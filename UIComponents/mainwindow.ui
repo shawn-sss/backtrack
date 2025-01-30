@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1177</width>
+    <height>356</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTreeView" name="DriveTreeView">
+    <property name="geometry">
+     <rect>
+      <x>46</x>
+      <y>52</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTreeView" name="BackupDestinationView">
+    <property name="geometry">
+     <rect>
+      <x>586</x>
+      <y>52</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="AddToBackupButton">
+    <property name="geometry">
+     <rect>
+      <x>106</x>
+      <y>252</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add to Backup</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="RemoveFromBackupButton">
+    <property name="geometry">
+     <rect>
+      <x>376</x>
+      <y>252</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Remove from Backup</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="CreateBackupButton">
+    <property name="geometry">
+     <rect>
+      <x>376</x>
+      <y>282</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Create Backup</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="ChangeBackupDestinationButton">
+    <property name="geometry">
+     <rect>
+      <x>646</x>
+      <y>252</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Change Location</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="SourceTreeTitleLabel">
+    <property name="geometry">
+     <rect>
+      <x>146</x>
+      <y>32</y>
+      <width>49</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Source</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="StagingListTitleLabel">
+    <property name="geometry">
+     <rect>
+      <x>426</x>
+      <y>32</y>
+      <width>49</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Staging</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="DestinationTreeTitleLabel">
+    <property name="geometry">
+     <rect>
+      <x>686</x>
+      <y>32</y>
+      <width>71</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Destination</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BackupStatusLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>52</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BackupStatus</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BackupLocationLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>72</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BackupLocation</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BackupTotalCountLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>92</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BackupTotalCount</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BackupTotalSizeLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>112</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BackupTotalSize</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BackupLocationStatusLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>132</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BackupLocationStatus</string>
+    </property>
+   </widget>
+   <widget class="QTreeView" name="BackupStagingTreeView">
+    <property name="geometry">
+     <rect>
+      <x>316</x>
+      <y>53</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="LastBackupNameLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>162</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>LastBackupName</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="LastBackupTimestampLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>182</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>LastBackupTimestamp</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="LastBackupDurationLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>202</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>LastBackupDuration</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="LastBackupSizeLabel">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>222</y>
+      <width>271</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>LastBackupSize</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DeleteBackupButton">
+    <property name="geometry">
+     <rect>
+      <x>646</x>
+      <y>282</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delete Backup</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="TransferProgressBar">
+    <property name="geometry">
+     <rect>
+      <x>856</x>
+      <y>272</y>
+      <width>271</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>24</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="AboutButton">
+    <property name="geometry">
+     <rect>
+      <x>106</x>
+      <y>281</y>
+      <width>131</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>About</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1177</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
