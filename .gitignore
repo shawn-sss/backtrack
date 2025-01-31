@@ -1,3 +1,9 @@
+# Ignore build directory
+/build/
+
+# Ignore CMakeLists.txt.user
+CMakeLists.txt.user
+
 # C++ objects and libs
 *.slo
 *.lo
