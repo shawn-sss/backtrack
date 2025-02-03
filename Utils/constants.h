@@ -146,6 +146,17 @@ constexpr int TREE_VIEW_DEFAULT_COLUMN_COUNT = 4;
 
 // Miscellaneous
 inline const QString ERROR_TITLE = "Error";
+inline const QString WARNING_TITLE = "Warning";
+inline const QString INFO_TITLE = "Information";
+inline const QString INVALID_SELECTION_TITLE = "Invalid Selection";
+inline const QString BACKUP_ERROR_TITLE = "Backup Failed";
+inline const QString EMPTY_SELECTION_TITLE = "No Items Selected";
+inline const QString PERMISSION_DENIED_TITLE = "Permission Denied";
+inline const QString LOCATION_SELECTION_TITLE = "No Location Selected";
+inline const QString NO_FILES_SELECTED_TITLE = "No Files Selected";
+inline const QString NO_BACKUP_ITEMS_SELECTED_TITLE = "No Backup Items Selected";
+
+
 inline const QString DEFAULT_VALUE_NOT_AVAILABLE = "N/A";
 inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
 

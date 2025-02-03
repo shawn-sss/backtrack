@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
         refreshBackupStatus();
     });
     connect(backupController, &BackupController::errorOccurred, this, [this](const QString &error) {
-        QMessageBox::critical(this, Constants::ERROR_TITLE, error);
+        QMessageBox::critical(this, Constants::BACKUP_ERROR_TITLE, error);
     });
 
     // Setup UI components
@@ -116,7 +116,7 @@ void MainWindow::setupBackupStagingTreeView() {
 void MainWindow::onAddToBackupClicked() {
     QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, Constants::ERROR_TITLE, Constants::ERROR_INVALID_SELECTION);
+        QMessageBox::warning(this, Constants::NO_BACKUP_ITEMS_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
 
@@ -130,7 +130,7 @@ void MainWindow::onAddToBackupClicked() {
 void MainWindow::onRemoveFromBackupClicked() {
     QModelIndex selectedIndex = ui->BackupStagingTreeView->currentIndex();
     if (!selectedIndex.isValid()) {
-        QMessageBox::warning(this, Constants::ERROR_TITLE, Constants::ERROR_INVALID_SELECTION);
+        QMessageBox::warning(this, Constants::NO_FILES_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
 
@@ -144,12 +144,12 @@ void MainWindow::onChangeBackupDestinationClicked() {
                                                             Constants::SELECT_BACKUP_DESTINATION_TITLE,
                                                             Constants::DEFAULT_FILE_DIALOG_ROOT);
     if (selectedDir.isEmpty()) {
-        QMessageBox::warning(this, Constants::ERROR_TITLE, Constants::ERROR_EMPTY_PATH_SELECTION);
+        QMessageBox::warning(this, Constants::LOCATION_SELECTION_TITLE, Constants::ERROR_EMPTY_PATH_SELECTION);
         return;
     }
 
     if (!FileOperations::createDirectory(selectedDir)) {
-        QMessageBox::critical(this, Constants::ERROR_TITLE, Constants::ERROR_SET_BACKUP_DESTINATION);
+        QMessageBox::critical(this, Constants::BACKUP_ERROR_TITLE, Constants::ERROR_SET_BACKUP_DESTINATION);
         return;
     }
 
@@ -166,9 +166,7 @@ void MainWindow::onChangeBackupDestinationClicked() {
 void MainWindow::onCreateBackupClicked() {
     QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
-        QMessageBox::warning(this,
-                             Constants::EMPTY_STAGING_WARNING_TITLE,
-                             Constants::EMPTY_STAGING_WARNING_MESSAGE);
+        QMessageBox::warning(this, Constants::EMPTY_SELECTION_TITLE, Constants::EMPTY_STAGING_WARNING_MESSAGE);
         return;
     }
 
@@ -182,7 +180,7 @@ void MainWindow::onCreateBackupClicked() {
 void MainWindow::onDeleteBackupClicked() {
     QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
-        QMessageBox::warning(this, Constants::ERROR_TITLE, Constants::ERROR_BACKUP_DELETION_FAILED);
+        QMessageBox::warning(this, Constants::BACKUP_ERROR_TITLE, Constants::ERROR_BACKUP_DELETION_FAILED);
         return;
     }
 
