@@ -5,19 +5,32 @@
 #include <QDateTime>
 #include <QTreeView>
 #include <QProgressBar>
+#include <QPixmap>
 
-// Utility class for general-purpose helper methods
-class Utils {
-public:
-    // Methods for formatting sizes, durations, and timestamps
-    static QString formatSize(qint64 size);
-    static QString formatDuration(qint64 milliseconds);
-    static QString formatTimestamp(const QDateTime &datetime, const QString &format);
-    static QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format);
+// Forward-declaration to avoid including the entire header:
+class StagingModel;
 
-    // Methods for managing UI components
-    static void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount);
-    static void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible);
-};
+namespace Utils {
+
+namespace Formatting {
+QString formatSize(qint64 size);
+QString formatDuration(qint64 milliseconds);
+QString formatTimestamp(const QDateTime &datetime, const QString &format);
+QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format);
+}
+
+namespace UI {
+void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount);
+void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible);
+
+QPixmap createStatusLightPixmap(const QString &color, int size);
+}
+
+namespace Backup {
+void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel);
+void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel);
+}
+
+}
 
 #endif // UTILS_H

@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Configure the progress bar
-    Utils::setupProgressBar(ui->TransferProgressBar,
+    Utils::UI::setupProgressBar(ui->TransferProgressBar,
                             Constants::PROGRESS_BAR_MIN_VALUE,
                             Constants::PROGRESS_BAR_MAX_VALUE,
                             Constants::PROGRESS_BAR_HEIGHT,
@@ -124,33 +124,18 @@ void MainWindow::onAddToBackupClicked() {
         return;
     }
 
-    for (int i = 0; i < selectedIndexes.size(); ++i) {
-        QModelIndex index = selectedIndexes.at(i);
-        QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
-        stagingModel->addPath(filePath);
-    }
+    Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
 }
 
 // Remove selected items from the backup staging area
 void MainWindow::onRemoveFromBackupClicked() {
     QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
-
     if (selectedIndexes.isEmpty()) {
         QMessageBox::warning(this, Constants::NO_FILES_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
 
-    // Collect file paths to remove
-    QStringList filePathsToRemove;
-    for (const QModelIndex &index : selectedIndexes) {
-        QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
-        filePathsToRemove.append(filePath);
-    }
-
-    // Remove collected file paths from the staging model
-    for (const QString &filePath : filePathsToRemove) {
-        stagingModel->removePath(filePath);
-    }
+    Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
 }
 
 // Change the backup destination directory
@@ -254,16 +239,11 @@ void MainWindow::onBackupDirectoryChanged() {
 
 // Update the backup status label
 void MainWindow::updateBackupStatusLabel(bool backupFound) {
-    QString color = backupFound ? Constants::BACKUP_STATUS_COLOR_FOUND : Constants::BACKUP_STATUS_COLOR_NOT_FOUND;
+    QString color = backupFound
+                        ? Constants::BACKUP_STATUS_COLOR_FOUND
+                        : Constants::BACKUP_STATUS_COLOR_NOT_FOUND;
 
-    QPixmap pixmap(Constants::STATUS_LIGHT_SIZE, Constants::STATUS_LIGHT_SIZE);
-    pixmap.fill(Qt::transparent);
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setBrush(QBrush(QColor(color)));
-    painter.setPen(Qt::NoPen);
-    painter.drawEllipse(0, 0, Constants::STATUS_LIGHT_SIZE, Constants::STATUS_LIGHT_SIZE);
-    painter.end();
+    QPixmap pixmap = Utils::UI::createStatusLightPixmap(color, Constants::STATUS_LIGHT_SIZE);
 
     QByteArray ba;
     QBuffer buffer(&ba);
@@ -271,7 +251,9 @@ void MainWindow::updateBackupStatusLabel(bool backupFound) {
     pixmap.save(&buffer, "PNG");
 
     QString pixmapHtml = QStringLiteral("<img src='data:image/png;base64,%1' style='%2'>")
-                             .arg(QString::fromUtf8(ba.toBase64()), QString(Constants::ICON_STYLE_TEMPLATE).arg(Constants::STATUS_LIGHT_SIZE));
+                             .arg(QString::fromUtf8(ba.toBase64()),
+                                  QString(Constants::ICON_STYLE_TEMPLATE)
+                                      .arg(Constants::STATUS_LIGHT_SIZE));
 
     QString combinedHtml = QStringLiteral(
                                "<div style='display:flex; align-items:center;'>"
@@ -288,6 +270,7 @@ void MainWindow::updateBackupStatusLabel(bool backupFound) {
     ui->LastBackupSizeLabel->setVisible(backupFound);
 }
 
+
 // Update the backup location label
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     ui->BackupLocationLabel->setText(Constants::LABEL_BACKUP_LOCATION + location);
@@ -302,7 +285,7 @@ void MainWindow::updateBackupTotalCountLabel() {
 // Update the backup total size label
 void MainWindow::updateBackupTotalSizeLabel() {
     quint64 totalSize = backupService->getTotalBackupSize();
-    QString humanReadableSize = Utils::formatSize(totalSize);
+    QString humanReadableSize = Utils::Formatting::formatSize(totalSize);
     ui->BackupTotalSizeLabel->setText(Constants::LABEL_BACKUP_TOTAL_SIZE + humanReadableSize);
 }
 
@@ -318,7 +301,7 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 
 // Remove extra columns from the QTreeView
 void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
-    Utils::removeAllColumnsFromTreeView(treeView,
+    Utils::UI::removeAllColumnsFromTreeView(treeView,
                                         Constants::TREE_VIEW_START_HIDDEN_COLUMN,
                                         Constants::TREE_VIEW_DEFAULT_COLUMN_COUNT);
 }
@@ -350,10 +333,10 @@ void MainWindow::updateLastBackupInfo() {
 
     QDateTime backupTimestamp = QDateTime::fromString(metadata.value("backup_timestamp").toString(), Qt::ISODate);
     ui->LastBackupTimestampLabel->setText(Constants::LABEL_LAST_BACKUP_TIMESTAMP +
-                                          Utils::formatTimestamp(backupTimestamp, Constants::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
+                                          Utils::Formatting::formatTimestamp(backupTimestamp, Constants::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
 
     ui->LastBackupDurationLabel->setText(Constants::LABEL_LAST_BACKUP_DURATION +
-                                         Utils::formatDuration(metadata.value("backup_duration").toInt(0)));
+                                         Utils::Formatting::formatDuration(metadata.value("backup_duration").toInt(0)));
 
     ui->LastBackupSizeLabel->setText(Constants::LABEL_LAST_BACKUP_SIZE +
                                      metadata.value("total_size_readable").toString(Constants::DEFAULT_VALUE_NOT_AVAILABLE));

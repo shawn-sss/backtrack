@@ -44,9 +44,9 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
 
     // General backup information
     summaryObject["backup_name"] = QFileInfo(backupFolderPath).fileName();
-    summaryObject["backup_timestamp"] = Utils::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate);
+    summaryObject["backup_timestamp"] = Utils::Formatting::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate);
     summaryObject["backup_duration"] = backupDuration;
-    summaryObject["backup_duration_readable"] = Utils::formatDuration(backupDuration);
+    summaryObject["backup_duration_readable"] = Utils::Formatting::formatDuration(backupDuration);
 
     QJsonArray filesArray, foldersArray, userSelectedItemsArray;
     QSet<QString> uniqueFiles;
@@ -68,7 +68,7 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
 
     // Populate metadata
     summaryObject["total_size_bytes"] = totalSize;
-    summaryObject["total_size_readable"] = Utils::formatSize(totalSize);
+    summaryObject["total_size_readable"] = Utils::Formatting::formatSize(totalSize);
     summaryObject["file_count"] = filesArray.size();
     summaryObject["folder_count"] = foldersArray.size();
     summaryObject["user_selected_item_count"] = selectedItems.size();
