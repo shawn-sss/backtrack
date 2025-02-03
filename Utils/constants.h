@@ -9,7 +9,7 @@ namespace Constants {
 // Application metadata
 constexpr auto WINDOW_TITLE = "MyDataBackupApp";
 inline const QString ABOUT_DIALOG_TITLE = "About";
-inline const QString ABOUT_DIALOG_MESSAGE = "%1\n%2\n\nMade by Shawn";
+inline const QString ABOUT_DIALOG_MESSAGE = "%1\n%2\n\nMade by Shawn SSS";
 inline const QString APP_VERSION = "Version 0.1";
 
 // Colors for UI themes and visual styles
