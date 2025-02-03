@@ -100,6 +100,8 @@ void MainWindow::setupSourceTreeView() {
     ui->DriveTreeView->setModel(sourceModel);
     ui->DriveTreeView->setRootIndex(sourceModel->index(Constants::DEFAULT_ROOT_PATH));
 
+    ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     removeAllColumnsFromTreeView(ui->DriveTreeView);
 }
 
@@ -108,6 +110,8 @@ void MainWindow::setupBackupStagingTreeView() {
     ui->BackupStagingTreeView->setModel(stagingModel);
     ui->BackupStagingTreeView->header()->setVisible(true);
     ui->BackupStagingTreeView->header()->setStretchLastSection(true);
+
+    ui->BackupStagingTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     removeAllColumnsFromTreeView(ui->BackupStagingTreeView);
 }
@@ -121,21 +125,32 @@ void MainWindow::onAddToBackupClicked() {
     }
 
     for (int i = 0; i < selectedIndexes.size(); ++i) {
-        QString filePath = selectedIndexes.at(i).data(QFileSystemModel::FilePathRole).toString();
+        QModelIndex index = selectedIndexes.at(i);
+        QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
         stagingModel->addPath(filePath);
     }
 }
 
 // Remove selected items from the backup staging area
 void MainWindow::onRemoveFromBackupClicked() {
-    QModelIndex selectedIndex = ui->BackupStagingTreeView->currentIndex();
-    if (!selectedIndex.isValid()) {
+    QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
+
+    if (selectedIndexes.isEmpty()) {
         QMessageBox::warning(this, Constants::NO_FILES_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
 
-    QString filePath = stagingModel->data(selectedIndex, Qt::ToolTipRole).toString();
-    stagingModel->removePath(filePath);
+    // Collect file paths to remove
+    QStringList filePathsToRemove;
+    for (const QModelIndex &index : selectedIndexes) {
+        QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
+        filePathsToRemove.append(filePath);
+    }
+
+    // Remove collected file paths from the staging model
+    for (const QString &filePath : filePathsToRemove) {
+        stagingModel->removePath(filePath);
+    }
 }
 
 // Change the backup destination directory
