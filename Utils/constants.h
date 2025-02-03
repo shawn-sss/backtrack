@@ -64,6 +64,16 @@ inline const QString EMPTY_STAGING_WARNING_MESSAGE =
     "No items are currently staged. Please add files or folders before creating a backup.";
 
 // Error messages
+inline const QString ERROR_TITLE = "Error";
+inline const QString WARNING_TITLE = "Warning";
+inline const QString INFO_TITLE = "Information";
+inline const QString INVALID_SELECTION_TITLE = "Invalid Selection";
+inline const QString BACKUP_ERROR_TITLE = "Backup Failed";
+inline const QString EMPTY_SELECTION_TITLE = "No Items Selected";
+inline const QString PERMISSION_DENIED_TITLE = "Permission Denied";
+inline const QString LOCATION_SELECTION_TITLE = "No Location Selected";
+inline const QString NO_FILES_SELECTED_TITLE = "No Files Selected";
+inline const QString NO_BACKUP_ITEMS_SELECTED_TITLE = "No Backup Items Selected";
 inline const QString ERROR_INVALID_SELECTION = "No items are selected. Please select at least one item and try again.";
 inline const QString ERROR_BACKUP_CREATION_FAILED = "Unable to create the backup.";
 inline const QString ERROR_INVALID_BACKUP_LOCATION = "The selected backup location is invalid.";
@@ -79,6 +89,7 @@ inline const QString INITIALIZATION_ERROR_MESSAGE = "Unable to create the defaul
 inline const QString ERROR_NO_ITEMS_IN_STAGING_TITLE = "No Items Staged";
 inline const QString ERROR_NO_ITEMS_IN_STAGING_MESSAGE =
     "There are currently no items staged to remove. Please select items in the staging area first.";
+inline const QString ERROR_TRANSFER_FAILED = "Unable to transfer the following item: %1";
 
 // Success messages
 inline const QString SUCCESS_BACKUP_CREATED = "The backup was created successfully.";
@@ -93,9 +104,6 @@ inline const QString NOTIFY_BACKUP_FAILED = "The backup operation has failed.";
 inline const QString INVALID_BACKUP_TITLE = "Invalid Backup";
 inline const QString INVALID_BACKUP_MESSAGE =
     "The folder you selected does not contain a valid backup. The deletion process has been canceled.";
-
-// TransferWorker error message
-inline const QString ERROR_TRANSFER_FAILED = "Unable to transfer the following item: %1";
 
 // Default paths and filters
 constexpr auto ICON_PATH = ":/resources/app_icon.png";
@@ -144,21 +152,9 @@ constexpr int PROGRESS_BAR_DELAY_MS = 5000;
 constexpr int TREE_VIEW_START_HIDDEN_COLUMN = 1;
 constexpr int TREE_VIEW_DEFAULT_COLUMN_COUNT = 4;
 
-// Miscellaneous
-inline const QString ERROR_TITLE = "Error";
-inline const QString WARNING_TITLE = "Warning";
-inline const QString INFO_TITLE = "Information";
-inline const QString INVALID_SELECTION_TITLE = "Invalid Selection";
-inline const QString BACKUP_ERROR_TITLE = "Backup Failed";
-inline const QString EMPTY_SELECTION_TITLE = "No Items Selected";
-inline const QString PERMISSION_DENIED_TITLE = "Permission Denied";
-inline const QString LOCATION_SELECTION_TITLE = "No Location Selected";
-inline const QString NO_FILES_SELECTED_TITLE = "No Files Selected";
-inline const QString NO_BACKUP_ITEMS_SELECTED_TITLE = "No Backup Items Selected";
-
-
-inline const QString DEFAULT_VALUE_NOT_AVAILABLE = "N/A";
+// UI styling and miscellaneous
 inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
+inline const QString DEFAULT_VALUE_NOT_AVAILABLE = "N/A";
 
 } // namespace Constants
 
