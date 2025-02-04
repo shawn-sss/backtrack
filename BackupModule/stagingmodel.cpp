@@ -74,12 +74,26 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
 
 // Add a path to the staged list
 void StagingModel::addPath(const QString &path) {
-    if (!stagedPaths.contains(path)) {
-        beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
-        stagedPaths.append(path);
-        endInsertRows();
+    QFileInfo fileInfo(path);
+
+    // Check if the selected path is a drive root
+    if (fileInfo.isDir() && path.endsWith(":/")) {
+        // Ensure drive root is not added directly (handled in TransferWorker)
+        if (!stagedPaths.contains(path)) {
+            beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
+            stagedPaths.append(path);
+            endInsertRows();
+        }
+    } else {
+        // Normal file or folder
+        if (!stagedPaths.contains(path)) {
+            beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
+            stagedPaths.append(path);
+            endInsertRows();
+        }
     }
 }
+
 
 // Remove a path from the staged list
 void StagingModel::removePath(const QString &path) {
