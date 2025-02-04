@@ -12,7 +12,7 @@ public:
     // Constructor
     explicit StagingModel(QObject *parent = nullptr);
 
-    // Overridden Methods for QAbstractItemModel Functionality
+    // Overridden methods for QAbstractItemModel functionality
     QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &child) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -20,13 +20,13 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Methods for Managing Staged File Paths
+    // Methods for managing staged file paths
     void addPath(const QString &path);
     void removePath(const QString &path);
     QStringList getStagedPaths() const;
 
 private:
-    // Member Variables
+    // Member variable storing staged file paths
     QStringList stagedPaths;
 };
 

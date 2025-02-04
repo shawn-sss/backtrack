@@ -47,8 +47,8 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     QDir dir(backupRootPath);
     dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     dir.setSorting(QDir::Time);
-
     QFileInfoList subDirectories = dir.entryInfoList();
+
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &subDir = subDirectories.at(i);
         QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
@@ -78,10 +78,11 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
         userSelectedItemsArray.append(item);
 
         if (fileInfo.isDir()) {
+            // Collect subdirectories and files
             QJsonArray collectedSubdirectories;
             traverseDirectoryForFolders(item, uniqueFolders, collectedSubdirectories);
-            foldersArray.append(collectedSubdirectories);  // Include all subdirectories
-            traverseDirectory(item, uniqueFiles, filesArray); // Include all files
+            foldersArray.append(collectedSubdirectories);
+            traverseDirectory(item, uniqueFiles, filesArray);
         } else if (fileInfo.isFile() && !uniqueFiles.contains(item)) {
             uniqueFiles.insert(item);
             filesArray.append(item);
@@ -112,8 +113,9 @@ int BackupService::getBackupCount() const {
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     int count = 0;
 
+    // Use indexed access to avoid detachment
     for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &subDir = subDirectories.at(i);
+        const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
         QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             ++count;
@@ -128,8 +130,9 @@ quint64 BackupService::getTotalBackupSize() const {
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     quint64 totalSize = 0;
 
+    // Use indexed access to avoid detachment
     for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &subDir = subDirectories.at(i);
+        const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
         QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             totalSize += FileOperations::calculateDirectorySize(subDir.absoluteFilePath());
@@ -152,7 +155,6 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
             totalSize += fileInfo.size();
         }
     }
-
     return totalSize;
 }
 
@@ -162,13 +164,17 @@ void BackupService::traverseDirectory(const QString &dirPath, QSet<QString> &uni
 }
 
 // Traverse a directory and collect unique subdirectories
-void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const {
+void BackupService::traverseDirectoryForFolders(const QString &dirPath,
+                                                QSet<QString> &uniqueFolders,
+                                                QJsonArray &foldersArray) const {
     QDir dir(dirPath);
     QFileInfoList subDirEntries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
+    // Use indexed access to avoid detachment
     for (int i = 0; i < subDirEntries.size(); ++i) {
-        const QFileInfo &subDir = subDirEntries.at(i);
+        const QFileInfo &subDir = subDirEntries.at(i); // Safe indexed access
         QString subDirPath = subDir.absoluteFilePath();
+
         if (!uniqueFolders.contains(subDirPath)) {
             uniqueFolders.insert(subDirPath);
             foldersArray.append(subDirPath);

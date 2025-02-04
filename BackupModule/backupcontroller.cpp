@@ -32,32 +32,26 @@ void BackupController::createBackup(const QString &destinationPath,
         return;
     }
 
-    // Generate a timestamped backup folder name
     QString timestamp = QDateTime::currentDateTime()
                             .toString(Constants::BACKUP_FOLDER_TIMESTAMP_FORMAT);
     QString backupFolderName = QString(Constants::BACKUP_FOLDER_FORMAT)
                                    .arg(Constants::BACKUP_FOLDER_PREFIX, timestamp);
     QString backupFolderPath = QDir(destinationPath).filePath(backupFolderName);
 
-    // Ensure the backup folder is created
     if (!QDir().mkpath(backupFolderPath)) {
         emit errorOccurred(Constants::ERROR_BACKUP_FOLDER_CREATION_FAILED);
         return;
     }
 
-    // Initialize progress bar
     progressBar->setVisible(true);
     progressBar->setValue(Constants::PROGRESS_BAR_MIN_VALUE);
 
-    // Capture the start time
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
-    // Setup worker and thread
     workerThread = new QThread(this);
     auto *worker = new TransferWorker(stagingList, backupFolderPath);
     worker->moveToThread(workerThread);
 
-    // Connect signals for progress, completion, and errors
     connect(worker, &TransferWorker::progressUpdated, progressBar, &QProgressBar::setValue);
     connect(worker, &TransferWorker::transferComplete, this,
             [this, backupFolderPath, stagingList, startTime, progressBar]() {
@@ -68,8 +62,8 @@ void BackupController::createBackup(const QString &destinationPath,
 
                 progressBar->setValue(Constants::PROGRESS_BAR_MAX_VALUE);
                 progressBar->setVisible(false);
-
                 emit backupCreated();
+
                 cleanupAfterTransfer();
             });
     connect(worker, &TransferWorker::errorOccurred, this,
@@ -79,7 +73,6 @@ void BackupController::createBackup(const QString &destinationPath,
                 cleanupAfterTransfer();
             });
 
-    // Start worker thread
     connect(workerThread, &QThread::started, worker, &TransferWorker::startTransfer);
     connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
 

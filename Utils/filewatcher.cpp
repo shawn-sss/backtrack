@@ -60,19 +60,17 @@ QStringList FileWatcher::watchedFiles() const {
 
 // Start watching a root directory and its relevant subdirectories
 void FileWatcher::startWatching(const QString &rootPath) {
-    removeAllPaths(); // Clear all previously watched paths
-    addPath(rootPath); // Add the root directory to watch
+    removeAllPaths();
+    addPath(rootPath);
 
-    // Add subdirectories and relevant files within the root path
     QDir rootDir(rootPath);
     QFileInfoList subDirectories = rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    // Use indexed access to avoid range-loop detach warning
     for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &dirInfo = subDirectories.at(i); // Safe indexed access
+        const QFileInfo &dirInfo = subDirectories.at(i);
         QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
-            addPath(summaryFilePath); // Watch the summary file path
+            addPath(summaryFilePath);
         }
     }
 }

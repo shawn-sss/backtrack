@@ -27,11 +27,11 @@ public:
     ~MainWindow();
 
 protected:
-    // Overridden event handlers
+    // Overridden event handler for window closing
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    // Initialization methods
+    // UI setup methods
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
@@ -61,7 +61,7 @@ private slots:
     void onDeleteBackupClicked();
     void onAboutButtonClicked();
 
-    // File and directory watcher signal slots
+    // File and directory watcher slots
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 

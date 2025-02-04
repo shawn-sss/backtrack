@@ -3,6 +3,7 @@
 #include "Utils/constants.h"
 
 int main(int argc, char *argv[]) {
+    // Initialize the application
     QApplication app(argc, argv);
 
     // Set application properties

@@ -10,7 +10,7 @@ StagingModel::StagingModel(QObject *parent)
 
 // QModelIndex Management
 
-// QModelIndex creation for rows
+// Create QModelIndex for rows
 QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) const {
     if (parent.isValid() || row < 0 || row >= stagedPaths.size() || column != 0) {
         return QModelIndex();
@@ -26,12 +26,12 @@ QModelIndex StagingModel::parent(const QModelIndex &child) const {
 
 // Row and Column Counts
 
-// Number of rows (staged paths)
+// Get the number of rows (staged paths count)
 int StagingModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : stagedPaths.size();
 }
 
-// Number of columns (always one)
+// Get the number of columns (always one)
 int StagingModel::columnCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
     return 1;
@@ -39,7 +39,7 @@ int StagingModel::columnCount(const QModelIndex &parent) const {
 
 // Data Handling
 
-// Data for display, tooltip, and decoration
+// Retrieve data for display, tooltip, and decoration roles
 QVariant StagingModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() < 0 || index.row() >= stagedPaths.size()) {
         return QVariant();
@@ -53,7 +53,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
         return fileInfo.fileName().isEmpty() ? path : fileInfo.fileName();
     case Qt::ToolTipRole:
         return path;
-    case Qt::DecorationRole: // File icon
+    case Qt::DecorationRole:
         return QFileIconProvider().icon(fileInfo);
     default:
         return QVariant();
@@ -62,7 +62,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
 
 // Header Management
 
-// Header data for the column
+// Retrieve header data for the column
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return Constants::STAGING_COLUMN_NAME;
@@ -74,26 +74,13 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
 
 // Add a path to the staged list
 void StagingModel::addPath(const QString &path) {
-    QFileInfo fileInfo(path);
-
-    // Check if the selected path is a drive root
-    if (fileInfo.isDir() && path.endsWith(":/")) {
-        // Ensure drive root is not added directly (handled in TransferWorker)
-        if (!stagedPaths.contains(path)) {
-            beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
-            stagedPaths.append(path);
-            endInsertRows();
-        }
-    } else {
-        // Normal file or folder
-        if (!stagedPaths.contains(path)) {
-            beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
-            stagedPaths.append(path);
-            endInsertRows();
-        }
+    // Prevent duplicate paths
+    if (!stagedPaths.contains(path)) {
+        beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
+        stagedPaths.append(path);
+        endInsertRows();
     }
 }
-
 
 // Remove a path from the staged list
 void StagingModel::removePath(const QString &path) {

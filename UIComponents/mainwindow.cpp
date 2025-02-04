@@ -20,6 +20,9 @@
 #include <QFileSystemModel>
 #include <QProgressBar>
 
+// Constructor and Destructor
+// --------------------------
+
 // Constructor to initialize the MainWindow
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -32,12 +35,12 @@ MainWindow::MainWindow(QWidget *parent)
     backupController(new BackupController(backupService, this)) {
     ui->setupUi(this);
 
-    // Configure the progress bar
+    // Configure progress bar
     Utils::UI::setupProgressBar(ui->TransferProgressBar,
-                            Constants::PROGRESS_BAR_MIN_VALUE,
-                            Constants::PROGRESS_BAR_MAX_VALUE,
-                            Constants::PROGRESS_BAR_HEIGHT,
-                            Constants::PROGRESS_BAR_TEXT_VISIBLE);
+                                Constants::PROGRESS_BAR_MIN_VALUE,
+                                Constants::PROGRESS_BAR_MAX_VALUE,
+                                Constants::PROGRESS_BAR_HEIGHT,
+                                Constants::PROGRESS_BAR_TEXT_VISIBLE);
     ui->TransferProgressBar->setVisible(false);
 
     // Ensure the backup directory exists
@@ -63,11 +66,12 @@ MainWindow::MainWindow(QWidget *parent)
     setupSourceTreeView();
     setupBackupStagingTreeView();
 
+    // Initialize backup and file watcher
     refreshBackupStatus();
     startWatchingBackupDirectory(Constants::DEFAULT_BACKUP_DESTINATION);
     updateFileWatcher();
 
-    // Connect buttons to their slots
+    // Connect UI buttons to slots
     connect(ui->AddToBackupButton, &QPushButton::clicked, this, &MainWindow::onAddToBackupClicked);
     connect(ui->ChangeBackupDestinationButton, &QPushButton::clicked, this, &MainWindow::onChangeBackupDestinationClicked);
     connect(ui->RemoveFromBackupButton, &QPushButton::clicked, this, &MainWindow::onRemoveFromBackupClicked);
@@ -80,6 +84,9 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete ui;
 }
+
+// UI Setup
+// --------
 
 // Setup the destination view
 void MainWindow::setupDestinationView() {
@@ -116,6 +123,22 @@ void MainWindow::setupBackupStagingTreeView() {
     removeAllColumnsFromTreeView(ui->BackupStagingTreeView);
 }
 
+// Setup the backup staging tree view
+void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
+    if (!treeView) return;
+
+    QAbstractItemModel *model = treeView->model();
+    if (model) {
+        for (int i = Constants::TREE_VIEW_START_HIDDEN_COLUMN;
+             i < Constants::TREE_VIEW_DEFAULT_COLUMN_COUNT; ++i) {
+            treeView->setColumnHidden(i, true);
+        }
+    }
+}
+
+// Backup Management
+// ------------------
+
 // Add selected items to the backup staging area
 void MainWindow::onAddToBackupClicked() {
     QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
@@ -123,7 +146,6 @@ void MainWindow::onAddToBackupClicked() {
         QMessageBox::warning(this, Constants::NO_BACKUP_ITEMS_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
-
     Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
 }
 
@@ -134,7 +156,6 @@ void MainWindow::onRemoveFromBackupClicked() {
         QMessageBox::warning(this, Constants::NO_FILES_SELECTED_TITLE, Constants::ERROR_INVALID_SELECTION);
         return;
     }
-
     Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
 }
 
@@ -214,6 +235,9 @@ void MainWindow::onAboutButtonClicked() {
         );
 }
 
+// File and Directory Monitoring
+// -----------------------------
+
 // Start watching the backup directory
 void MainWindow::startWatchingBackupDirectory(const QString &path) {
     fileWatcher->startWatching(path);
@@ -236,6 +260,9 @@ void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
     refreshBackupStatus();
 }
+
+// Status Updates
+// ---------------
 
 // Update the backup status label
 void MainWindow::updateBackupStatusLabel(bool backupFound) {
@@ -270,7 +297,6 @@ void MainWindow::updateBackupStatusLabel(bool backupFound) {
     ui->LastBackupSizeLabel->setVisible(backupFound);
 }
 
-
 // Update the backup location label
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     ui->BackupLocationLabel->setText(Constants::LABEL_BACKUP_LOCATION + location);
@@ -297,13 +323,6 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
                                       : Constants::DIRECTORY_STATUS_UNKNOWN;
 
     ui->BackupLocationStatusLabel->setText(Constants::LABEL_BACKUP_LOCATION_ACCESS + status);
-}
-
-// Remove extra columns from the QTreeView
-void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
-    Utils::UI::removeAllColumnsFromTreeView(treeView,
-                                        Constants::TREE_VIEW_START_HIDDEN_COLUMN,
-                                        Constants::TREE_VIEW_DEFAULT_COLUMN_COUNT);
 }
 
 // Refresh the backup status
@@ -341,6 +360,9 @@ void MainWindow::updateLastBackupInfo() {
     ui->LastBackupSizeLabel->setText(Constants::LABEL_LAST_BACKUP_SIZE +
                                      metadata.value("total_size_readable").toString(Constants::DEFAULT_VALUE_NOT_AVAILABLE));
 }
+
+// Event Handlers
+// --------------
 
 // Handle the close event for the MainWindow
 void MainWindow::closeEvent(QCloseEvent *event) {

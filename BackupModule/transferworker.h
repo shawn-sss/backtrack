@@ -17,13 +17,17 @@ public slots:
     void startTransfer();
 
 signals:
-    // Signals for transfer progress and status
+    // Signals for transfer progress and status updates
     void progressUpdated(int progress);
     void transferComplete();
     void errorOccurred(const QString &error);
 
 private:
-    // Member Variables
+    // Helper methods for specific transfer operations
+    bool processDriveRoot(const QString &driveRoot);
+    bool processFileOrFolder(const QString &filePath);
+
+    // Member variables for file transfer
     QStringList files;
     QString destination;
 };
