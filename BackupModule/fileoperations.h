@@ -8,17 +8,17 @@
 
 namespace FileOperations {
 
-// Directory and file management
+// Directory and File Management
 bool copyDirectoryRecursively(const QString &source, const QString &destination);
 quint64 calculateDirectorySize(const QString &path);
 bool createDirectory(const QString &path);
 bool deleteDirectory(const QString &path);
 
-// JSON file handling
+// JSON File Handling
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject);
 QJsonObject readJsonFromFile(const QString &filePath);
 
-// File collection
+// File Collection
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
 
 } // namespace FileOperations

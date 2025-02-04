@@ -6,6 +6,8 @@
 
 namespace FileOperations {
 
+// Directory and File Management
+
 // Copy a directory and its contents recursively
 bool copyDirectoryRecursively(const QString &source, const QString &destination) {
     QDir sourceDir(source);
@@ -64,6 +66,8 @@ bool deleteDirectory(const QString &path) {
     return dir.exists() && dir.removeRecursively();
 }
 
+// JSON File Handling
+
 // Write a QJsonObject to a file
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
     QFile file(filePath);
@@ -88,6 +92,8 @@ QJsonObject readJsonFromFile(const QString &filePath) {
     }
     return QJsonObject();
 }
+
+// File Collection
 
 // Collect files from a directory recursively and store them in a QJsonArray
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {

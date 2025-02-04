@@ -1,11 +1,14 @@
 #include "stagingmodel.h"
 #include "../Utils/constants.h"
+
 #include <QFileIconProvider>
 #include <QFileInfo>
 
 // Constructor
 StagingModel::StagingModel(QObject *parent)
     : QAbstractItemModel(parent) {}
+
+// QModelIndex Management
 
 // QModelIndex creation for rows
 QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) const {
@@ -21,6 +24,8 @@ QModelIndex StagingModel::parent(const QModelIndex &child) const {
     return QModelIndex();
 }
 
+// Row and Column Counts
+
 // Number of rows (staged paths)
 int StagingModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : stagedPaths.size();
@@ -31,6 +36,8 @@ int StagingModel::columnCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
     return 1;
 }
+
+// Data Handling
 
 // Data for display, tooltip, and decoration
 QVariant StagingModel::data(const QModelIndex &index, int role) const {
@@ -53,6 +60,8 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
     }
 }
 
+// Header Management
+
 // Header data for the column
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
@@ -60,6 +69,8 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
     }
     return QVariant();
 }
+
+// Path Management
 
 // Add a path to the staged list
 void StagingModel::addPath(const QString &path) {

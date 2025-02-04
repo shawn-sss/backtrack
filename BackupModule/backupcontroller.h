@@ -12,6 +12,7 @@ class BackupService;
 // Controller class for managing backups
 class BackupController : public QObject {
     Q_OBJECT
+
 public:
     // Constructor and destructor
     explicit BackupController(BackupService *service, QObject *parent = nullptr);

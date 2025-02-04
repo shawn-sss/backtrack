@@ -23,7 +23,7 @@ signals:
     void errorOccurred(const QString &error);
 
 private:
-    // Member variables
+    // Member Variables
     QStringList files;
     QString destination;
 };
