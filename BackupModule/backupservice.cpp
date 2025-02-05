@@ -34,7 +34,7 @@ bool BackupService::scanForBackupSummary() const {
 
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &dirInfo = subDirectories.at(i);
-        QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+        QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
             return true;
         }
@@ -51,7 +51,7 @@ QJsonObject BackupService::getLastBackupMetadata() const {
 
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &subDir = subDirectories.at(i);
-        QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+        QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
             return FileOperations::readJsonFromFile(summaryFilePath);
         }
@@ -101,7 +101,7 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
     summaryObject["backup_folders"] = foldersArray;
     summaryObject["user_selected_items"] = userSelectedItemsArray;
 
-    QString summaryFilePath = QDir(backupFolderPath).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+    QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
     FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
 }
 
@@ -116,7 +116,7 @@ int BackupService::getBackupCount() const {
     // Use indexed access to avoid detachment
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
-        QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+        QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             ++count;
         }
@@ -133,7 +133,7 @@ quint64 BackupService::getTotalBackupSize() const {
     // Use indexed access to avoid detachment
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
-        QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+        QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             totalSize += FileOperations::calculateDirectorySize(subDir.absoluteFilePath());
         }

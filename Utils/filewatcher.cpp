@@ -68,7 +68,7 @@ void FileWatcher::startWatching(const QString &rootPath) {
 
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &dirInfo = subDirectories.at(i);
-        QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(Constants::BACKUP_SUMMARY_FILENAME);
+        QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
             addPath(summaryFilePath);
         }

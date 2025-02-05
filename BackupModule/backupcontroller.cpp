@@ -28,23 +28,23 @@ void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
     if (isBackupInProgress()) {
-        emit errorOccurred(Constants::MESSAGE_BACKUP_IN_PROGRESS);
+        emit errorOccurred(UIConfig::MESSAGE_BACKUP_IN_PROGRESS);
         return;
     }
 
     QString timestamp = QDateTime::currentDateTime()
-                            .toString(Constants::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    QString backupFolderName = QString(Constants::BACKUP_FOLDER_FORMAT)
-                                   .arg(Constants::BACKUP_FOLDER_PREFIX, timestamp);
+                            .toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
+    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT)
+                                   .arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
     QString backupFolderPath = QDir(destinationPath).filePath(backupFolderName);
 
     if (!QDir().mkpath(backupFolderPath)) {
-        emit errorOccurred(Constants::ERROR_BACKUP_FOLDER_CREATION_FAILED);
+        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
         return;
     }
 
     progressBar->setVisible(true);
-    progressBar->setValue(Constants::PROGRESS_BAR_MIN_VALUE);
+    progressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -60,7 +60,7 @@ void BackupController::createBackup(const QString &destinationPath,
 
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
 
-                progressBar->setValue(Constants::PROGRESS_BAR_MAX_VALUE);
+                progressBar->setValue(UIConfig::PROGRESS_BAR_MAX_VALUE);
                 progressBar->setVisible(false);
                 emit backupCreated();
 
@@ -82,19 +82,19 @@ void BackupController::createBackup(const QString &destinationPath,
 // Delete a backup folder and its metadata
 void BackupController::deleteBackup(const QString &backupPath) {
     if (!QFile::exists(backupPath)) {
-        emit errorOccurred(Constants::ERROR_INVALID_BACKUP_LOCATION);
+        emit errorOccurred(BackupInfo::ERROR_INVALID_BACKUP_LOCATION);
         return;
     }
 
     QDir backupDir(backupPath);
-    QString summaryFilePath = backupDir.filePath(Constants::BACKUP_SUMMARY_FILENAME);
+    QString summaryFilePath = backupDir.filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
 
     if (QFile::exists(summaryFilePath)) {
         QFile::remove(summaryFilePath);
     }
 
     if (!backupDir.removeRecursively()) {
-        emit errorOccurred(Constants::ERROR_BACKUP_DELETION_FAILED);
+        emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
         return;
     }
 

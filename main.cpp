@@ -7,13 +7,13 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     // Set application properties
-    app.setApplicationName(Constants::WINDOW_TITLE);
-    app.setApplicationDisplayName(Constants::WINDOW_TITLE);
+    app.setApplicationName(AppConfig::WINDOW_TITLE);
+    app.setApplicationDisplayName(AppConfig::WINDOW_TITLE);
 
     // Create and configure the main window
     MainWindow mainWindow;
-    mainWindow.setWindowTitle(Constants::WINDOW_TITLE);
-    mainWindow.setWindowIcon(QIcon(Constants::ICON_PATH));
+    mainWindow.setWindowTitle(AppConfig::WINDOW_TITLE);
+    mainWindow.setWindowIcon(QIcon(BackupInfo::ICON_PATH));
     mainWindow.show();
 
     // Start the application event loop

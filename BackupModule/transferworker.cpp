@@ -58,7 +58,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     }
 
     if (!QDir().mkpath(driveBackupFolder)) {
-        emit errorOccurred(QString(Constants::ERROR_BACKUP_FOLDER_CREATION_FAILED));
+        emit errorOccurred(QString(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED));
         return false;
     }
 
@@ -74,7 +74,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
                            : QFile::copy(entry.absoluteFilePath(), destPath);
 
         if (!success) {
-            emit errorOccurred(QString(Constants::ERROR_TRANSFER_FAILED).arg(entry.absoluteFilePath()));
+            emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(entry.absoluteFilePath()));
             return false;
         }
     }
@@ -92,7 +92,7 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
                        : QFile::copy(filePath, destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString(Constants::ERROR_TRANSFER_FAILED).arg(filePath));
+        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(filePath));
         return false;
     }
 

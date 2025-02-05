@@ -65,7 +65,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
 // Retrieve header data for the column
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
-        return Constants::STAGING_COLUMN_NAME;
+        return UIConfig::STAGING_COLUMN_NAME;
     }
     return QVariant();
 }
