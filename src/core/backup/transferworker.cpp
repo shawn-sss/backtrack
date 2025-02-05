@@ -1,6 +1,6 @@
 #include "transferworker.h"
 #include "fileoperations.h"
-#include "../Utils/constants.h"
+#include "../../core/utils/constants.h"
 
 #include <QStringList>
 #include <QFile>
@@ -18,18 +18,17 @@ void TransferWorker::startTransfer() {
     int totalFiles = files.size();
     int completedFiles = 0;
 
-    for (int i = 0; i < totalFiles; ++i) {
-        const QString &filePath = files.at(i);
+    for (const QString &filePath : files) {
         QFileInfo fileInfo(filePath);
-        if (fileInfo.isDir() && filePath.endsWith(":/")) {
-            if (!processDriveRoot(filePath)) {
-                return;
-            }
-        } else {
-            if (!processFileOrFolder(filePath)) {
-                return;
-            }
+
+        bool success = fileInfo.isDir() && filePath.endsWith(":/")
+                           ? processDriveRoot(filePath)
+                           : processFileOrFolder(filePath);
+
+        if (!success) {
+            return;
         }
+
         completedFiles++;
         int progress = static_cast<int>((static_cast<double>(completedFiles) / totalFiles) * 100);
         emit progressUpdated(progress);
@@ -53,20 +52,22 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     QString driveName = QString("%1 (%2)").arg(driveLabel, driveLetter);
     QString driveBackupFolder = QDir(destination).filePath(driveName);
 
-    if (QDir(driveBackupFolder).exists()) {
-        QDir(driveBackupFolder).removeRecursively();
+    // Ensure backup folder is fresh
+    QDir dir(driveBackupFolder);
+    if (dir.exists()) {
+        dir.removeRecursively();
     }
 
     if (!QDir().mkpath(driveBackupFolder)) {
-        emit errorOccurred(QString(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED));
+        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
         return false;
     }
 
+    // Copy drive contents
     QDir driveDir(driveRoot);
     QFileInfoList entries = driveDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
 
-    for (int i = 0; i < entries.size(); ++i) {
-        const QFileInfo &entry = entries.at(i); // Indexed access to avoid detachment
+    for (const QFileInfo &entry : entries) {
         QString destPath = QDir(driveBackupFolder).filePath(entry.fileName());
 
         bool success = entry.isDir()

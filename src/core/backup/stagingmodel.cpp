@@ -1,5 +1,5 @@
 #include "stagingmodel.h"
-#include "../Utils/constants.h"
+#include "../../core/utils/constants.h"
 
 #include <QFileIconProvider>
 #include <QFileInfo>
@@ -74,7 +74,6 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
 
 // Add a path to the staged list
 void StagingModel::addPath(const QString &path) {
-    // Prevent duplicate paths
     if (!stagedPaths.contains(path)) {
         beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
         stagedPaths.append(path);

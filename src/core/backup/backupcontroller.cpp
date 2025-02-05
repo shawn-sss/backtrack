@@ -1,7 +1,7 @@
 #include "backupcontroller.h"
 #include "backupservice.h"
 #include "transferworker.h"
-#include "../Utils/constants.h"
+#include "../../core/utils/constants.h"
 
 #include <QThread>
 #include <QProgressBar>
@@ -32,40 +32,48 @@ void BackupController::createBackup(const QString &destinationPath,
         return;
     }
 
+    // Generate timestamped backup folder name
     QString timestamp = QDateTime::currentDateTime()
                             .toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
     QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT)
                                    .arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
     QString backupFolderPath = QDir(destinationPath).filePath(backupFolderName);
 
+    // Ensure backup folder is created
     if (!QDir().mkpath(backupFolderPath)) {
         emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
         return;
     }
 
+    // Initialize progress bar
     progressBar->setVisible(true);
     progressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
+    // Create and start worker thread for file transfer
     workerThread = new QThread(this);
     auto *worker = new TransferWorker(stagingList, backupFolderPath);
     worker->moveToThread(workerThread);
 
+    // Connect worker signals to UI and control flow
     connect(worker, &TransferWorker::progressUpdated, progressBar, &QProgressBar::setValue);
     connect(worker, &TransferWorker::transferComplete, this,
             [this, backupFolderPath, stagingList, startTime, progressBar]() {
                 qint64 endTime = QDateTime::currentMSecsSinceEpoch();
                 qint64 backupDuration = endTime - startTime;
 
+                // Create backup metadata
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
 
+                // Finalize progress UI
                 progressBar->setValue(UIConfig::PROGRESS_BAR_MAX_VALUE);
                 progressBar->setVisible(false);
                 emit backupCreated();
 
                 cleanupAfterTransfer();
             });
+
     connect(worker, &TransferWorker::errorOccurred, this,
             [this, progressBar](const QString &error) {
                 progressBar->setVisible(false);
@@ -89,10 +97,12 @@ void BackupController::deleteBackup(const QString &backupPath) {
     QDir backupDir(backupPath);
     QString summaryFilePath = backupDir.filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
 
+    // Remove metadata file if it exists
     if (QFile::exists(summaryFilePath)) {
         QFile::remove(summaryFilePath);
     }
 
+    // Delete backup directory recursively
     if (!backupDir.removeRecursively()) {
         emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
         return;

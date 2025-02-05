@@ -22,8 +22,7 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
 
     QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
 
-    for (int i = 0; i < entries.size(); ++i) {
-        const QFileInfo &entry = entries.at(i);
+    for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
 
         if (entry.isDir()) {
@@ -45,13 +44,8 @@ quint64 calculateDirectorySize(const QString &path) {
     QDir dir(path);
     QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
 
-    for (int i = 0; i < entries.size(); ++i) {
-        const QFileInfo &entry = entries.at(i);
-        if (entry.isDir()) {
-            totalSize += calculateDirectorySize(entry.absoluteFilePath());
-        } else {
-            totalSize += entry.size();
-        }
+    for (const QFileInfo &entry : entries) {
+        totalSize += entry.isDir() ? calculateDirectorySize(entry.absoluteFilePath()) : entry.size();
     }
     return totalSize;
 }
@@ -88,9 +82,7 @@ QJsonObject readJsonFromFile(const QString &filePath) {
     if (file.open(QIODevice::ReadOnly)) {
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
         file.close();
-        if (doc.isObject()) {
-            return doc.object();
-        }
+        return doc.isObject() ? doc.object() : QJsonObject();
     }
     return QJsonObject();
 }
@@ -104,9 +96,7 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     // Collect files in the current directory
     QFileInfoList fileEntries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
 
-    // Use indexed access to avoid detachment
-    for (int i = 0; i < fileEntries.size(); ++i) {
-        const QFileInfo &entry = fileEntries.at(i); // Safe indexed access
+    for (const QFileInfo &entry : fileEntries) {
         QString fullPath = entry.absoluteFilePath();
         if (!uniqueFiles.contains(fullPath)) {
             uniqueFiles.insert(fullPath);
@@ -117,9 +107,7 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     // Recurse into subdirectories
     QFileInfoList subDirEntries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    // Use indexed access for subdirectories
-    for (int i = 0; i < subDirEntries.size(); ++i) {
-        const QFileInfo &subDir = subDirEntries.at(i); // Safe indexed access
+    for (const QFileInfo &subDir : subDirEntries) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
     }
 }

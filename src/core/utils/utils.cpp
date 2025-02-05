@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "../../core/backup/stagingmodel.h"
 
 #include <QAbstractItemModel>
 #include <QVector>
@@ -11,11 +12,9 @@
 #include <QBuffer>
 #include <utility>
 
-#include "../BackupModule/stagingmodel.h"
-
 namespace Utils {
 
-// Formatting namespace: Functions for formatting size, duration, and timestamps
+// Formatting namespace: Functions for size, duration, and timestamps
 namespace Formatting {
 
 // Format file size into human-readable units
@@ -34,25 +33,13 @@ QString formatSize(qint64 size) {
 
 // Format duration into human-readable units
 QString formatDuration(qint64 milliseconds) {
-    if (milliseconds < 1000) {
-        return QString::number(milliseconds) + " milliseconds";
-    }
-
+    if (milliseconds < 1000) return QString::number(milliseconds) + " milliseconds";
     qint64 seconds = milliseconds / 1000;
-    if (seconds < 60) {
-        return QString::number(seconds) + " seconds";
-    }
-
+    if (seconds < 60) return QString::number(seconds) + " seconds";
     qint64 minutes = seconds / 60;
-    if (minutes < 60) {
-        return QString::number(minutes) + " minutes";
-    }
-
+    if (minutes < 60) return QString::number(minutes) + " minutes";
     qint64 hours = minutes / 60;
-    if (hours < 24) {
-        return QString::number(hours) + " hours";
-    }
-
+    if (hours < 24) return QString::number(hours) + " hours";
     qint64 days = hours / 24;
     return QString::number(days) + " days";
 }
@@ -66,7 +53,8 @@ QString formatTimestamp(const QDateTime &datetime, const QString &format) {
 QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
-}
+
+} // namespace Formatting
 
 // UI namespace: Functions for managing tree views, progress bars, and status lights
 namespace UI {
@@ -84,11 +72,7 @@ void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int colu
 }
 
 // Configure a progress bar
-void setupProgressBar(QProgressBar *progressBar,
-                      int minValue,
-                      int maxValue,
-                      int height,
-                      bool textVisible) {
+void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
 
     progressBar->setRange(minValue, maxValue);
@@ -111,7 +95,8 @@ QPixmap createStatusLightPixmap(const QString &color, int size) {
 
     return pixmap;
 }
-}
+
+} // namespace UI
 
 // Backup namespace: Functions for managing staged paths
 namespace Backup {
@@ -142,6 +127,7 @@ void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingMo
         stagingModel->removePath(filePath);
     }
 }
-}
 
-}
+} // namespace Backup
+
+} // namespace Utils

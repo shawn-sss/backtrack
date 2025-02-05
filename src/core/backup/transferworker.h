@@ -13,21 +13,23 @@ public:
     explicit TransferWorker(const QStringList &files, const QString &destination, QObject *parent = nullptr);
 
 public slots:
-    // Slot to start the file transfer process
+    // Starts the file transfer process
     void startTransfer();
 
 signals:
-    // Signals for transfer progress and status updates
+    // Signals for progress and status updates
     void progressUpdated(int progress);
     void transferComplete();
     void errorOccurred(const QString &error);
 
 private:
-    // Helper methods for specific transfer operations
+    // Handles drive root processing
     bool processDriveRoot(const QString &driveRoot);
+
+    // Handles individual file or folder processing
     bool processFileOrFolder(const QString &filePath);
 
-    // Member variables for file transfer
+    // File transfer data
     QStringList files;
     QString destination;
 };

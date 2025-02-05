@@ -12,9 +12,9 @@ inline const QString ABOUT_DIALOG_MESSAGE = "%1\n%2\n\nMade by Shawn SSS";
 inline const QString APP_VERSION = "Version 0.1";
 }
 
-// Constants that users might want to change
+// User-configurable settings
 namespace UserSettings {
-inline const QString DEFAULT_BACKUP_DESTINATION = "C:\\temp";  // User-configurable
+inline const QString DEFAULT_BACKUP_DESTINATION = "C:\\temp";
 inline const QString BACKUP_FOLDER_PREFIX = "BKP_";
 inline const QString BACKUP_SUMMARY_FILENAME = ".backup_summary.json";
 }
@@ -28,22 +28,22 @@ constexpr auto SUCCESS_ICON_PATH = ":/resources/success_icon.png";
 constexpr auto BACKUP_STATUS_ICON_FOUND = ":/resources/backup_found_icon.png";
 constexpr auto BACKUP_STATUS_ICON_NOT_FOUND = ":/resources/backup_not_found_icon.png";
 
-// Paths related to file selection
-inline const QString DEFAULT_ROOT_PATH = "";  // User-configurable
-inline const QString DEFAULT_FILE_DIALOG_ROOT = QDir::rootPath();  // System-based
+// File selection paths
+inline const QString DEFAULT_ROOT_PATH = "";
+inline const QString DEFAULT_FILE_DIALOG_ROOT = QDir::rootPath();
 
 // File system settings
 inline const QDir::Filters FILE_SYSTEM_FILTER = QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files;
 
-// Backup naming and formats
+// Backup naming formats
 inline const QString BACKUP_FOLDER_FORMAT = "%1%2";
 inline const QString BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
 
-// Backup status messages
+// Status messages
 inline const QString BACKUP_COMPLETE_MESSAGE = "The backup completed successfully.";
 inline const QString BACKUP_DELETE_SUCCESS = "The backup was successfully deleted.";
 
-// Backup error messages
+// Error messages
 inline const QString ERROR_BACKUP_CREATION_FAILED = "Unable to create the backup.";
 inline const QString ERROR_INVALID_BACKUP_LOCATION = "The selected backup location is invalid.";
 inline const QString ERROR_BACKUP_DELETION_FAILED = "Unable to delete the selected backup.";
@@ -66,7 +66,7 @@ inline const QString NOTIFY_BACKUP_FAILED = "The backup operation has failed.";
 inline const QString SUCCESS_BACKUP_CREATED = "The backup was created successfully.";
 inline const QString SUCCESS_BACKUP_DELETED = "The backup was deleted successfully.";
 
-// Backup timestamp formats
+// Timestamp formats
 inline const QString DISPLAY_TIMESTAMP_FORMAT = "dd-MM-yyyy hh:mm:ss";
 inline const QString BACKUP_TIMESTAMP_DISPLAY_FORMAT = "MM/dd/yyyy hh:mm AP";
 
@@ -78,9 +78,9 @@ inline const QString SIZE_UNIT_GIGABYTES = " GB";
 constexpr double SIZE_CONVERSION_FACTOR = 1024.0;
 }
 
-// User interface configuration constants
+// UI-related constants
 namespace UIConfig {
-// UI Colors
+// Colors
 inline const QString COLOR_GREEN = "green";
 inline const QString COLOR_RED = "red";
 inline const QString COLOR_YELLOW = "yellow";
@@ -89,11 +89,11 @@ inline const QString COLOR_GRAY = "gray";
 inline const QString COLOR_WARNING = "orange";
 inline const QString COLOR_INFO = "blue";
 
-// Derived backup status colors
+// Backup status colors
 inline const QString BACKUP_STATUS_COLOR_FOUND = COLOR_GREEN;
 inline const QString BACKUP_STATUS_COLOR_NOT_FOUND = COLOR_RED;
 
-// UI Labels and Messages
+// UI Labels
 inline const QString LABEL_BACKUP_FOUND = "Backup Found: ";
 inline const QString LABEL_BACKUP_STATUS = "Backup Status: ";
 inline const QString LABEL_BACKUP_TOTAL_COUNT = "Backup Total Count: ";
@@ -108,7 +108,7 @@ inline const QString LABEL_BACKUP_PROGRESS = "Backup Progress: ";
 inline const QString LABEL_TRANSFER_PROGRESS_COMPLETE = "Transfer Complete";
 inline const QString STAGING_COLUMN_NAME = "Name";
 
-// UI Messages for ongoing operations
+// UI messages
 inline const QString MESSAGE_BACKUP_IN_PROGRESS = "A backup operation is currently in progress.";
 inline const QString MESSAGE_OPERATION_IN_PROGRESS = "An operation is currently in progress.";
 inline const QString MESSAGE_OPERATION_WARNING =
@@ -122,11 +122,11 @@ inline const QString DELETE_BACKUP_WARNING_TITLE = "Confirm Backup Deletion";
 inline const QString DELETE_BACKUP_WARNING_MESSAGE =
     "Are you sure you want to delete this backup?\nThis action cannot be undone.\n\nLocation: %1";
 
-// Warnings and errors for staging
+// Staging warnings
 inline const QString EMPTY_STAGING_WARNING_MESSAGE =
     "No items are currently staged. Please add files or folders before creating a backup.";
 
-// Error Messages
+// Error messages
 inline const QString ERROR_INVALID_SELECTION = "No items are selected. Please select at least one item and try again.";
 inline const QString ERROR_FILE_ACCESS_DENIED = "File access was denied.";
 inline const QString ERROR_EMPTY_PATH_SELECTION = "No path was selected. Please choose a valid directory.";
@@ -135,7 +135,7 @@ inline const QString ERROR_NO_ITEMS_IN_STAGING_MESSAGE =
     "There are currently no items staged to remove. Please select items in the staging area first.";
 inline const QString ERROR_TRANSFER_FAILED = "Unable to transfer the following item: %1";
 
-// UI Styling
+// UI styling
 inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
 inline const QString DEFAULT_VALUE_NOT_AVAILABLE = "N/A";
 

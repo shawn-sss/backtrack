@@ -1,7 +1,7 @@
 #include "backupservice.h"
 #include "fileoperations.h"
-#include "../Utils/constants.h"
-#include "../Utils/utils.h"
+#include "../../core/utils/constants.h"
+#include "../../core/utils/utils.h"
 
 #include <QDir>
 #include <QFile>
@@ -32,8 +32,7 @@ bool BackupService::scanForBackupSummary() const {
     QDir destinationDir(backupRootPath);
     QFileInfoList subDirectories = destinationDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
 
-    for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &dirInfo = subDirectories.at(i);
+    for (const QFileInfo &dirInfo : subDirectories) {
         QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
             return true;
@@ -49,8 +48,7 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     dir.setSorting(QDir::Time);
     QFileInfoList subDirectories = dir.entryInfoList();
 
-    for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &subDir = subDirectories.at(i);
+    for (const QFileInfo &subDir : subDirectories) {
         QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
             return FileOperations::readJsonFromFile(summaryFilePath);
@@ -70,18 +68,14 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
     summaryObject["backup_duration_readable"] = Utils::Formatting::formatDuration(backupDuration);
 
     QJsonArray filesArray, foldersArray, userSelectedItemsArray;
-    QSet<QString> uniqueFiles;
-    QSet<QString> uniqueFolders;
+    QSet<QString> uniqueFiles, uniqueFolders;
 
     for (const QString &item : selectedItems) {
         QFileInfo fileInfo(item);
         userSelectedItemsArray.append(item);
 
         if (fileInfo.isDir()) {
-            // Collect subdirectories and files
-            QJsonArray collectedSubdirectories;
-            traverseDirectoryForFolders(item, uniqueFolders, collectedSubdirectories);
-            foldersArray.append(collectedSubdirectories);
+            traverseDirectoryForFolders(item, uniqueFolders, foldersArray);
             traverseDirectory(item, uniqueFiles, filesArray);
         } else if (fileInfo.isFile() && !uniqueFiles.contains(item)) {
             uniqueFiles.insert(item);
@@ -89,6 +83,7 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
         }
     }
 
+    // Calculate total backup size
     qint64 totalSize = calculateTotalBackupSize(selectedItems);
 
     // Populate metadata
@@ -101,21 +96,20 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
     summaryObject["backup_folders"] = foldersArray;
     summaryObject["user_selected_items"] = userSelectedItemsArray;
 
+    // Write metadata to file
     QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
     FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
 }
 
 // Backup Statistics Retrieval
 
-// Get the number of backups available
+// Get the number of available backups
 int BackupService::getBackupCount() const {
     QDir dir(backupRootPath);
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     int count = 0;
 
-    // Use indexed access to avoid detachment
-    for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
+    for (const QFileInfo &subDir : subDirectories) {
         QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             ++count;
@@ -130,9 +124,7 @@ quint64 BackupService::getTotalBackupSize() const {
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     quint64 totalSize = 0;
 
-    // Use indexed access to avoid detachment
-    for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &subDir = subDirectories.at(i); // Safe indexed access
+    for (const QFileInfo &subDir : subDirectories) {
         QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
             totalSize += FileOperations::calculateDirectorySize(subDir.absoluteFilePath());
@@ -164,15 +156,11 @@ void BackupService::traverseDirectory(const QString &dirPath, QSet<QString> &uni
 }
 
 // Traverse a directory and collect unique subdirectories
-void BackupService::traverseDirectoryForFolders(const QString &dirPath,
-                                                QSet<QString> &uniqueFolders,
-                                                QJsonArray &foldersArray) const {
+void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const {
     QDir dir(dirPath);
     QFileInfoList subDirEntries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    // Use indexed access to avoid detachment
-    for (int i = 0; i < subDirEntries.size(); ++i) {
-        const QFileInfo &subDir = subDirEntries.at(i); // Safe indexed access
+    for (const QFileInfo &subDir : subDirEntries) {
         QString subDirPath = subDir.absoluteFilePath();
 
         if (!uniqueFolders.contains(subDirPath)) {

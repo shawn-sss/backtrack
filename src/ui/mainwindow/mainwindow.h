@@ -27,7 +27,7 @@ public:
     ~MainWindow();
 
 protected:
-    // Overridden event handler for window closing
+    // Handles window closing event
     void closeEvent(QCloseEvent *event) override;
 
 private:
@@ -36,15 +36,15 @@ private:
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
 
-    // Backup management methods
+    // Backup management
     void updateLastBackupInfo();
     void refreshBackupStatus();
 
-    // File and directory monitoring methods
+    // File and directory monitoring
     void startWatchingBackupDirectory(const QString &path);
     void updateFileWatcher();
 
-    // UI update methods
+    // UI updates
     void updateBackupStatusLabel(bool backupFound);
     void updateBackupLocationLabel(const QString &location);
     void updateBackupTotalCountLabel();
@@ -53,7 +53,7 @@ private:
     void removeAllColumnsFromTreeView(QTreeView *treeView);
 
 private slots:
-    // UI interaction slots
+    // UI interaction handlers
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -61,7 +61,7 @@ private slots:
     void onDeleteBackupClicked();
     void onAboutButtonClicked();
 
-    // File and directory watcher slots
+    // File and directory watcher handlers
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 

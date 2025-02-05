@@ -31,7 +31,7 @@ signals:
     void errorOccurred(const QString &error);
 
 private:
-    // Helper method for cleanup
+    // Helper for cleanup after backup operations
     void cleanupAfterTransfer();
 
     // Member variables for backup management

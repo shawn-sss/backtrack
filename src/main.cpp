@@ -1,6 +1,7 @@
-#include "UIComponents/mainwindow.h"
 #include <QApplication>
-#include "Utils/constants.h"
+
+#include "ui/mainwindow/mainwindow.h"
+#include "core/utils/constants.h"
 
 int main(int argc, char *argv[]) {
     // Initialize the application

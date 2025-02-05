@@ -26,7 +26,7 @@ public:
     quint64 getTotalBackupSize() const;
 
 private:
-    // Helper methods for directory traversal and size calculation
+    // Directory traversal and size calculation
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
     void traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
     void traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
