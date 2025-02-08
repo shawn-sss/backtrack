@@ -21,6 +21,9 @@ A lightweight **C++** utility for **selecting** and **safely storing** important
 - **Detailed Backup Summaries**  
   Get detailed information on the most recent backup, including file sizes, completion time, and success status.
 
+- **Metadata Log File**  
+  A JSON log is specifically created regarding each backup for recordkeeping and peace of mind.
+
 Though the current version delivers **core backup functionality**, future updates aim to expand on these fundamentals in various ways.
 
 ## Installation & Usage
