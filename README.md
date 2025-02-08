@@ -1,5 +1,8 @@
 # MyDataBackupApp *(Early Preview v0.1)*
 ![Version](https://img.shields.io/badge/version-v0.1-orange)
+<p align="center">
+  <img src="screenshot.jpg" alt="Screenshot">
+</p>
 
 A lightweight **C++** utility for **selecting** and **safely storing** important files and folders. This is an **early preview release**, with the current release emphasizing core functionality. However, the project is actively evolving to include new capabilities and improvements over time.
 
