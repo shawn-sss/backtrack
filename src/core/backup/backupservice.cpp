@@ -9,25 +9,20 @@
 #include <QDateTime>
 #include <QFileInfo>
 
-// Constructor to initialize BackupService
+// Constructor
 BackupService::BackupService(const QString &backupRoot)
     : backupRootPath(backupRoot) {}
 
 // Backup Root Management
-
-// Set the backup root path
 void BackupService::setBackupRoot(const QString &path) {
     backupRootPath = path;
 }
 
-// Get the backup root path
 QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
 // Backup Metadata Management
-
-// Scan for the existence of a backup summary file
 bool BackupService::scanForBackupSummary() const {
     QDir destinationDir(backupRootPath);
     QFileInfoList subDirectories = destinationDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
@@ -41,7 +36,6 @@ bool BackupService::scanForBackupSummary() const {
     return false;
 }
 
-// Retrieve metadata for the last backup
 QJsonObject BackupService::getLastBackupMetadata() const {
     QDir dir(backupRootPath);
     dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -57,16 +51,16 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return QJsonObject();
 }
 
-// Create metadata for a backup
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     QJsonObject summaryObject;
 
-    // General backup information
-    summaryObject["backup_name"] = QFileInfo(backupFolderPath).fileName();
-    summaryObject["backup_timestamp"] = Utils::Formatting::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate);
-    summaryObject["backup_duration"] = backupDuration;
-    summaryObject["backup_duration_readable"] = Utils::Formatting::formatDuration(backupDuration);
+    // General metadata
+    summaryObject[BackupMetadataKeys::NAME] = QFileInfo(backupFolderPath).fileName();
+    summaryObject[BackupMetadataKeys::TIMESTAMP] = Utils::Formatting::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate);
+    summaryObject[BackupMetadataKeys::DURATION] = backupDuration;
+    summaryObject[BackupMetadataKeys::DURATION_READABLE] = Utils::Formatting::formatDuration(backupDuration);
 
+    // Backup contents
     QJsonArray filesArray, foldersArray, userSelectedItemsArray;
     QSet<QString> uniqueFiles, uniqueFolders;
 
@@ -83,27 +77,25 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
         }
     }
 
-    // Calculate total backup size
+    // Total backup size
     qint64 totalSize = calculateTotalBackupSize(selectedItems);
 
     // Populate metadata
-    summaryObject["total_size_bytes"] = totalSize;
-    summaryObject["total_size_readable"] = Utils::Formatting::formatSize(totalSize);
-    summaryObject["file_count"] = filesArray.size();
-    summaryObject["folder_count"] = uniqueFolders.size();
-    summaryObject["user_selected_item_count"] = selectedItems.size();
-    summaryObject["backup_files"] = filesArray;
-    summaryObject["backup_folders"] = foldersArray;
-    summaryObject["user_selected_items"] = userSelectedItemsArray;
+    summaryObject[BackupMetadataKeys::SIZE_BYTES] = totalSize;
+    summaryObject[BackupMetadataKeys::SIZE_READABLE] = Utils::Formatting::formatSize(totalSize);
+    summaryObject[BackupMetadataKeys::FILE_COUNT] = filesArray.size();
+    summaryObject[BackupMetadataKeys::FOLDER_COUNT] = uniqueFolders.size();
+    summaryObject[BackupMetadataKeys::USER_SELECTED_ITEMS] = userSelectedItemsArray;
+    summaryObject[BackupMetadataKeys::USER_SELECTED_ITEM_COUNT] = selectedItems.size();
+    summaryObject[BackupMetadataKeys::BACKUP_FILES] = filesArray;
+    summaryObject[BackupMetadataKeys::BACKUP_FOLDERS] = foldersArray;
 
-    // Write metadata to file
+    // Write metadata
     QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
     FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
 }
 
-// Backup Statistics Retrieval
-
-// Get the number of available backups
+// Backup Statistics
 int BackupService::getBackupCount() const {
     QDir dir(backupRootPath);
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -118,7 +110,6 @@ int BackupService::getBackupCount() const {
     return count;
 }
 
-// Get the total size of all backups
 quint64 BackupService::getTotalBackupSize() const {
     QDir dir(backupRootPath);
     QFileInfoList subDirectories = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -134,8 +125,6 @@ quint64 BackupService::getTotalBackupSize() const {
 }
 
 // Helper Methods
-
-// Calculate the total size of selected items
 qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems) const {
     qint64 totalSize = 0;
 
@@ -150,12 +139,10 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
     return totalSize;
 }
 
-// Traverse a directory and collect unique files
 void BackupService::traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const {
     FileOperations::collectFilesRecursively(dirPath, uniqueFiles, filesArray);
 }
 
-// Traverse a directory and collect unique subdirectories
 void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const {
     QDir dir(dirPath);
     QFileInfoList subDirEntries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);

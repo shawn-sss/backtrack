@@ -11,11 +11,11 @@ class FileWatcher : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor and destructor
+    // Constructor and Destructor
     explicit FileWatcher(QObject *parent = nullptr);
     ~FileWatcher() override = default;
 
-    // Managing watched paths
+    // Managing Watched Paths
     void addPath(const QString &path);
     void addPaths(const QStringList &paths);
     void removePath(const QString &path);
@@ -23,16 +23,16 @@ public:
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 
-    // Start monitoring a directory
+    // Start Monitoring
     void startWatching(const QString &rootPath);
 
 signals:
-    // Emitted when a directory or file changes
+    // Signals for File/Directory Changes
     void directoryChanged(const QString &path);
     void fileChanged(const QString &path);
 
 private:
-    // File system watcher instance
+    // File System Watcher
     QFileSystemWatcher *watcher;
 };
 

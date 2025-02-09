@@ -23,10 +23,10 @@ signals:
     void errorOccurred(const QString &error);
 
 private:
-    // Handles drive root processing
+    // Processes drive root before transfer
     bool processDriveRoot(const QString &driveRoot);
 
-    // Handles individual file or folder processing
+    // Processes individual file or folder transfer
     bool processFileOrFolder(const QString &filePath);
 
     // File transfer data

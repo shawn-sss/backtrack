@@ -12,26 +12,29 @@ public:
     // Constructor
     explicit BackupService(const QString &backupRoot);
 
-    // Backup root path management
+    // Backup Root Path Management
     void setBackupRoot(const QString &path);
     QString getBackupRoot() const;
 
-    // Backup metadata operations
+    // Backup Metadata Operations
     bool scanForBackupSummary() const;
     void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
     QJsonObject getLastBackupMetadata() const;
 
-    // Backup statistics retrieval
+    // Backup Statistics Retrieval
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
 private:
-    // Directory traversal and size calculation
+    // Directory Traversal and Size Calculation
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
     void traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
     void traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
 
-    // Member variables for backup management
+    // Backup Summary Handling
+    bool containsBackupSummary(const QString &dirPath) const;
+
+    // Member Variables
     QString backupRootPath;
 };
 

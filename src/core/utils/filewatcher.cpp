@@ -12,29 +12,24 @@ FileWatcher::FileWatcher(QObject *parent)
 }
 
 // Path Management
-
-// Add a single path to the watcher
 void FileWatcher::addPath(const QString &path) {
     if (!watcher->directories().contains(path) && !watcher->files().contains(path)) {
         watcher->addPath(path);
     }
 }
 
-// Remove a single path from the watcher
 void FileWatcher::removePath(const QString &path) {
     if (watcher->directories().contains(path) || watcher->files().contains(path)) {
         watcher->removePath(path);
     }
 }
 
-// Add multiple paths to the watcher
 void FileWatcher::addPaths(const QStringList &paths) {
     for (const QString &path : paths) {
         addPath(path);
     }
 }
 
-// Remove all watched paths
 void FileWatcher::removeAllPaths() {
     if (!watchedDirectories().isEmpty()) {
         watcher->removePaths(watcher->directories());
@@ -45,20 +40,15 @@ void FileWatcher::removeAllPaths() {
 }
 
 // Retrieval Methods
-
-// Get the list of currently watched directories
 QStringList FileWatcher::watchedDirectories() const {
     return watcher->directories();
 }
 
-// Get the list of currently watched files
 QStringList FileWatcher::watchedFiles() const {
     return watcher->files();
 }
 
 // Monitoring Functionality
-
-// Start watching a root directory and its relevant subdirectories
 void FileWatcher::startWatching(const QString &rootPath) {
     removeAllPaths();
     addPath(rootPath);

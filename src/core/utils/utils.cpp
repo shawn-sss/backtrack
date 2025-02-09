@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "../../core/backup/stagingmodel.h"
+#include "../../core/utils/constants.h"
 
 #include <QAbstractItemModel>
 #include <QVector>
@@ -14,24 +15,28 @@
 
 namespace Utils {
 
-// Formatting namespace: Functions for size, duration, and timestamps
+// Formatting Functions for sizes, durations, and timestamps
 namespace Formatting {
 
-// Format file size into human-readable units
 QString formatSize(qint64 size) {
-    static const QVector<QString> units{" B", " KB", " MB", " GB"};
+    static const QVector<QString> units{
+        BackupInfo::SIZE_UNIT_BYTES,
+        BackupInfo::SIZE_UNIT_KILOBYTES,
+        BackupInfo::SIZE_UNIT_MEGABYTES,
+        BackupInfo::SIZE_UNIT_GIGABYTES
+    };
+
     int unitIndex = 0;
     double sizeInUnits = size;
 
-    while (sizeInUnits >= 1024 && unitIndex < units.size() - 1) {
-        sizeInUnits /= 1024.0;
+    while (sizeInUnits >= BackupInfo::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+        sizeInUnits /= BackupInfo::SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
 
     return QString::number(sizeInUnits, 'f', 2) + units[unitIndex];
 }
 
-// Format duration into human-readable units
 QString formatDuration(qint64 milliseconds) {
     if (milliseconds < 1000) return QString::number(milliseconds) + " milliseconds";
     qint64 seconds = milliseconds / 1000;
@@ -44,22 +49,19 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + " days";
 }
 
-// Format timestamp using a custom string format
 QString formatTimestamp(const QDateTime &datetime, const QString &format) {
     return datetime.toString(format);
 }
 
-// Format timestamp using a Qt date format
 QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
 
 } // namespace Formatting
 
-// UI namespace: Functions for managing tree views, progress bars, and status lights
+// UI Functions for tree views, progress bars, and status lights
 namespace UI {
 
-// Remove specific columns from a tree view
 void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount) {
     if (!treeView) return;
 
@@ -71,17 +73,15 @@ void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int colu
     }
 }
 
-// Configure a progress bar
 void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
 
     progressBar->setRange(minValue, maxValue);
-    progressBar->setValue(0);
+    progressBar->setValue(ProgressConfig::DEFAULT_VISIBILITY ? minValue : 0);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
 
-// Create a circular status light pixmap
 QPixmap createStatusLightPixmap(const QString &color, int size) {
     QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
@@ -98,29 +98,32 @@ QPixmap createStatusLightPixmap(const QString &color, int size) {
 
 } // namespace UI
 
-// Backup namespace: Functions for managing staged paths
+// Backup Functions for managing staged paths
 namespace Backup {
 
-// Add selected paths from a tree view to the staging model
 void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel) return;
 
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
     for (const QModelIndex &index : std::as_const(selectedIndexes)) {
         QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
-        stagingModel->addPath(filePath);
+        if (!filePath.isEmpty()) {
+            stagingModel->addPath(filePath);
+        }
     }
 }
 
-// Remove selected paths from the staging model
 void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel) return;
 
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
     QStringList filePathsToRemove;
+
     for (const QModelIndex &index : std::as_const(selectedIndexes)) {
         QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
-        filePathsToRemove.append(filePath);
+        if (!filePath.isEmpty()) {
+            filePathsToRemove.append(filePath);
+        }
     }
 
     for (const QString &filePath : filePathsToRemove) {

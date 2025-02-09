@@ -1,4 +1,5 @@
 #include "fileoperations.h"
+#include "../../core/utils/constants.h"
 
 #include <QDir>
 #include <QFileInfoList>
@@ -7,8 +8,6 @@
 namespace FileOperations {
 
 // Directory and File Management
-
-// Copy a directory and its contents recursively
 bool copyDirectoryRecursively(const QString &source, const QString &destination) {
     QDir sourceDir(source);
     if (!sourceDir.exists()) {
@@ -20,8 +19,7 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
         return false;
     }
 
-    QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
-
+    QFileInfoList entries = sourceDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
     for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
 
@@ -38,11 +36,10 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
     return true;
 }
 
-// Calculate the total size of a directory
 quint64 calculateDirectorySize(const QString &path) {
     quint64 totalSize = 0;
     QDir dir(path);
-    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
+    QFileInfoList entries = dir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
 
     for (const QFileInfo &entry : entries) {
         totalSize += entry.isDir() ? calculateDirectorySize(entry.absoluteFilePath()) : entry.size();
@@ -50,52 +47,46 @@ quint64 calculateDirectorySize(const QString &path) {
     return totalSize;
 }
 
-// Create a directory if it does not exist
 bool createDirectory(const QString &path) {
     QDir dir(path);
     return dir.exists() || dir.mkpath(".");
 }
 
-// Delete a directory and its contents
 bool deleteDirectory(const QString &path) {
     QDir dir(path);
     return dir.exists() && dir.removeRecursively();
 }
 
 // JSON File Handling
-
-// Write a QJsonObject to a file
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
     QFile file(filePath);
-    if (file.open(QIODevice::WriteOnly)) {
-        QJsonDocument doc(jsonObject);
-        file.write(doc.toJson());
-        file.close();
-        return true;
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
     }
-    return false;
+
+    QJsonDocument doc(jsonObject);
+    file.write(doc.toJson());
+    file.close();
+    return true;
 }
 
-// Read a QJsonObject from a file
 QJsonObject readJsonFromFile(const QString &filePath) {
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly)) {
-        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-        file.close();
-        return doc.isObject() ? doc.object() : QJsonObject();
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QJsonObject();
     }
-    return QJsonObject();
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+    return doc.isObject() ? doc.object() : QJsonObject();
 }
 
 // File Collection
-
-// Collect files from a directory recursively and store them in a QJsonArray
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {
     QDir dir(dirPath);
 
     // Collect files in the current directory
     QFileInfoList fileEntries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
-
     for (const QFileInfo &entry : fileEntries) {
         QString fullPath = entry.absoluteFilePath();
         if (!uniqueFiles.contains(fullPath)) {
@@ -106,7 +97,6 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
 
     // Recurse into subdirectories
     QFileInfoList subDirEntries = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-
     for (const QFileInfo &subDir : subDirEntries) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
     }

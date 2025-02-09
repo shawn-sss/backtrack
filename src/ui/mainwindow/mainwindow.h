@@ -22,29 +22,29 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    // Constructor and destructor
+    // Constructor and Destructor
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 protected:
-    // Handles window closing event
+    // Handles the window close event
     void closeEvent(QCloseEvent *event) override;
 
 private:
-    // UI setup methods
+    // UI Setup Methods
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
 
-    // Backup management
+    // Backup Management
     void updateLastBackupInfo();
     void refreshBackupStatus();
 
-    // File and directory monitoring
+    // File and Directory Monitoring
     void startWatchingBackupDirectory(const QString &path);
     void updateFileWatcher();
 
-    // UI updates
+    // UI Updates
     void updateBackupStatusLabel(bool backupFound);
     void updateBackupLocationLabel(const QString &location);
     void updateBackupTotalCountLabel();
@@ -53,7 +53,7 @@ private:
     void removeAllColumnsFromTreeView(QTreeView *treeView);
 
 private slots:
-    // UI interaction handlers
+    // UI Interaction Handlers
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -61,18 +61,18 @@ private slots:
     void onDeleteBackupClicked();
     void onAboutButtonClicked();
 
-    // File and directory watcher handlers
+    // File and Directory Watcher Handlers
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 
 private:
-    // UI components and models
+    // UI Components and Models
     Ui::MainWindow *ui;
     QFileSystemModel *destinationModel;
     QFileSystemModel *sourceModel;
     QProgressBar *progressBar;
 
-    // Backup-related objects
+    // Backup-Related Objects
     FileWatcher *fileWatcher;
     BackupService *backupService;
     StagingModel *stagingModel;

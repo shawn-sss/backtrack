@@ -3,10 +3,10 @@
 
 #include <QObject>
 #include <QStringList>
-#include <QProgressBar>
-#include <QThread>
 
-// Forward declaration of dependent class
+// Forward declarations
+class QProgressBar;
+class QThread;
 class BackupService;
 
 // Controller class for managing backups
@@ -14,25 +14,26 @@ class BackupController : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor and destructor
+    // Constructor and Destructor
     explicit BackupController(BackupService *service, QObject *parent = nullptr);
     ~BackupController();
 
-    // Backup operation methods
+    // Backup Operations
     void createBackup(const QString &destinationPath, const QStringList &stagingList, QProgressBar *progressBar);
     void deleteBackup(const QString &backupPath);
     bool isBackupInProgress() const;
 
 signals:
-    // Signals for tracking backup progress and errors
+    // Signals for backup status updates
     void backupCreated();
     void backupDeleted();
     void progressUpdated(int progress);
     void errorOccurred(const QString &error);
 
 private:
-    // Helper for cleanup after backup operations
+    // Utility methods for backup handling
     void cleanupAfterTransfer();
+    bool createBackupFolder(const QString &path);
 
     // Member variables for backup management
     BackupService *backupService;

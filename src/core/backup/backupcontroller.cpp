@@ -10,20 +10,24 @@
 #include <QDir>
 #include <QFile>
 
-// Constructor
+// Constructor and Destructor
 BackupController::BackupController(BackupService *service, QObject *parent)
     : QObject(parent), backupService(service), workerThread(nullptr) {}
 
-// Destructor
 BackupController::~BackupController() {
-    if (workerThread && workerThread->isRunning()) {
-        workerThread->quit();
-        workerThread->wait();
-    }
-    delete workerThread;
+    cleanupAfterTransfer();
 }
 
-// Create a backup and manage the transfer process
+// Helper Methods
+bool BackupController::createBackupFolder(const QString &path) {
+    if (!QDir().mkpath(path)) {
+        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
+        return false;
+    }
+    return true;
+}
+
+// Backup Operations
 void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
@@ -40,14 +44,13 @@ void BackupController::createBackup(const QString &destinationPath,
     QString backupFolderPath = QDir(destinationPath).filePath(backupFolderName);
 
     // Ensure backup folder is created
-    if (!QDir().mkpath(backupFolderPath)) {
-        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
+    if (!createBackupFolder(backupFolderPath)) {
         return;
     }
 
     // Initialize progress bar
     progressBar->setVisible(true);
-    progressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
+    progressBar->setValue(ProgressConfig::MIN_VALUE);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -56,7 +59,7 @@ void BackupController::createBackup(const QString &destinationPath,
     auto *worker = new TransferWorker(stagingList, backupFolderPath);
     worker->moveToThread(workerThread);
 
-    // Connect worker signals to UI and control flow
+    // Connect worker signals to manage progress and completion
     connect(worker, &TransferWorker::progressUpdated, progressBar, &QProgressBar::setValue);
     connect(worker, &TransferWorker::transferComplete, this,
             [this, backupFolderPath, stagingList, startTime, progressBar]() {
@@ -67,7 +70,7 @@ void BackupController::createBackup(const QString &destinationPath,
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
 
                 // Finalize progress UI
-                progressBar->setValue(UIConfig::PROGRESS_BAR_MAX_VALUE);
+                progressBar->setValue(ProgressConfig::MAX_VALUE);
                 progressBar->setVisible(false);
                 emit backupCreated();
 
@@ -87,7 +90,6 @@ void BackupController::createBackup(const QString &destinationPath,
     workerThread->start();
 }
 
-// Delete a backup folder and its metadata
 void BackupController::deleteBackup(const QString &backupPath) {
     if (!QFile::exists(backupPath)) {
         emit errorOccurred(BackupInfo::ERROR_INVALID_BACKUP_LOCATION);
@@ -111,17 +113,20 @@ void BackupController::deleteBackup(const QString &backupPath) {
     emit backupDeleted();
 }
 
-// Check if a backup process is in progress
+// Status Check
 bool BackupController::isBackupInProgress() const {
     return workerThread && workerThread->isRunning();
 }
 
-// Clean up the worker thread after a transfer
+// Cleanup Operations
 void BackupController::cleanupAfterTransfer() {
-    if (workerThread && workerThread->isRunning()) {
+    if (!workerThread) return;
+
+    if (workerThread->isRunning()) {
         workerThread->quit();
         workerThread->wait();
     }
+
     delete workerThread;
     workerThread = nullptr;
 }

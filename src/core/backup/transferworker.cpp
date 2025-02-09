@@ -22,11 +22,11 @@ void TransferWorker::startTransfer() {
         QFileInfo fileInfo(filePath);
 
         bool success = fileInfo.isDir() && filePath.endsWith(":/")
-                           ? processDriveRoot(filePath)
-                           : processFileOrFolder(filePath);
+                           ? processDriveRoot(filePath)  // Handle drive roots
+                           : processFileOrFolder(filePath);  // Handle files and folders
 
         if (!success) {
-            return;
+            return;  // Stop the transfer process on failure
         }
 
         completedFiles++;
@@ -37,22 +37,24 @@ void TransferWorker::startTransfer() {
     emit transferComplete();
 }
 
-// Handle the transfer of drive roots (e.g., D:/)
+// Handle drive root transfers (e.g., D:/)
 bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     QFileInfo fileInfo(driveRoot);
     if (!fileInfo.exists() || !fileInfo.isDir()) {
-        emit errorOccurred(QString("Invalid drive root: %1").arg(driveRoot));
+        emit errorOccurred(QString(UIConfig::ERROR_INVALID_SELECTION).arg(driveRoot));
         return false;
     }
 
     QString driveLetter = driveRoot.left(1);
     QStorageInfo storageInfo(driveRoot);
-    QString driveLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
+    QString driveLabel = storageInfo.displayName().isEmpty()
+                             ? BackupInfo::DEFAULT_DRIVE_LABEL
+                             : storageInfo.displayName();
 
     QString driveName = QString("%1 (%2)").arg(driveLabel, driveLetter);
     QString driveBackupFolder = QDir(destination).filePath(driveName);
 
-    // Ensure backup folder is fresh
+    // Ensure a clean backup folder
     QDir dir(driveBackupFolder);
     if (dir.exists()) {
         dir.removeRecursively();
@@ -83,7 +85,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     return true;
 }
 
-// Handle the transfer of normal files or folders
+// Handle file or folder transfers
 bool TransferWorker::processFileOrFolder(const QString &filePath) {
     QFileInfo fileInfo(filePath);
     QString destinationPath = QDir(destination).filePath(fileInfo.fileName());
