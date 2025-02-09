@@ -1,6 +1,6 @@
 #include "transferworker.h"
-#include "core/backup/operations/fileoperations.h"
-#include "core/config/constants.h"
+#include "../../backup_module/operations/fileoperations.h"
+#include "../../config/constants.h"
 
 #include <QStringList>
 #include <QFile>
@@ -22,11 +22,11 @@ void TransferWorker::startTransfer() {
         QFileInfo fileInfo(filePath);
 
         bool success = fileInfo.isDir() && filePath.endsWith(":/")
-                           ? processDriveRoot(filePath)  // Handle drive roots
-                           : processFileOrFolder(filePath);  // Handle files and folders
+                           ? processDriveRoot(filePath)
+                           : processFileOrFolder(filePath);
 
         if (!success) {
-            return;  // Stop the transfer process on failure
+            return;
         }
 
         completedFiles++;

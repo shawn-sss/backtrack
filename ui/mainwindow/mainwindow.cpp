@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "core/backup/operations/fileoperations.h"
-#include "core/config/constants.h"
-#include "core/utils/utils.h"
-#include "core/utils/filewatcher.h"
-#include "core/backup/models/stagingmodel.h"
-#include "core/backup/controller/backupcontroller.h"
-#include "core/backup/service/backupservice.h"
+#include "../../core/config/constants.h"
+
+#include "../../core/backup_module/controller/backupcontroller.h"
+#include "../../core/backup_module/service/backupservice.h"
+#include "../../core/backup_module/operations/fileoperations.h"
+#include "../../core/backup_module/models/stagingmodel.h"
+#include "../../core/utils/common_utils/utils.h"
+#include "../../core/utils/file_utils/filewatcher.h"
 
 #include <QTreeView>
 #include <QFileDialog>

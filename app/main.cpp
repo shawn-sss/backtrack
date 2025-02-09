@@ -1,7 +1,7 @@
 #include <QApplication>
 
-#include "ui/mainwindow/mainwindow.h"
-#include "core/config/constants.h"
+#include "../ui/mainwindow/mainwindow.h"
+#include "../core/config/constants.h"
 
 int main(int argc, char *argv[]) {
     // Initialize the application

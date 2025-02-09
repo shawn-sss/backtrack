@@ -27,59 +27,59 @@ endif()
 
 # App sources
 set(APP_SOURCES
-    src/app/main.cpp
-    src/app/app_manifest.rc
+    app/main.cpp
+    app/app_manifest.rc
+    core/config/constants.h
 )
 
 # Project resources
 set(PROJECT_RESOURCES
-    src/resources/resource.qrc
+    resources/resource.qrc
 )
 
 # UI sources
 set(UI_SOURCES
-    src/ui/mainwindow/MainWindow.cpp
-    src/ui/mainwindow/MainWindow.h
-    src/ui/mainwindow/MainWindow.ui
+    ui/mainwindow/MainWindow.cpp
+    ui/mainwindow/MainWindow.h
+    ui/mainwindow/MainWindow.ui
 )
 
 # Backup Controller sources
 set(BACKUP_CONTROLLER_SOURCES
-    src/core/backup/controller/BackupController.cpp
-    src/core/backup/controller/BackupController.h
+    core/backup_module/controller/BackupController.cpp
+    core/backup_module/controller/BackupController.h
 )
 
 # Backup Service sources
 set(BACKUP_SERVICE_SOURCES
-    src/core/backup/service/BackupService.cpp
-    src/core/backup/service/BackupService.h
+    core/backup_module/service/BackupService.cpp
+    core/backup_module/service/BackupService.h
 )
 
 # Backup Operations sources
 set(BACKUP_OPERATIONS_SOURCES
-    src/core/backup/operations/FileOperations.cpp
-    src/core/backup/operations/FileOperations.h
+    core/backup_module/operations/FileOperations.cpp
+    core/backup_module/operations/FileOperations.h
 )
 
 # Backup Worker sources
 set(BACKUP_WORKER_SOURCES
-    src/core/backup/worker/TransferWorker.cpp
-    src/core/backup/worker/TransferWorker.h
+    core/backup_module/worker/TransferWorker.cpp
+    core/backup_module/worker/TransferWorker.h
 )
 
 # Backup Models sources
 set(BACKUP_MODELS_SOURCES
-    src/core/backup/models/StagingModel.cpp
-    src/core/backup/models/StagingModel.h
+    core/backup_module/models/StagingModel.cpp
+    core/backup_module/models/StagingModel.h
 )
 
 # Utilities sources
 set(UTILS_SOURCES
-    src/core/config/constants.h
-    src/core/utils/FileWatcher.cpp
-    src/core/utils/FileWatcher.h
-    src/core/utils/Utils.cpp
-    src/core/utils/Utils.h
+    core/utils/file_utils/FileWatcher.cpp
+    core/utils/file_utils/FileWatcher.h
+    core/utils/common_utils/Utils.cpp
+    core/utils/common_utils/Utils.h
 )
 
 # Combine all sources

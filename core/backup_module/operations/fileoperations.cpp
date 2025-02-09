@@ -1,5 +1,5 @@
 #include "fileoperations.h"
-#include "core/config/constants.h"
+#include "../../config/constants.h"
 
 #include <QDir>
 #include <QFileInfoList>
