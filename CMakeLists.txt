@@ -25,34 +25,10 @@ if(NOT DEFINED QT_VERSION_MAJOR)
     message(FATAL_ERROR "QT_VERSION_MAJOR is not defined. Ensure Qt5 or Qt6 is found properly.")
 endif()
 
-# UI sources
-set(UI_SOURCES
-    src/ui/mainwindow/MainWindow.cpp
-    src/ui/mainwindow/MainWindow.h
-    src/ui/mainwindow/MainWindow.ui
-)
-
-# Backup module sources
-set(BACKUP_MODULE_SOURCES
-    src/core/backup/BackupService.cpp
-    src/core/backup/BackupService.h
-    src/core/backup/FileOperations.cpp
-    src/core/backup/FileOperations.h
-    src/core/backup/StagingModel.cpp
-    src/core/backup/StagingModel.h
-    src/core/backup/TransferWorker.cpp
-    src/core/backup/TransferWorker.h
-    src/core/backup/BackupController.cpp
-    src/core/backup/BackupController.h
-)
-
-# Utilities sources
-set(UTILS_SOURCES
-    src/core/utils/constants.h
-    src/core/utils/FileWatcher.cpp
-    src/core/utils/FileWatcher.h
-    src/core/utils/Utils.cpp
-    src/core/utils/Utils.h
+# App sources
+set(APP_SOURCES
+    src/app/main.cpp
+    src/app/app_manifest.rc
 )
 
 # Project resources
@@ -60,14 +36,63 @@ set(PROJECT_RESOURCES
     src/resources/resource.qrc
 )
 
+# UI sources
+set(UI_SOURCES
+    src/ui/mainwindow/MainWindow.cpp
+    src/ui/mainwindow/MainWindow.h
+    src/ui/mainwindow/MainWindow.ui
+)
+
+# Backup Controller sources
+set(BACKUP_CONTROLLER_SOURCES
+    src/core/backup/controller/BackupController.cpp
+    src/core/backup/controller/BackupController.h
+)
+
+# Backup Service sources
+set(BACKUP_SERVICE_SOURCES
+    src/core/backup/service/BackupService.cpp
+    src/core/backup/service/BackupService.h
+)
+
+# Backup Operations sources
+set(BACKUP_OPERATIONS_SOURCES
+    src/core/backup/operations/FileOperations.cpp
+    src/core/backup/operations/FileOperations.h
+)
+
+# Backup Worker sources
+set(BACKUP_WORKER_SOURCES
+    src/core/backup/worker/TransferWorker.cpp
+    src/core/backup/worker/TransferWorker.h
+)
+
+# Backup Models sources
+set(BACKUP_MODELS_SOURCES
+    src/core/backup/models/StagingModel.cpp
+    src/core/backup/models/StagingModel.h
+)
+
+# Utilities sources
+set(UTILS_SOURCES
+    src/core/config/constants.h
+    src/core/utils/FileWatcher.cpp
+    src/core/utils/FileWatcher.h
+    src/core/utils/Utils.cpp
+    src/core/utils/Utils.h
+)
+
 # Combine all sources
 set(PROJECT_SOURCES
+    ${APP_SOURCES}
     ${PROJECT_RESOURCES}
     ${UI_SOURCES}
-    ${BACKUP_MODULE_SOURCES}
+    ${BACKUP_CONTROLLER_SOURCES}
+    ${BACKUP_SERVICE_SOURCES}
+    ${BACKUP_OPERATIONS_SOURCES}
+    ${BACKUP_WORKER_SOURCES}
+    ${BACKUP_MODELS_SOURCES}
     ${UTILS_SOURCES}
-    src/main.cpp
-    src/app_manifest.rc
 )
 
 # Add executable (define the target before applying properties)

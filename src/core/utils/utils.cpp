@@ -1,6 +1,6 @@
 #include "utils.h"
-#include "core/backup/stagingmodel.h"
-#include "core/utils/constants.h"
+#include "core/backup/models/stagingmodel.h"
+#include "core/config/constants.h"
 
 #include <QAbstractItemModel>
 #include <QVector>
