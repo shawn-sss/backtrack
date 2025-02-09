@@ -1,5 +1,5 @@
 #include "filewatcher.h"
-#include "../../core/utils/constants.h"
+#include "core/utils/constants.h"
 
 #include <QDir>
 #include <QFileInfo>

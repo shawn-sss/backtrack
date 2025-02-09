@@ -1,7 +1,7 @@
 #include "backupservice.h"
 #include "fileoperations.h"
-#include "../../core/utils/constants.h"
-#include "../../core/utils/utils.h"
+#include "core/utils/constants.h"
+#include "core/utils/utils.h"
 
 #include <QDir>
 #include <QFile>

@@ -1,6 +1,6 @@
 #include "transferworker.h"
 #include "fileoperations.h"
-#include "../../core/utils/constants.h"
+#include "core/utils/constants.h"
 
 #include <QStringList>
 #include <QFile>

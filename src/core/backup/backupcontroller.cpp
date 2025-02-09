@@ -1,7 +1,7 @@
 #include "backupcontroller.h"
 #include "backupservice.h"
 #include "transferworker.h"
-#include "../../core/utils/constants.h"
+#include "core/utils/constants.h"
 
 #include <QThread>
 #include <QProgressBar>
