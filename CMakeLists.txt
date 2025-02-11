@@ -56,12 +56,6 @@ set(BACKUP_SERVICE_SOURCES
     core/backup_module/service/BackupService.h
 )
 
-# Backup Operations sources
-set(BACKUP_OPERATIONS_SOURCES
-    core/backup_module/operations/FileOperations.cpp
-    core/backup_module/operations/FileOperations.h
-)
-
 # Backup Worker sources
 set(BACKUP_WORKER_SOURCES
     core/backup_module/worker/TransferWorker.cpp
@@ -78,6 +72,8 @@ set(BACKUP_MODELS_SOURCES
 set(UTILS_SOURCES
     core/utils/file_utils/FileWatcher.cpp
     core/utils/file_utils/FileWatcher.h
+    core/utils/file_utils/fileoperations.cpp
+    core/utils/file_utils/fileoperations.h
     core/utils/common_utils/Utils.cpp
     core/utils/common_utils/Utils.h
 )

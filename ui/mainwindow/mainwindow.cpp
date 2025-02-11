@@ -4,7 +4,7 @@
 
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"
-#include "../../core/backup_module/operations/fileoperations.h"
+#include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/backup_module/models/stagingmodel.h"
 #include "../../core/utils/common_utils/utils.h"
 #include "../../core/utils/file_utils/filewatcher.h"
