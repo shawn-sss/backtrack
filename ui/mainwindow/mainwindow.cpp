@@ -208,10 +208,7 @@ void MainWindow::onDeleteBackupClicked() {
 }
 
 void MainWindow::onAboutButtonClicked() {
-    QMessageBox::information(this,
-                             AppConfig::ABOUT_DIALOG_TITLE,
-                             QString(AppConfig::ABOUT_DIALOG_MESSAGE)
-                                 .arg(AppConfig::APP_VERSION, AppConfig::WINDOW_TITLE));
+    QMessageBox::information(this, AppConfig::ABOUT_DIALOG_TITLE, QString(AppConfig::ABOUT_DIALOG_MESSAGE).arg(AppConfig::APP_VERSION, AppConfig::WINDOW_TITLE));
 }
 
 // File and Directory Monitoring

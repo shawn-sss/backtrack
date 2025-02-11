@@ -54,9 +54,27 @@ QJsonObject BackupService::getLastBackupMetadata() const {
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
 
-    // Write the metadata to a file
+    // Create the metadata file path in the backup folder
     QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
     FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
+
+    // Now create the metadata file inside the _backup_settings/backup_logs folder
+    QString backupSettingsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
+    QString logsFolderPath = QDir(backupSettingsFolderPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
+
+    // Ensure logs folder exists (though you mentioned it's guaranteed)
+    QDir logDir(logsFolderPath);
+    if (!logDir.exists()) {
+        logDir.mkpath(logsFolderPath);  // Just in case, ensure folder is created
+    }
+
+    // Generate the backup log filename using the backup name (extracted from the folder name)
+    QString backupFolderName = QFileInfo(backupFolderPath).fileName();  // Get the backup folder's name
+    QString logFileName = backupFolderName + "_backup_log.json";  // Append _backup_log.json to the folder name
+    QString logSummaryFilePath = QDir(logsFolderPath).filePath(logFileName);
+
+    // Write the metadata to the backup_logs folder with the new name
+    FileOperations::writeJsonToFile(logSummaryFilePath, summaryObject);
 }
 
 // Create the backup metadata JSON object
