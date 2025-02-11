@@ -27,7 +27,6 @@ signals:
     // Signals for backup status updates
     void backupCreated();
     void backupDeleted();
-    void progressUpdated(int progress);
     void errorOccurred(const QString &error);
 
 private:

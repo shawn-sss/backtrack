@@ -26,12 +26,13 @@ public:
     quint64 getTotalBackupSize() const;
 
 private:
-    // Directory Traversal and Size Calculation
+    // Helper Methods for Backup Metadata and File Traversal
+    QJsonObject createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const;
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
     void traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
     void traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
 
-    // Backup Summary Handling
+    // Backup Summary Checking
     bool containsBackupSummary(const QString &dirPath) const;
 
     // Member Variables

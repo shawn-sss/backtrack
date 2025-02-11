@@ -30,10 +30,10 @@ bool BackupService::scanForBackupSummary() const {
     for (const QFileInfo &dirInfo : subDirectories) {
         QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
-            return true;
+            return true;  // Found a backup summary
         }
     }
-    return false;
+    return false;  // No backup summary found
 }
 
 QJsonObject BackupService::getLastBackupMetadata() const {
@@ -45,13 +45,22 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     for (const QFileInfo &subDir : subDirectories) {
         QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(summaryFilePath)) {
-            return FileOperations::readJsonFromFile(summaryFilePath);
+            return FileOperations::readJsonFromFile(summaryFilePath);  // Return metadata of the last backup
         }
     }
-    return QJsonObject();
+    return QJsonObject();  // No backup summary found
 }
 
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
+    QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
+
+    // Write the metadata to a file
+    QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
+    FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
+}
+
+// Create the backup metadata JSON object
+QJsonObject BackupService::createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const {
     QJsonObject summaryObject;
 
     // General metadata
@@ -90,9 +99,7 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
     summaryObject[BackupMetadataKeys::BACKUP_FILES] = filesArray;
     summaryObject[BackupMetadataKeys::BACKUP_FOLDERS] = foldersArray;
 
-    // Write metadata
-    QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-    FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
+    return summaryObject;  // Return generated metadata
 }
 
 // Backup Statistics
@@ -104,7 +111,7 @@ int BackupService::getBackupCount() const {
     for (const QFileInfo &subDir : subDirectories) {
         QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
         if (QFile::exists(metadataFile)) {
-            ++count;
+            ++count;  // Increment count for each backup found
         }
     }
     return count;
@@ -121,7 +128,7 @@ quint64 BackupService::getTotalBackupSize() const {
             totalSize += FileOperations::calculateDirectorySize(subDir.absoluteFilePath());
         }
     }
-    return totalSize;
+    return totalSize;  // Return total size of backups
 }
 
 // Helper Methods
@@ -131,16 +138,16 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
     for (const QString &item : selectedItems) {
         QFileInfo fileInfo(item);
         if (fileInfo.isDir()) {
-            totalSize += FileOperations::calculateDirectorySize(item);
+            totalSize += FileOperations::calculateDirectorySize(item);  // Include directory size
         } else if (fileInfo.isFile()) {
-            totalSize += fileInfo.size();
+            totalSize += fileInfo.size();  // Include file size
         }
     }
-    return totalSize;
+    return totalSize;  // Return total size of selected items
 }
 
 void BackupService::traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const {
-    FileOperations::collectFilesRecursively(dirPath, uniqueFiles, filesArray);
+    FileOperations::collectFilesRecursively(dirPath, uniqueFiles, filesArray);  // Collect files recursively in the directory
 }
 
 void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const {
@@ -153,7 +160,7 @@ void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QSt
         if (!uniqueFolders.contains(subDirPath)) {
             uniqueFolders.insert(subDirPath);
             foldersArray.append(subDirPath);
-            traverseDirectoryForFolders(subDirPath, uniqueFolders, foldersArray);
+            traverseDirectoryForFolders(subDirPath, uniqueFolders, foldersArray);  // Recurse into subfolders
         }
     }
 }
