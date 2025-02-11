@@ -21,6 +21,9 @@ QJsonObject readJsonFromFile(const QString &filePath);
 // File Collection and Traversal
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
 
+// Backup Infrastructure
+bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage);
+
 } // namespace FileOperations
 
 #endif // FILEOPERATIONS_H

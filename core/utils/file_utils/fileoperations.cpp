@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFileInfoList>
 #include <QJsonDocument>
+#include <QFile>
 
 namespace FileOperations {
 
@@ -100,6 +101,42 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     for (const QFileInfo &subDir : subDirEntries) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
     }
+}
+
+// Backup Infrastructure Creation
+bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
+    QString backupSettingsPath = QDir(backupDir).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
+
+    // Check if _backup_settings folder exists, if not create it
+    if (!QDir().exists(backupSettingsPath)) {
+        if (!QDir().mkpath(backupSettingsPath)) {
+            errorMessage = QString(AppConfig::ERROR_CREATE_DIR).arg(AppConfig::BACKUP_SETTINGS_FOLDER);
+            return false;
+        }
+    }
+
+    // Check for settings.json inside _backup_settings
+    QString settingsFilePath = QDir(backupSettingsPath).filePath(AppConfig::SETTINGS_FILE_NAME);
+    if (!QFile::exists(settingsFilePath)) {
+        // Create an empty settings.json file
+        QFile file(settingsFilePath);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            errorMessage = QString(AppConfig::ERROR_CREATE_FILE).arg(AppConfig::SETTINGS_FILE_NAME);
+            return false;
+        }
+        file.close();
+    }
+
+    // Check for backup_logs folder inside _backup_settings
+    QString backupLogsPath = QDir(backupSettingsPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
+    if (!QDir().exists(backupLogsPath)) {
+        if (!QDir().mkpath(backupLogsPath)) {
+            errorMessage = QString(AppConfig::ERROR_CREATE_FOLDER).arg(AppConfig::BACKUP_LOGS_FOLDER);
+            return false;
+        }
+    }
+
+    return true; // Everything passed
 }
 
 } // namespace FileOperations

@@ -176,6 +176,14 @@ void MainWindow::onCreateBackupClicked() {
     ui->TransferProgressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
 
+    // Pre-check the backup directory structure
+    QString errorMessage;
+    if (!FileOperations::createBackupInfrastructure(destinationModel->rootPath(), errorMessage)) {
+        QMessageBox::critical(this, UIConfig::BACKUP_ERROR_TITLE, errorMessage);
+        return; // If it fails, exit early
+    }
+
+    // Proceed with backup creation if the pre-check passed
     backupController->createBackup(destinationModel->rootPath(), pathsToBackup, ui->TransferProgressBar);
 }
 
