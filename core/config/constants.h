@@ -9,7 +9,7 @@ namespace AppConfig {
 constexpr auto WINDOW_TITLE = "MyDataBackupApp";
 inline const QString ABOUT_DIALOG_TITLE = "About";
 inline const QString ABOUT_DIALOG_MESSAGE = "%1\n%2\n\nMade by Shawn SSS";
-inline const QString APP_VERSION = "Version 0.1";
+inline const QString APP_VERSION = "Version 0.2";
 
 // Folder and File Names for Backup Infrastructure
 inline const QString BACKUP_SETTINGS_FOLDER = "_backup_settings";
