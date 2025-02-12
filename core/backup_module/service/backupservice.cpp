@@ -29,11 +29,10 @@ void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QSt
 
     for (const QFileInfo &subDir : subDirs) {
         QString subDirPath = subDir.absoluteFilePath();
-
         if (!uniqueFolders.contains(subDirPath)) {
             uniqueFolders.insert(subDirPath);
             foldersArray.append(subDirPath);
-            traverseDirectoryForFolders(subDirPath, uniqueFolders, foldersArray); // Recursive call
+            traverseDirectoryForFolders(subDirPath, uniqueFolders, foldersArray);
         }
     }
 }
@@ -65,9 +64,9 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
         QFileInfo fileInfo(item);
 
         if (fileInfo.isDir()) {
-            totalSize += FileOperations::calculateDirectorySize(item);  // Get directory size
+            totalSize += FileOperations::calculateDirectorySize(item);
         } else {
-            totalSize += fileInfo.size();  // Get file size
+            totalSize += fileInfo.size();
         }
     }
 
@@ -76,28 +75,22 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
 
 // Backup Metadata Management
 BackupStatus BackupService::scanForBackupStatus() const {
-    QString settingsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
-    QString logsFolderPath = QDir(settingsFolderPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
-    QString settingsFilePath = QDir(settingsFolderPath).filePath(AppConfig::SETTINGS_FILE_NAME);
+    QString backupSettingsPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
+    QString logsFolderPath = QDir(backupSettingsPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
+    QString settingsFilePath = QDir(backupSettingsPath).filePath(AppConfig::SETTINGS_FILE_NAME);
 
-    // If _backup_settings/ folder is missing
-    if (!QDir(settingsFolderPath).exists()) {
-        return BackupStatus::NoBackups; // Red light
-    }
-
-    // If either backup_logs/ or settings.json is missing
-    if (!QDir(logsFolderPath).exists() || !QFile::exists(settingsFilePath)) {
-        return BackupStatus::Incomplete; // Yellow light
-    }
-
-    // If backup_logs/ contains at least one backup log, return Valid (Green light)
+    QDir backupSettingsDir(backupSettingsPath);
     QDir logsDir(logsFolderPath);
-    if (!logsDir.entryList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files).isEmpty()) {
-        return BackupStatus::Valid;
+
+    if (!backupSettingsDir.exists()) {
+        return BackupStatus::None;
     }
 
-    // Otherwise, treat as NoBackups (empty logs folder)
-    return BackupStatus::NoBackups;
+    if (!logsDir.exists() || !QFile::exists(settingsFilePath)) {
+        return BackupStatus::Broken;
+    }
+
+    return BackupStatus::Valid;
 }
 
 QJsonObject BackupService::getLastBackupMetadata() const {

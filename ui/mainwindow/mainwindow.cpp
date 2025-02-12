@@ -317,14 +317,14 @@ void MainWindow::refreshBackupStatus() {
 
     switch (status) {
     case BackupStatus::Valid:
-        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_FOUND); // Green
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_FOUND);
         break;
-    case BackupStatus::Incomplete:
-        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_WARNING); // Yellow
+    case BackupStatus::Broken:
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_WARNING);
         break;
-    case BackupStatus::NoBackups:
+    case BackupStatus::None:
     default:
-        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_NOT_FOUND); // Red
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_NOT_FOUND);
         break;
     }
 
