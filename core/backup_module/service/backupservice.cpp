@@ -24,39 +24,38 @@ QString BackupService::getBackupRoot() const {
 
 // Backup Metadata Management
 bool BackupService::scanForBackupSummary() const {
-    for (const QFileInfo &dirInfo : QDir(backupRootPath).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
-        if (QFile::exists(QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME))) {
-            return true;
-        }
-    }
-    return false;
+    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QDir logsDir(logsFolderPath);
+
+    return logsDir.exists() && !logsDir.entryList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files).isEmpty();
 }
 
 QJsonObject BackupService::getLastBackupMetadata() const {
-    for (const QFileInfo &subDir : QDir(backupRootPath).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time)) {
-        QString summaryFilePath = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-        if (QFile::exists(summaryFilePath)) {
-            return FileOperations::readJsonFromFile(summaryFilePath);
-        }
+    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QDir logsDir(logsFolderPath);
+    logsDir.setSorting(QDir::Time);
+
+    QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files, QDir::Time);
+    if (!logFiles.isEmpty()) {
+        return FileOperations::readJsonFromFile(logFiles.first().absoluteFilePath());
     }
     return QJsonObject();
 }
 
+// Backup Summary Creation
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
 
-    QString summaryFilePath = QDir(backupFolderPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-    FileOperations::writeJsonToFile(summaryFilePath, summaryObject);
-
+    // Ensure logs folder exists
     QString logsFolderPath = QDir(QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER))
                                  .filePath(AppConfig::BACKUP_LOGS_FOLDER);
-
     QDir logDir(logsFolderPath);
     if (!logDir.exists()) {
         logDir.mkpath(logsFolderPath);
     }
 
-    QString logFileName = QFileInfo(backupFolderPath).fileName() + "_backup_log.json";
+    // Save metadata only to the logs folder
+    QString logFileName = QFileInfo(backupFolderPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
     FileOperations::writeJsonToFile(QDir(logsFolderPath).filePath(logFileName), summaryObject);
 }
 
@@ -99,23 +98,27 @@ QJsonObject BackupService::createBackupMetadata(const QString &backupFolderPath,
 
 // Backup Statistics
 int BackupService::getBackupCount() const {
-    int count = 0;
-    for (const QFileInfo &subDir : QDir(backupRootPath).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        if (QFile::exists(QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME))) {
-            ++count;
-        }
+    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QDir logsDir(logsFolderPath);
+
+    if (!logsDir.exists()) {
+        return 0;
     }
-    return count;
+
+    return logsDir.entryList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files).size();
 }
 
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
-    for (const QFileInfo &subDir : QDir(backupRootPath).entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        QString metadataFile = QDir(subDir.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-        if (QFile::exists(metadataFile)) {
-            totalSize += FileOperations::calculateDirectorySize(subDir.absoluteFilePath());
-        }
+    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QDir logsDir(logsFolderPath);
+    QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files);
+
+    for (const QFileInfo &logFile : logFiles) {
+        QJsonObject metadata = FileOperations::readJsonFromFile(logFile.absoluteFilePath());
+        totalSize += metadata.value(BackupMetadataKeys::SIZE_BYTES).toVariant().toULongLong();
     }
+
     return totalSize;
 }
 

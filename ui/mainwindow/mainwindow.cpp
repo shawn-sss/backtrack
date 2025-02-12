@@ -159,8 +159,15 @@ void MainWindow::onChangeBackupDestinationClicked() {
         return;
     }
 
-    destinationModel->setRootPath(selectedDir);
+    // Update backup root in service
     backupService->setBackupRoot(selectedDir);
+
+    // Reset and refresh the destination model
+    destinationModel->setRootPath(selectedDir);
+    ui->BackupDestinationView->setModel(destinationModel);
+    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
+
+    // Refresh UI & monitoring
     refreshBackupStatus();
     startWatchingBackupDirectory(selectedDir);
     updateFileWatcher();
@@ -187,7 +194,6 @@ void MainWindow::onCreateBackupClicked() {
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
 
-
 void MainWindow::onDeleteBackupClicked() {
     QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
@@ -196,7 +202,14 @@ void MainWindow::onDeleteBackupClicked() {
     }
 
     QString selectedPath = destinationModel->filePath(selectedIndex);
-    if (!QFile::exists(QDir(selectedPath).filePath(UserSettings::BACKUP_SUMMARY_FILENAME))) {
+
+    // Construct path to the corresponding backup log file
+    QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logFileName = QFileInfo(selectedPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
+    QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
+
+    // Check if backup log exists before allowing deletion
+    if (!QFile::exists(logFilePath)) {
         QMessageBox::warning(this, BackupInfo::INVALID_BACKUP_TITLE, BackupInfo::INVALID_BACKUP_MESSAGE);
         return;
     }
@@ -294,12 +307,11 @@ void MainWindow::refreshBackupStatus() {
     bool backupFound = backupService->scanForBackupSummary();
     updateBackupStatusLabel(backupFound);
     updateBackupLocationLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
-    updateBackupTotalCountLabel();  // Ensures the total count label updates correctly
-    updateBackupTotalSizeLabel();   // Ensures the total size label updates correctly
+    updateBackupTotalCountLabel();
+    updateBackupTotalSizeLabel();
     updateBackupLocationStatusLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
     updateLastBackupInfo();
 }
-
 
 // Update information about the last backup
 void MainWindow::updateLastBackupInfo() {
@@ -327,7 +339,6 @@ void MainWindow::updateLastBackupInfo() {
     ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + formattedDuration);
     ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + totalSize);
 }
-
 
 // Event Handlers
 void MainWindow::closeEvent(QCloseEvent *event) {

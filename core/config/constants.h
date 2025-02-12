@@ -15,6 +15,7 @@ inline const QString APP_VERSION = "Version 0.2";
 inline const QString BACKUP_SETTINGS_FOLDER = "_backup_settings";
 inline const QString SETTINGS_FILE_NAME = "settings.json";
 inline const QString BACKUP_LOGS_FOLDER = "backup_logs";
+inline const QString BACKUP_LOG_SUFFIX = "_backup_log.json";
 
 // Error Message Templates
 inline const QString ERROR_CREATE_DIR = "Failed to create '%1' directory.";

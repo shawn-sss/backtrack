@@ -29,10 +29,8 @@ void BackupController::createBackup(const QString &destinationPath,
 
     cleanupAfterTransfer();
 
-    QString timestamp = QDateTime::currentDateTime()
-                            .toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT)
-                                   .arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
+    QString timestamp = QDateTime::currentDateTime().toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
+    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT).arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
 
     QDir destDir(destinationPath);
     QString backupFolderPath = destDir.filePath(backupFolderName);
@@ -76,16 +74,24 @@ void BackupController::createBackup(const QString &destinationPath,
 }
 
 void BackupController::deleteBackup(const QString &backupPath) {
-    if (!QFile::exists(backupPath)) {
+    QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
+    QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
+
+    // Ensure log file exists before deleting
+    if (!QFile::exists(logFilePath)) {
         emit errorOccurred(BackupInfo::ERROR_INVALID_BACKUP_LOCATION);
         return;
     }
 
+    // Attempt to remove the backup log file first
+    if (!QFile::remove(logFilePath)) {
+        emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
+        return;
+    }
+
+    // Proceed with deleting the backup directory
     QDir backupDir(backupPath);
-    QString summaryFilePath = backupDir.filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-
-    QFile::remove(summaryFilePath);
-
     if (!backupDir.removeRecursively()) {
         emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
         return;

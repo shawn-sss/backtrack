@@ -48,12 +48,12 @@ private:
     // UI updates
     void updateBackupStatusLabel(bool backupFound);
     void updateBackupLocationLabel(const QString &location);
-    void updateBackupTotalCountLabel();  // Restored original function signature
-    void updateBackupTotalSizeLabel();   // Restored original function signature
+    void updateBackupTotalCountLabel();
+    void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString &location);
 
     // Signal connections
-    void connectBackupSignals();  // Added missing declaration
+    void connectBackupSignals();
 
 private slots:
     // UI event handlers
