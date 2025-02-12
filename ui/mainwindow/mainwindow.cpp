@@ -228,8 +228,14 @@ void MainWindow::onAboutButtonClicked() {
 // File and Directory Monitoring
 void MainWindow::startWatchingBackupDirectory(const QString &path) {
     fileWatcher->startWatching(path);
+
+    // Also watch _backup_settings for changes
+    QString settingsFolderPath = QDir(path).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
+    fileWatcher->addPath(settingsFolderPath);
+
     connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
 }
+
 
 void MainWindow::updateFileWatcher() {
     fileWatcher->startWatching(destinationModel->rootPath());
@@ -242,40 +248,43 @@ void MainWindow::onFileChanged(const QString &path) {
 
 void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
-    refreshBackupStatus();
+    refreshBackupStatus(); // Ensures UI updates when backup_logs/settings.json changes
 }
 
 // Status Updates
-void MainWindow::updateBackupStatusLabel(bool backupFound) {
-    QString color = backupFound
-                        ? UIConfig::BACKUP_STATUS_COLOR_FOUND
-                        : UIConfig::BACKUP_STATUS_COLOR_NOT_FOUND;
+void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
+    // Create a status light with the specified color
+    QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, UIConfig::STATUS_LIGHT_SIZE);
 
-    QPixmap pixmap = Utils::UI::createStatusLightPixmap(color, UIConfig::STATUS_LIGHT_SIZE);
-
+    // Convert the pixmap into a base64-encoded image string for HTML formatting
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
 
+    // Generate HTML to embed the status light icon
     QString pixmapHtml = QStringLiteral("<img src='data:image/png;base64,%1' style='%2'>")
                              .arg(QString::fromUtf8(ba.toBase64()),
                                   QString(UIConfig::ICON_STYLE_TEMPLATE)
                                       .arg(UIConfig::STATUS_LIGHT_SIZE));
 
+    // Combine status label and icon for display
     QString combinedHtml = QStringLiteral(
                                "<div style='display:flex; align-items:center;'>"
                                "<span>%1</span><span style='margin-left:4px;'>%2</span>"
                                "</div>")
                                .arg(UIConfig::LABEL_BACKUP_FOUND, pixmapHtml);
 
+    // Set the updated status label in the UI
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
-    ui->LastBackupNameLabel->setVisible(backupFound);
-    ui->LastBackupTimestampLabel->setVisible(backupFound);
-    ui->LastBackupDurationLabel->setVisible(backupFound);
-    ui->LastBackupSizeLabel->setVisible(backupFound);
+    // Control visibility of backup detail labels based on backup status
+    bool backupExists = (statusColor == UIConfig::BACKUP_STATUS_COLOR_FOUND);
+    ui->LastBackupNameLabel->setVisible(backupExists);
+    ui->LastBackupTimestampLabel->setVisible(backupExists);
+    ui->LastBackupDurationLabel->setVisible(backupExists);
+    ui->LastBackupSizeLabel->setVisible(backupExists);
 }
 
 void MainWindow::updateBackupLocationLabel(const QString &location) {
@@ -304,12 +313,25 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 
 // Refresh the backup status
 void MainWindow::refreshBackupStatus() {
-    bool backupFound = backupService->scanForBackupSummary();
-    updateBackupStatusLabel(backupFound);
-    updateBackupLocationLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
+    BackupStatus status = backupService->scanForBackupStatus();
+
+    switch (status) {
+    case BackupStatus::Valid:
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_FOUND); // Green
+        break;
+    case BackupStatus::Incomplete:
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_WARNING); // Yellow
+        break;
+    case BackupStatus::NoBackups:
+    default:
+        updateBackupStatusLabel(UIConfig::BACKUP_STATUS_COLOR_NOT_FOUND); // Red
+        break;
+    }
+
+    updateBackupLocationLabel(backupService->getBackupRoot());
     updateBackupTotalCountLabel();
     updateBackupTotalSizeLabel();
-    updateBackupLocationStatusLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
+    updateBackupLocationStatusLabel(backupService->getBackupRoot());
     updateLastBackupInfo();
 }
 

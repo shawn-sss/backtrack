@@ -104,6 +104,8 @@ inline const QString COLOR_INFO = "blue";
 // Backup Status Colors
 inline const QString BACKUP_STATUS_COLOR_FOUND = COLOR_GREEN;
 inline const QString BACKUP_STATUS_COLOR_NOT_FOUND = COLOR_RED;
+inline const QString BACKUP_STATUS_COLOR_WARNING = COLOR_YELLOW;
+
 
 // UI Labels
 inline const QString LABEL_BACKUP_FOUND = "Backup Found: ";

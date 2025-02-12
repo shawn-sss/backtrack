@@ -46,7 +46,7 @@ private:
     void updateFileWatcher();
 
     // UI updates
-    void updateBackupStatusLabel(bool backupFound);
+    void updateBackupStatusLabel(const QString &statusColor);
     void updateBackupLocationLabel(const QString &location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();

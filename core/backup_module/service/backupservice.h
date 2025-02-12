@@ -6,6 +6,13 @@
 #include <QSet>
 #include <QJsonArray>
 
+// Enum for Backup Status
+enum class BackupStatus {
+    NoBackups,   // Red light (No backups found or _backup_settings missing)
+    Incomplete,  // Yellow light (backup_logs/ or settings.json missing)
+    Valid        // Green light (Everything is fine)
+};
+
 // Backup Service Class
 class BackupService {
 public:
@@ -19,7 +26,7 @@ public:
     QString getBackupRoot() const;
 
     // Backup Metadata Management
-    bool scanForBackupSummary() const;
+    BackupStatus scanForBackupStatus() const; // Returns BackupStatus instead of bool
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
 
