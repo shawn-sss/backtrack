@@ -6,36 +6,37 @@
 #include <QSet>
 #include <QJsonArray>
 
-// Service class for handling backup operations
+// Backup Service Class
 class BackupService {
 public:
     // Constructor
     explicit BackupService(const QString &backupRoot);
 
-    // Backup Root Path Management
+    Q_DISABLE_COPY(BackupService)
+
+    // Backup Root Management
     void setBackupRoot(const QString &path);
     QString getBackupRoot() const;
 
-    // Backup Metadata Operations
+    // Backup Metadata Management
     bool scanForBackupSummary() const;
-    void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
     QJsonObject getLastBackupMetadata() const;
+    void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
 
-    // Backup Statistics Retrieval
+    // Backup Statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
 private:
-    // Helper Methods for Backup Metadata and File Traversal
+    // Metadata Generation
     QJsonObject createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const;
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
+
+    // File Traversal Methods
     void traverseDirectory(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
     void traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
 
-    // Backup Summary Checking
-    bool containsBackupSummary(const QString &dirPath) const;
-
-    // Member Variables
+    // Backup Root Path
     QString backupRootPath;
 };
 

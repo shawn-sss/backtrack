@@ -173,19 +173,20 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
+    QString backupRoot = destinationModel->rootPath();
+    QString errorMessage;
+
+    if (!FileOperations::createBackupInfrastructure(backupRoot, errorMessage)) {
+        QMessageBox::critical(this, UIConfig::BACKUP_ERROR_TITLE, errorMessage);
+        return;
+    }
+
     ui->TransferProgressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
 
-    // Pre-check the backup directory structure
-    QString errorMessage;
-    if (!FileOperations::createBackupInfrastructure(destinationModel->rootPath(), errorMessage)) {
-        QMessageBox::critical(this, UIConfig::BACKUP_ERROR_TITLE, errorMessage);
-        return; // If it fails, exit early
-    }
-
-    // Proceed with backup creation if the pre-check passed
-    backupController->createBackup(destinationModel->rootPath(), pathsToBackup, ui->TransferProgressBar);
+    backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
+
 
 void MainWindow::onDeleteBackupClicked() {
     QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
@@ -293,36 +294,40 @@ void MainWindow::refreshBackupStatus() {
     bool backupFound = backupService->scanForBackupSummary();
     updateBackupStatusLabel(backupFound);
     updateBackupLocationLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
-    updateBackupTotalCountLabel();
-    updateBackupTotalSizeLabel();
+    updateBackupTotalCountLabel();  // Ensures the total count label updates correctly
+    updateBackupTotalSizeLabel();   // Ensures the total size label updates correctly
     updateBackupLocationStatusLabel(UserSettings::DEFAULT_BACKUP_DESTINATION);
     updateLastBackupInfo();
 }
+
 
 // Update information about the last backup
 void MainWindow::updateLastBackupInfo() {
     QJsonObject metadata = backupService->getLastBackupMetadata();
     if (metadata.isEmpty()) {
-        ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME + UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
-        ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP + UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
-        ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
-        ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
+        QString notAvailable = UIConfig::DEFAULT_VALUE_NOT_AVAILABLE;
+        ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME + notAvailable);
+        ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP + notAvailable);
+        ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + notAvailable);
+        ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + notAvailable);
         return;
     }
 
-    ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME +
-                                     metadata.value("backup_name").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE));
+    QString backupName = metadata.value("backup_name").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
+    QString timestampStr = metadata.value("backup_timestamp").toString();
+    int durationMs = metadata.value("backup_duration").toInt(0);
+    QString totalSize = metadata.value("total_size_readable").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
 
-    QDateTime backupTimestamp = QDateTime::fromString(metadata.value("backup_timestamp").toString(), Qt::ISODate);
-    ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP +
-                                          Utils::Formatting::formatTimestamp(backupTimestamp, BackupInfo::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
+    QDateTime backupTimestamp = QDateTime::fromString(timestampStr, Qt::ISODate);
+    QString formattedTimestamp = Utils::Formatting::formatTimestamp(backupTimestamp, BackupInfo::BACKUP_TIMESTAMP_DISPLAY_FORMAT);
+    QString formattedDuration = Utils::Formatting::formatDuration(durationMs);
 
-    ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION +
-                                         Utils::Formatting::formatDuration(metadata.value("backup_duration").toInt(0)));
-
-    ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE +
-                                     metadata.value("total_size_readable").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE));
+    ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME + backupName);
+    ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP + formattedTimestamp);
+    ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + formattedDuration);
+    ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + totalSize);
 }
+
 
 // Event Handlers
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -334,4 +339,13 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         return;
     }
     QMainWindow::closeEvent(event);
+}
+
+// Backup Signal Connections
+void MainWindow::connectBackupSignals() {
+    connect(backupController, &BackupController::backupCreated, this, &MainWindow::refreshBackupStatus);
+    connect(backupController, &BackupController::backupDeleted, this, &MainWindow::refreshBackupStatus);
+    connect(backupController, &BackupController::errorOccurred, this, [this](const QString &error) {
+        QMessageBox::critical(this, UIConfig::BACKUP_ERROR_TITLE, error);
+    });
 }

@@ -5,23 +5,25 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QSet>
+#include <QDir>
 
+// File operations utilities
 namespace FileOperations {
 
-// Directory and File Management
+// Directory and file management
 bool copyDirectoryRecursively(const QString &source, const QString &destination);
-quint64 calculateDirectorySize(const QString &path);
+quint64 calculateDirectorySize(const QDir &dir);
 bool createDirectory(const QString &path);
 bool deleteDirectory(const QString &path);
 
-// JSON File Handling
+// JSON file handling
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject);
 QJsonObject readJsonFromFile(const QString &filePath);
 
-// File Collection and Traversal
+// File collection and traversal
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
 
-// Backup Infrastructure
+// Backup infrastructure setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage);
 
 } // namespace FileOperations

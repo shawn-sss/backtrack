@@ -4,12 +4,12 @@
 #include <QObject>
 #include <QStringList>
 
-// Forward declarations
+// Forward Declarations
 class QProgressBar;
 class QThread;
 class BackupService;
 
-// Controller class for managing backups
+// Backup Controller Class
 class BackupController : public QObject {
     Q_OBJECT
 
@@ -24,19 +24,19 @@ public:
     bool isBackupInProgress() const;
 
 signals:
-    // Signals for backup status updates
+    // Backup Status Signals
     void backupCreated();
     void backupDeleted();
     void errorOccurred(const QString &error);
 
 private:
-    // Utility methods for backup handling
+    // Internal Utility Methods
     void cleanupAfterTransfer();
     bool createBackupFolder(const QString &path);
 
-    // Member variables for backup management
+    // Backup Management Variables
     BackupService *backupService;
-    QThread *workerThread;
+    QThread *workerThread = nullptr;
 };
 
 #endif // BACKUPCONTROLLER_H

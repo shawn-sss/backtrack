@@ -4,7 +4,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-// Constructor
+// Constructor & Initialization
 FileWatcher::FileWatcher(QObject *parent)
     : QObject(parent), watcher(new QFileSystemWatcher(this)) {
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcher::directoryChanged);
@@ -13,21 +13,19 @@ FileWatcher::FileWatcher(QObject *parent)
 
 // Path Management
 void FileWatcher::addPath(const QString &path) {
-    if (!watcher->directories().contains(path) && !watcher->files().contains(path)) {
+    if (!(watcher->directories() + watcher->files()).contains(path)) {
         watcher->addPath(path);
     }
 }
 
 void FileWatcher::removePath(const QString &path) {
-    if (watcher->directories().contains(path) || watcher->files().contains(path)) {
+    if ((watcher->directories() + watcher->files()).contains(path)) {
         watcher->removePath(path);
     }
 }
 
 void FileWatcher::addPaths(const QStringList &paths) {
-    for (const QString &path : paths) {
-        addPath(path);
-    }
+    watcher->addPaths(paths);
 }
 
 void FileWatcher::removeAllPaths() {
@@ -57,9 +55,9 @@ void FileWatcher::startWatching(const QString &rootPath) {
     QFileInfoList subDirectories = rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
     for (const QFileInfo &dirInfo : subDirectories) {
-        QString summaryFilePath = QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME);
-        if (QFile::exists(summaryFilePath)) {
-            addPath(summaryFilePath);
+        QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME));
+        if (summaryFile.exists()) {
+            addPath(summaryFile.absoluteFilePath());
         }
     }
 }

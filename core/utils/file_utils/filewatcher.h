@@ -6,7 +6,7 @@
 #include <QStringList>
 #include <QFileSystemWatcher>
 
-// Class for monitoring file and directory changes
+// File and directory monitoring utility
 class FileWatcher : public QObject {
     Q_OBJECT
 
@@ -15,24 +15,25 @@ public:
     explicit FileWatcher(QObject *parent = nullptr);
     ~FileWatcher() override = default;
 
-    // Managing Watched Paths
+    // Path management
     void addPath(const QString &path);
     void addPaths(const QStringList &paths);
     void removePath(const QString &path);
     void removeAllPaths();
+
+    // Retrieval methods
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 
-    // Start Monitoring
+    // Monitoring functionality
     void startWatching(const QString &rootPath);
 
 signals:
-    // Signals for File/Directory Changes
+    // Change detection signals
     void directoryChanged(const QString &path);
     void fileChanged(const QString &path);
 
 private:
-    // File System Watcher
     QFileSystemWatcher *watcher;
 };
 

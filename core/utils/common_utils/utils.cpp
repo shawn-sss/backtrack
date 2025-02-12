@@ -11,11 +11,11 @@
 #include <QBrush>
 #include <QColor>
 #include <QBuffer>
-#include <utility>
+#include <QSet>
 
 namespace Utils {
 
-// Formatting Functions for sizes, durations, and timestamps
+// Formatting Functions
 namespace Formatting {
 
 QString formatSize(qint64 size) {
@@ -59,7 +59,7 @@ QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
 
 } // namespace Formatting
 
-// UI Functions for tree views, progress bars, and status lights
+// UI Functions
 namespace UI {
 
 void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount) {
@@ -68,7 +68,9 @@ void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int colu
     QAbstractItemModel *model = treeView->model();
     if (model) {
         for (int i = startColumn; i < columnCount; ++i) {
-            treeView->setColumnHidden(i, true);
+            if (!treeView->isColumnHidden(i)) {
+                treeView->setColumnHidden(i, true);
+            }
         }
     }
 }
@@ -77,7 +79,9 @@ void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int
     if (!progressBar) return;
 
     progressBar->setRange(minValue, maxValue);
-    progressBar->setValue(ProgressConfig::DEFAULT_VISIBILITY ? minValue : 0);
+    if (ProgressConfig::DEFAULT_VISIBILITY) {
+        progressBar->setValue(minValue);
+    }
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
@@ -91,23 +95,25 @@ QPixmap createStatusLightPixmap(const QString &color, int size) {
     painter.setBrush(QBrush(QColor(color)));
     painter.setPen(Qt::NoPen);
     painter.drawEllipse(0, 0, size, size);
-    painter.end();
 
     return pixmap;
 }
 
 } // namespace UI
 
-// Backup Functions for managing staged paths
+// Backup Functions
 namespace Backup {
 
 void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel) return;
 
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
+    QSet<QString> uniquePaths;
+
     for (const QModelIndex &index : std::as_const(selectedIndexes)) {
         QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
-        if (!filePath.isEmpty()) {
+        if (!filePath.isEmpty() && !uniquePaths.contains(filePath)) {
+            uniquePaths.insert(filePath);
             stagingModel->addPath(filePath);
         }
     }
@@ -117,16 +123,16 @@ void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingMo
     if (!treeView || !stagingModel) return;
 
     QModelIndexList selectedIndexes = treeView->selectionModel()->selectedIndexes();
-    QStringList filePathsToRemove;
+    QSet<QString> uniquePathsToRemove;
 
     for (const QModelIndex &index : std::as_const(selectedIndexes)) {
         QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
-        if (!filePath.isEmpty()) {
-            filePathsToRemove.append(filePath);
+        if (!filePath.isEmpty() && !uniquePathsToRemove.contains(filePath)) {
+            uniquePathsToRemove.insert(filePath);
         }
     }
 
-    for (const QString &filePath : filePathsToRemove) {
+    for (const QString &filePath : uniquePathsToRemove) {
         stagingModel->removePath(filePath);
     }
 }

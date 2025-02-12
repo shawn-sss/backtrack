@@ -3,8 +3,10 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QFileInfo>
+#include <QDir>
 
-// Worker class for handling file transfers
+// Handles file transfer operations
 class TransferWorker : public QObject {
     Q_OBJECT
 
@@ -12,26 +14,28 @@ public:
     // Constructor
     explicit TransferWorker(const QStringList &files, const QString &destination, QObject *parent = nullptr);
 
+    Q_DISABLE_COPY(TransferWorker)
+
 public slots:
-    // Starts the file transfer process
     void startTransfer();
+    void stopTransfer();
 
 signals:
-    // Signals for progress and status updates
     void progressUpdated(int progress);
     void transferComplete();
     void errorOccurred(const QString &error);
+    void finished();
 
 private:
-    // Processes drive root before transfer
+    // File processing
     bool processDriveRoot(const QString &driveRoot);
-
-    // Processes individual file or folder transfer
     bool processFileOrFolder(const QString &filePath);
+    bool copyItem(const QFileInfo &fileInfo, const QString &destinationPath);
 
-    // File transfer data
-    QStringList files;
-    QString destination;
+    // Transfer management
+    const QStringList files;
+    const QString destination;
+    bool stopRequested = false;
 };
 
 #endif // TRANSFERWORKER_H

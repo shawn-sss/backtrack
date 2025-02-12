@@ -10,10 +10,9 @@ StagingModel::StagingModel(QObject *parent)
 
 // QModelIndex Management
 QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) const {
-    if (parent.isValid() || row < 0 || row >= stagedPaths.size() || column != 0) {
-        return QModelIndex();
-    }
-    return createIndex(row, column);
+    return (!parent.isValid() && row >= 0 && row < stagedPaths.size() && column == 0)
+    ? createIndex(row, column)
+    : QModelIndex();
 }
 
 QModelIndex StagingModel::parent(const QModelIndex &child) const {
@@ -54,21 +53,18 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
 
 // Header Management
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
-        return UIConfig::STAGING_COLUMN_NAME;
-    }
-    return QVariant();
+    return (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0)
+    ? UIConfig::STAGING_COLUMN_NAME
+    : QVariant();
 }
 
 // Path Management
 void StagingModel::addPath(const QString &path) {
-    if (path.isEmpty() || stagedPaths.contains(path)) {
-        return;
+    if (!path.isEmpty() && !stagedPaths.contains(path)) {
+        beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
+        stagedPaths.append(path);
+        endInsertRows();
     }
-
-    beginInsertRows(QModelIndex(), stagedPaths.size(), stagedPaths.size());
-    stagedPaths.append(path);
-    endInsertRows();
 }
 
 void StagingModel::removePath(const QString &path) {

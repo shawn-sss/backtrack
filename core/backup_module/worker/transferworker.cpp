@@ -7,20 +7,31 @@
 #include <QDir>
 #include <QStorageInfo>
 
-// Constructor
-TransferWorker::TransferWorker(const QStringList &files,
-                               const QString &destination,
-                               QObject *parent)
+// Constructor & Initialization
+TransferWorker::TransferWorker(const QStringList &files, const QString &destination, QObject *parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// Start the file transfer process
+// Transfer Control
+void TransferWorker::stopTransfer() {
+    stopRequested = true;
+}
+
 void TransferWorker::startTransfer() {
     int totalFiles = files.size();
+    if (totalFiles == 0) {
+        emit transferComplete();
+        emit finished();
+        return;
+    }
+
     int completedFiles = 0;
-
     for (const QString &filePath : files) {
-        QFileInfo fileInfo(filePath);
+        if (stopRequested) {
+            emit errorOccurred("Transfer stopped by user.");
+            return;
+        }
 
+        QFileInfo fileInfo(filePath);
         bool success = fileInfo.isDir() && filePath.endsWith(":/")
                            ? processDriveRoot(filePath)
                            : processFileOrFolder(filePath);
@@ -30,15 +41,17 @@ void TransferWorker::startTransfer() {
         }
 
         completedFiles++;
-        int progress = static_cast<int>((static_cast<double>(completedFiles) / totalFiles) * 100);
-        emit progressUpdated(progress);
+        emit progressUpdated((completedFiles * 100) / totalFiles);
     }
 
     emit transferComplete();
+    emit finished();
 }
 
-// Handle drive root transfers (e.g., D:/)
+// File Processing
 bool TransferWorker::processDriveRoot(const QString &driveRoot) {
+    if (stopRequested) return false;
+
     QFileInfo fileInfo(driveRoot);
     if (!fileInfo.exists() || !fileInfo.isDir()) {
         emit errorOccurred(QString(UIConfig::ERROR_INVALID_SELECTION).arg(driveRoot));
@@ -47,14 +60,10 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     QString driveLetter = driveRoot.left(1);
     QStorageInfo storageInfo(driveRoot);
-    QString driveLabel = storageInfo.displayName().isEmpty()
-                             ? BackupInfo::DEFAULT_DRIVE_LABEL
-                             : storageInfo.displayName();
-
+    QString driveLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
     QString driveName = QString("%1 (%2)").arg(driveLabel, driveLetter);
     QString driveBackupFolder = QDir(destination).filePath(driveName);
 
-    // Ensure a clean backup folder
     QDir dir(driveBackupFolder);
     if (dir.exists()) {
         dir.removeRecursively();
@@ -65,19 +74,14 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
         return false;
     }
 
-    // Copy drive contents
     QDir driveDir(driveRoot);
     QFileInfoList entries = driveDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
 
+    if (stopRequested) return false;
+
     for (const QFileInfo &entry : entries) {
-        QString destPath = QDir(driveBackupFolder).filePath(entry.fileName());
-
-        bool success = entry.isDir()
-                           ? FileOperations::copyDirectoryRecursively(entry.absoluteFilePath(), destPath)
-                           : QFile::copy(entry.absoluteFilePath(), destPath);
-
-        if (!success) {
-            emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(entry.absoluteFilePath()));
+        QString destPath = driveBackupFolder + QDir::separator() + entry.fileName();
+        if (!copyItem(entry, destPath)) {
             return false;
         }
     }
@@ -85,17 +89,33 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     return true;
 }
 
-// Handle file or folder transfers
 bool TransferWorker::processFileOrFolder(const QString &filePath) {
+    if (stopRequested) return false;
+
     QFileInfo fileInfo(filePath);
     QString destinationPath = QDir(destination).filePath(fileInfo.fileName());
 
+    return copyItem(fileInfo, destinationPath);
+}
+
+// Helper Methods
+bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
+    if (!fileInfo.isReadable()) {
+        emit errorOccurred(QString("File is locked or cannot be accessed: %1").arg(fileInfo.absoluteFilePath()));
+        return false;
+    }
+
+    if (QFile::exists(destinationPath) && !QFile::remove(destinationPath)) {
+        emit errorOccurred(QString("Unable to overwrite existing file: %1").arg(destinationPath));
+        return false;
+    }
+
     bool success = fileInfo.isDir()
-                       ? FileOperations::copyDirectoryRecursively(filePath, destinationPath)
-                       : QFile::copy(filePath, destinationPath);
+                       ? FileOperations::copyDirectoryRecursively(fileInfo.absoluteFilePath(), destinationPath)
+                       : QFile::copy(fileInfo.absoluteFilePath(), destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(filePath));
+        emit errorOccurred(QString("Unable to transfer: %1").arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
