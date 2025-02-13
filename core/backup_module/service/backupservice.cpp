@@ -22,7 +22,7 @@ QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-//Helper
+// Helper
 void BackupService::traverseDirectoryForFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const {
     QDir dir(dirPath);
     QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
@@ -94,11 +94,15 @@ BackupStatus BackupService::scanForBackupStatus() const {
 }
 
 QJsonObject BackupService::getLastBackupMetadata() const {
-    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logsFolderPath = QDir(backupRootPath).filePath(
+        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+
     QDir logsDir(logsFolderPath);
     logsDir.setSorting(QDir::Time);
 
-    QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files, QDir::Time);
+    QFileInfoList logFiles = logsDir.entryInfoList(
+        QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files, QDir::Time);
+
     if (!logFiles.isEmpty()) {
         return FileOperations::readJsonFromFile(logFiles.first().absoluteFilePath());
     }
@@ -124,7 +128,9 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
 
 // Backup Statistics
 int BackupService::getBackupCount() const {
-    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logsFolderPath = QDir(backupRootPath).filePath(
+        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+
     QDir logsDir(logsFolderPath);
 
     if (!logsDir.exists()) {
@@ -136,7 +142,9 @@ int BackupService::getBackupCount() const {
 
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
-    QString logsFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logsFolderPath = QDir(backupRootPath).filePath(
+        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+
     QDir logsDir(logsFolderPath);
     QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files);
 

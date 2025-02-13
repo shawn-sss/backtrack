@@ -45,7 +45,9 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
     case Qt::DisplayRole: {
         if (fileInfo.isRoot()) {
             QStorageInfo storageInfo(path);
-            QString volumeLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
+            QString volumeLabel = storageInfo.displayName().isEmpty()
+                                      ? BackupInfo::DEFAULT_DRIVE_LABEL
+                                      : storageInfo.displayName();
             return QString("%1 (%2)").arg(volumeLabel, path.left(2));
         }
         return fileInfo.fileName().isEmpty() ? path : fileInfo.fileName();

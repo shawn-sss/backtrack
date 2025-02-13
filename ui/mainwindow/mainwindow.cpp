@@ -36,8 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Configure progress bar
     Utils::UI::setupProgressBar(ui->TransferProgressBar,
-                                UIConfig::PROGRESS_BAR_MIN_VALUE,
-                                UIConfig::PROGRESS_BAR_MAX_VALUE,
+                                ProgressConfig::MIN_VALUE,
+                                ProgressConfig::MAX_VALUE,
                                 UIConfig::PROGRESS_BAR_HEIGHT,
                                 UIConfig::PROGRESS_BAR_TEXT_VISIBLE);
     ui->TransferProgressBar->setVisible(false);
@@ -48,19 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     // Connect backup signals
-    connect(backupController, &BackupController::backupCreated, this, [this]() {
-        QMessageBox::information(this, BackupInfo::SUCCESS_BACKUP_CREATED, BackupInfo::BACKUP_COMPLETE_MESSAGE);
-        refreshBackupStatus();
-    });
-
-    connect(backupController, &BackupController::backupDeleted, this, [this]() {
-        QMessageBox::information(this, BackupInfo::SUCCESS_BACKUP_DELETED, BackupInfo::BACKUP_DELETE_SUCCESS);
-        refreshBackupStatus();
-    });
-
-    connect(backupController, &BackupController::errorOccurred, this, [this](const QString &error) {
-        QMessageBox::critical(this, UIConfig::BACKUP_ERROR_TITLE, error);
-    });
+    connectBackupSignals();
 
     // Setup UI components
     setupDestinationView();
@@ -188,7 +176,7 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
-    ui->TransferProgressBar->setValue(UIConfig::PROGRESS_BAR_MIN_VALUE);
+    ui->TransferProgressBar->setValue(ProgressConfig::MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
 
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
@@ -263,17 +251,15 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     pixmap.save(&buffer, "PNG");
 
     // Generate HTML to embed the status light icon
-    QString pixmapHtml = QStringLiteral("<img src='data:image/png;base64,%1' style='%2'>")
+    QString pixmapHtml = QString(UIConfig::STATUS_LIGHT_ICON_TEMPLATE)
                              .arg(QString::fromUtf8(ba.toBase64()),
                                   QString(UIConfig::ICON_STYLE_TEMPLATE)
                                       .arg(UIConfig::STATUS_LIGHT_SIZE));
 
     // Combine status label and icon for display
-    QString combinedHtml = QStringLiteral(
-                               "<div style='display:flex; align-items:center;'>"
-                               "<span>%1</span><span style='margin-left:4px;'>%2</span>"
-                               "</div>")
+    QString combinedHtml = QString(UIConfig::STATUS_LABEL_HTML_TEMPLATE)
                                .arg(UIConfig::LABEL_BACKUP_FOUND, pixmapHtml);
+
 
     // Set the updated status label in the UI
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
@@ -347,10 +333,10 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    QString backupName = metadata.value("backup_name").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
-    QString timestampStr = metadata.value("backup_timestamp").toString();
-    int durationMs = metadata.value("backup_duration").toInt(0);
-    QString totalSize = metadata.value("total_size_readable").toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
+    QString backupName = metadata.value(BackupMetadataKeys::NAME).toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
+    QString timestampStr = metadata.value(BackupMetadataKeys::TIMESTAMP).toString();
+    int durationMs = metadata.value(BackupMetadataKeys::DURATION).toInt(0);
+    QString totalSize = metadata.value(BackupMetadataKeys::SIZE_READABLE).toString(UIConfig::DEFAULT_VALUE_NOT_AVAILABLE);
 
     QDateTime backupTimestamp = QDateTime::fromString(timestampStr, Qt::ISODate);
     QString formattedTimestamp = Utils::Formatting::formatTimestamp(backupTimestamp, BackupInfo::BACKUP_TIMESTAMP_DISPLAY_FORMAT);

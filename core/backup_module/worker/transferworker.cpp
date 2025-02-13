@@ -27,7 +27,7 @@ void TransferWorker::startTransfer() {
     int completedFiles = 0;
     for (const QString &filePath : files) {
         if (stopRequested) {
-            emit errorOccurred("Transfer stopped by user.");
+            emit errorOccurred(UIConfig::MESSAGE_OPERATION_WARNING);
             return;
         }
 
@@ -60,10 +60,9 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     QString driveLetter = driveRoot.left(1);
     QStorageInfo storageInfo(driveRoot);
-    QString driveLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
+    QString driveLabel = storageInfo.displayName().isEmpty() ? BackupInfo::DEFAULT_DRIVE_LABEL : storageInfo.displayName();
 
-    QString driveName = QString("%1 (%2 Drive)").arg(driveLabel, driveLetter);
-
+    QString driveName = QString("%1 (%2 %3)").arg(driveLabel, driveLetter, BackupInfo::DRIVE_LABEL_SUFFIX);
     QString driveBackupFolder = QDir(destination).filePath(driveName);
 
     QDir dir(driveBackupFolder);
@@ -103,12 +102,12 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
 // Helper Methods
 bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
     if (!fileInfo.isReadable()) {
-        emit errorOccurred(QString("File is locked or cannot be accessed: %1").arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(UIConfig::ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
     if (QFile::exists(destinationPath) && !QFile::remove(destinationPath)) {
-        emit errorOccurred(QString("Unable to overwrite existing file: %1").arg(destinationPath));
+        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(destinationPath));
         return false;
     }
 
@@ -117,7 +116,7 @@ bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinat
                        : QFile::copy(fileInfo.absoluteFilePath(), destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString("Unable to transfer: %1").arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 

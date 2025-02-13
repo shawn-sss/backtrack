@@ -16,7 +16,7 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
     if (!sourceDir.exists()) return false;
 
     QDir destinationDir(destination);
-    if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false;
+    if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false; // Fixed mkpath
 
     QFileInfoList entries = sourceDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
     for (const QFileInfo &entry : entries) {
@@ -39,7 +39,7 @@ bool deleteDirectory(const QString &path) {
 
 bool createDirectory(const QString &path) {
     QDir dir(path);
-    return dir.exists() || dir.mkpath(".");
+    return dir.exists() || dir.mkpath("."); // Fixed mkpath
 }
 
 // File size calculation
@@ -97,7 +97,7 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
     QString backupSettingsPath = QDir(backupDir).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
 
     QDir settingsDir(backupSettingsPath);
-    if (!settingsDir.exists() && !settingsDir.mkpath(".")) {
+    if (!settingsDir.exists() && !settingsDir.mkpath(".")) { // Fixed mkpath
         errorMessage = QString(AppConfig::ERROR_CREATE_DIR).arg(AppConfig::BACKUP_SETTINGS_FOLDER);
         return false;
     }
@@ -114,7 +114,7 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
 
     QString backupLogsPath = settingsDir.filePath(AppConfig::BACKUP_LOGS_FOLDER);
     QDir logsDir(backupLogsPath);
-    if (!logsDir.exists() && !logsDir.mkpath(".")) {
+    if (!logsDir.exists() && !logsDir.mkpath(".")) { // Fixed mkpath
         errorMessage = QString(AppConfig::ERROR_CREATE_FOLDER).arg(AppConfig::BACKUP_LOGS_FOLDER);
         return false;
     }

@@ -30,7 +30,8 @@ void BackupController::createBackup(const QString &destinationPath,
     cleanupAfterTransfer();
 
     QString timestamp = QDateTime::currentDateTime().toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT).arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
+    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT)
+                                   .arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
 
     QDir destDir(destinationPath);
     QString backupFolderPath = destDir.filePath(backupFolderName);
@@ -74,7 +75,8 @@ void BackupController::createBackup(const QString &destinationPath,
 }
 
 void BackupController::deleteBackup(const QString &backupPath) {
-    QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
+    QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(
+        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
     QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
     QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
 

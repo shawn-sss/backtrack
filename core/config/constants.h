@@ -43,6 +43,7 @@ constexpr auto BACKUP_STATUS_ICON_NOT_FOUND = ":/resources/backup_not_found_icon
 inline const QString DEFAULT_ROOT_PATH = "";
 inline const QString DEFAULT_DRIVE_LABEL = "Local Disk";
 inline const QString DEFAULT_FILE_DIALOG_ROOT = QDir::rootPath();
+inline const QString DRIVE_LABEL_SUFFIX = "Drive";
 
 // File System Settings
 inline const QDir::Filters FILE_SYSTEM_FILTER = QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files;
@@ -121,6 +122,25 @@ inline const QString LABEL_LAST_BACKUP_SIZE = "Last Backup Size: ";
 inline const QString LABEL_BACKUP_PROGRESS = "Backup Progress: ";
 inline const QString LABEL_TRANSFER_PROGRESS_COMPLETE = "Transfer Complete";
 inline const QString STAGING_COLUMN_NAME = "Name";
+
+// HTML template for embedding status light icon
+inline const QString STATUS_LIGHT_ICON_TEMPLATE =
+    "<img src='data:image/png;base64,%1' style='%2'>";
+
+// HTML template for combining the status label and the icon
+inline const QString STATUS_LABEL_HTML_TEMPLATE =
+    "<div style='display:flex; align-items:center;'>"
+    "<span>%1</span><span style='margin-left:4px;'>%2</span>"
+    "</div>";
+
+
+inline const QString SIZE_UNIT_MILLISECONDS = " milliseconds";
+inline const QString SIZE_UNIT_SECONDS = " seconds";
+inline const QString SIZE_UNIT_MINUTES = " minutes";
+inline const QString SIZE_UNIT_HOURS = " hours";
+inline const QString SIZE_UNIT_DAYS = " days";
+
+
 
 // UI Messages
 inline const QString MESSAGE_BACKUP_IN_PROGRESS = "A backup operation is currently in progress.";
