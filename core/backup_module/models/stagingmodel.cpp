@@ -3,6 +3,8 @@
 
 #include <QFileIconProvider>
 #include <QFileInfo>
+#include <QStorageInfo>
+#include <QDir>
 
 // Constructor
 StagingModel::StagingModel(QObject *parent)
@@ -40,8 +42,14 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
     QFileInfo fileInfo(path);
 
     switch (role) {
-    case Qt::DisplayRole:
+    case Qt::DisplayRole: {
+        if (fileInfo.isRoot()) {
+            QStorageInfo storageInfo(path);
+            QString volumeLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
+            return QString("%1 (%2)").arg(volumeLabel, path.left(2));
+        }
         return fileInfo.fileName().isEmpty() ? path : fileInfo.fileName();
+    }
     case Qt::ToolTipRole:
         return path;
     case Qt::DecorationRole:

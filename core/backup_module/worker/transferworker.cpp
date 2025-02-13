@@ -61,7 +61,9 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     QString driveLetter = driveRoot.left(1);
     QStorageInfo storageInfo(driveRoot);
     QString driveLabel = storageInfo.displayName().isEmpty() ? "Local Disk" : storageInfo.displayName();
-    QString driveName = QString("%1 (%2)").arg(driveLabel, driveLetter);
+
+    QString driveName = QString("%1 (%2 Drive)").arg(driveLabel, driveLetter);
+
     QString driveBackupFolder = QDir(destination).filePath(driveName);
 
     QDir dir(driveBackupFolder);
