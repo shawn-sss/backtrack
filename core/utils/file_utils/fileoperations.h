@@ -26,6 +26,9 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
 // Backup infrastructure setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage);
 
+void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
+void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray);
+
 } // namespace FileOperations
 
 #endif // FILEOPERATIONS_H

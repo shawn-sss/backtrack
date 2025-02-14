@@ -16,9 +16,9 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
     if (!sourceDir.exists()) return false;
 
     QDir destinationDir(destination);
-    if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false; // Fixed mkpath
+    if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false;
 
-    QFileInfoList entries = sourceDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
+    QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
     for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
 
@@ -39,13 +39,13 @@ bool deleteDirectory(const QString &path) {
 
 bool createDirectory(const QString &path) {
     QDir dir(path);
-    return dir.exists() || dir.mkpath("."); // Fixed mkpath
+    return dir.exists() || dir.mkpath(".");
 }
 
 // File size calculation
 quint64 calculateDirectorySize(const QDir &dir) {
     quint64 totalSize = 0;
-    QFileInfoList entries = dir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
+    QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
     for (const QFileInfo &entry : entries) {
         totalSize += entry.isDir() ? calculateDirectorySize(QDir(entry.absoluteFilePath())) : entry.size();
@@ -73,7 +73,7 @@ QJsonObject readJsonFromFile(const QString &filePath) {
     return doc.isObject() ? doc.object() : QJsonObject();
 }
 
-// File collection operations
+// Recursive Traversal Methods
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {
     QDir dir(dirPath);
     QFileInfoList fileEntries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
@@ -92,12 +92,26 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     }
 }
 
+void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) {
+    QDir dir(dirPath);
+    QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    for (const QFileInfo &subDir : subDirs) {
+        QString subDirPath = subDir.absoluteFilePath();
+        if (!uniqueFolders.contains(subDirPath)) {
+            uniqueFolders.insert(subDirPath);
+            foldersArray.append(subDirPath);
+            collectDirectoriesRecursively(subDirPath, uniqueFolders, foldersArray);
+        }
+    }
+}
+
 // Backup infrastructure setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
     QString backupSettingsPath = QDir(backupDir).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
 
     QDir settingsDir(backupSettingsPath);
-    if (!settingsDir.exists() && !settingsDir.mkpath(".")) { // Fixed mkpath
+    if (!settingsDir.exists() && !settingsDir.mkpath(".")) {
         errorMessage = QString(AppConfig::ERROR_CREATE_DIR).arg(AppConfig::BACKUP_SETTINGS_FOLDER);
         return false;
     }
@@ -114,7 +128,7 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
 
     QString backupLogsPath = settingsDir.filePath(AppConfig::BACKUP_LOGS_FOLDER);
     QDir logsDir(backupLogsPath);
-    if (!logsDir.exists() && !logsDir.mkpath(".")) { // Fixed mkpath
+    if (!logsDir.exists() && !logsDir.mkpath(".")) {
         errorMessage = QString(AppConfig::ERROR_CREATE_FOLDER).arg(AppConfig::BACKUP_LOGS_FOLDER);
         return false;
     }
