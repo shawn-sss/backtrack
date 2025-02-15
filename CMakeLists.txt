@@ -29,12 +29,23 @@ endif()
 set(APP_SOURCES
     app/main.cpp
     app/app_manifest.rc
-    core/config/constants.h
+
 )
 
 # Project resources
 set(PROJECT_RESOURCES
     resources/resource.qrc
+)
+
+# Project settings
+set(PROJECT_SETTINGS
+    core/config/constants.h
+    core/config/app_config.h
+    core/config/backup_info.h
+    core/config/error_messages.h
+    core/config/progress_config.h
+    core/config/user_settings.h
+    core/config/visual_config.h
 )
 
 # UI sources
@@ -82,6 +93,7 @@ set(UTILS_SOURCES
 set(PROJECT_SOURCES
     ${APP_SOURCES}
     ${PROJECT_RESOURCES}
+    ${PROJECT_SETTINGS}
     ${UI_SOURCES}
     ${BACKUP_CONTROLLER_SOURCES}
     ${BACKUP_SERVICE_SOURCES}
