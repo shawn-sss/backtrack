@@ -76,11 +76,12 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     }
 
     QDir driveDir(driveRoot);
-    QFileInfoList entries = driveDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
+    const QFileInfoList entries = driveDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
 
     if (stopRequested) return false;
 
-    for (const QFileInfo &entry : entries) {
+    for (int i = 0; i < entries.size(); ++i) {
+        const QFileInfo &entry = entries.at(i);
         QString destPath = driveBackupFolder + QDir::separator() + entry.fileName();
         if (!copyItem(entry, destPath)) {
             return false;

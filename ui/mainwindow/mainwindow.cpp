@@ -147,15 +147,12 @@ void MainWindow::onChangeBackupDestinationClicked() {
         return;
     }
 
-    // Update backup root in service
     backupService->setBackupRoot(selectedDir);
 
-    // Reset and refresh the destination model
     destinationModel->setRootPath(selectedDir);
     ui->BackupDestinationView->setModel(destinationModel);
     ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
 
-    // Refresh UI & monitoring
     refreshBackupStatus();
     startWatchingBackupDirectory(selectedDir);
     updateFileWatcher();
@@ -191,12 +188,10 @@ void MainWindow::onDeleteBackupClicked() {
 
     QString selectedPath = destinationModel->filePath(selectedIndex);
 
-    // Construct path to the corresponding backup log file
     QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(AppConfig::BACKUP_SETTINGS_FOLDER + "/" + AppConfig::BACKUP_LOGS_FOLDER);
     QString logFileName = QFileInfo(selectedPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
     QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
 
-    // Check if backup log exists before allowing deletion
     if (!QFile::exists(logFilePath)) {
         QMessageBox::warning(this, BackupInfo::INVALID_BACKUP_TITLE, BackupInfo::INVALID_BACKUP_MESSAGE);
         return;
@@ -217,7 +212,6 @@ void MainWindow::onAboutButtonClicked() {
 void MainWindow::startWatchingBackupDirectory(const QString &path) {
     fileWatcher->startWatching(path);
 
-    // Also watch _backup_settings for changes
     QString settingsFolderPath = QDir(path).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
     fileWatcher->addPath(settingsFolderPath);
 
@@ -236,36 +230,31 @@ void MainWindow::onFileChanged(const QString &path) {
 
 void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
-    refreshBackupStatus(); // Ensures UI updates when backup_logs/settings.json changes
+    refreshBackupStatus();
 }
 
 // Status Updates
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
-    // Create a status light with the specified color
+
     QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, UIConfig::STATUS_LIGHT_SIZE);
 
-    // Convert the pixmap into a base64-encoded image string for HTML formatting
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
 
-    // Generate HTML to embed the status light icon
     QString pixmapHtml = QString(UIConfig::STATUS_LIGHT_ICON_TEMPLATE)
                              .arg(QString::fromUtf8(ba.toBase64()),
                                   QString(UIConfig::ICON_STYLE_TEMPLATE)
                                       .arg(UIConfig::STATUS_LIGHT_SIZE));
 
-    // Combine status label and icon for display
     QString combinedHtml = QString(UIConfig::STATUS_LABEL_HTML_TEMPLATE)
                                .arg(UIConfig::LABEL_BACKUP_FOUND, pixmapHtml);
 
 
-    // Set the updated status label in the UI
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
-    // Control visibility of backup detail labels based on backup status
     bool backupExists = (statusColor == UIConfig::BACKUP_STATUS_COLOR_FOUND);
     ui->LastBackupNameLabel->setVisible(backupExists);
     ui->LastBackupTimestampLabel->setVisible(backupExists);

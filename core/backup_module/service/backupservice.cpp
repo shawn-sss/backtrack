@@ -22,7 +22,7 @@ QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-// Updated Traversal Functions (Delegating to FileOperations)
+// Traversal Calls
 void BackupService::collectBackupFiles(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const {
     FileOperations::collectFilesRecursively(dirPath, uniqueFiles, filesArray);
 }
@@ -87,7 +87,6 @@ QJsonObject BackupService::getLastBackupMetadata() const {
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
 
-    // Ensure logs folder exists
     QString logsFolderPath = QDir(QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER))
                                  .filePath(AppConfig::BACKUP_LOGS_FOLDER);
     QDir logDir(logsFolderPath);
@@ -95,7 +94,6 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
         logDir.mkpath(logsFolderPath);
     }
 
-    // Save metadata only to the logs folder
     QString logFileName = QFileInfo(backupFolderPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
     FileOperations::writeJsonToFile(QDir(logsFolderPath).filePath(logFileName), summaryObject);
 }
@@ -120,9 +118,11 @@ quint64 BackupService::getTotalBackupSize() const {
         QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
 
     QDir logsDir(logsFolderPath);
-    QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files);
+    const QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files);
 
-    for (const QFileInfo &logFile : logFiles) {
+
+    for (int i = 0; i < logFiles.size(); ++i) {
+        const QFileInfo &logFile = logFiles.at(i);
         QJsonObject metadata = FileOperations::readJsonFromFile(logFile.absoluteFilePath());
         totalSize += metadata.value(BackupMetadataKeys::SIZE_BYTES).toVariant().toULongLong();
     }

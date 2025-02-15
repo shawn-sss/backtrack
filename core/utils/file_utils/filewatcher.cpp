@@ -52,9 +52,10 @@ void FileWatcher::startWatching(const QString &rootPath) {
     addPath(rootPath);
 
     QDir rootDir(rootPath);
-    QFileInfoList subDirectories = rootDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
+    const QFileInfoList subDirectories = rootDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
 
-    for (const QFileInfo &dirInfo : subDirectories) {
+    for (int i = 0; i < subDirectories.size(); ++i) {
+        const QFileInfo &dirInfo = subDirectories.at(i);
         QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME));
         if (summaryFile.exists()) {
             addPath(summaryFile.absoluteFilePath());
