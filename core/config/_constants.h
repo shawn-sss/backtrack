@@ -1,7 +1,6 @@
 #ifndef _CONSTANTS_H
 #define _CONSTANTS_H
 
-// Ignore the Warnings, for now!
 #include "app_settings.h"
 #include "backup_settings.h"
 #include "messages_settings.h"

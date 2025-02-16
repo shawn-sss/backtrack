@@ -54,6 +54,9 @@ set(UI_SOURCES
     ui/mainwindow/MainWindow.cpp
     ui/mainwindow/MainWindow.h
     ui/mainwindow/MainWindow.ui
+    ui/settingsdialog/settingsdialog.cpp
+    ui/settingsdialog/settingsdialog.h
+    ui/settingsdialog/settingsdialog.ui
 )
 
 # Backup Controller sources
@@ -109,10 +112,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
-        core/config/utilities_settings.h
-        core/config/resources_settings.h
-        core/config/messages_settings.h
     )
 else()
     if(ANDROID)

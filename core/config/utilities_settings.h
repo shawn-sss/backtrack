@@ -2,6 +2,7 @@
 #define UTILITIES_SETTINGS_H
 
 #include <QString>
+#include <QSize>
 
 namespace Utilities {
 // Default Values
@@ -42,21 +43,6 @@ inline const QString UNIT_SECONDS = " seconds";
 inline const QString UNIT_MINUTES = " minutes";
 inline const QString UNIT_HOURS = " hours";
 inline const QString UNIT_DAYS = " days";
-}
-
-namespace Styling {
-// HTML Template for Embedding Status Light Icon
-inline const QString STATUS_LIGHT_ICON_TEMPLATE =
-    "<img src='data:image/png;base64,%1' style='%2'>";
-
-// HTML Template for Combining the Status Label and the Icon
-inline const QString STATUS_LABEL_HTML_TEMPLATE =
-    "<div style='display:flex; align-items:center;'>"
-    "<span>%1</span><span style='margin-left:4px;'>%2</span>"
-    "</div>";
-
-// Icon Styling Template
-inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
 }
 
 #endif // UTILITIES_SETTINGS_H
