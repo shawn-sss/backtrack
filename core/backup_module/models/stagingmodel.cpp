@@ -1,5 +1,5 @@
 #include "stagingmodel.h"
-#include "../../config/constants.h"
+#include "../../config/_constants.h"
 
 #include <QFileIconProvider>
 #include <QFileInfo>

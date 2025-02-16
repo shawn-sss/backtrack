@@ -1,6 +1,6 @@
 #include "transferworker.h"
 #include "../../utils/file_utils/fileoperations.h"
-#include "../../config/constants.h"
+#include "../../config/_constants.h"
 
 #include <QStringList>
 #include <QFile>
@@ -27,7 +27,7 @@ void TransferWorker::startTransfer() {
     int completedFiles = 0;
     for (const QString &filePath : files) {
         if (stopRequested) {
-            emit errorOccurred(UIConfig::MESSAGE_OPERATION_WARNING);
+            emit errorOccurred(ErrorMessages::WARNING_OPERATION_STILL_RUNNING);
             return;
         }
 
@@ -54,7 +54,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     QFileInfo fileInfo(driveRoot);
     if (!fileInfo.exists() || !fileInfo.isDir()) {
-        emit errorOccurred(QString(UIConfig::ERROR_INVALID_SELECTION).arg(driveRoot));
+        emit errorOccurred(QString(ErrorMessages::ERROR_NO_ITEMS_SELECTED_FOR_BACKUP).arg(driveRoot));
         return false;
     }
 
@@ -71,7 +71,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     }
 
     if (!QDir().mkpath(driveBackupFolder)) {
-        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
+        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
 
@@ -103,12 +103,12 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
 // Helper Methods
 bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
     if (!fileInfo.isReadable()) {
-        emit errorOccurred(QString(UIConfig::ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(ErrorMessages::ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
     if (QFile::exists(destinationPath) && !QFile::remove(destinationPath)) {
-        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(destinationPath));
+        emit errorOccurred(QString(ErrorMessages::ERROR_TRANSFER_FAILED).arg(destinationPath));
         return false;
     }
 
@@ -117,7 +117,7 @@ bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinat
                        : QFile::copy(fileInfo.absoluteFilePath(), destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString(UIConfig::ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(ErrorMessages::ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 

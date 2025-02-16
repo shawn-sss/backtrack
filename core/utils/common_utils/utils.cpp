@@ -1,6 +1,6 @@
 #include "utils.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
-#include "../../../core/config/constants.h"
+#include "../../../core/config/_constants.h"
 
 #include <QAbstractItemModel>
 #include <QVector>
@@ -20,17 +20,17 @@ namespace Formatting {
 
 QString formatSize(qint64 size) {
     static const QVector<QString> units{
-        BackupInfo::SIZE_UNIT_BYTES,
-        BackupInfo::SIZE_UNIT_KILOBYTES,
-        BackupInfo::SIZE_UNIT_MEGABYTES,
-        BackupInfo::SIZE_UNIT_GIGABYTES
+        Numbers::SIZE_UNIT_BYTES,
+        Numbers::SIZE_UNIT_KILOBYTES,
+        Numbers::SIZE_UNIT_MEGABYTES,
+        Numbers::SIZE_UNIT_GIGABYTES
     };
 
     int unitIndex = 0;
     double sizeInUnits = size;
 
-    while (sizeInUnits >= BackupInfo::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
-        sizeInUnits /= BackupInfo::SIZE_CONVERSION_FACTOR;
+    while (sizeInUnits >= Numbers::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+        sizeInUnits /= Numbers::SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
 
@@ -38,15 +38,15 @@ QString formatSize(qint64 size) {
 }
 
 QString formatDuration(qint64 milliseconds) {
-    if (milliseconds < 1000) return QString::number(milliseconds) + UIConfig::SIZE_UNIT_MILLISECONDS;
+    if (milliseconds < 1000) return QString::number(milliseconds) + TimeUnits::UNIT_MILLISECONDS;
     qint64 seconds = milliseconds / 1000;
-    if (seconds < 60) return QString::number(seconds) + UIConfig::SIZE_UNIT_SECONDS;
+    if (seconds < 60) return QString::number(seconds) + TimeUnits::UNIT_SECONDS;
     qint64 minutes = seconds / 60;
-    if (minutes < 60) return QString::number(minutes) + UIConfig::SIZE_UNIT_MINUTES;
+    if (minutes < 60) return QString::number(minutes) + TimeUnits::UNIT_MINUTES;
     qint64 hours = minutes / 60;
-    if (hours < 24) return QString::number(hours) + UIConfig::SIZE_UNIT_HOURS;
+    if (hours < 24) return QString::number(hours) + TimeUnits::UNIT_HOURS;
     qint64 days = hours / 24;
-    return QString::number(days) + UIConfig::SIZE_UNIT_DAYS;
+    return QString::number(days) + TimeUnits::UNIT_DAYS;
 }
 
 QString formatTimestamp(const QDateTime &datetime, const QString &format) {
@@ -79,14 +79,14 @@ void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int
     if (!progressBar) return;
 
     progressBar->setRange(minValue, maxValue);
-    progressBar->setValue(ProgressConfig::DEFAULT_VISIBILITY ? minValue : maxValue);
+    progressBar->setValue(ProgressConfig::PROGRESS_BAR_DEFAULT_VISIBILITY ? minValue : maxValue);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
 
 QPixmap createStatusLightPixmap(const QString &color, int size) {
     QPixmap pixmap(size, size);
-    pixmap.fill(UIConfig::COLOR_TRANSPARENT);
+    pixmap.fill(Colors::COLOR_TRANSPARENT);
 
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing, true);

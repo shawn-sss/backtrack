@@ -1,6 +1,6 @@
 #include "backupservice.h"
 #include "../../utils/file_utils/fileoperations.h"
-#include "../../../core/config/constants.h"
+#include "../../../core/config/_constants.h"
 #include "../../../core/utils/common_utils/utils.h"
 
 #include <QDir>
@@ -49,9 +49,9 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
 
 // Backup Metadata Management
 BackupStatus BackupService::scanForBackupStatus() const {
-    QString backupSettingsPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER);
-    QString logsFolderPath = QDir(backupSettingsPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
-    QString settingsFilePath = QDir(backupSettingsPath).filePath(AppConfig::SETTINGS_FILE_NAME);
+    QString backupSettingsPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
+    QString logsFolderPath = QDir(backupSettingsPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
+    QString settingsFilePath = QDir(backupSettingsPath).filePath(AppConfig::CONFIG_FILE_NAME);
 
     QDir backupSettingsDir(backupSettingsPath);
     QDir logsDir(logsFolderPath);
@@ -69,13 +69,14 @@ BackupStatus BackupService::scanForBackupStatus() const {
 
 QJsonObject BackupService::getLastBackupMetadata() const {
     QString logsFolderPath = QDir(backupRootPath).filePath(
-        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+        QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
 
     QDir logsDir(logsFolderPath);
     logsDir.setSorting(QDir::Time);
 
     QFileInfoList logFiles = logsDir.entryInfoList(
-        QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files, QDir::Time);
+        QStringList() << ("*" + QString(AppConfig::BACKUP_LOG_FILE_SUFFIX)), QDir::Files, QDir::Time);
+
 
     if (!logFiles.isEmpty()) {
         return FileOperations::readJsonFromFile(logFiles.first().absoluteFilePath());
@@ -87,21 +88,21 @@ QJsonObject BackupService::getLastBackupMetadata() const {
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
 
-    QString logsFolderPath = QDir(QDir(backupRootPath).filePath(AppConfig::BACKUP_SETTINGS_FOLDER))
-                                 .filePath(AppConfig::BACKUP_LOGS_FOLDER);
+    QString logsFolderPath = QDir(QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER))
+                                 .filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
     QDir logDir(logsFolderPath);
     if (!logDir.exists()) {
         logDir.mkpath(logsFolderPath);
     }
 
-    QString logFileName = QFileInfo(backupFolderPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
+    QString logFileName = QFileInfo(backupFolderPath).fileName() + AppConfig::BACKUP_LOG_FILE_SUFFIX;
     FileOperations::writeJsonToFile(QDir(logsFolderPath).filePath(logFileName), summaryObject);
 }
 
 // Backup Statistics
 int BackupService::getBackupCount() const {
     QString logsFolderPath = QDir(backupRootPath).filePath(
-        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+        QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
 
     QDir logsDir(logsFolderPath);
 
@@ -109,16 +110,16 @@ int BackupService::getBackupCount() const {
         return 0;
     }
 
-    return logsDir.entryList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files).size();
+    return logsDir.entryList(QStringList() << "*" + AppConfig::BACKUP_LOG_FILE_SUFFIX, QDir::Files).size();
 }
 
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
     QString logsFolderPath = QDir(backupRootPath).filePath(
-        QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
+        QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
 
     QDir logsDir(logsFolderPath);
-    const QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_SUFFIX, QDir::Files);
+    const QFileInfoList logFiles = logsDir.entryInfoList(QStringList() << "*" + AppConfig::BACKUP_LOG_FILE_SUFFIX, QDir::Files);
 
 
     for (int i = 0; i < logFiles.size(); ++i) {

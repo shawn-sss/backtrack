@@ -1,5 +1,5 @@
 #include "filewatcher.h"
-#include "../../config/constants.h"
+#include "../../config/_constants.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -56,7 +56,7 @@ void FileWatcher::startWatching(const QString &rootPath) {
 
     for (int i = 0; i < subDirectories.size(); ++i) {
         const QFileInfo &dirInfo = subDirectories.at(i);
-        QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserSettings::BACKUP_SUMMARY_FILENAME));
+        QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserConfig::BACKUP_SUMMARY_FILE));
         if (summaryFile.exists()) {
             addPath(summaryFile.absoluteFilePath());
         }

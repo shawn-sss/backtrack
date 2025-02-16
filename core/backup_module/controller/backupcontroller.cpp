@@ -1,7 +1,7 @@
 #include "backupcontroller.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
-#include "../../config/constants.h"
+#include "../../config/_constants.h"
 
 #include <QThread>
 #include <QProgressBar>
@@ -23,15 +23,14 @@ void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
     if (isBackupInProgress()) {
-        emit errorOccurred(UIConfig::MESSAGE_BACKUP_IN_PROGRESS);
+        emit errorOccurred(ErrorMessages::WARNING_BACKUP_OPERATION_RUNNING	);
         return;
     }
 
     cleanupAfterTransfer();
 
     QString timestamp = QDateTime::currentDateTime().toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    QString backupFolderName = QString(BackupInfo::BACKUP_FOLDER_FORMAT)
-                                   .arg(UserSettings::BACKUP_FOLDER_PREFIX, timestamp);
+    QString backupFolderName = QString("%1%2").arg(UserConfig::BACKUP_FOLDER_PREFIX, timestamp);
 
     QDir destDir(destinationPath);
     QString backupFolderPath = destDir.filePath(backupFolderName);
@@ -41,7 +40,7 @@ void BackupController::createBackup(const QString &destinationPath,
     }
 
     progressBar->setVisible(true);
-    progressBar->setValue(ProgressConfig::MIN_VALUE);
+    progressBar->setValue(ProgressConfig::PROGRESS_BAR_MIN_VALUE);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -56,7 +55,7 @@ void BackupController::createBackup(const QString &destinationPath,
                 qint64 backupDuration = QDateTime::currentMSecsSinceEpoch() - startTime;
 
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
-                progressBar->setValue(ProgressConfig::MAX_VALUE);
+                progressBar->setValue(ProgressConfig::PROGRESS_BAR_MAX_VALUE);
                 progressBar->setVisible(false);
                 emit backupCreated();
             });
@@ -76,23 +75,23 @@ void BackupController::createBackup(const QString &destinationPath,
 
 void BackupController::deleteBackup(const QString &backupPath) {
     QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(
-    QString("%1/%2").arg(AppConfig::BACKUP_SETTINGS_FOLDER, AppConfig::BACKUP_LOGS_FOLDER));
-    QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_SUFFIX;
+    QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
+    QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_FILE_SUFFIX;
     QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
 
     if (!QFile::exists(logFilePath)) {
-        emit errorOccurred(BackupInfo::ERROR_INVALID_BACKUP_LOCATION);
+        emit errorOccurred(ErrorMessages::ERROR_BACKUP_LOG_NOT_FOUND);
         return;
     }
 
     if (!QFile::remove(logFilePath)) {
-        emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
+        emit errorOccurred(ErrorMessages::ERROR_DELETING_BACKUP_LOG);
         return;
     }
 
     QDir backupDir(backupPath);
     if (!backupDir.removeRecursively()) {
-        emit errorOccurred(BackupInfo::ERROR_BACKUP_DELETION_FAILED);
+        emit errorOccurred(ErrorMessages::ERROR_DELETING_BACKUP_DIRECTORY);
         return;
     }
 
@@ -107,7 +106,7 @@ bool BackupController::isBackupInProgress() const {
 // Helper Methods
 bool BackupController::createBackupFolder(const QString &path) {
     if (!QDir().mkpath(path)) {
-        emit errorOccurred(BackupInfo::ERROR_BACKUP_FOLDER_CREATION_FAILED);
+        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
     return true;

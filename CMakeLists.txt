@@ -39,13 +39,14 @@ set(PROJECT_RESOURCES
 
 # Project settings
 set(PROJECT_SETTINGS
-    core/config/constants.h
-    core/config/app_config.h
-    core/config/backup_info.h
-    core/config/error_messages.h
-    core/config/progress_config.h
-    core/config/user_settings.h
-    core/config/visual_config.h
+    core/config/_constants.h
+    core/config/app_settings.h
+    core/config/backup_settings.h
+    core/config/messages_settings.h
+    core/config/progress_settings.h
+    core/config/utilities_settings.h
+    core/config/resources_settings.h
+    core/config/visual_settings.h
 )
 
 # UI sources
@@ -108,6 +109,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
+        core/config/utilities_settings.h
+        core/config/resources_settings.h
+        core/config/messages_settings.h
     )
 else()
     if(ANDROID)
