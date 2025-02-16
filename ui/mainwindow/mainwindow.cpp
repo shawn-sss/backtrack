@@ -124,9 +124,7 @@ void MainWindow::setupToolBar() {
     QAction *helpAction = new QAction(QIcon(BackupResources::HELP_ICON_PATH), "Help", this);
     QAction *aboutAction = new QAction(QIcon(BackupResources::ABOUT_ICON_PATH), "About", this);
 
-
     ui->mainToolBar->clear();
-
 
     ui->mainToolBar->addAction(ui->actionOpenSettings);
     ui->mainToolBar->addAction(helpAction);
@@ -140,7 +138,8 @@ void MainWindow::setupToolBar() {
     ui->mainToolBar->addAction(aboutAction);
     ui->mainToolBar->addAction(ui->actionExit);
 
-    for (QAction* action : ui->mainToolBar->actions()) {
+    const QList<QAction*> actionsList = ui->mainToolBar->actions();
+    for (QAction* action : actionsList) {
         QWidget* widget = ui->mainToolBar->widgetForAction(action);
         if (widget) {
             widget->setCursor(Qt::PointingHandCursor);
@@ -224,6 +223,32 @@ void MainWindow::refreshBackupStatus() {
     updateBackupTotalSizeLabel();
     updateBackupLocationStatusLabel(backupService->getBackupRoot());
     updateLastBackupInfo();
+}
+
+// **Change Backup Destination**
+void MainWindow::onChangeBackupDestinationClicked() {
+    QString selectedDir = QFileDialog::getExistingDirectory(this,
+                                                            InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
+                                                            BackupInfo::DEFAULT_FILE_DIALOG_ROOT);
+    if (selectedDir.isEmpty()) {
+        QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE, ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
+        return;
+    }
+
+    if (!FileOperations::createDirectory(selectedDir)) {
+        QMessageBox::critical(this, ErrorMessages::BACKUP_DIRECTORY_ERROR_TITLE, ErrorMessages::ERROR_CREATING_BACKUP_DIRECTORY);
+        return;
+    }
+
+    backupService->setBackupRoot(selectedDir);
+
+    destinationModel->setRootPath(selectedDir);
+    ui->BackupDestinationView->setModel(destinationModel);
+    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
+
+    refreshBackupStatus();
+    startWatchingBackupDirectory(selectedDir);
+    updateFileWatcher();
 }
 
 void MainWindow::onAddToBackupClicked() {
@@ -391,23 +416,18 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 // **UI Setup**
 void MainWindow::setupCustomTitleBar() {
-
     titleBar = new QWidget(this);
     titleBar->setFixedHeight(UIConfig::TITLE_BAR_HEIGHT);
     titleBar->setStyleSheet(Styling::TITLE_BAR_STYLESHEET);
 
-
     QHBoxLayout *titleLayout = new QHBoxLayout(titleBar);
     titleLayout->setContentsMargins(5, 0, 5, 0);
 
-
     titleLabel = new QLabel(AppInfo::APP_DISPLAY_TITLE, titleBar);
-    titleLabel->setStyleSheet("color: white; font-size: 14px;");
-
+    titleLabel->setStyleSheet(Styling::TITLE_LABEL_STYLESHEET);
 
     minimizeButton = new QPushButton(Styling::WINDOW_MINIMIZE_BUTTON_LABEL, titleBar);
     closeButton = new QPushButton(Styling::WINDOW_CLOSE_BUTTON_LABEL, titleBar);
-
 
     minimizeButton->setToolTip("Minimize Window");
     closeButton->setToolTip("Close Application");
@@ -415,17 +435,8 @@ void MainWindow::setupCustomTitleBar() {
     minimizeButton->setFixedSize(30, 25);
     closeButton->setFixedSize(30, 25);
 
-    minimizeButton->setStyleSheet(
-        "QPushButton { background: transparent; color: white; border: none; }"
-        "QPushButton:hover { background: rgba(255, 255, 255, 0.2); }"
-        "QPushButton:pressed { background: rgba(255, 255, 255, 0.3); }"
-        );
-
-    closeButton->setStyleSheet(
-        "QPushButton { background: transparent; color: white; border: none; }"
-        "QPushButton:hover { background: red; color: white; }"
-        "QPushButton:pressed { background: darkred; color: white; }"
-        );
+    minimizeButton->setStyleSheet(Styling::MINIMIZE_BUTTON_STYLESHEET);
+    closeButton->setStyleSheet(Styling::CLOSE_BUTTON_STYLESHEET);
 
     minimizeButton->setCursor(Qt::PointingHandCursor);
     closeButton->setCursor(Qt::PointingHandCursor);
@@ -489,7 +500,7 @@ void MainWindow::exitApplication() {
 }
 
 void MainWindow::showHelpDialog() {
-    QMessageBox::information(this, "Help", "To be added later.");
+    QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE, HelpInfo::HELP_WINDOW_MESSAGE);
 }
 
 void MainWindow::onAboutButtonClicked() {
@@ -527,30 +538,3 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
         }
     }
 }
-
-// **Change Backup Destination**
-void MainWindow::onChangeBackupDestinationClicked() {
-    QString selectedDir = QFileDialog::getExistingDirectory(this,
-                                                            InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
-                                                            BackupInfo::DEFAULT_FILE_DIALOG_ROOT);
-    if (selectedDir.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE, ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
-        return;
-    }
-
-    if (!FileOperations::createDirectory(selectedDir)) {
-        QMessageBox::critical(this, ErrorMessages::BACKUP_DIRECTORY_ERROR_TITLE, ErrorMessages::ERROR_CREATING_BACKUP_DIRECTORY);
-        return;
-    }
-
-    backupService->setBackupRoot(selectedDir);
-
-    destinationModel->setRootPath(selectedDir);
-    ui->BackupDestinationView->setModel(destinationModel);
-    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
-
-    refreshBackupStatus();
-    startWatchingBackupDirectory(selectedDir);
-    updateFileWatcher();
-}
-

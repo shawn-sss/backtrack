@@ -18,6 +18,7 @@ namespace Utils {
 // Formatting Functions
 namespace Formatting {
 
+// Formats file size into human-readable units
 QString formatSize(qint64 size) {
     static const QVector<QString> units{
         Numbers::SIZE_UNIT_BYTES,
@@ -37,6 +38,7 @@ QString formatSize(qint64 size) {
     return QString::number(sizeInUnits, 'f', 2) + units[unitIndex];
 }
 
+// Formats duration into human-readable time units
 QString formatDuration(qint64 milliseconds) {
     if (milliseconds < 1000) return QString::number(milliseconds) + TimeUnits::UNIT_MILLISECONDS;
     qint64 seconds = milliseconds / 1000;
@@ -49,10 +51,12 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + TimeUnits::UNIT_DAYS;
 }
 
+// Formats timestamp using a custom format string
 QString formatTimestamp(const QDateTime &datetime, const QString &format) {
     return datetime.toString(format);
 }
 
+// Formats timestamp using a predefined Qt DateFormat
 QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
@@ -62,6 +66,7 @@ QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
 // UI Functions
 namespace UI {
 
+// Hides columns in a QTreeView from a given start column
 void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount) {
     if (!treeView) return;
 
@@ -75,6 +80,7 @@ void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int colu
     }
 }
 
+// Sets up a QProgressBar with given settings
 void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
 
@@ -84,6 +90,7 @@ void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int
     progressBar->setFixedHeight(height);
 }
 
+// Creates a circular status light icon with a specified color and size
 QPixmap createStatusLightPixmap(const QString &color, int size) {
     QPixmap pixmap(size, size);
     pixmap.fill(Colors::COLOR_TRANSPARENT);
@@ -102,6 +109,7 @@ QPixmap createStatusLightPixmap(const QString &color, int size) {
 // Backup Functions
 namespace Backup {
 
+// Adds selected file paths from a QTreeView to the StagingModel
 void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel) return;
 
@@ -117,6 +125,7 @@ void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) 
     }
 }
 
+// Removes selected file paths from a QTreeView in the StagingModel
 void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel) return;
 

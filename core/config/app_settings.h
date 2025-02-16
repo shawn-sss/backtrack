@@ -15,6 +15,12 @@ inline const QString ABOUT_WINDOW_TITLE = "About MyDataBackupApp";
 inline const QString ABOUT_WINDOW_MESSAGE = "%2\nVersion %1\n\nDeveloped by Shawn SSS";
 }
 
+namespace HelpInfo {
+// Help Dialog Information
+inline const QString HELP_WINDOW_TITLE = "Help";
+inline const QString HELP_WINDOW_MESSAGE = "To be added later.";
+}
+
 namespace AppConfig {
 // Application Configuration
 inline const QString BACKUP_CONFIG_FOLDER = "_MyDataBackupApp";

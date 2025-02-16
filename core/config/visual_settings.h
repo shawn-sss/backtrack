@@ -2,6 +2,7 @@
 #define UI_CONFIG_H
 
 #include <QString>
+#include <QSize>
 
 namespace UIConfig {
 
@@ -40,33 +41,58 @@ constexpr int TITLE_BAR_HEIGHT = 40;
 } // namespace UIConfig
 
 namespace Styling {
-// HTML Template for Embedding Status Light Icon
+
+// HTML Templates for UI Components
 inline const QString STATUS_LIGHT_ICON_TEMPLATE =
     "<img src='data:image/png;base64,%1' style='%2'>";
 
-// HTML Template for Combining the Status Label and the Icon
 inline const QString STATUS_LABEL_HTML_TEMPLATE =
     "<div style='display:flex; align-items:center;'>"
     "<span>%1</span><span style='margin-left:4px;'>%2</span>"
     "</div>";
 
-// Icon Styling Template
+// Icon Styling
 inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
+
+// General UI Styling
 constexpr auto TOOLBAR_ICON_SIZE = QSize(32, 32);
 constexpr auto TOOLBAR_BACKGROUND_COLOR = "#222222";
 constexpr auto TITLE_BAR_COLOR = "#222";
+constexpr auto WINDOW_BACKGROUND_COLOR = "#2B2B2B";
+
+// Title Bar Styling
+constexpr auto TITLE_BAR_STYLESHEET =
+    "background-color: #222; color: white; border: none;";
+
+// Title Label Styling
+constexpr auto TITLE_LABEL_STYLESHEET =
+    "color: white; font-size: 24px;";
+
+// Window Buttons
 constexpr auto WINDOW_CLOSE_BUTTON_LABEL = "X";
 constexpr auto WINDOW_MINIMIZE_BUTTON_LABEL = "-";
-constexpr auto WINDOW_BACKGROUND_COLOR = "#2B2B2B";
-constexpr auto WINDOW_STYLESHEET = "background-color: #2B2B2B; border: none;";
-constexpr auto TITLE_BAR_STYLESHEET = "background-color: #222; color: white; border: none;";
+
+// Minimize Button Styling
+inline const QString MINIMIZE_BUTTON_STYLESHEET =
+    "QPushButton { background: transparent; color: white; border: none; }"
+    "QPushButton:hover { background: rgba(255, 255, 255, 0.2); }"
+    "QPushButton:pressed { background: rgba(255, 255, 255, 0.3); }";
+
+// Close Button Styling
+inline const QString CLOSE_BUTTON_STYLESHEET =
+    "QPushButton { background: transparent; color: white; border: none; }"
+    "QPushButton:hover { background: red; color: white; }"
+    "QPushButton:pressed { background: darkred; color: white; }";
+
+// Toolbar Styling
 constexpr auto TOOLBAR_STYLESHEET = "background-color: #222222; border: none;";
 
+// General Button Styling
 inline const QString BUTTON_STYLE =
     "QPushButton { background: #444; color: white; border-radius: 5px; padding: 5px; }"
     "QPushButton:hover { background: #666; }"
     "QPushButton:pressed { background: #888; }";
 
-}
+} // namespace Styling
 
 #endif // UI_CONFIG_H

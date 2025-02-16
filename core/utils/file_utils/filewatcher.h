@@ -15,25 +15,26 @@ public:
     explicit FileWatcher(QObject *parent = nullptr);
     ~FileWatcher() override = default;
 
-    // Path management
+    // Path Management
     void addPath(const QString &path);
     void addPaths(const QStringList &paths);
     void removePath(const QString &path);
     void removeAllPaths();
 
-    // Retrieval methods
+    // Retrieval Methods
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 
-    // Monitoring functionality
+    // Monitoring Functionality
     void startWatching(const QString &rootPath);
 
 signals:
-    // Change detection signals
+    // Change Detection Signals
     void directoryChanged(const QString &path);
     void fileChanged(const QString &path);
 
 private:
+    // Internal Watcher
     QFileSystemWatcher *watcher;
 };
 

@@ -7,12 +7,12 @@
 #include <QStringList>
 #include <QToolBar>
 #include <QAction>
-#include <QMouseEvent>  // Required for window dragging
+#include <QMouseEvent>
 #include <QLabel>
 #include <QPushButton>
 #include <QWidget>
 
-// Forward declarations
+// Forward Declarations
 class QTreeView;
 class BackupService;
 class StagingModel;
@@ -28,58 +28,59 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
+    // Constructor and Destructor
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
 protected:
-    // Window events
+    // Window Events
     void closeEvent(QCloseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;   // Enables dragging the window
-    void mouseMoveEvent(QMouseEvent *event) override;    // Enables dragging the window
-    void mouseReleaseEvent(QMouseEvent *event) override; // Enables dragging the window
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    // **New Initialization Methods**
+    // Initialization Methods
     void initializeUI();
     void initializeBackupSystem();
     void setupConnections();
 
-    // UI setup
-    void setupCustomTitleBar();  // Custom title bar setup
-    void setupToolBar();         // Toolbar setup
-    void setupToolbarActions();  // Helper function for toolbar
-    void addToolbarSpacer();     // Adds spacing in toolbar
-    void connectToolbarActions(QAction* helpAction, QAction* aboutAction); // Connects toolbar actions
+    // UI Setup
+    void setupCustomTitleBar();
+    void setupToolBar();
+    void setupToolbarActions();
+    void addToolbarSpacer();
+    void connectToolbarActions(QAction *helpAction, QAction *aboutAction);
 
-    // Backup-related UI setup
+    // Backup-Related UI Setup
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void removeAllColumnsFromTreeView(QTreeView *treeView);
 
-    // Backup management
+    // Backup Management
     void refreshBackupStatus();
     void updateLastBackupInfo();
 
-    // File monitoring
+    // File Monitoring
     void startWatchingBackupDirectory(const QString &path);
     void updateFileWatcher();
 
-    // UI updates
+    // UI Updates
     void updateBackupStatusLabel(const QString &statusColor);
     void updateBackupLocationLabel(const QString &location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString &location);
 
-    // Dragging support
+    // Dragging Support
     void handleMouseEvent(QMouseEvent *event, bool isPress);
 
-    // Signal connections
+    // Signal Connections
     void connectBackupSignals();
 
 private slots:
-    // UI event handlers
+    // UI Event Handlers
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -90,14 +91,14 @@ private slots:
     void showHelpDialog();
     void onAboutButtonClicked();
 
-    // File watcher event handlers
+    // File Watcher Event Handlers
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 
 private:
     Ui::MainWindow *ui;
 
-    // Models and UI components
+    // Models and UI Components
     QFileSystemModel *destinationModel;
     QFileSystemModel *sourceModel;
     QProgressBar *progressBar;
@@ -109,19 +110,19 @@ private:
     QAction *actionHelp;
     QAction *actionAbout;
 
-    // Backup-related objects
+    // Backup-Related Objects
     FileWatcher *fileWatcher;
     BackupService *backupService;
     StagingModel *stagingModel;
     BackupController *backupController;
 
-    // Custom title bar components
+    // Custom Title Bar Components
     QWidget *titleBar;
     QLabel *titleLabel;
     QPushButton *minimizeButton;
     QPushButton *closeButton;
 
-    // Dragging support
+    // Dragging Support
     QPoint lastMousePosition;
     bool dragging = false;
 };

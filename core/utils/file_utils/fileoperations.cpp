@@ -10,7 +10,7 @@
 
 namespace FileOperations {
 
-// Directory and file management
+// Directory and File Management
 bool copyDirectoryRecursively(const QString &source, const QString &destination) {
     QDir sourceDir(source);
     if (!sourceDir.exists()) return false;
@@ -20,8 +20,7 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
 
     const QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
-    for (int i = 0; i < entries.size(); ++i) {
-        const QFileInfo &entry = entries.at(i);
+    for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
 
         if (entry.isDir()) {
@@ -44,20 +43,18 @@ bool createDirectory(const QString &path) {
     return dir.exists() || dir.mkpath(".");
 }
 
-// File size calculation
+// File Size Calculation
 quint64 calculateDirectorySize(const QDir &dir) {
     quint64 totalSize = 0;
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
-    for (int i = 0; i < entries.size(); ++i) {
-        const QFileInfo &entry = entries.at(i);
+    for (const QFileInfo &entry : entries) {
         totalSize += entry.isDir() ? calculateDirectorySize(QDir(entry.absoluteFilePath())) : entry.size();
     }
     return totalSize;
 }
 
-
-// JSON file handling
+// JSON File Handling
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
     QSaveFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) return false;
@@ -82,8 +79,7 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     QDir dir(dirPath);
     const QFileInfoList fileEntries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
 
-    for (int i = 0; i < fileEntries.size(); ++i) {
-        const QFileInfo &entry = fileEntries.at(i);
+    for (const QFileInfo &entry : fileEntries) {
         QString fullPath = entry.absoluteFilePath();
         if (!uniqueFiles.contains(fullPath)) {
             uniqueFiles.insert(fullPath);
@@ -92,9 +88,7 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     }
 
     const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-
-    for (int i = 0; i < subDirs.size(); ++i) {
-        const QFileInfo &subDir = subDirs.at(i);
+    for (const QFileInfo &subDir : subDirs) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
     }
 }
@@ -103,8 +97,7 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
     QDir dir(dirPath);
     const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    for (int i = 0; i < subDirs.size(); ++i) {
-        const QFileInfo &subDir = subDirs.at(i);
+    for (const QFileInfo &subDir : subDirs) {
         QString subDirPath = subDir.absoluteFilePath();
         if (!uniqueFolders.contains(subDirPath)) {
             uniqueFolders.insert(subDirPath);
@@ -114,7 +107,7 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
     }
 }
 
-// Backup infrastructure setup
+// Backup Infrastructure Setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
     QString backupSettingsPath = QDir(backupDir).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
 

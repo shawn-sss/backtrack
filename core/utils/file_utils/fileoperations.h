@@ -10,24 +10,24 @@
 // File operations utilities
 namespace FileOperations {
 
-// Directory and file management
+// Directory and File Management
 bool copyDirectoryRecursively(const QString &source, const QString &destination);
-quint64 calculateDirectorySize(const QDir &dir);
 bool createDirectory(const QString &path);
 bool deleteDirectory(const QString &path);
 
-// JSON file handling
+// File Size Calculation
+quint64 calculateDirectorySize(const QDir &dir);
+
+// JSON File Handling
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject);
 QJsonObject readJsonFromFile(const QString &filePath);
 
-// File collection and traversal
-void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
-
-// Backup infrastructure setup
-bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage);
-
+// File and Directory Collection
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
 void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray);
+
+// Backup Infrastructure Setup
+bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage);
 
 } // namespace FileOperations
 

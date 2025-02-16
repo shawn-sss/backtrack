@@ -18,14 +18,14 @@ void FileWatcher::addPath(const QString &path) {
     }
 }
 
+void FileWatcher::addPaths(const QStringList &paths) {
+    watcher->addPaths(paths);
+}
+
 void FileWatcher::removePath(const QString &path) {
     if ((watcher->directories() + watcher->files()).contains(path)) {
         watcher->removePath(path);
     }
-}
-
-void FileWatcher::addPaths(const QStringList &paths) {
-    watcher->addPaths(paths);
 }
 
 void FileWatcher::removeAllPaths() {
@@ -54,8 +54,7 @@ void FileWatcher::startWatching(const QString &rootPath) {
     QDir rootDir(rootPath);
     const QFileInfoList subDirectories = rootDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
 
-    for (int i = 0; i < subDirectories.size(); ++i) {
-        const QFileInfo &dirInfo = subDirectories.at(i);
+    for (const QFileInfo &dirInfo : subDirectories) {
         QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserConfig::BACKUP_SUMMARY_FILE));
         if (summaryFile.exists()) {
             addPath(summaryFile.absoluteFilePath());
