@@ -18,8 +18,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Svg)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Svg)
 
 if(NOT DEFINED QT_VERSION_MAJOR)
     message(FATAL_ERROR "QT_VERSION_MAJOR is not defined. Ensure Qt5 or Qt6 is found properly.")
@@ -51,6 +51,8 @@ set(PROJECT_SETTINGS
 
 # UI sources
 set(UI_SOURCES
+    ui/customtitlebar/customtitlebar.cpp
+    ui/customtitlebar/customtitlebar.h
     ui/mainwindow/MainWindow.cpp
     ui/mainwindow/MainWindow.h
     ui/mainwindow/MainWindow.ui

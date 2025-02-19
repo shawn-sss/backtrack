@@ -280,6 +280,9 @@
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -324,6 +327,17 @@
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::MenuRole::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+   <property name="toolTip">
+    <string>About</string>
    </property>
    <property name="menuRole">
     <enum>QAction::MenuRole::NoRole</enum>

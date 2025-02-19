@@ -67,7 +67,7 @@ inline const QString ERROR_TRANSFER_FAILED = "Unable to transfer the following i
 //backup transfer access failure
 inline const QString ERROR_FILE_ACCESS_DENIED = "File access was denied.";
 
-// Backup Errors - Error Handling Only
+// Backup Errors - Error Handling
 
 // infrastructure return messages
 inline const QString ERROR_CREATE_BACKUP_DIRECTORY = "Failed to create '%1' directory.";

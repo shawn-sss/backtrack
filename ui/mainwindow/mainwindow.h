@@ -12,6 +12,9 @@
 #include <QPushButton>
 #include <QWidget>
 
+#include "../customtitlebar/customtitlebar.h"
+#include "../../core/utils/common_utils/utils.h"
+
 // Forward Declarations
 class QTreeView;
 class BackupService;
@@ -96,35 +99,32 @@ private slots:
     void onFileChanged(const QString &path);
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *ui{nullptr};
 
     // Models and UI Components
-    QFileSystemModel *destinationModel;
-    QFileSystemModel *sourceModel;
-    QProgressBar *progressBar;
+    QFileSystemModel *destinationModel{nullptr};
+    QFileSystemModel *sourceModel{nullptr};
+    QProgressBar *progressBar{nullptr};
 
     // Toolbar and Actions
-    QToolBar *customToolBar;
-    QAction *actionOpenSettings;
-    QAction *actionExit;
-    QAction *actionHelp;
-    QAction *actionAbout;
+    QToolBar *customToolBar{nullptr};
+    QAction *actionOpenSettings{nullptr};
+    QAction *actionExit{nullptr};
+    QAction *actionHelp{nullptr};
+    QAction *actionAbout{nullptr};
 
     // Backup-Related Objects
-    FileWatcher *fileWatcher;
-    BackupService *backupService;
-    StagingModel *stagingModel;
-    BackupController *backupController;
+    FileWatcher *fileWatcher{nullptr};
+    BackupService *backupService{nullptr};
+    StagingModel *stagingModel{nullptr};
+    BackupController *backupController{nullptr};
 
-    // Custom Title Bar Components
-    QWidget *titleBar;
-    QLabel *titleLabel;
-    QPushButton *minimizeButton;
-    QPushButton *closeButton;
+    // Custom Title Bar
+    CustomTitleBar *titleBar{nullptr};
 
     // Dragging Support
     QPoint lastMousePosition;
-    bool dragging = false;
+    bool dragging{false};
 };
 
 #endif // MAINWINDOW_H

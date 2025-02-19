@@ -27,7 +27,6 @@ inline const QString BACKUP_CONFIG_FOLDER = "_MyDataBackupApp";
 inline const QString CONFIG_FILE_NAME = "config.json";
 inline const QString BACKUP_LOGS_DIRECTORY = "Backup Logs";
 inline const QString BACKUP_LOG_FILE_SUFFIX = "_log.json";
-//constexpr auto BACKUP_WINDOW_BACKGROUND_COLOR = "#2B2B2B";
 }
 
 namespace UserConfig {

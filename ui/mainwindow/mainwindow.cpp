@@ -30,7 +30,11 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QWidget>
+#include <QtSvg/QSvgRenderer>
+#include <QPainter>
 
+// Constructor
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -43,7 +47,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->setupUi(this);
     setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
-    this->setStatusBar(nullptr);
+    setStatusBar(nullptr);
+    titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::MainWindow);
+
+    if (ui->mainToolBar) {
+        ui->mainToolBar->setFloatable(false);
+        ui->mainToolBar->setMovable(false);
+        ui->mainToolBar->setVisible(true);
+        ui->mainToolBar->setIconSize(QSize(24, 24));
+        ui->mainToolBar->setStyleSheet("background-color: transparent; border: none;");
+    }
 
     initializeUI();
     initializeBackupSystem();
@@ -56,29 +69,55 @@ MainWindow::MainWindow(QWidget *parent)
     ui->DeleteBackupButton->setCursor(Qt::PointingHandCursor);
 }
 
+// Destructor
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-// **Initialization Methods**
+// Initializes UI components
 void MainWindow::initializeUI() {
     setupCustomTitleBar();
     setupToolBar();
-
     Utils::UI::setupProgressBar(ui->TransferProgressBar,
                                 ProgressConfig::PROGRESS_BAR_MIN_VALUE,
                                 ProgressConfig::PROGRESS_BAR_MAX_VALUE,
                                 ProgressConfig::PROGRESS_BAR_HEIGHT,
                                 ProgressConfig::PROGRESS_BAR_TEXT_VISIBLE);
     ui->TransferProgressBar->setVisible(false);
-
-    ui->AddToBackupButton->setStyleSheet(Styling::BUTTON_STYLE);
-    ui->RemoveFromBackupButton->setStyleSheet(Styling::BUTTON_STYLE);
-    ui->CreateBackupButton->setStyleSheet(Styling::BUTTON_STYLE);
-    ui->ChangeBackupDestinationButton->setStyleSheet(Styling::BUTTON_STYLE);
-    ui->DeleteBackupButton->setStyleSheet(Styling::BUTTON_STYLE);
 }
 
+// Sets up the custom title bar
+void MainWindow::setupCustomTitleBar() {
+    titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::MainWindow);
+    if (!titleBar) return;
+
+    QWidget *container = new QWidget(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+    mainLayout->addWidget(titleBar, 0, Qt::AlignTop);
+
+    QHBoxLayout *contentLayout = new QHBoxLayout();
+    contentLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->setSpacing(0);
+
+    if (ui->mainToolBar) {
+        ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        contentLayout->addWidget(ui->mainToolBar, 0, Qt::AlignLeft);
+    }
+
+    if (centralWidget()) {
+        QWidget *contentContainer = centralWidget();
+        contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        contentLayout->addWidget(contentContainer, 1);
+    }
+
+    mainLayout->addLayout(contentLayout, 1);
+    container->setLayout(mainLayout);
+    setCentralWidget(container);
+}
+
+// Initializes the backup system
 void MainWindow::initializeBackupSystem() {
     if (!FileOperations::createDirectory(UserConfig::DEFAULT_BACKUP_DIRECTORY)) {
         QMessageBox::critical(this, ErrorMessages::BACKUP_INITIALIZATION_FAILED_TITLE,
@@ -92,6 +131,7 @@ void MainWindow::initializeBackupSystem() {
     updateFileWatcher();
 }
 
+// Sets up signal connections
 void MainWindow::setupConnections() {
     connectBackupSignals();
     connect(ui->AddToBackupButton, &QPushButton::clicked, this, &MainWindow::onAddToBackupClicked);
@@ -100,82 +140,77 @@ void MainWindow::setupConnections() {
     connect(ui->CreateBackupButton, &QPushButton::clicked, this, &MainWindow::onCreateBackupClicked);
     connect(ui->DeleteBackupButton, &QPushButton::clicked, this, &MainWindow::onDeleteBackupClicked);
     connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::openSettings);
+    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::exitApplication);
+    connect(ui->actionHelp, &QAction::triggered, this, &MainWindow::showHelpDialog);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::onAboutButtonClicked);
 }
 
-// **Toolbar Setup**
+// Sets up toolbar
 void MainWindow::setupToolBar() {
     if (!ui->mainToolBar) return;
+
+    setupToolbarActions();
 
     ui->mainToolBar->setFloatable(false);
     ui->mainToolBar->setMovable(false);
     ui->mainToolBar->setVisible(true);
-    ui->mainToolBar->setIconSize(Styling::TOOLBAR_ICON_SIZE);
-
-    if (!ui->actionOpenSettings)
-        ui->actionOpenSettings = new QAction(QIcon(BackupResources::SETTINGS_ICON_PATH), UIConfig::MENU_SETTINGS_LABEL, this);
-    else
-        ui->actionOpenSettings->setIcon(QIcon(BackupResources::SETTINGS_ICON_PATH));
-
-    if (!ui->actionExit)
-        ui->actionExit = new QAction(QIcon(BackupResources::EXIT_ICON_PATH), UIConfig::MENU_EXIT_LABEL, this);
-    else
-        ui->actionExit->setIcon(QIcon(BackupResources::EXIT_ICON_PATH));
-
-    QAction *helpAction = new QAction(QIcon(BackupResources::HELP_ICON_PATH), "Help", this);
-    QAction *aboutAction = new QAction(QIcon(BackupResources::ABOUT_ICON_PATH), "About", this);
+    ui->mainToolBar->setIconSize(QSize(24, 24));
+    ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    ui->mainToolBar->setStyleSheet("background-color: transparent; border: none; padding: 5px;");
 
     ui->mainToolBar->clear();
 
     ui->mainToolBar->addAction(ui->actionOpenSettings);
-    ui->mainToolBar->addAction(helpAction);
+    ui->mainToolBar->addAction(ui->actionHelp);
+    ui->mainToolBar->addAction(ui->actionAbout);
 
-    QWidget* spacer = new QWidget();
+    QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QWidgetAction* spacerAction = new QWidgetAction(this);
-    spacerAction->setDefaultWidget(spacer);
-    ui->mainToolBar->addAction(spacerAction);
+    ui->mainToolBar->addWidget(spacer);
 
-    ui->mainToolBar->addAction(aboutAction);
     ui->mainToolBar->addAction(ui->actionExit);
 
-    const QList<QAction*> actionsList = ui->mainToolBar->actions();
-    for (QAction* action : actionsList) {
-        QWidget* widget = ui->mainToolBar->widgetForAction(action);
-        if (widget) {
-            widget->setCursor(Qt::PointingHandCursor);
-        }
+    for (QAction *&action : ui->mainToolBar->actions()) {
+        QWidget *widget = ui->mainToolBar->widgetForAction(action);
+        if (widget) widget->setCursor(Qt::PointingHandCursor);
     }
-
-    connect(ui->actionExit, &QAction::triggered, this, &MainWindow::exitApplication);
-    connect(helpAction, &QAction::triggered, this, &MainWindow::showHelpDialog);
-    connect(aboutAction, &QAction::triggered, this, &MainWindow::onAboutButtonClicked);
 }
 
+// Sets up toolbar actions
 void MainWindow::setupToolbarActions() {
-    if (!ui->actionOpenSettings)
-        ui->actionOpenSettings = new QAction(UIConfig::MENU_SETTINGS_LABEL, this);
+    if (!ui->actionOpenSettings) ui->actionOpenSettings = new QAction(this);
+    if (!ui->actionExit) ui->actionExit = new QAction(this);
+    if (!ui->actionHelp) ui->actionHelp = new QAction(this);
+    if (!ui->actionAbout) ui->actionAbout = new QAction(this);
+
     ui->actionOpenSettings->setIcon(QIcon(BackupResources::SETTINGS_ICON_PATH));
+    ui->actionOpenSettings->setText(UIConfig::MENU_SETTINGS_LABEL);
 
-    if (!ui->actionExit)
-        ui->actionExit = new QAction(UIConfig::MENU_EXIT_LABEL, this);
     ui->actionExit->setIcon(QIcon(BackupResources::EXIT_ICON_PATH));
+    ui->actionExit->setText(UIConfig::MENU_EXIT_LABEL);
+
+    ui->actionHelp->setIcon(QIcon(BackupResources::HELP_ICON_PATH));
+    ui->actionHelp->setText(UIConfig::MENU_HELP_LABEL);
+
+    ui->actionAbout->setIcon(QIcon(BackupResources::ABOUT_ICON_PATH));
+    ui->actionAbout->setText(UIConfig::MENU_ABOUT_LABEL);
 }
 
+// Adds a spacer to the toolbar
 void MainWindow::addToolbarSpacer() {
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    QWidgetAction* spacerAction = new QWidgetAction(this);
-    spacerAction->setDefaultWidget(spacer);
-    ui->mainToolBar->addAction(spacerAction);
+    QWidget *spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->mainToolBar->addWidget(spacer);
 }
 
+// Connects toolbar actions to their respective slots
 void MainWindow::connectToolbarActions(QAction* helpAction, QAction* aboutAction) {
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::exitApplication);
     connect(helpAction, &QAction::triggered, this, &MainWindow::showHelpDialog);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::onAboutButtonClicked);
 }
 
-// **Mouse Event Handling (Refactored)**
+// Handles mouse events for dragging
 void MainWindow::handleMouseEvent(QMouseEvent *event, bool isPress) {
     if (event->button() == Qt::LeftButton) {
         dragging = isPress;
@@ -186,10 +221,12 @@ void MainWindow::handleMouseEvent(QMouseEvent *event, bool isPress) {
     }
 }
 
+// Handles mouse press events
 void MainWindow::mousePressEvent(QMouseEvent *event) {
     handleMouseEvent(event, true);
 }
 
+// Handles mouse move events
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     if (dragging && event->buttons() & Qt::LeftButton) {
         move(event->globalPosition().toPoint() - lastMousePosition);
@@ -197,11 +234,12 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
+// Handles mouse release events
 void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
     handleMouseEvent(event, false);
 }
 
-// **Backup Management**
+// Refreshes the backup status
 void MainWindow::refreshBackupStatus() {
     BackupStatus status = backupService->scanForBackupStatus();
 
@@ -225,7 +263,7 @@ void MainWindow::refreshBackupStatus() {
     updateLastBackupInfo();
 }
 
-// **Change Backup Destination**
+// Changes the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {
     QString selectedDir = QFileDialog::getExistingDirectory(this,
                                                             InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
@@ -241,7 +279,6 @@ void MainWindow::onChangeBackupDestinationClicked() {
     }
 
     backupService->setBackupRoot(selectedDir);
-
     destinationModel->setRootPath(selectedDir);
     ui->BackupDestinationView->setModel(destinationModel);
     ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
@@ -251,6 +288,7 @@ void MainWindow::onChangeBackupDestinationClicked() {
     updateFileWatcher();
 }
 
+// Adds selected paths to backup staging
 void MainWindow::onAddToBackupClicked() {
     QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
@@ -260,6 +298,7 @@ void MainWindow::onAddToBackupClicked() {
     Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
 }
 
+// Removes selected paths from backup staging
 void MainWindow::onRemoveFromBackupClicked() {
     QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
@@ -269,6 +308,7 @@ void MainWindow::onRemoveFromBackupClicked() {
     Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
 }
 
+// Initiates backup creation
 void MainWindow::onCreateBackupClicked() {
     QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
@@ -290,6 +330,7 @@ void MainWindow::onCreateBackupClicked() {
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
 
+// Deletes a selected backup
 void MainWindow::onDeleteBackupClicked() {
     QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
@@ -306,41 +347,40 @@ void MainWindow::onDeleteBackupClicked() {
     }
 }
 
-// **File and Directory Monitoring**
+// Starts watching the backup directory
 void MainWindow::startWatchingBackupDirectory(const QString &path) {
     fileWatcher->startWatching(path);
     connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
 }
 
+// Updates the file watcher
 void MainWindow::updateFileWatcher() {
     fileWatcher->startWatching(destinationModel->rootPath());
 }
 
+// Handles file changes
 void MainWindow::onFileChanged(const QString &path) {
     Q_UNUSED(path);
     refreshBackupStatus();
 }
 
+// Handles backup directory changes
 void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
     refreshBackupStatus();
 }
 
-// **UI Updates**
+// Updates the backup status label
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressConfig::STATUS_LIGHT_SIZE);
-
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
-
     QString pixmapHtml = QString(Styling::STATUS_LIGHT_ICON_TEMPLATE)
                              .arg(QString::fromUtf8(ba.toBase64()));
-
     QString combinedHtml = QString(Styling::STATUS_LABEL_HTML_TEMPLATE)
                                .arg(UIConfig::LABEL_BACKUP_FOUND, pixmapHtml);
-
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
@@ -351,31 +391,34 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     ui->LastBackupSizeLabel->setVisible(backupExists);
 }
 
+// Updates the backup location label
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     ui->BackupLocationLabel->setText(UIConfig::LABEL_BACKUP_LOCATION + location);
 }
 
+// Updates the backup total count label
 void MainWindow::updateBackupTotalCountLabel() {
     ui->BackupTotalCountLabel->setText(UIConfig::LABEL_BACKUP_TOTAL_COUNT +
                                        QString::number(backupService->getBackupCount()));
 }
 
+// Updates the backup total size label
 void MainWindow::updateBackupTotalSizeLabel() {
     quint64 totalSize = backupService->getTotalBackupSize();
     QString humanReadableSize = Utils::Formatting::formatSize(totalSize);
     ui->BackupTotalSizeLabel->setText(UIConfig::LABEL_BACKUP_TOTAL_SIZE + humanReadableSize);
 }
 
+// Updates the backup location status label
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
     QString status = dirInfo.exists() ? (dirInfo.isWritable() ? UIConfig::DIRECTORY_STATUS_WRITABLE
                                                               : UIConfig::DIRECTORY_STATUS_READ_ONLY)
                                       : UIConfig::DIRECTORY_STATUS_UNKNOWN;
-
     ui->BackupLocationStatusLabel->setText(UIConfig::LABEL_BACKUP_LOCATION_ACCESS + status);
 }
 
-// **Last Backup Info Update**
+// Updates the last backup info
 void MainWindow::updateLastBackupInfo() {
     QJsonObject metadata = backupService->getLastBackupMetadata();
     if (metadata.isEmpty()) {
@@ -402,11 +445,10 @@ void MainWindow::updateLastBackupInfo() {
     ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + totalSize);
 }
 
-// **Close Event Handling**
+// Handles the close event
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this,
-                             ErrorMessages::ERROR_OPERATION_IN_PROGRESS,
+        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS,
                              ErrorMessages::WARNING_OPERATION_STILL_RUNNING);
         event->ignore();
         return;
@@ -414,99 +456,47 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     QMainWindow::closeEvent(event);
 }
 
-// **UI Setup**
-void MainWindow::setupCustomTitleBar() {
-    titleBar = new QWidget(this);
-    titleBar->setFixedHeight(UIConfig::TITLE_BAR_HEIGHT);
-    titleBar->setStyleSheet(Styling::TITLE_BAR_STYLESHEET);
-
-    QHBoxLayout *titleLayout = new QHBoxLayout(titleBar);
-    titleLayout->setContentsMargins(5, 0, 5, 0);
-
-    titleLabel = new QLabel(AppInfo::APP_DISPLAY_TITLE, titleBar);
-    titleLabel->setStyleSheet(Styling::TITLE_LABEL_STYLESHEET);
-
-    minimizeButton = new QPushButton(Styling::WINDOW_MINIMIZE_BUTTON_LABEL, titleBar);
-    closeButton = new QPushButton(Styling::WINDOW_CLOSE_BUTTON_LABEL, titleBar);
-
-    minimizeButton->setToolTip("Minimize Window");
-    closeButton->setToolTip("Close Application");
-
-    minimizeButton->setFixedSize(30, 25);
-    closeButton->setFixedSize(30, 25);
-
-    minimizeButton->setStyleSheet(Styling::MINIMIZE_BUTTON_STYLESHEET);
-    closeButton->setStyleSheet(Styling::CLOSE_BUTTON_STYLESHEET);
-
-    minimizeButton->setCursor(Qt::PointingHandCursor);
-    closeButton->setCursor(Qt::PointingHandCursor);
-
-    titleLayout->addWidget(titleLabel);
-    titleLayout->addStretch();
-    titleLayout->addWidget(minimizeButton);
-    titleLayout->addWidget(closeButton);
-
-    QWidget *mainContainer = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout(mainContainer);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-
-    mainLayout->addWidget(titleBar);
-
-    QHBoxLayout *contentLayout = new QHBoxLayout();
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(0);
-
-    if (ui->mainToolBar) {
-        ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        contentLayout->addWidget(ui->mainToolBar);
-    }
-
-    contentLayout->addWidget(ui->centralwidget);
-    mainLayout->addLayout(contentLayout);
-
-    setCentralWidget(mainContainer);
-
-    connect(minimizeButton, &QPushButton::clicked, this, &MainWindow::showMinimized);
-    connect(closeButton, &QPushButton::clicked, this, &MainWindow::close);
-}
-
+// Sets up the destination view
 void MainWindow::setupDestinationView() {
     destinationModel->setFilter(BackupInfo::FILE_SYSTEM_FILTER);
     destinationModel->sort(0, Qt::DescendingOrder);
     ui->BackupDestinationView->setModel(destinationModel);
     ui->BackupDestinationView->setRootIndex(destinationModel->setRootPath(UserConfig::DEFAULT_BACKUP_DIRECTORY));
-
     removeAllColumnsFromTreeView(ui->BackupDestinationView);
 }
 
+// Sets up the backup staging tree view
 void MainWindow::setupBackupStagingTreeView() {
     ui->BackupStagingTreeView->setModel(stagingModel);
     ui->BackupStagingTreeView->header()->setVisible(true);
     ui->BackupStagingTreeView->header()->setStretchLastSection(true);
     ui->BackupStagingTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
     removeAllColumnsFromTreeView(ui->BackupStagingTreeView);
 }
 
-// **Fix for Undefined References**
+// Opens the settings dialog
 void MainWindow::openSettings() {
     SettingsDialog settingsDialog(this);
     settingsDialog.exec();
 }
 
+// Exits the application
 void MainWindow::exitApplication() {
     QApplication::quit();
 }
 
+// Displays the help dialog
 void MainWindow::showHelpDialog() {
     QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE, HelpInfo::HELP_WINDOW_MESSAGE);
 }
 
+// Displays the about dialog
 void MainWindow::onAboutButtonClicked() {
-    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE, QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE));
+    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE,
+                             QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE));
 }
 
+// Connects backup signals
 void MainWindow::connectBackupSignals() {
     connect(backupController, &BackupController::backupCreated, this, &MainWindow::refreshBackupStatus);
     connect(backupController, &BackupController::backupDeleted, this, &MainWindow::refreshBackupStatus);
@@ -515,18 +505,17 @@ void MainWindow::connectBackupSignals() {
     });
 }
 
-// **Setup Source Tree View**
+// Sets up the source tree view
 void MainWindow::setupSourceTreeView() {
     sourceModel->setRootPath(BackupInfo::DEFAULT_ROOT_PATH);
     sourceModel->setFilter(BackupInfo::FILE_SYSTEM_FILTER);
     ui->DriveTreeView->setModel(sourceModel);
     ui->DriveTreeView->setRootIndex(sourceModel->index(BackupInfo::DEFAULT_ROOT_PATH));
     ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
     removeAllColumnsFromTreeView(ui->DriveTreeView);
 }
 
-// **Remove Unnecessary Columns from QTreeView**
+// Removes unnecessary columns from QTreeView
 void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
     if (!treeView) return;
 
