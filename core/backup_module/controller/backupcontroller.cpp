@@ -1,6 +1,6 @@
 #include "backupcontroller.h"
-#include "../../config/_constants.h"
-#include "../../config/configmanager/configmanager.h"
+#include "../../../config/_constants.h"
+#include "../../../config/configmanager/configmanager.h"
 
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"

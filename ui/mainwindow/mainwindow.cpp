@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "../../core/config/_constants.h"
-#include "../../core/config/configmanager/configmanager.h"
-#include "../../core/config/resources_settings.h"
+#include "../../config/_constants.h"
+#include "../../config/configmanager/configmanager.h"
+#include "../../config/resources_settings.h"
 #include "../../core/backup_module/models/stagingmodel.h"
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"

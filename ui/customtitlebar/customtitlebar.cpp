@@ -1,5 +1,5 @@
 #include "customtitlebar.h"
-#include "../../core/config/_constants.h"
+#include "../../config/_constants.h"
 
 #include <QLabel>
 #include <QPushButton>

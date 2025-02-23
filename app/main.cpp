@@ -1,6 +1,6 @@
 #include <QApplication>
-#include "../core/config/_constants.h"
-#include "../core/config/configmanager/configmanager.h"
+#include "../config/_constants.h"
+#include "../config/configmanager/configmanager.h"
 #include "../ui/mainwindow/mainwindow.h"
 
 int main(int argc, char *argv[]) {
