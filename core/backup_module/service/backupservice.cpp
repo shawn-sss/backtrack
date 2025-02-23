@@ -49,18 +49,23 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
 
 // Backup Metadata Management
 BackupStatus BackupService::scanForBackupStatus() const {
-    QString backupSettingsPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
-    QString logsFolderPath = QDir(backupSettingsPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
-    QString settingsFilePath = QDir(backupSettingsPath).filePath(AppConfig::CONFIG_FILE_NAME);
+    QString configFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
+    QString logsFolderPath = QDir(configFolderPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
+    QString configFilePath = QDir(configFolderPath).filePath(AppConfig::CONFIG_FILE_NAME);
 
-    QDir backupSettingsDir(backupSettingsPath);
-    QDir logsDir(logsFolderPath);
+    qDebug() << "configFolderPath" << configFolderPath;
+    qDebug() << "logsFolderPath" << logsFolderPath;
+    qDebug() << "configFilePath" << configFilePath;
 
-    if (!backupSettingsDir.exists()) {
+
+    QDir configFolderDir(configFolderPath);
+    QDir logsFolderDir(logsFolderPath);
+
+    if (!configFolderDir.exists()) {
         return BackupStatus::None;
     }
 
-    if (!logsDir.exists() || !QFile::exists(settingsFilePath)) {
+    if (!logsFolderDir.exists() || !QFile::exists(configFilePath)) {
         return BackupStatus::Broken;
     }
 

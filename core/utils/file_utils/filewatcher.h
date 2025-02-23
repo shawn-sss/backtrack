@@ -27,6 +27,7 @@ public:
 
     // Monitoring Functionality
     void startWatching(const QString &rootPath);
+    void updateWatchList(const QStringList &paths); // New method to update the watch list dynamically
 
 signals:
     // Change Detection Signals
@@ -36,6 +37,9 @@ signals:
 private:
     // Internal Watcher
     QFileSystemWatcher *watcher;
+
+    // List of paths being watched
+    QStringList watchList;
 };
 
 #endif // FILEWATCHER_H

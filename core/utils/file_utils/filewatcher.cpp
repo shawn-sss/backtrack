@@ -3,6 +3,8 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <QDebug>
+#include <utility>
 
 // Constructor & Initialization
 FileWatcher::FileWatcher(QObject *parent)
@@ -11,20 +13,29 @@ FileWatcher::FileWatcher(QObject *parent)
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::fileChanged);
 }
 
+// Updates the watch list dynamically
+void FileWatcher::updateWatchList(const QStringList &paths) {
+    watchList = paths;
+}
+
 // Path Management
 void FileWatcher::addPath(const QString &path) {
-    if (!(watcher->directories() + watcher->files()).contains(path)) {
+    if (!path.isEmpty() && !(watcher->directories() + watcher->files()).contains(path)) {
         watcher->addPath(path);
+        qDebug() << "Watching path: " << path;
     }
 }
 
 void FileWatcher::addPaths(const QStringList &paths) {
-    watcher->addPaths(paths);
+    for (const QString &path : paths) {
+        addPath(path);
+    }
 }
 
 void FileWatcher::removePath(const QString &path) {
     if ((watcher->directories() + watcher->files()).contains(path)) {
         watcher->removePath(path);
+        qDebug() << "Stopped watching path: " << path;
     }
 }
 
@@ -49,15 +60,34 @@ QStringList FileWatcher::watchedFiles() const {
 // Monitoring Functionality
 void FileWatcher::startWatching(const QString &rootPath) {
     removeAllPaths();
-    addPath(rootPath);
+    addPath(rootPath);  // Always watch the root backup directory
 
     QDir rootDir(rootPath);
-    const QFileInfoList subDirectories = rootDir.entryInfoList(BackupInfo::FILE_SYSTEM_FILTER);
+    const QFileInfoList subDirectories = rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
+    // Define important paths to watch dynamically
+    watchList = {
+        QDir(rootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER),
+        QDir(rootPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY),
+        QDir(rootPath).filePath(AppConfig::CONFIG_FILE_NAME)
+    };
+
+    // Add all subdirectories to the watch list
     for (const QFileInfo &dirInfo : subDirectories) {
-        QFileInfo summaryFile(QDir(dirInfo.absoluteFilePath()).filePath(UserConfig::BACKUP_SUMMARY_FILE));
-        if (summaryFile.exists()) {
-            addPath(summaryFile.absoluteFilePath());
+        watchList.append(dirInfo.absoluteFilePath());
+    }
+
+    // Ensure the paths actually exist before adding them to the watcher
+    QStringList validPaths;
+    for (const auto &path : std::as_const(watchList)) {  // Use std::as_const to prevent detachment
+        if (QFileInfo::exists(path)) {  // Use static QFileInfo::exists() method
+            validPaths.append(path);
         }
     }
+
+    // Start watching the valid paths
+    addPaths(validPaths);
+
+    // Debug output
+    qDebug() << "Currently watching paths: " << watchedDirectories() + watchedFiles();
 }
