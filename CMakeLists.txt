@@ -47,6 +47,8 @@ set(PROJECT_SETTINGS
     core/config/utilities_settings.h
     core/config/resources_settings.h
     core/config/visual_settings.h
+    core/config/configmanager/configmanager.cpp
+    core/config/configmanager/configmanager.h
 )
 
 # UI sources
@@ -114,7 +116,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        core/config/configmanager/configmanager.cpp core/config/configmanager/configmanager.h
     )
 else()
     if(ANDROID)

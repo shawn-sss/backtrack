@@ -1,22 +1,25 @@
 #include <QApplication>
-
-#include "../ui/mainwindow/mainwindow.h"
 #include "../core/config/_constants.h"
+#include "../core/config/configmanager/configmanager.h"
+#include "../ui/mainwindow/mainwindow.h"
 
 int main(int argc, char *argv[]) {
-    // Initialize the application
+    // Initialize application
     QApplication app(argc, argv);
+
+    // Load configuration
+    ConfigManager::getInstance();
 
     // Set application properties
     app.setApplicationName(AppInfo::APP_DISPLAY_TITLE);
     app.setApplicationDisplayName(AppInfo::APP_DISPLAY_TITLE);
 
-    // Create and configure the main window
+    // Initialize main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::APP_DISPLAY_TITLE);
     mainWindow.setWindowIcon(QIcon(BackupResources::ICON_PATH));
     mainWindow.show();
 
-    // Start the application event loop
+    // Start event loop
     return app.exec();
 }

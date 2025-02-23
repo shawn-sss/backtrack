@@ -1,11 +1,10 @@
 #include "customtitlebar.h"
 #include "../../core/config/_constants.h"
-#include "../../core/config/resources_settings.h"
 
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QPointer>
+#include <QHBoxLayout>
 
 // Constructor
 CustomTitleBar::CustomTitleBar(QWidget *parent)
@@ -17,7 +16,7 @@ CustomTitleBar::CustomTitleBar(QWidget *parent)
     setupLayout();
 }
 
-// Sets up the title bar layout
+// Sets up layout
 void CustomTitleBar::setupLayout() {
     auto *layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 0, 5, 0);
@@ -34,7 +33,7 @@ void CustomTitleBar::setupLayout() {
     connect(closeButton, &QPushButton::clicked, this, &CustomTitleBar::closeRequested);
 }
 
-// Creates a styled button
+// Creates button
 QPushButton* CustomTitleBar::createButton(const QString &label, const QString &style, const QString &tooltip) {
     auto *button = new QPushButton(label, this);
     button->setStyleSheet(style);

@@ -5,53 +5,50 @@
 #include <QSize>
 
 namespace UIConfig {
-
 // Backup UI Labels
-inline const QString LABEL_BACKUP_FOUND = "Backup Found: ";
-inline const QString LABEL_BACKUP_LOCATION = "Backup Location: ";
-inline const QString LABEL_BACKUP_TOTAL_COUNT = "Backup Total Count: ";
-inline const QString LABEL_BACKUP_TOTAL_SIZE = "Backup Total Size: ";
-inline const QString LABEL_BACKUP_LOCATION_ACCESS = "Backup Location Access: ";
+constexpr auto LABEL_BACKUP_FOUND = "Backup Found: ";
+constexpr auto LABEL_BACKUP_LOCATION = "Backup Location: ";
+constexpr auto LABEL_BACKUP_TOTAL_COUNT = "Backup Total Count: ";
+constexpr auto LABEL_BACKUP_TOTAL_SIZE = "Backup Total Size: ";
+constexpr auto LABEL_BACKUP_LOCATION_ACCESS = "Backup Location Access: ";
 
 // Last Backup UI Labels
-inline const QString LABEL_LAST_BACKUP_NAME = "Last Backup Name: ";
-inline const QString LABEL_LAST_BACKUP_TIMESTAMP = "Last Backup Timestamp: ";
-inline const QString LABEL_LAST_BACKUP_DURATION = "Last Backup Duration: ";
-inline const QString LABEL_LAST_BACKUP_SIZE = "Last Backup Size: ";
+constexpr auto LABEL_LAST_BACKUP_NAME = "Last Backup Name: ";
+constexpr auto LABEL_LAST_BACKUP_TIMESTAMP = "Last Backup Timestamp: ";
+constexpr auto LABEL_LAST_BACKUP_DURATION = "Last Backup Duration: ";
+constexpr auto LABEL_LAST_BACKUP_SIZE = "Last Backup Size: ";
 
 // Toolbar UI Labels
-inline const QString MENU_SETTINGS_LABEL = "Settings";
-inline const QString MENU_EXIT_LABEL = "Exit";
-inline const QString MENU_HELP_LABEL = "Help";
-inline const QString MENU_ABOUT_LABEL = "About";
+constexpr auto MENU_SETTINGS_LABEL = "Settings";
+constexpr auto MENU_EXIT_LABEL = "Exit";
+constexpr auto MENU_HELP_LABEL = "Help";
+constexpr auto MENU_ABOUT_LABEL = "About";
 
 // Directory Write Status
-inline const QString DIRECTORY_STATUS_WRITABLE = "Writable";
-inline const QString DIRECTORY_STATUS_READ_ONLY = "Read-Only";
-inline const QString DIRECTORY_STATUS_UNKNOWN = "Unknown";
+constexpr auto DIRECTORY_STATUS_WRITABLE = "Writable";
+constexpr auto DIRECTORY_STATUS_READ_ONLY = "Read-Only";
+constexpr auto DIRECTORY_STATUS_UNKNOWN = "Unknown";
 
 // Tree View UI Settings
-inline const QString STAGING_COLUMN_NAME = "Name";
+constexpr auto STAGING_COLUMN_NAME = "Name";
 constexpr int TREE_VIEW_START_HIDDEN_COLUMN = 1;
 constexpr int TREE_VIEW_DEFAULT_COLUMN_COUNT = 4;
 
 // Title Bar UI Settings
 constexpr int TITLE_BAR_HEIGHT = 40;
-
-} // namespace UIConfig
+}
 
 namespace Styling {
-
 // UI Component HTML Templates
-inline const QString STATUS_LIGHT_ICON_TEMPLATE = "<img src='data:image/png;base64,%1' style='%2'>";
-inline const QString STATUS_LABEL_HTML_TEMPLATE =
+constexpr auto STATUS_LIGHT_ICON_TEMPLATE = "<img src='data:image/png;base64,%1' style='%2'>";
+constexpr auto STATUS_LABEL_HTML_TEMPLATE =
     "<div style='display:flex; align-items:center;'>"
     "<span>%1</span><span style='margin-left:4px;'>%2</span>"
     "</div>";
 
 // Icon Styling
-inline const QString ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
-constexpr auto TOOLBAR_ICON_SIZE = QSize(32, 32);
+constexpr auto ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
+constexpr QSize TOOLBAR_ICON_SIZE(32, 32);
 
 // General UI Colors
 constexpr auto TOOLBAR_BACKGROUND_COLOR = "#222222";
@@ -67,13 +64,13 @@ constexpr auto WINDOW_CLOSE_BUTTON_LABEL = "X";
 constexpr auto WINDOW_MINIMIZE_BUTTON_LABEL = "-";
 
 // Minimize Button Styling
-inline const QString MINIMIZE_BUTTON_STYLESHEET =
+constexpr auto MINIMIZE_BUTTON_STYLESHEET =
     "QPushButton { background: transparent; color: white; border: none; }"
     "QPushButton:hover { background: rgba(255, 255, 255, 0.2); }"
     "QPushButton:pressed { background: rgba(255, 255, 255, 0.3); }";
 
 // Close Button Styling
-inline const QString CLOSE_BUTTON_STYLESHEET =
+constexpr auto CLOSE_BUTTON_STYLESHEET =
     "QPushButton { background: transparent; color: white; border: none; }"
     "QPushButton:hover { background: red; color: white; }"
     "QPushButton:pressed { background: darkred; color: white; }";
@@ -82,11 +79,10 @@ inline const QString CLOSE_BUTTON_STYLESHEET =
 constexpr auto TOOLBAR_STYLESHEET = "background-color: #222222; border: none;";
 
 // General Button Styling
-inline const QString BUTTON_STYLE =
+constexpr auto BUTTON_STYLE =
     "QPushButton { background: #444; color: white; border-radius: 5px; padding: 5px; }"
     "QPushButton:hover { background: #666; }"
     "QPushButton:pressed { background: #888; }";
-
-} // namespace Styling
+}
 
 #endif // UI_CONFIG_H

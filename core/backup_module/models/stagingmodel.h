@@ -1,8 +1,8 @@
 #ifndef STAGINGMODEL_H
 #define STAGINGMODEL_H
 
-#include <QAbstractItemModel>
 #include <QVector>
+#include <QAbstractItemModel>
 
 // Staging Model Class
 class StagingModel : public QAbstractItemModel {
@@ -11,7 +11,6 @@ class StagingModel : public QAbstractItemModel {
 public:
     // Constructor
     explicit StagingModel(QObject *parent = nullptr);
-
     Q_DISABLE_COPY(StagingModel)
 
     // QModelIndex Management

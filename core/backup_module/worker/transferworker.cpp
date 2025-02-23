@@ -1,13 +1,14 @@
 #include "transferworker.h"
-#include "../../utils/file_utils/fileoperations.h"
 #include "../../config/_constants.h"
 
-#include <QStringList>
-#include <QFile>
-#include <QDir>
-#include <QStorageInfo>
+#include "../../utils/file_utils/fileoperations.h"
 
-// Constructor & Initialization
+#include <QDir>
+#include <QStringList>
+#include <QStorageInfo>
+#include <QFile>
+
+// Constructor
 TransferWorker::TransferWorker(const QStringList &files, const QString &destination, QObject *parent)
     : QObject(parent), files(files), destination(destination) {}
 
@@ -17,8 +18,7 @@ void TransferWorker::stopTransfer() {
 }
 
 void TransferWorker::startTransfer() {
-    int totalFiles = files.size();
-    if (totalFiles == 0) {
+    if (files.isEmpty()) {
         emit transferComplete();
         emit finished();
         return;
@@ -31,24 +31,19 @@ void TransferWorker::startTransfer() {
             return;
         }
 
-        QFileInfo fileInfo(filePath);
-        bool success = fileInfo.isDir() && filePath.endsWith(":/")
+        bool success = QFileInfo(filePath).isDir() && filePath.endsWith(":/")
                            ? processDriveRoot(filePath)
                            : processFileOrFolder(filePath);
 
-        if (!success) {
-            return;
-        }
+        if (!success) return;
 
-        completedFiles++;
-        emit progressUpdated((completedFiles * 100) / totalFiles);
+        emit progressUpdated((++completedFiles * 100) / files.size());
     }
 
     emit transferComplete();
     emit finished();
 }
 
-// File Processing
 bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     if (stopRequested) return false;
 
@@ -58,46 +53,28 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
         return false;
     }
 
-    QString driveLetter = driveRoot.left(1);
-    QStorageInfo storageInfo(driveRoot);
-    QString driveLabel = storageInfo.displayName().isEmpty() ? BackupInfo::DEFAULT_DRIVE_LABEL : storageInfo.displayName();
+    QString driveBackupFolder = QDir(destination).filePath(QString("%1 (%2 %3)")
+                                                               .arg(QStorageInfo(driveRoot).displayName().isEmpty() ? BackupInfo::DEFAULT_DRIVE_LABEL : QStorageInfo(driveRoot).displayName(),
+                                                                    driveRoot.left(1),
+                                                                    BackupInfo::DRIVE_LABEL_SUFFIX));
 
-    QString driveName = QString("%1 (%2 %3)").arg(driveLabel, driveLetter, BackupInfo::DRIVE_LABEL_SUFFIX);
-    QString driveBackupFolder = QDir(destination).filePath(driveName);
-
-    QDir dir(driveBackupFolder);
-    if (dir.exists()) {
-        dir.removeRecursively();
-    }
-
+    if (QDir(driveBackupFolder).exists()) QDir(driveBackupFolder).removeRecursively();
     if (!QDir().mkpath(driveBackupFolder)) {
         emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
 
-    QDir driveDir(driveRoot);
-    const QFileInfoList entries = driveDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
-
-    if (stopRequested) return false;
-
+    QFileInfoList entries = QDir(driveRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
     for (int i = 0; i < entries.size(); ++i) {
         const QFileInfo &entry = entries.at(i);
-        QString destPath = driveBackupFolder + QDir::separator() + entry.fileName();
-        if (!copyItem(entry, destPath)) {
-            return false;
-        }
+        if (!copyItem(entry, driveBackupFolder + QDir::separator() + entry.fileName())) return false;
     }
 
     return true;
 }
 
 bool TransferWorker::processFileOrFolder(const QString &filePath) {
-    if (stopRequested) return false;
-
-    QFileInfo fileInfo(filePath);
-    QString destinationPath = QDir(destination).filePath(fileInfo.fileName());
-
-    return copyItem(fileInfo, destinationPath);
+    return !stopRequested && copyItem(QFileInfo(filePath), QDir(destination).filePath(QFileInfo(filePath).fileName()));
 }
 
 // Helper Methods

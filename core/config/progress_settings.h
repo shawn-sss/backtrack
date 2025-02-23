@@ -2,7 +2,7 @@
 #define PROGRESS_SETTINGS_H
 
 namespace ProgressConfig {
-// progress bar settings
+// Progress bar settings
 constexpr int STATUS_LIGHT_SIZE = 8;
 constexpr int PROGRESS_BAR_HEIGHT = 20;
 constexpr int PROGRESS_BAR_MAX_VALUE = 100;

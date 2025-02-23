@@ -2,10 +2,10 @@
 #define FILEOPERATIONS_H
 
 #include <QString>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QSet>
 #include <QDir>
+#include <QJsonObject>
+#include <QJsonArray>
 
 // File operations utilities
 namespace FileOperations {

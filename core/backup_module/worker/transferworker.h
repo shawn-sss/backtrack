@@ -1,10 +1,10 @@
 #ifndef TRANSFERWORKER_H
 #define TRANSFERWORKER_H
 
-#include <QObject>
+#include <QDir>
 #include <QStringList>
 #include <QFileInfo>
-#include <QDir>
+#include <QObject>
 
 // Handles file transfer operations
 class TransferWorker : public QObject {

@@ -1,10 +1,10 @@
 #include "stagingmodel.h"
 #include "../../config/_constants.h"
 
-#include <QFileIconProvider>
-#include <QFileInfo>
-#include <QStorageInfo>
 #include <QDir>
+#include <QStorageInfo>
+#include <QFileInfo>
+#include <QFileIconProvider>
 
 // Constructor
 StagingModel::StagingModel(QObject *parent)

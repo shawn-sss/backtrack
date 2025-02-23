@@ -14,15 +14,11 @@ namespace FileOperations {
 bool copyDirectoryRecursively(const QString &source, const QString &destination) {
     QDir sourceDir(source);
     if (!sourceDir.exists()) return false;
-
     QDir destinationDir(destination);
     if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false;
-
     const QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-
     for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
-
         if (entry.isDir()) {
             if (!copyDirectoryRecursively(entry.absoluteFilePath(), destPath)) return false;
         } else if (entry.isFile()) {
@@ -47,7 +43,6 @@ bool createDirectory(const QString &path) {
 quint64 calculateDirectorySize(const QDir &dir) {
     quint64 totalSize = 0;
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-
     for (const QFileInfo &entry : entries) {
         totalSize += entry.isDir() ? calculateDirectorySize(QDir(entry.absoluteFilePath())) : entry.size();
     }
@@ -58,17 +53,14 @@ quint64 calculateDirectorySize(const QDir &dir) {
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
     QSaveFile file(filePath);
     if (!file.open(QIODevice::WriteOnly)) return false;
-
     QJsonDocument doc(jsonObject);
     if (file.write(doc.toJson()) == -1) return false;
-
     return file.commit();
 }
 
 QJsonObject readJsonFromFile(const QString &filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) return QJsonObject();
-
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
     file.close();
     return doc.isObject() ? doc.object() : QJsonObject();
@@ -78,7 +70,6 @@ QJsonObject readJsonFromFile(const QString &filePath) {
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {
     QDir dir(dirPath);
     const QFileInfoList fileEntries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
-
     for (const QFileInfo &entry : fileEntries) {
         QString fullPath = entry.absoluteFilePath();
         if (!uniqueFiles.contains(fullPath)) {
@@ -86,7 +77,6 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
             filesArray.append(fullPath);
         }
     }
-
     const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
     for (const QFileInfo &subDir : subDirs) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
@@ -96,7 +86,6 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
 void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) {
     QDir dir(dirPath);
     const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-
     for (const QFileInfo &subDir : subDirs) {
         QString subDirPath = subDir.absoluteFilePath();
         if (!uniqueFolders.contains(subDirPath)) {
@@ -110,13 +99,11 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
 // Backup Infrastructure Setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
     QString backupSettingsPath = QDir(backupDir).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
-
     QDir settingsDir(backupSettingsPath);
     if (!settingsDir.exists() && !settingsDir.mkpath(".")) {
         errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_DIRECTORY).arg(AppConfig::BACKUP_CONFIG_FOLDER);
         return false;
     }
-
     QString settingsFilePath = settingsDir.filePath(AppConfig::CONFIG_FILE_NAME);
     if (!QFile::exists(settingsFilePath)) {
         QFile file(settingsFilePath);
@@ -126,14 +113,12 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
         }
         file.close();
     }
-
     QString backupLogsPath = settingsDir.filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
     QDir logsDir(backupLogsPath);
     if (!logsDir.exists() && !logsDir.mkpath(".")) {
         errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_FOLDER).arg(AppConfig::BACKUP_LOGS_DIRECTORY);
         return false;
     }
-
     return true;
 }
 

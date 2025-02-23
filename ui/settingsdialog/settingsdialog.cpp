@@ -1,10 +1,10 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+
 #include "../../core/utils/common_utils/utils.h"
 
 #include <QVBoxLayout>
 
-// Constructor
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent), ui(std::make_unique<Ui::SettingsDialog>()) {
     ui->setupUi(this);
@@ -12,10 +12,9 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setupConnections();
 }
 
-// Destructor
 SettingsDialog::~SettingsDialog() {}
 
-// Sets up UI components
+// Initialize UI components
 void SettingsDialog::setupUIComponents() {
     QWidget *titleBarContainer = findChild<QWidget *>("titleBarContainer");
     if (!titleBarContainer || titleBarContainer->layout()) return;
@@ -25,7 +24,7 @@ void SettingsDialog::setupUIComponents() {
     layout->addWidget(titleBar);
 }
 
-// Sets up signal connections
+// Establish signal connections
 void SettingsDialog::setupConnections() {
     if (titleBar) {
         connect(titleBar, &CustomTitleBar::minimizeRequested, this, &SettingsDialog::showMinimized);
@@ -35,17 +34,17 @@ void SettingsDialog::setupConnections() {
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
 }
 
-// Handles save action
+// Save action handler
 void SettingsDialog::onSaveClicked() {
     accept();
 }
 
-// Handles cancel action
+// Cancel action handler
 void SettingsDialog::onCancelClicked() {
     reject();
 }
 
-// Handles mouse press event for dragging
+// Mouse press event handler
 void SettingsDialog::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         dragging = true;
@@ -54,7 +53,7 @@ void SettingsDialog::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-// Handles mouse move event for dragging
+// Mouse move event handler
 void SettingsDialog::mouseMoveEvent(QMouseEvent *event) {
     if (dragging && event->buttons() & Qt::LeftButton) {
         move(event->globalPosition().toPoint() - lastMousePosition);
@@ -62,7 +61,7 @@ void SettingsDialog::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
-// Handles mouse release event for dragging
+// Mouse release event handler
 void SettingsDialog::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         dragging = false;

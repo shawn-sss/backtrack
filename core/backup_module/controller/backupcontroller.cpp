@@ -1,7 +1,9 @@
 #include "backupcontroller.h"
+#include "../../config/_constants.h"
+#include "../../config/configmanager/configmanager.h"
+
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
-#include "../../config/_constants.h"
 
 #include <QThread>
 #include <QProgressBar>
@@ -23,21 +25,19 @@ void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
     if (isBackupInProgress()) {
-        emit errorOccurred(ErrorMessages::WARNING_BACKUP_OPERATION_RUNNING	);
+        emit errorOccurred(ErrorMessages::WARNING_BACKUP_OPERATION_RUNNING);
         return;
     }
 
     cleanupAfterTransfer();
 
     QString timestamp = QDateTime::currentDateTime().toString(BackupInfo::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    QString backupFolderName = QString("%1%2").arg(UserConfig::BACKUP_FOLDER_PREFIX, timestamp);
+    QString backupFolderName = QString("%1%2").arg(ConfigManager::getInstance().getBackupPrefix(), timestamp);
 
     QDir destDir(destinationPath);
     QString backupFolderPath = destDir.filePath(backupFolderName);
 
-    if (!createBackupFolder(backupFolderPath)) {
-        return;
-    }
+    if (!createBackupFolder(backupFolderPath)) return;
 
     progressBar->setVisible(true);
     progressBar->setValue(ProgressConfig::PROGRESS_BAR_MIN_VALUE);
@@ -50,15 +50,13 @@ void BackupController::createBackup(const QString &destinationPath,
 
     connect(workerThread, &QThread::started, worker, &TransferWorker::startTransfer);
     connect(worker, &TransferWorker::progressUpdated, progressBar, &QProgressBar::setValue);
-    connect(worker, &TransferWorker::transferComplete, this,
-            [this, backupFolderPath, stagingList, startTime, progressBar]() {
-                qint64 backupDuration = QDateTime::currentMSecsSinceEpoch() - startTime;
-
-                backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
-                progressBar->setValue(ProgressConfig::PROGRESS_BAR_MAX_VALUE);
-                progressBar->setVisible(false);
-                emit backupCreated();
-            });
+    connect(worker, &TransferWorker::transferComplete, this, [this, backupFolderPath, stagingList, startTime, progressBar]() {
+        qint64 backupDuration = QDateTime::currentMSecsSinceEpoch() - startTime;
+        backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
+        progressBar->setValue(ProgressConfig::PROGRESS_BAR_MAX_VALUE);
+        progressBar->setVisible(false);
+        emit backupCreated();
+    });
 
     connect(worker, &TransferWorker::errorOccurred, this, [this, progressBar](const QString &error) {
         progressBar->setVisible(false);
@@ -75,7 +73,7 @@ void BackupController::createBackup(const QString &destinationPath,
 
 void BackupController::deleteBackup(const QString &backupPath) {
     QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(
-    QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
+        QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
     QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_FILE_SUFFIX;
     QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
 

@@ -1,8 +1,8 @@
 #ifndef BACKUPCONTROLLER_H
 #define BACKUPCONTROLLER_H
 
-#include <QObject>
 #include <QStringList>
+#include <QObject>
 
 // Forward Declarations
 class QProgressBar;

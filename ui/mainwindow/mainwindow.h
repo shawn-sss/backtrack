@@ -1,21 +1,21 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QFileSystemModel>
-#include <QProgressBar>
-#include <QStringList>
-#include <QToolBar>
-#include <QAction>
-#include <QMouseEvent>
-#include <QLabel>
-#include <QPushButton>
-#include <QWidget>
-
 #include "../customtitlebar/customtitlebar.h"
 #include "../../core/utils/common_utils/utils.h"
 
-// Forward Declarations
+#include <QLabel>
+#include <QStringList>
+#include <QMainWindow>
+#include <QToolBar>
+#include <QPushButton>
+#include <QProgressBar>
+#include <QWidget>
+#include <QAction>
+#include <QMouseEvent>
+#include <QFileSystemModel>
+
+//Forward declarations
 class QTreeView;
 class BackupService;
 class StagingModel;
@@ -31,31 +31,30 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    // Constructor and Destructor
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
 protected:
-    // Window Events
+    // Window event handling
     void closeEvent(QCloseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    // Initialization Methods
+    // Initialization
     void initializeUI();
     void initializeBackupSystem();
     void setupConnections();
 
-    // UI Setup
+    // UI Components
     void setupCustomTitleBar();
     void setupToolBar();
     void setupToolbarActions();
     void addToolbarSpacer();
     void connectToolbarActions(QAction *helpAction, QAction *aboutAction);
 
-    // Backup-Related UI Setup
+    // Backup UI
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
@@ -79,11 +78,11 @@ private:
     // Dragging Support
     void handleMouseEvent(QMouseEvent *event, bool isPress);
 
-    // Signal Connections
+    // Signal Handling
     void connectBackupSignals();
 
 private slots:
-    // UI Event Handlers
+    // UI Actions
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -94,26 +93,24 @@ private slots:
     void showHelpDialog();
     void onAboutButtonClicked();
 
-    // File Watcher Event Handlers
+    // File Watcher Handling
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 
 private:
     Ui::MainWindow *ui{nullptr};
-
-    // Models and UI Components
     QFileSystemModel *destinationModel{nullptr};
     QFileSystemModel *sourceModel{nullptr};
     QProgressBar *progressBar{nullptr};
 
-    // Toolbar and Actions
+    // Toolbar
     QToolBar *customToolBar{nullptr};
     QAction *actionOpenSettings{nullptr};
     QAction *actionExit{nullptr};
     QAction *actionHelp{nullptr};
     QAction *actionAbout{nullptr};
 
-    // Backup-Related Objects
+    // Backup System
     FileWatcher *fileWatcher{nullptr};
     BackupService *backupService{nullptr};
     StagingModel *stagingModel{nullptr};
@@ -122,7 +119,7 @@ private:
     // Custom Title Bar
     CustomTitleBar *titleBar{nullptr};
 
-    // Dragging Support
+    // Dragging
     QPoint lastMousePosition;
     bool dragging{false};
 };

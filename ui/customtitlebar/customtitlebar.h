@@ -1,8 +1,9 @@
 #ifndef CUSTOMTITLEBAR_H
 #define CUSTOMTITLEBAR_H
 
-#include <QWidget>
 #include <QPointer>
+#include <QWidget>
+
 
 class QLabel;
 class QPushButton;
@@ -18,10 +19,10 @@ signals:
     void closeRequested();
 
 private:
-    // Sets up the title bar layout
+    // Layout setup
     void setupLayout();
 
-    // Creates a styled button
+    // Button creation
     QPushButton* createButton(const QString &label, const QString &style, const QString &tooltip);
 
     QPointer<QLabel> titleLabel;
@@ -29,4 +30,4 @@ private:
     QPointer<QPushButton> closeButton;
 };
 
-#endif // CUSTOMTITLEBAR_H
+#endif

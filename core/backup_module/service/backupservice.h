@@ -2,8 +2,8 @@
 #define BACKUPSERVICE_H
 
 #include <QString>
-#include <QJsonObject>
 #include <QSet>
+#include <QJsonObject>
 #include <QJsonArray>
 
 // Enum for Backup Status

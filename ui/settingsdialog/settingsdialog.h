@@ -1,13 +1,13 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
+#include "../customtitlebar/customtitlebar.h"
+
+#include <memory>
 #include <QDialog>
 #include <QMouseEvent>
 #include <QPoint>
-#include <memory>
 #include <QPointer>
-
-#include "../customtitlebar/customtitlebar.h"
 
 namespace Ui {
 class SettingsDialog;
@@ -21,27 +21,19 @@ public:
     ~SettingsDialog() override;
 
 protected:
-    // Handles mouse press events
+    // Mouse event handlers
     void mousePressEvent(QMouseEvent *event) override;
-
-    // Handles mouse move events
     void mouseMoveEvent(QMouseEvent *event) override;
-
-    // Handles mouse release events
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
-    // Sets up UI components
+    // UI setup
     void setupUIComponents();
-
-    // Sets up signal connections
     void setupConnections();
 
 private slots:
-    // Handles save action
+    // Button actions
     void onSaveClicked();
-
-    // Handles cancel action
     void onCancelClicked();
 
 private:
