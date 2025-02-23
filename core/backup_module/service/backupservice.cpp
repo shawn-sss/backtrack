@@ -53,11 +53,6 @@ BackupStatus BackupService::scanForBackupStatus() const {
     QString logsFolderPath = QDir(configFolderPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
     QString configFilePath = QDir(configFolderPath).filePath(AppConfig::CONFIG_FILE_NAME);
 
-    qDebug() << "configFolderPath" << configFolderPath;
-    qDebug() << "logsFolderPath" << logsFolderPath;
-    qDebug() << "configFilePath" << configFilePath;
-
-
     QDir configFolderDir(configFolderPath);
     QDir logsFolderDir(logsFolderPath);
 

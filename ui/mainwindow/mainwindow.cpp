@@ -123,13 +123,17 @@ void MainWindow::initializeBackupSystem() {
         QMessageBox::critical(this, ErrorMessages::BACKUP_INITIALIZATION_FAILED_TITLE,
                               ErrorMessages::ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
     }
+
     setupDestinationView();
     setupSourceTreeView();
     setupBackupStagingTreeView();
     refreshBackupStatus();
-    startWatchingBackupDirectory(UserConfig::DEFAULT_BACKUP_DIRECTORY);
-    updateFileWatcher();
+
+    if (!fileWatcher->watchedDirectories().contains(UserConfig::DEFAULT_BACKUP_DIRECTORY)) {
+        startWatchingBackupDirectory(UserConfig::DEFAULT_BACKUP_DIRECTORY);
+    }
 }
+
 
 // Sets up signal connections
 void MainWindow::setupConnections() {
@@ -355,7 +359,11 @@ void MainWindow::startWatchingBackupDirectory(const QString &path) {
 
 // Updates the file watcher
 void MainWindow::updateFileWatcher() {
-    fileWatcher->startWatching(destinationModel->rootPath());
+    QString watchPath = destinationModel->rootPath();
+
+    if (!fileWatcher->watchedDirectories().contains(watchPath)) {
+        fileWatcher->startWatching(watchPath);
+    }
 }
 
 // Handles file changes
