@@ -74,7 +74,7 @@ void BackupController::createBackup(const QString &destinationPath,
 void BackupController::deleteBackup(const QString &backupPath) {
     QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(
         QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
-    QString logFileName = QFileInfo(backupPath).fileName() + AppConfig::BACKUP_LOG_FILE_SUFFIX;
+    QString logFileName = QFileInfo(backupPath).fileName() + "_" + AppConfig::BACKUP_LOG_FILE_SUFFIX;
     QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
 
     if (!QFile::exists(logFilePath)) {
