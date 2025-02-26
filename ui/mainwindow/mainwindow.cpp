@@ -54,20 +54,27 @@ MainWindow::MainWindow(QWidget *parent)
         ui->mainToolBar->setFloatable(false);
         ui->mainToolBar->setMovable(false);
         ui->mainToolBar->setVisible(true);
-        ui->mainToolBar->setIconSize(QSize(24, 24));
-        ui->mainToolBar->setStyleSheet("background-color: transparent; border: none;");
+        ui->mainToolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
+        ui->mainToolBar->setStyleSheet(Styles::Toolbar::MINIMAL);
     }
 
     initializeUI();
     initializeBackupSystem();
     setupConnections();
 
-    ui->AddToBackupButton->setCursor(Qt::PointingHandCursor);
-    ui->RemoveFromBackupButton->setCursor(Qt::PointingHandCursor);
-    ui->CreateBackupButton->setCursor(Qt::PointingHandCursor);
-    ui->ChangeBackupDestinationButton->setCursor(Qt::PointingHandCursor);
-    ui->DeleteBackupButton->setCursor(Qt::PointingHandCursor);
+    QList<QPushButton*> buttons = {
+        ui->AddToBackupButton,
+        ui->RemoveFromBackupButton,
+        ui->CreateBackupButton,
+        ui->ChangeBackupDestinationButton,
+        ui->DeleteBackupButton
+    };
+
+    for (QPushButton* button : buttons) {
+        button->setCursor(Qt::PointingHandCursor);
+    }
 }
+
 
 // Destructor
 MainWindow::~MainWindow() {
@@ -78,9 +85,9 @@ MainWindow::~MainWindow() {
 void MainWindow::initializeUI() {
     setupCustomTitleBar();
     setupToolBar();
-    Utils::UI::setupProgressBar(ui->TransferProgressBar, ProgressConfig::PROGRESS_BAR_MIN_VALUE,
-                                ProgressConfig::PROGRESS_BAR_MAX_VALUE, ProgressConfig::PROGRESS_BAR_HEIGHT,
-                                ProgressConfig::PROGRESS_BAR_TEXT_VISIBLE);
+    Utils::UI::setupProgressBar(ui->TransferProgressBar, ProgressSettings::PROGRESS_BAR_MIN_VALUE,
+                                ProgressSettings::PROGRESS_BAR_MAX_VALUE, ProgressSettings::PROGRESS_BAR_HEIGHT,
+                                ProgressSettings::PROGRESS_BAR_TEXT_VISIBLE);
     ui->TransferProgressBar->setVisible(false);
 }
 
@@ -155,29 +162,31 @@ void MainWindow::setupToolbarActions() {
     if (!ui->actionHelp) ui->actionHelp = new QAction(this);
     if (!ui->actionAbout) ui->actionAbout = new QAction(this);
 
-    ui->actionOpenSettings->setIcon(QIcon(BackupResources::SETTINGS_ICON_PATH));
-    ui->actionOpenSettings->setText(UIConfig::MENU_SETTINGS_LABEL);
+    ui->actionOpenSettings->setIcon(QIcon(Resources::Toolbar::SETTINGS_ICON_PATH));
+    ui->actionOpenSettings->setText(Labels::Toolbar::SETTINGS);
 
-    ui->actionExit->setIcon(QIcon(BackupResources::EXIT_ICON_PATH));
-    ui->actionExit->setText(UIConfig::MENU_EXIT_LABEL);
+    ui->actionExit->setIcon(QIcon(Resources::Toolbar::EXIT_ICON_PATH));
+    ui->actionExit->setText(Labels::Toolbar::EXIT);
 
-    ui->actionHelp->setIcon(QIcon(BackupResources::HELP_ICON_PATH));
-    ui->actionHelp->setText(UIConfig::MENU_HELP_LABEL);
+    ui->actionHelp->setIcon(QIcon(Resources::Toolbar::HELP_ICON_PATH));
+    ui->actionHelp->setText(Labels::Toolbar::HELP);
 
-    ui->actionAbout->setIcon(QIcon(BackupResources::ABOUT_ICON_PATH));
-    ui->actionAbout->setText(UIConfig::MENU_ABOUT_LABEL);
+    ui->actionAbout->setIcon(QIcon(Resources::Toolbar::ABOUT_ICON_PATH));
+    ui->actionAbout->setText(Labels::Toolbar::ABOUT);
 }
 
 // Configures toolbar
 void MainWindow::setupToolBar() {
     if (!ui->mainToolBar) return;
     setupToolbarActions();
+
     ui->mainToolBar->setFloatable(false);
     ui->mainToolBar->setMovable(false);
     ui->mainToolBar->setVisible(true);
-    ui->mainToolBar->setIconSize(QSize(24, 24));
+    ui->mainToolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
     ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    ui->mainToolBar->setStyleSheet("background-color: transparent; border: none; padding: 5px;");
+    ui->mainToolBar->setStyleSheet(Styles::Toolbar::GENERAL);
+
     ui->mainToolBar->clear();
     ui->mainToolBar->addAction(ui->actionOpenSettings);
     ui->mainToolBar->addAction(ui->actionHelp);
@@ -261,7 +270,7 @@ void MainWindow::refreshBackupStatus() {
 void MainWindow::onChangeBackupDestinationClicked() {
     QString selectedDir = QFileDialog::getExistingDirectory(this,
                                                             InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
-                                                            BackupInfo::DEFAULT_FILE_DIALOG_ROOT);
+                                                            BackupPaths::DEFAULT_FILE_DIALOG_ROOT);
     if (selectedDir.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE, ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
         return;
@@ -312,7 +321,7 @@ void MainWindow::onCreateBackupClicked() {
         QMessageBox::critical(this, ErrorMessages::ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
         return;
     }
-    ui->TransferProgressBar->setValue(ProgressConfig::PROGRESS_BAR_MIN_VALUE);
+    ui->TransferProgressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
@@ -362,13 +371,13 @@ void MainWindow::onBackupDirectoryChanged() {
 
 // Updates backup status label
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
-    QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressConfig::STATUS_LIGHT_SIZE);
+    QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressSettings::STATUS_LIGHT_SIZE);
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, "PNG");
-    QString pixmapHtml = QString(Styling::STATUS_LIGHT_ICON_TEMPLATE).arg(QString::fromUtf8(ba.toBase64()));
-    QString combinedHtml = QString(Styling::STATUS_LABEL_HTML_TEMPLATE).arg(UIConfig::LABEL_BACKUP_FOUND, pixmapHtml);
+    pixmap.save(&buffer, Labels::Backup::STATUS_LIGHT_IMAGE_FORMAT);
+    QString pixmapHtml = QString(HTMLTemplates::STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
+    QString combinedHtml = QString(HTMLTemplates::STATUS_LABEL_HTML).arg(Labels::Backup::FOUND, pixmapHtml);
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
@@ -381,26 +390,26 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
 
 // Updates backup location label
 void MainWindow::updateBackupLocationLabel(const QString &location) {
-    ui->BackupLocationLabel->setText(UIConfig::LABEL_BACKUP_LOCATION + location);
+    ui->BackupLocationLabel->setText(Labels::Backup::LOCATION + location);
 }
 
 // Updates backup total count label
 void MainWindow::updateBackupTotalCountLabel() {
-    ui->BackupTotalCountLabel->setText(UIConfig::LABEL_BACKUP_TOTAL_COUNT + QString::number(backupService->getBackupCount()));
+    ui->BackupTotalCountLabel->setText(Labels::Backup::TOTAL_COUNT + QString::number(backupService->getBackupCount()));
 }
 
 // Updates backup total size label
 void MainWindow::updateBackupTotalSizeLabel() {
     quint64 totalSize = backupService->getTotalBackupSize();
     QString humanReadableSize = Utils::Formatting::formatSize(totalSize);
-    ui->BackupTotalSizeLabel->setText(UIConfig::LABEL_BACKUP_TOTAL_SIZE + humanReadableSize);
+    ui->BackupTotalSizeLabel->setText(Labels::Backup::TOTAL_SIZE + humanReadableSize);
 }
 
 // Updates backup location status label
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
-    QString status = dirInfo.exists() ? (dirInfo.isWritable() ? UIConfig::DIRECTORY_STATUS_WRITABLE : UIConfig::DIRECTORY_STATUS_READ_ONLY) : UIConfig::DIRECTORY_STATUS_UNKNOWN;
-    ui->BackupLocationStatusLabel->setText(UIConfig::LABEL_BACKUP_LOCATION_ACCESS + status);
+    QString status = dirInfo.exists() ? (dirInfo.isWritable() ? DirectoryStatus::WRITABLE : DirectoryStatus::READ_ONLY) : DirectoryStatus::UNKNOWN;
+    ui->BackupLocationStatusLabel->setText(Labels::Backup::LOCATION_ACCESS + status);
 }
 
 // Updates last backup info
@@ -408,10 +417,10 @@ void MainWindow::updateLastBackupInfo() {
     QJsonObject metadata = backupService->getLastBackupMetadata();
     if (metadata.isEmpty()) {
         QString notAvailable = Utilities::DEFAULT_VALUE_NOT_AVAILABLE;
-        ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME + notAvailable);
-        ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP + notAvailable);
-        ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + notAvailable);
-        ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + notAvailable);
+        ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + notAvailable);
+        ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP + notAvailable);
+        ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION + notAvailable);
+        ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE + notAvailable);
         return;
     }
 
@@ -421,19 +430,19 @@ void MainWindow::updateLastBackupInfo() {
     QString totalSize = metadata.value(BackupMetadataKeys::SIZE_READABLE).toString(Utilities::DEFAULT_VALUE_NOT_AVAILABLE);
 
     QDateTime backupTimestamp = QDateTime::fromString(timestampStr, Qt::ISODate);
-    QString formattedTimestamp = Utils::Formatting::formatTimestamp(backupTimestamp, BackupInfo::BACKUP_TIMESTAMP_DISPLAY_FORMAT);
+    QString formattedTimestamp = Utils::Formatting::formatTimestamp(backupTimestamp, TimestampFormats::BACKUP_TIMESTAMP_DISPLAY_FORMAT);
     QString formattedDuration = Utils::Formatting::formatDuration(durationMs);
 
-    ui->LastBackupNameLabel->setText(UIConfig::LABEL_LAST_BACKUP_NAME + backupName);
-    ui->LastBackupTimestampLabel->setText(UIConfig::LABEL_LAST_BACKUP_TIMESTAMP + formattedTimestamp);
-    ui->LastBackupDurationLabel->setText(UIConfig::LABEL_LAST_BACKUP_DURATION + formattedDuration);
-    ui->LastBackupSizeLabel->setText(UIConfig::LABEL_LAST_BACKUP_SIZE + totalSize);
+    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + backupName);
+    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP + formattedTimestamp);
+    ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION + formattedDuration);
+    ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE + totalSize);
 }
 
 // Handles close event
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS, ErrorMessages::WARNING_OPERATION_STILL_RUNNING);
+        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS, WarningMessages::WARNING_OPERATION_STILL_RUNNING);
         event->ignore();
         return;
     }
@@ -442,7 +451,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
 // Setup methods
 void MainWindow::setupDestinationView() {
-    destinationModel->setFilter(BackupInfo::FILE_SYSTEM_FILTER);
+    destinationModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
     destinationModel->sort(0, Qt::DescendingOrder);
     ui->BackupDestinationView->setModel(destinationModel);
     ui->BackupDestinationView->setRootIndex(destinationModel->setRootPath(ConfigManager::getInstance().getBackupDirectory()));
@@ -458,10 +467,10 @@ void MainWindow::setupBackupStagingTreeView() {
 }
 
 void MainWindow::setupSourceTreeView() {
-    sourceModel->setRootPath(BackupInfo::DEFAULT_ROOT_PATH);
-    sourceModel->setFilter(BackupInfo::FILE_SYSTEM_FILTER);
+    sourceModel->setRootPath(BackupPaths::DEFAULT_ROOT_PATH);
+    sourceModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
     ui->DriveTreeView->setModel(sourceModel);
-    ui->DriveTreeView->setRootIndex(sourceModel->index(BackupInfo::DEFAULT_ROOT_PATH));
+    ui->DriveTreeView->setRootIndex(sourceModel->index(BackupPaths::DEFAULT_ROOT_PATH));
     ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     removeAllColumnsFromTreeView(ui->DriveTreeView);
 }
@@ -477,14 +486,12 @@ void MainWindow::exitApplication() {
 }
 
 void MainWindow::showHelpDialog() {
-    QString extendedMessage = QString("\n\nYour settings are stored at:\n%1")
-    .arg(ConfigManager::getInstance().getConfigFilePathPublic());
-    QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE, HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
+    QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE).arg(ConfigManager::getInstance().getConfigFilePathPublic());
+    QMessageBox::information(this, QString("%1 - %2").arg(AppInfo::APP_DISPLAY_TITLE, HelpInfo::HELP_WINDOW_TITLE), HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
 }
 
 void MainWindow::onAboutButtonClicked() {
-    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE,
-                             QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE));
+    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE, QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE));
 }
 
 // Backup management
@@ -501,8 +508,8 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
     if (!treeView) return;
     QAbstractItemModel *model = treeView->model();
     if (model) {
-        for (int i = UIConfig::TREE_VIEW_START_HIDDEN_COLUMN;
-             i < UIConfig::TREE_VIEW_DEFAULT_COLUMN_COUNT; ++i) {
+        for (int i = UISettings::TreeView::START_HIDDEN_COLUMN;
+             i < UISettings::TreeView::DEFAULT_COLUMN_COUNT; ++i) {
             treeView->setColumnHidden(i, true);
         }
     }

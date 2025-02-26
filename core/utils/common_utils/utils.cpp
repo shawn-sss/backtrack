@@ -38,7 +38,7 @@ void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int colu
 void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
     progressBar->setRange(minValue, maxValue);
-    progressBar->setValue(ProgressConfig::PROGRESS_BAR_DEFAULT_VISIBILITY ? minValue : maxValue);
+    progressBar->setValue(ProgressSettings::PROGRESS_BAR_DEFAULT_VISIBILITY ? minValue : maxValue);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
@@ -60,15 +60,15 @@ namespace Formatting {
 // Convert size to readable format
 QString formatSize(qint64 size) {
     static const QVector<QString> units{
-        Numbers::SIZE_UNIT_BYTES,
-        Numbers::SIZE_UNIT_KILOBYTES,
-        Numbers::SIZE_UNIT_MEGABYTES,
-        Numbers::SIZE_UNIT_GIGABYTES
+        Units::FileSize::SIZE_UNIT_BYTES,
+        Units::FileSize::SIZE_UNIT_KILOBYTES,
+        Units::FileSize::SIZE_UNIT_MEGABYTES,
+        Units::FileSize::SIZE_UNIT_GIGABYTES
     };
     int unitIndex = 0;
     double sizeInUnits = size;
-    while (sizeInUnits >= Numbers::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
-        sizeInUnits /= Numbers::SIZE_CONVERSION_FACTOR;
+    while (sizeInUnits >= Units::FileSize::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+        sizeInUnits /= Units::FileSize::SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
     return QString::number(sizeInUnits, 'f', 2) + units[unitIndex];
@@ -76,15 +76,15 @@ QString formatSize(qint64 size) {
 
 // Convert milliseconds to readable time
 QString formatDuration(qint64 milliseconds) {
-    if (milliseconds < 1000) return QString::number(milliseconds) + TimeUnits::UNIT_MILLISECONDS;
+    if (milliseconds < 1000) return QString::number(milliseconds) + Units::Time::UNIT_MILLISECONDS;
     qint64 seconds = milliseconds / 1000;
-    if (seconds < 60) return QString::number(seconds) + TimeUnits::UNIT_SECONDS;
+    if (seconds < 60) return QString::number(seconds) + Units::Time::UNIT_SECONDS;
     qint64 minutes = seconds / 60;
-    if (minutes < 60) return QString::number(minutes) + TimeUnits::UNIT_MINUTES;
+    if (minutes < 60) return QString::number(minutes) + Units::Time::UNIT_MINUTES;
     qint64 hours = minutes / 60;
-    if (hours < 24) return QString::number(hours) + TimeUnits::UNIT_HOURS;
+    if (hours < 24) return QString::number(hours) + Units::Time::UNIT_HOURS;
     qint64 days = hours / 24;
-    return QString::number(days) + TimeUnits::UNIT_DAYS;
+    return QString::number(days) + Units::Time::UNIT_DAYS;
 }
 
 // Format timestamp with custom string

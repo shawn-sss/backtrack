@@ -12,12 +12,12 @@ int main(int argc, char *argv[]) {
 
     // Set application properties
     app.setApplicationName(AppInfo::APP_DISPLAY_TITLE);
-    app.setApplicationDisplayName(AppInfo::APP_DISPLAY_TITLE);
+    app.setApplicationDisplayName(Resources::Application::ICON_PATH);
 
     // Initialize main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::APP_DISPLAY_TITLE);
-    mainWindow.setWindowIcon(QIcon(BackupResources::ICON_PATH));
+    mainWindow.setWindowIcon(QIcon(Resources::Application::ICON_PATH));
     mainWindow.show();
 
     // Start event loop

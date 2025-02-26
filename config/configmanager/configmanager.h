@@ -5,6 +5,11 @@
 #include <QJsonObject>
 
 class ConfigManager {
+private:
+    // User Settings
+    static constexpr auto DEFAULT_BACKUP_DIRECTORY = "C:\\temp";
+    static constexpr auto DEFAULT_BACKUP_PREFIX = "Backup_";
+
 public:
     static ConfigManager& getInstance();
 
@@ -26,10 +31,7 @@ public:
 private:
     ConfigManager();
     QString getConfigFilePath() const;
-
     QJsonObject settings;
-    static constexpr auto DEFAULT_BACKUP_DIRECTORY = "C:\\temp";
-    static constexpr auto DEFAULT_BACKUP_PREFIX = "Backup_";
 };
 
 #endif // CONFIGMANAGER_H

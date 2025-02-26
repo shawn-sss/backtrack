@@ -27,7 +27,7 @@ void TransferWorker::startTransfer() {
     int completedFiles = 0;
     for (const QString &filePath : files) {
         if (stopRequested) {
-            emit errorOccurred(ErrorMessages::WARNING_OPERATION_STILL_RUNNING);
+            emit errorOccurred(WarningMessages::WARNING_OPERATION_STILL_RUNNING);
             return;
         }
 
@@ -54,9 +54,9 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     }
 
     QString driveBackupFolder = QDir(destination).filePath(QString("%1 (%2 %3)")
-                                                               .arg(QStorageInfo(driveRoot).displayName().isEmpty() ? BackupInfo::DEFAULT_DRIVE_LABEL : QStorageInfo(driveRoot).displayName(),
+                                                               .arg(QStorageInfo(driveRoot).displayName().isEmpty() ? BackupConfiguration::DEFAULT_DRIVE_LABEL : QStorageInfo(driveRoot).displayName(),
                                                                     driveRoot.left(1),
-                                                                    BackupInfo::DRIVE_LABEL_SUFFIX));
+                                                                    BackupConfiguration::DRIVE_LABEL_SUFFIX));
 
     if (QDir(driveBackupFolder).exists()) QDir(driveBackupFolder).removeRecursively();
     if (!QDir().mkpath(driveBackupFolder)) {

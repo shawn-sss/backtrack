@@ -1,4 +1,5 @@
 #include "configmanager.h"
+#include "../_constants.h"
 
 #include <QDir>
 #include <QFile>
@@ -21,7 +22,7 @@ ConfigManager::ConfigManager() {
 QString ConfigManager::getConfigFilePath() const {
     QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     QDir().mkpath(configDir);
-    return configDir + "/config.json";
+    return configDir + "/" + AppConfig::CONFIG_FILE_NAME;
 }
 
 QString ConfigManager::getConfigFilePathPublic() const {
@@ -32,8 +33,8 @@ QString ConfigManager::getConfigFilePathPublic() const {
 void ConfigManager::load() {
     QFile file(getConfigFilePath());
     if (!file.open(QIODevice::ReadOnly)) {
-        settings["backup_directory"] = DEFAULT_BACKUP_DIRECTORY;
-        settings["backup_prefix"] = DEFAULT_BACKUP_PREFIX;
+        settings[ConfigKeys::BACKUP_DIRECTORY_KEY] = DEFAULT_BACKUP_DIRECTORY;
+        settings[ConfigKeys::BACKUP_PREFIX_KEY] = DEFAULT_BACKUP_PREFIX;
         save();
         return;
     }
@@ -51,20 +52,20 @@ void ConfigManager::save() {
 
 // Backup Directory Management
 QString ConfigManager::getBackupDirectory() const {
-    return settings.value("backup_directory").toString(DEFAULT_BACKUP_DIRECTORY);
+    return settings.value(ConfigKeys::BACKUP_DIRECTORY_KEY).toString(DEFAULT_BACKUP_DIRECTORY);
 }
 
 void ConfigManager::setBackupDirectory(const QString& dir) {
-    settings["backup_directory"] = dir;
+    settings[ConfigKeys::BACKUP_DIRECTORY_KEY] = dir;
     save();
 }
 
 // Backup Prefix Management
 QString ConfigManager::getBackupPrefix() const {
-    return settings.value("backup_prefix").toString(DEFAULT_BACKUP_PREFIX);
+    return settings.value(ConfigKeys::BACKUP_PREFIX_KEY).toString(DEFAULT_BACKUP_PREFIX);
 }
 
 void ConfigManager::setBackupPrefix(const QString& prefix) {
-    settings["backup_prefix"] = prefix;
+    settings[ConfigKeys::BACKUP_PREFIX_KEY] = prefix;
     save();
 }

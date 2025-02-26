@@ -46,7 +46,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
         if (fileInfo.isRoot()) {
             QStorageInfo storageInfo(path);
             QString volumeLabel = storageInfo.displayName().isEmpty()
-                                      ? BackupInfo::DEFAULT_DRIVE_LABEL
+                                      ? BackupConfiguration::DEFAULT_DRIVE_LABEL
                                       : storageInfo.displayName();
             return QString("%1 (%2)").arg(volumeLabel, path.left(2));
         }
@@ -64,7 +64,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
 // Header Management
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     return (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0)
-    ? UIConfig::STAGING_COLUMN_NAME
+    ? UISettings::TreeView::STAGING_COLUMN_NAME
     : QVariant();
 }
 

@@ -41,13 +41,12 @@ set(PROJECT_SETTINGS
     config/_constants.h
     config/app_settings.h
     config/backup_settings.h
+    config/cfgmgr_settings.h
     config/messages_settings.h
     config/progress_settings.h
     config/utilities_settings.h
     config/resources_settings.h
     config/visual_settings.h
-    config/configmanager/configmanager.cpp
-    config/configmanager/configmanager.h
 )
 
 # UI sources
@@ -94,6 +93,8 @@ set(UTILS_SOURCES
     core/utils/file_utils/fileoperations.h
     core/utils/common_utils/Utils.cpp
     core/utils/common_utils/Utils.h
+    config/configmanager/configmanager.cpp
+    config/configmanager/configmanager.h
 )
 
 # Combine all sources

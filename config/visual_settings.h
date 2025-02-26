@@ -4,85 +4,126 @@
 #include <QString>
 #include <QSize>
 
-namespace UIConfig {
+// UI Labels
+namespace Labels {
 // Backup UI Labels
-constexpr auto LABEL_BACKUP_FOUND = "Backup Found: ";
-constexpr auto LABEL_BACKUP_LOCATION = "Backup Location: ";
-constexpr auto LABEL_BACKUP_TOTAL_COUNT = "Backup Total Count: ";
-constexpr auto LABEL_BACKUP_TOTAL_SIZE = "Backup Total Size: ";
-constexpr auto LABEL_BACKUP_LOCATION_ACCESS = "Backup Location Access: ";
-
-// Last Backup UI Labels
-constexpr auto LABEL_LAST_BACKUP_NAME = "Last Backup Name: ";
-constexpr auto LABEL_LAST_BACKUP_TIMESTAMP = "Last Backup Timestamp: ";
-constexpr auto LABEL_LAST_BACKUP_DURATION = "Last Backup Duration: ";
-constexpr auto LABEL_LAST_BACKUP_SIZE = "Last Backup Size: ";
-
-// Toolbar UI Labels
-constexpr auto MENU_SETTINGS_LABEL = "Settings";
-constexpr auto MENU_EXIT_LABEL = "Exit";
-constexpr auto MENU_HELP_LABEL = "Help";
-constexpr auto MENU_ABOUT_LABEL = "About";
-
-// Directory Write Status
-constexpr auto DIRECTORY_STATUS_WRITABLE = "Writable";
-constexpr auto DIRECTORY_STATUS_READ_ONLY = "Read-Only";
-constexpr auto DIRECTORY_STATUS_UNKNOWN = "Unknown";
-
-// Tree View UI Settings
-constexpr auto STAGING_COLUMN_NAME = "Name";
-constexpr int TREE_VIEW_START_HIDDEN_COLUMN = 1;
-constexpr int TREE_VIEW_DEFAULT_COLUMN_COUNT = 4;
-
-// Title Bar UI Settings
-constexpr int TITLE_BAR_HEIGHT = 40;
+namespace Backup {
+constexpr auto STATUS_LIGHT_IMAGE_FORMAT = "PNG";
+constexpr auto FOUND = "Backup Found: ";
+constexpr auto LOCATION = "Backup Location: ";
+constexpr auto TOTAL_COUNT = "Backup Total Count: ";
+constexpr auto TOTAL_SIZE = "Backup Total Size: ";
+constexpr auto LOCATION_ACCESS = "Backup Location Access: ";
 }
 
-namespace Styling {
+// Last Backup UI Labels
+namespace LastBackup {
+constexpr auto NAME = "Last Backup Name: ";
+constexpr auto TIMESTAMP = "Last Backup Timestamp: ";
+constexpr auto DURATION = "Last Backup Duration: ";
+constexpr auto SIZE = "Last Backup Size: ";
+}
+
+// Toolbar UI Labels
+namespace Toolbar {
+constexpr auto SETTINGS = "Settings";
+constexpr auto EXIT = "Exit";
+constexpr auto HELP = "Help";
+constexpr auto ABOUT = "About";
+}
+
+// Window Buttons Labels
+namespace WindowButtons {
+constexpr auto CLOSE = "X";
+constexpr auto MINIMIZE = "_";
+}
+}
+
+// Directory Write Status Labels
+namespace DirectoryStatus {
+constexpr auto WRITABLE = "Writable";
+constexpr auto READ_ONLY = "Read-Only";
+constexpr auto UNKNOWN = "Unknown";
+}
+
+// UI Settings
+namespace UISettings {
+// Tree View UI Settings
+namespace TreeView {
+constexpr auto STAGING_COLUMN_NAME = "Name";
+constexpr int START_HIDDEN_COLUMN = 1;
+constexpr int DEFAULT_COLUMN_COUNT = 4;
+}
+
+// Title Bar UI Settings
+namespace TitleBar {
+constexpr int HEIGHT = 40;
+}
+}
+
+// UI Component Tooltips
+namespace Tooltips {
+constexpr auto WINDOW_MINIMIZE = "Minimize Window";
+constexpr auto WINDOW_CLOSE = "Close Application";
+}
+
 // UI Component HTML Templates
-constexpr auto STATUS_LIGHT_ICON_TEMPLATE = "<img src='data:image/png;base64,%1' style='%2'>";
-constexpr auto STATUS_LABEL_HTML_TEMPLATE =
+namespace HTMLTemplates {
+constexpr auto STATUS_LIGHT_ICON = "<img src='data:image/png;base64,%1' style='%2'>";
+constexpr auto STATUS_LABEL_HTML =
     "<div style='display:flex; align-items:center;'>"
     "<span>%1</span><span style='margin-left:4px;'>%2</span>"
     "</div>";
+}
 
 // Icon Styling
-constexpr auto ICON_STYLE_TEMPLATE = "width:%1px; height:%1px;";
-constexpr QSize TOOLBAR_ICON_SIZE(32, 32);
+namespace IconStyles {
+constexpr auto STYLE_TEMPLATE = "width:%1px; height:%1px;";
+constexpr QSize TOOLBAR_SIZE(24, 24);
+}
 
 // General UI Colors
-constexpr auto TOOLBAR_BACKGROUND_COLOR = "#222222";
-constexpr auto TITLE_BAR_COLOR = "#222";
-constexpr auto WINDOW_BACKGROUND_COLOR = "#2B2B2B";
+namespace Colors {
+constexpr auto TOOLBAR_BACKGROUND = "#222222";
+constexpr auto TITLE_BAR = "#222";
+constexpr auto WINDOW_BACKGROUND = "#2B2B2B";
+}
 
+// UI Styling
+namespace Styles {
 // Title Bar Styling
-constexpr auto TITLE_BAR_STYLESHEET = "background-color: #222; color: white; border: none;";
-constexpr auto TITLE_LABEL_STYLESHEET = "color: white; font-size: 24px;";
+namespace TitleBar {
+constexpr auto STYLESHEET = "background-color: #222; color: white; border: none;";
+constexpr auto LABEL_STYLESHEET = "color: white; font-size: 24px;";
+}
 
-// Window Buttons Labels
-constexpr auto WINDOW_CLOSE_BUTTON_LABEL = "X";
-constexpr auto WINDOW_MINIMIZE_BUTTON_LABEL = "-";
-
-// Minimize Button Styling
-constexpr auto MINIMIZE_BUTTON_STYLESHEET =
+// Button Styling
+namespace Button {
+constexpr auto MINIMIZE_STYLESHEET =
     "QPushButton { background: transparent; color: white; border: none; }"
     "QPushButton:hover { background: rgba(255, 255, 255, 0.2); }"
     "QPushButton:pressed { background: rgba(255, 255, 255, 0.3); }";
 
-// Close Button Styling
-constexpr auto CLOSE_BUTTON_STYLESHEET =
+constexpr auto CLOSE_STYLESHEET =
     "QPushButton { background: transparent; color: white; border: none; }"
     "QPushButton:hover { background: red; color: white; }"
     "QPushButton:pressed { background: darkred; color: white; }";
+}
 
 // Toolbar Styling
-constexpr auto TOOLBAR_STYLESHEET = "background-color: #222222; border: none;";
+namespace Toolbar {
+constexpr auto GENERAL = "background-color: transparent; border: none; padding: 5px;";
+constexpr auto MINIMAL = "background-color: transparent; border: none;";
+constexpr auto STYLESHEET = "background-color: #222222; border: none;";
+}
 
 // General Button Styling
-constexpr auto BUTTON_STYLE =
+namespace GeneralButton {
+constexpr auto STYLE =
     "QPushButton { background: #444; color: white; border-radius: 5px; padding: 5px; }"
     "QPushButton:hover { background: #666; }"
     "QPushButton:pressed { background: #888; }";
+}
 }
 
 #endif // UI_CONFIG_H

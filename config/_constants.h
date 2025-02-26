@@ -3,6 +3,7 @@
 
 #include "app_settings.h"
 #include "backup_settings.h"
+#include "cfgmgr_settings.h"
 #include "messages_settings.h"
 #include "progress_settings.h"
 #include "resources_settings.h"

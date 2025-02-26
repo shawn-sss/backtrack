@@ -9,10 +9,10 @@
 // Constructor
 CustomTitleBar::CustomTitleBar(QWidget *parent)
     : QWidget(parent), titleLabel(new QLabel(AppInfo::APP_DISPLAY_TITLE, this)),
-    minimizeButton(createButton(Styling::WINDOW_MINIMIZE_BUTTON_LABEL, Styling::MINIMIZE_BUTTON_STYLESHEET, "Minimize Window")),
-    closeButton(createButton(Styling::WINDOW_CLOSE_BUTTON_LABEL, Styling::CLOSE_BUTTON_STYLESHEET, "Close Application")) {
-    setFixedHeight(UIConfig::TITLE_BAR_HEIGHT);
-    setStyleSheet(Styling::TITLE_BAR_STYLESHEET);
+    minimizeButton(createButton(Labels::WindowButtons::MINIMIZE, Styles::Button::MINIMIZE_STYLESHEET, Tooltips::WINDOW_MINIMIZE)),
+    closeButton(createButton(Labels::WindowButtons::CLOSE, Styles::Button::CLOSE_STYLESHEET, Tooltips::WINDOW_CLOSE)) {
+    setFixedHeight(UISettings::TitleBar::HEIGHT);
+    setStyleSheet(Styles::TitleBar::STYLESHEET);
     setupLayout();
 }
 
@@ -22,7 +22,7 @@ void CustomTitleBar::setupLayout() {
     layout->setContentsMargins(5, 0, 5, 0);
     layout->setSpacing(5);
 
-    titleLabel->setStyleSheet(Styling::TITLE_LABEL_STYLESHEET);
+    titleLabel->setStyleSheet(Styles::TitleBar::LABEL_STYLESHEET);
 
     layout->addWidget(titleLabel);
     layout->addStretch();
