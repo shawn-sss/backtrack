@@ -50,12 +50,12 @@ MainWindow::MainWindow(QWidget *parent)
     setStatusBar(nullptr);
     titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::MainWindow);
 
-    if (ui->mainToolBar) {
-        ui->mainToolBar->setFloatable(false);
-        ui->mainToolBar->setMovable(false);
-        ui->mainToolBar->setVisible(true);
-        ui->mainToolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
-        ui->mainToolBar->setStyleSheet(Styles::Toolbar::MINIMAL);
+    if (ui->toolBar) {
+        ui->toolBar->setFloatable(false);
+        ui->toolBar->setMovable(false);
+        ui->toolBar->setVisible(true);
+        ui->toolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
+        ui->toolBar->setStyleSheet(Styles::Toolbar::MINIMAL);
     }
 
     initializeUI();
@@ -106,9 +106,9 @@ void MainWindow::setupCustomTitleBar() {
     contentLayout->setContentsMargins(0, 0, 0, 0);
     contentLayout->setSpacing(0);
 
-    if (ui->mainToolBar) {
-        ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        contentLayout->addWidget(ui->mainToolBar, 0, Qt::AlignLeft);
+    if (ui->toolBar) {
+        ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        contentLayout->addWidget(ui->toolBar, 0, Qt::AlignLeft);
     }
 
     if (centralWidget()) {
@@ -177,28 +177,28 @@ void MainWindow::setupToolbarActions() {
 
 // Configures toolbar
 void MainWindow::setupToolBar() {
-    if (!ui->mainToolBar) return;
+    if (!ui->toolBar) return;
     setupToolbarActions();
 
-    ui->mainToolBar->setFloatable(false);
-    ui->mainToolBar->setMovable(false);
-    ui->mainToolBar->setVisible(true);
-    ui->mainToolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
-    ui->mainToolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    ui->mainToolBar->setStyleSheet(Styles::Toolbar::GENERAL);
+    ui->toolBar->setFloatable(false);
+    ui->toolBar->setMovable(false);
+    ui->toolBar->setVisible(true);
+    ui->toolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
+    ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    ui->toolBar->setStyleSheet(Styles::Toolbar::GENERAL);
 
-    ui->mainToolBar->clear();
-    ui->mainToolBar->addAction(ui->actionOpenSettings);
-    ui->mainToolBar->addAction(ui->actionHelp);
-    ui->mainToolBar->addAction(ui->actionAbout);
+    ui->toolBar->clear();
+    ui->toolBar->addAction(ui->actionOpenSettings);
+    ui->toolBar->addAction(ui->actionHelp);
+    ui->toolBar->addAction(ui->actionAbout);
 
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->mainToolBar->addWidget(spacer);
-    ui->mainToolBar->addAction(ui->actionExit);
+    ui->toolBar->addWidget(spacer);
+    ui->toolBar->addAction(ui->actionExit);
 
-    for (QAction *&action : ui->mainToolBar->actions()) {
-        QWidget *widget = ui->mainToolBar->widgetForAction(action);
+    for (QAction *&action : ui->toolBar->actions()) {
+        QWidget *widget = ui->toolBar->widgetForAction(action);
         if (widget) widget->setCursor(Qt::PointingHandCursor);
     }
 }
@@ -207,7 +207,7 @@ void MainWindow::setupToolBar() {
 void MainWindow::addToolbarSpacer() {
     QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    ui->mainToolBar->addWidget(spacer);
+    ui->toolBar->addWidget(spacer);
 }
 
 // Connects toolbar actions
@@ -487,11 +487,11 @@ void MainWindow::exitApplication() {
 
 void MainWindow::showHelpDialog() {
     QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE).arg(ConfigManager::getInstance().getConfigFilePathPublic());
-    QMessageBox::information(this, QString("%1 - %2").arg(AppInfo::APP_DISPLAY_TITLE, HelpInfo::HELP_WINDOW_TITLE), HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
+    QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE, HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
 }
 
 void MainWindow::onAboutButtonClicked() {
-    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE, QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE));
+    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE, QString(AboutInfo::ABOUT_WINDOW_MESSAGE).arg(AppInfo::APP_VERSION, AppInfo::APP_DISPLAY_TITLE, AppInfo::AUTHOR_NAME));
 }
 
 // Backup management

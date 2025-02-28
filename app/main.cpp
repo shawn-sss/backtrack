@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
     // Set application properties
     app.setApplicationName(AppInfo::APP_DISPLAY_TITLE);
-    app.setApplicationDisplayName(Resources::Application::ICON_PATH);
+    app.setApplicationDisplayName(AppInfo::APP_DISPLAY_TITLE);
 
     // Initialize main window
     MainWindow mainWindow;

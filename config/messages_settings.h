@@ -68,7 +68,7 @@ constexpr auto ERROR_CREATE_BACKUP_FOLDER = "Failed to create '%1' folder.";
 
 //==================== About Window ====================//
 namespace AboutInfo {
-constexpr auto ABOUT_WINDOW_TITLE = "About MyDataBackupApp";
+constexpr auto ABOUT_WINDOW_TITLE = "About";
 constexpr auto AUTHOR_NAME = "Shawn SSS";
 constexpr auto ABOUT_WINDOW_MESSAGE = "%2\nVersion %1\n\nDeveloped by %3";
 }
