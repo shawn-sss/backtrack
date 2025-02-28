@@ -4,7 +4,6 @@
 #include <QPointer>
 #include <QWidget>
 
-
 class QLabel;
 class QPushButton;
 
@@ -14,20 +13,25 @@ class CustomTitleBar : public QWidget {
 public:
     explicit CustomTitleBar(QWidget *parent = nullptr);
 
+    // Provide size hints for layouts to work better
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
 signals:
     void minimizeRequested();
     void closeRequested();
 
 private:
-    // Layout setup
+    // Internal layout setup
     void setupLayout();
 
-    // Button creation
+    // Helper to create buttons consistently
     QPushButton* createButton(const QString &label, const QString &style, const QString &tooltip);
 
+    // Title bar components
     QPointer<QLabel> titleLabel;
     QPointer<QPushButton> minimizeButton;
     QPointer<QPushButton> closeButton;
 };
 
-#endif
+#endif // CUSTOMTITLEBAR_H

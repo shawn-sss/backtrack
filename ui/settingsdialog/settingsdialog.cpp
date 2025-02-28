@@ -1,26 +1,63 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
-
+#include "../../config/_constants.h"
 #include "../../core/utils/common_utils/utils.h"
 
 #include <QVBoxLayout>
 
 SettingsDialog::SettingsDialog(QWidget *parent)
-    : QDialog(parent), ui(std::make_unique<Ui::SettingsDialog>()) {
-    ui->setupUi(this);
-    titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::Dialog);
-    setupConnections();
+    : QDialog(parent) {
+
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
+    setMinimumSize(600, 400);
+
+    // ===== Create Layout =====
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    // ===== Create Title Bar =====
+    titleBar = new CustomTitleBar(this);
+    titleBar->setFixedHeight(UISettings::TitleBar::HEIGHT);
+
+    // Connect title bar signals to dialog slots
+    connect(titleBar, &CustomTitleBar::minimizeRequested, this, &SettingsDialog::showMinimized);
+    connect(titleBar, &CustomTitleBar::closeRequested, this, &SettingsDialog::close);
+
+    mainLayout->addWidget(titleBar);
+
+    // ===== Create Central Widget (Content Area) =====
+    QWidget *centralWidget = new QWidget(this);
+    auto *centralLayout = new QVBoxLayout(centralWidget);
+    centralLayout->setContentsMargins(10, 10, 10, 10);
+    centralLayout->setSpacing(10);
+
+    // ===== Add Dialog Buttons =====
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::reject);
+
+    centralLayout->addStretch();   // Future content can go above this
+    centralLayout->addWidget(buttonBox);  // Buttons at the bottom
+
+    // Add central widget to main layout
+    mainLayout->addWidget(centralWidget, 1);  // Take remaining space
 }
+
 
 SettingsDialog::~SettingsDialog() {}
 
 // Initialize UI components
 void SettingsDialog::setupUIComponents() {
     QWidget *titleBarContainer = findChild<QWidget *>("titleBarContainer");
-    if (!titleBarContainer || titleBarContainer->layout()) return;
+    if (!titleBarContainer) return;
 
-    auto *layout = new QVBoxLayout(titleBarContainer);
+    QVBoxLayout *layout = new QVBoxLayout(titleBarContainer);
     layout->setContentsMargins(0, 0, 0, 0);
+
+    // Explicitly enforce expansion when added
+    titleBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
     layout->addWidget(titleBar);
 }
 
