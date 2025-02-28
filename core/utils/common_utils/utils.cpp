@@ -130,32 +130,4 @@ void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingMo
 }
 }
 
-// Setup custom title bar
-QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode) {
-    if (!window) return nullptr;
-
-    // Apply appropriate window flags based on mode
-    Qt::WindowFlags flags = Qt::FramelessWindowHint;
-    if (mode == TitleBarMode::Dialog) {
-        flags |= Qt::Dialog;
-    }
-    window->setWindowFlags(flags);
-
-    // Check if we already have a custom title bar (prevents duplication)
-    auto existingTitleBar = window->findChild<CustomTitleBar *>();
-    if (existingTitleBar) return existingTitleBar;
-
-    // Create and configure the custom title bar
-    auto titleBar = new CustomTitleBar(window);
-
-    // Use the correct height from your UI settings
-    titleBar->setFixedHeight(UISettings::TitleBar::HEIGHT);
-
-    // Connect the title bar's signals to the window's actual slots
-    QObject::connect(titleBar, &CustomTitleBar::minimizeRequested, window, &QWidget::showMinimized);
-    QObject::connect(titleBar, &CustomTitleBar::closeRequested, window, &QWidget::close);
-
-    return titleBar;
-}
-
 } // namespace Utils

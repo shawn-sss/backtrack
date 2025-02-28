@@ -57,7 +57,7 @@ QPushButton* CustomTitleBar::createButton(const QString &label, const QString &s
     return button;
 }
 
-// override minimumSizeHint to ensure layout behaves even if something external queries this
+// override minimumSizeHint to ensure layout behaves even if queried externally
 QSize CustomTitleBar::minimumSizeHint() const {
     return QSize(100, UISettings::TitleBar::HEIGHT);
 }
@@ -66,3 +66,28 @@ QSize CustomTitleBar::minimumSizeHint() const {
 QSize CustomTitleBar::sizeHint() const {
     return QSize(400, UISettings::TitleBar::HEIGHT);  // Width will expand as needed
 }
+
+// ============================================================================
+// Static Helper Function: setupCustomTitleBar (moved from utils.cpp)
+// ============================================================================
+QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode) {
+    if (!window) return nullptr;
+
+    Qt::WindowFlags flags = Qt::FramelessWindowHint;
+    if (mode == TitleBarMode::Dialog) {
+        flags |= Qt::Dialog;
+    }
+    window->setWindowFlags(flags);
+
+    auto existingTitleBar = window->findChild<CustomTitleBar *>();
+    if (existingTitleBar) return existingTitleBar;
+
+    auto titleBar = new CustomTitleBar(window);
+    titleBar->setFixedHeight(UISettings::TitleBar::HEIGHT);
+
+    QObject::connect(titleBar, &CustomTitleBar::minimizeRequested, window, &QWidget::showMinimized);
+    QObject::connect(titleBar, &CustomTitleBar::closeRequested, window, &QWidget::close);
+
+    return titleBar;
+}
+

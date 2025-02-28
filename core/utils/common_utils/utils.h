@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include "../../../ui/customtitlebar/customtitlebar.h"
+#include "../../../ui/customtitlebar/titlebarmode.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
 
 #include <QString>
@@ -11,13 +12,6 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPointer>
-
-// Title bar modes
-enum class TitleBarMode {
-    Default,
-    MainWindow,
-    Dialog
-};
 
 namespace Utils {
 

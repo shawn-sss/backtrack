@@ -11,38 +11,33 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     setMinimumSize(600, 400);
 
-    // ===== Create Layout =====
+    // Create a main layout for the dialog
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // ===== Create Title Bar =====
-    titleBar = new CustomTitleBar(this);
-    titleBar->setFixedHeight(UISettings::TitleBar::HEIGHT);
-
-    // Connect title bar signals to dialog slots
-    connect(titleBar, &CustomTitleBar::minimizeRequested, this, &SettingsDialog::showMinimized);
-    connect(titleBar, &CustomTitleBar::closeRequested, this, &SettingsDialog::close);
-
+    // Create the custom title bar
+    titleBar = setupCustomTitleBar(this, TitleBarMode::Dialog);
     mainLayout->addWidget(titleBar);
 
-    // ===== Create Central Widget (Content Area) =====
-    QWidget *centralWidget = new QWidget(this);
-    auto *centralLayout = new QVBoxLayout(centralWidget);
-    centralLayout->setContentsMargins(10, 10, 10, 10);
-    centralLayout->setSpacing(10);
+    // Create content area (this can hold your actual settings widgets)
+    auto *contentArea = new QWidget(this);
+    auto *contentLayout = new QVBoxLayout(contentArea);
+    contentLayout->setContentsMargins(10, 10, 10, 10);
+    contentLayout->setSpacing(10);
 
-    // ===== Add Dialog Buttons =====
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    // Add some example content here if needed (for now just the buttons)
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::reject);
 
-    centralLayout->addStretch();   // Future content can go above this
-    centralLayout->addWidget(buttonBox);  // Buttons at the bottom
+    contentLayout->addStretch();
+    contentLayout->addWidget(buttonBox);
 
-    // Add central widget to main layout
-    mainLayout->addWidget(centralWidget, 1);  // Take remaining space
+    // Add content area to the main layout
+    mainLayout->addWidget(contentArea, 1);
 }
+
 
 
 SettingsDialog::~SettingsDialog() {}

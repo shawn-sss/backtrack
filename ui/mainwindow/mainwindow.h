@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "../customtitlebar/customtitlebar.h"
-#include "../../core/utils/common_utils/utils.h"
 
 #include <QLabel>
 #include <QStringList>
@@ -48,7 +47,6 @@ private:
     void setupConnections();
 
     // UI Components
-    void setupCustomTitleBar();
     void setupToolBar();
     void setupToolbarActions();
     void addToolbarSpacer();

@@ -1,8 +1,9 @@
 #ifndef CUSTOMTITLEBAR_H
 #define CUSTOMTITLEBAR_H
 
-#include <QPointer>
 #include <QWidget>
+#include <QPointer>
+#include "titlebarmode.h"  // Add this
 
 class QLabel;
 class QPushButton;
@@ -13,7 +14,6 @@ class CustomTitleBar : public QWidget {
 public:
     explicit CustomTitleBar(QWidget *parent = nullptr);
 
-    // Provide size hints for layouts to work better
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
@@ -22,16 +22,14 @@ signals:
     void closeRequested();
 
 private:
-    // Internal layout setup
+    QLabel *titleLabel;
+    QPushButton *minimizeButton;
+    QPushButton *closeButton;
+
     void setupLayout();
-
-    // Helper to create buttons consistently
     QPushButton* createButton(const QString &label, const QString &style, const QString &tooltip);
-
-    // Title bar components
-    QPointer<QLabel> titleLabel;
-    QPointer<QPushButton> minimizeButton;
-    QPointer<QPushButton> closeButton;
 };
+
+QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode);  // stays here
 
 #endif // CUSTOMTITLEBAR_H

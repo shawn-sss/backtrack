@@ -11,6 +11,8 @@
 #include "../../core/utils/common_utils/utils.h"
 #include "../../core/utils/file_utils/filewatcher.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
+#include "../../ui/customtitlebar/customtitlebar.h"
+#include "../../ui/customtitlebar/titlebarmode.h"
 
 #include <QLabel>
 #include <QBuffer>
@@ -46,22 +48,55 @@ MainWindow::MainWindow(QWidget *parent)
     backupController(new BackupController(backupService, this)) {
 
     ui->setupUi(this);
+
     setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     setStatusBar(nullptr);
-    titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::MainWindow);
 
+    // Create the custom title bar
+    titleBar = setupCustomTitleBar(this, TitleBarMode::MainWindow);
+
+    // Create a main container for the whole window (title bar + toolbar + main content)
+    auto *container = new QWidget(this);
+    auto *mainLayout = new QVBoxLayout(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    // Add the title bar at the top
+    mainLayout->addWidget(titleBar, 0, Qt::AlignTop);
+
+    // Create horizontal layout to hold the toolbar and the main content
+    auto *contentLayout = new QHBoxLayout();
+    contentLayout->setContentsMargins(0, 0, 0, 0);
+    contentLayout->setSpacing(0);
+
+    // Add the toolbar (if exists) on the left
     if (ui->toolBar) {
         ui->toolBar->setFloatable(false);
         ui->toolBar->setMovable(false);
         ui->toolBar->setVisible(true);
         ui->toolBar->setIconSize(IconStyles::TOOLBAR_SIZE);
         ui->toolBar->setStyleSheet(Styles::Toolbar::MINIMAL);
+        ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        contentLayout->addWidget(ui->toolBar, 0, Qt::AlignLeft);
     }
+
+    // Add the actual central widget (the content from the UI file)
+    QWidget *contentContainer = centralWidget();
+    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    contentLayout->addWidget(contentContainer, 1);
+
+    // Combine layouts
+    mainLayout->addLayout(contentLayout, 1);
+
+    // Set final container as the window's central widget
+    container->setLayout(mainLayout);
+    setCentralWidget(container);
 
     initializeUI();
     initializeBackupSystem();
     setupConnections();
 
+    // Cursor styling for toolbar buttons
     QList<QPushButton*> buttons = {
         ui->AddToBackupButton,
         ui->RemoveFromBackupButton,
@@ -75,7 +110,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
 }
 
-
 // Destructor
 MainWindow::~MainWindow() {
     delete ui;
@@ -83,43 +117,12 @@ MainWindow::~MainWindow() {
 
 // Initializes UI components
 void MainWindow::initializeUI() {
-    setupCustomTitleBar();
+    //setupCustomTitleBar();
     setupToolBar();
     Utils::UI::setupProgressBar(ui->TransferProgressBar, ProgressSettings::PROGRESS_BAR_MIN_VALUE,
                                 ProgressSettings::PROGRESS_BAR_MAX_VALUE, ProgressSettings::PROGRESS_BAR_HEIGHT,
                                 ProgressSettings::PROGRESS_BAR_TEXT_VISIBLE);
     ui->TransferProgressBar->setVisible(false);
-}
-
-// Sets up the custom title bar
-void MainWindow::setupCustomTitleBar() {
-    titleBar = Utils::setupCustomTitleBar(this, TitleBarMode::MainWindow);
-    if (!titleBar) return;
-
-    QWidget *container = new QWidget(this);
-    QVBoxLayout *mainLayout = new QVBoxLayout(container);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-    mainLayout->addWidget(titleBar, 0, Qt::AlignTop);
-
-    QHBoxLayout *contentLayout = new QHBoxLayout();
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(0);
-
-    if (ui->toolBar) {
-        ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        contentLayout->addWidget(ui->toolBar, 0, Qt::AlignLeft);
-    }
-
-    if (centralWidget()) {
-        QWidget *contentContainer = centralWidget();
-        contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        contentLayout->addWidget(contentContainer, 1);
-    }
-
-    mainLayout->addLayout(contentLayout, 1);
-    container->setLayout(mainLayout);
-    setCentralWidget(container);
 }
 
 // Initializes the backup system
@@ -360,8 +363,6 @@ void MainWindow::onFileChanged(const QString &path) {
     Q_UNUSED(path);
     refreshBackupStatus();
 }
-
-
 
 // Handles backup directory change
 void MainWindow::onBackupDirectoryChanged() {
