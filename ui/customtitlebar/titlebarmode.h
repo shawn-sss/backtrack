@@ -1,10 +1,11 @@
 #ifndef TITLEBARMODE_H
 #define TITLEBARMODE_H
 
+// Title bar display modes
 enum class TitleBarMode {
     MainWindow,
     Dialog,
-    Default  // Add this if you want a generic case
+    Default
 };
 
 #endif // TITLEBARMODE_H

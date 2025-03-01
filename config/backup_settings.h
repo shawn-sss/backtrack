@@ -4,31 +4,31 @@
 #include <QString>
 #include <QDir>
 
+// Default root paths
 namespace BackupPaths {
-// Default Root Paths
 const QString DEFAULT_ROOT_PATH = "";
 const QString DEFAULT_FILE_DIALOG_ROOT = QDir::rootPath();
 }
 
+// File system filters
 namespace FileSystemSettings {
-// File System Filters
 constexpr QDir::Filters FILE_SYSTEM_FILTER = QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files;
 }
 
+// Backup drive label settings
 namespace BackupConfiguration {
-// Backup Drive Label Settings
 constexpr auto DEFAULT_DRIVE_LABEL = "Local Disk";
 constexpr auto DRIVE_LABEL_SUFFIX = "Drive";
 }
 
+// Timestamp formats
 namespace TimestampFormats {
-// Timestamp Formats for Backup Folder Naming and Display
 constexpr auto BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyyMMdd_HHmmss";
 constexpr auto BACKUP_TIMESTAMP_DISPLAY_FORMAT = "MM/dd/yyyy hh:mm AP";
 }
 
+// Backup metadata keys
 namespace BackupMetadataKeys {
-// Metadata Keys Stored in Backup Log Files
 constexpr auto NAME = "backup_name";
 constexpr auto TIMESTAMP = "backup_timestamp";
 constexpr auto DURATION = "backup_duration";

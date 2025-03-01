@@ -4,6 +4,7 @@
 #include <QString>
 #include <QDir>
 
+// Configuration keys
 namespace ConfigKeys {
 constexpr auto BACKUP_DIRECTORY_KEY = "backup_directory";
 constexpr auto BACKUP_PREFIX_KEY = "backup_prefix";

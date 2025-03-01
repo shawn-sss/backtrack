@@ -12,29 +12,34 @@
 #include <QWidget>
 #include <QPixmap>
 #include <QPointer>
+#include <QMouseEvent>
 
 namespace Utils {
 
 // Custom title bar setup
 QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode = TitleBarMode::Default);
 
+// Formatting utilities
 namespace Formatting {
-// Data formatting utilities
 QString formatSize(qint64 size);
 QString formatDuration(qint64 milliseconds);
 QString formatTimestamp(const QDateTime &datetime, const QString &format);
 QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format);
 }
 
+// UI utilities
 namespace UI {
-// UI components and utilities
 void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount);
 void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible);
 QPixmap createStatusLightPixmap(const QString &color, int size);
+
+void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition);
+void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, const QPoint &lastMousePosition);
+void handleMouseRelease(QMouseEvent *event, bool &dragging);
 }
 
+// Backup staging operations
 namespace Backup {
-// Backup-related operations
 void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel);
 void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel);
 }

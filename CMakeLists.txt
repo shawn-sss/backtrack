@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Default to Debug build type if none is specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
@@ -59,6 +58,11 @@ set(UI_SOURCES
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
+    ui/customtitlebar/titlebarmode.h
+    ui/customtitlebar/titlebarstyles.h
+    ui/toolbarmanager/toolbarmanager.h
+    ui/toolbarmanager/toolbarmanager.cpp
+    ui/toolbarmanager/toolbarmanagerstyling.h
 )
 
 # Backup Controller sources
@@ -116,7 +120,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        ui/customtitlebar/titlebarmode.h
     )
 else()
     if(ANDROID)
@@ -130,7 +133,7 @@ endif()
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 
 # Link Qt libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg)
 
 # macOS-specific properties
 if(APPLE)

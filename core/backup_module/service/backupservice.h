@@ -6,47 +6,53 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-// Enum for Backup Status
+// Backup status enum
 enum class BackupStatus {
     None,
     Broken,
     Valid
 };
 
-// Backup Service Class
+// BackupService class definition
 class BackupService {
 public:
-    // Constructor
     explicit BackupService(const QString &backupRoot);
     Q_DISABLE_COPY(BackupService)
 
-    // Backup Root Management
+    // Backup root management
+public:
     void setBackupRoot(const QString &path);
     QString getBackupRoot() const;
 
-    // Backup Status and Metadata
+    // Backup status and metadata
+public:
     BackupStatus scanForBackupStatus() const;
     QJsonObject getLastBackupMetadata() const;
 
-    // Backup Summary
+    // Backup summary management
+public:
     void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
 
-    // Backup Statistics
+    // Backup statistics
+public:
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
+    // Internal metadata creation
 private:
-    // Metadata Creation
     QJsonObject createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const;
 
-    // Backup Size Calculation
+    // Internal size calculations
+private:
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
 
-    // Backup Collection Helpers
+    // File and folder collection
+private:
     void collectBackupFiles(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
     void collectBackupFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
 
-    // Private Member Variables
+    // Internal variables
+private:
     QString backupRootPath;
 };
 

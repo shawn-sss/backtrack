@@ -1,6 +1,7 @@
 #ifndef _CONSTANTS_H
 #define _CONSTANTS_H
 
+// Settings headers
 #include "app_settings.h"
 #include "backup_settings.h"
 #include "cfgmgr_settings.h"

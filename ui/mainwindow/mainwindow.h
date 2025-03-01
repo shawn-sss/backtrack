@@ -1,31 +1,35 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "../customtitlebar/customtitlebar.h"
-
-#include <QLabel>
-#include <QStringList>
 #include <QMainWindow>
-#include <QToolBar>
-#include <QPushButton>
-#include <QProgressBar>
-#include <QWidget>
-#include <QAction>
-#include <QMouseEvent>
-#include <QFileSystemModel>
+#include <QPoint>
+#include <QString>
 
-//Forward declarations
+// Forward declarations (Qt classes)
 class QTreeView;
+class QProgressBar;
+class QAction;
+class QFileSystemModel;
+class QLabel;
+class QPushButton;
+class QWidget;
+class QMouseEvent;
+class QCloseEvent;
+
+// Forward declarations (custom classes)
+class ToolbarManager;
 class BackupService;
 class StagingModel;
 class FileWatcher;
 class BackupController;
+class CustomTitleBar;
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
+// Forward declaration for auto-generated UI class
+namespace Ui {
+class MainWindow;
+}
 
-// Main application window
+// MainWindow class definition
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
@@ -33,93 +37,80 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
+    // Event handling
 protected:
-    // Window event handling
     void closeEvent(QCloseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
+    // Initialization and setup
 private:
-    // Initialization
+    void configureWindow();
+    void configureToolBar();
+    void setupLayout();
+    void setupToolBar();
+    void applyButtonCursors();
     void initializeUI();
     void initializeBackupSystem();
     void setupConnections();
-
-    // UI Components
-    void setupToolBar();
     void setupToolbarActions();
-    void addToolbarSpacer();
-    void connectToolbarActions(QAction *helpAction, QAction *aboutAction);
-
-    // Backup UI
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void removeAllColumnsFromTreeView(QTreeView *treeView);
 
-    // Backup Management
+    // Backup status and file watching
+private:
     void refreshBackupStatus();
     void updateLastBackupInfo();
-
-    // File Monitoring
     void startWatchingBackupDirectory(const QString &path);
     void updateFileWatcher();
-
-    // UI Updates
     void updateBackupStatusLabel(const QString &statusColor);
     void updateBackupLocationLabel(const QString &location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString &location);
-
-    // Dragging Support
-    void handleMouseEvent(QMouseEvent *event, bool isPress);
-
-    // Signal Handling
     void connectBackupSignals();
 
+    // Backup operation slots
 private slots:
-    // UI Actions
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
+
+    // Menu and toolbar actions
+private slots:
     void openSettings();
     void exitApplication();
     void showHelpDialog();
     void onAboutButtonClicked();
 
-    // File Watcher Handling
+    // File watcher callbacks
+private slots:
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 
+    // Internal variables
 private:
-    Ui::MainWindow *ui{nullptr};
-    QFileSystemModel *destinationModel{nullptr};
-    QFileSystemModel *sourceModel{nullptr};
-    QProgressBar *progressBar{nullptr};
+    Ui::MainWindow *ui = nullptr;
 
-    // Toolbar
-    QToolBar *customToolBar{nullptr};
-    QAction *actionOpenSettings{nullptr};
-    QAction *actionExit{nullptr};
-    QAction *actionHelp{nullptr};
-    QAction *actionAbout{nullptr};
+    QFileSystemModel *destinationModel = nullptr;
+    QFileSystemModel *sourceModel = nullptr;
 
-    // Backup System
-    FileWatcher *fileWatcher{nullptr};
-    BackupService *backupService{nullptr};
-    StagingModel *stagingModel{nullptr};
-    BackupController *backupController{nullptr};
+    FileWatcher *fileWatcher = nullptr;
+    BackupService *backupService = nullptr;
+    StagingModel *stagingModel = nullptr;
+    BackupController *backupController = nullptr;
 
-    // Custom Title Bar
-    CustomTitleBar *titleBar{nullptr};
+    CustomTitleBar *titleBar = nullptr;
 
-    // Dragging
+    // Mouse dragging state
+private:
     QPoint lastMousePosition;
-    bool dragging{false};
+    bool dragging = false;
 };
 
 #endif // MAINWINDOW_H
