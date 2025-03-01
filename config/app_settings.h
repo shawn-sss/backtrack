@@ -9,7 +9,7 @@
 namespace AppInfo {
 constexpr auto AUTHOR_NAME = "Shawn SSS";
 constexpr auto APP_DISPLAY_TITLE = "MyDataBackupApp";
-constexpr auto APP_VERSION = "v0.3";
+constexpr auto APP_VERSION = "v0.4";
 }
 
 // Application configuration

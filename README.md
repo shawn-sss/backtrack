@@ -1,5 +1,5 @@
-# MyDataBackupApp *(Pre-Alpha Release v0.3)*
-![Version](https://img.shields.io/badge/version-v0.3-orange)
+# MyDataBackupApp *(Alpha Release v0.4)*
+![Version](https://img.shields.io/badge/version-v0.4-orange)
 <p align="center">
   <img src="screenshot.jpg" alt="Screenshot">
 </p>
