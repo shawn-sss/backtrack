@@ -19,7 +19,8 @@ bool copyDirectoryRecursively(const QString &source, const QString &destination)
     QDir destinationDir(destination);
     if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false;
 
-    for (const QFileInfo &entry : sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries)) {
+    const QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    for (const QFileInfo &entry : entries) {
         QString destPath = destinationDir.filePath(entry.fileName());
         if (entry.isDir()) {
             if (!copyDirectoryRecursively(entry.absoluteFilePath(), destPath)) return false;
@@ -48,11 +49,13 @@ bool createDirectory(const QString &path) {
 // Directory size calculation
 quint64 calculateDirectorySize(const QDir &dir) {
     quint64 totalSize = 0;
-    for (const QFileInfo &entry : dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries)) {
+    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    for (const QFileInfo &entry : entries) {
         totalSize += entry.isDir() ? calculateDirectorySize(QDir(entry.absoluteFilePath())) : entry.size();
     }
     return totalSize;
 }
+
 
 // JSON file handling
 bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
@@ -81,7 +84,8 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     QDir dir(dirPath);
     if (!dir.exists()) return;
 
-    for (const QFileInfo &entry : dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot)) {
+    const QFileInfoList files = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+    for (const QFileInfo &entry : files) {
         QString fullPath = entry.absoluteFilePath();
         if (!uniqueFiles.contains(fullPath)) {
             uniqueFiles.insert(fullPath);
@@ -89,7 +93,8 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
         }
     }
 
-    for (const QFileInfo &subDir : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+    const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo &subDir : subDirs) {
         collectFilesRecursively(subDir.absoluteFilePath(), uniqueFiles, filesArray);
     }
 }
@@ -98,7 +103,8 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
     QDir dir(dirPath);
     if (!dir.exists()) return;
 
-    for (const QFileInfo &subDir : dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+    const QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo &subDir : subDirs) {
         QString subDirPath = subDir.absoluteFilePath();
         if (!uniqueFolders.contains(subDirPath)) {
             uniqueFolders.insert(subDirPath);

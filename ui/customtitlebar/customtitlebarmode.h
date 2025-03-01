@@ -1,5 +1,5 @@
-#ifndef TITLEBARMODE_H
-#define TITLEBARMODE_H
+#ifndef CUSTOMTITLEBARMODE_H
+#define CUSTOMTITLEBARMODE_H
 
 // Title bar display modes
 enum class TitleBarMode {
@@ -8,4 +8,4 @@ enum class TitleBarMode {
     Default
 };
 
-#endif // TITLEBARMODE_H
+#endif // CUSTOMTITLEBARMODE_H

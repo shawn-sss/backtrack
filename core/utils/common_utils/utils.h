@@ -2,7 +2,7 @@
 #define UTILS_H
 
 #include "../../../ui/customtitlebar/customtitlebar.h"
-#include "../../../ui/customtitlebar/titlebarmode.h"
+#include "../../../ui/customtitlebar/customtitlebarmode.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
 
 #include <QString>

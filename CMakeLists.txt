@@ -52,14 +52,14 @@ set(PROJECT_SETTINGS
 set(UI_SOURCES
     ui/customtitlebar/customtitlebar.cpp
     ui/customtitlebar/customtitlebar.h
-    ui/mainwindow/MainWindow.cpp
-    ui/mainwindow/MainWindow.h
-    ui/mainwindow/MainWindow.ui
+    ui/mainwindow/mainWindow.cpp
+    ui/mainwindow/mainWindow.h
+    ui/mainwindow/mainWindow.ui
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
-    ui/customtitlebar/titlebarmode.h
-    ui/customtitlebar/titlebarstyles.h
+    ui/customtitlebar/customtitlebarmode.h
+    ui/customtitlebar/customtitlebarstyling.h
     ui/toolbarmanager/toolbarmanager.h
     ui/toolbarmanager/toolbarmanager.cpp
     ui/toolbarmanager/toolbarmanagerstyling.h
@@ -67,36 +67,36 @@ set(UI_SOURCES
 
 # Backup Controller sources
 set(BACKUP_CONTROLLER_SOURCES
-    core/backup_module/controller/BackupController.cpp
-    core/backup_module/controller/BackupController.h
+    core/backup_module/controller/backupcontroller.cpp
+    core/backup_module/controller/backupcontroller.h
 )
 
 # Backup Service sources
 set(BACKUP_SERVICE_SOURCES
-    core/backup_module/service/BackupService.cpp
-    core/backup_module/service/BackupService.h
+    core/backup_module/service/backupservice.cpp
+    core/backup_module/service/backupservice.h
 )
 
 # Backup Worker sources
 set(BACKUP_WORKER_SOURCES
-    core/backup_module/worker/TransferWorker.cpp
-    core/backup_module/worker/TransferWorker.h
+    core/backup_module/worker/transferworker.cpp
+    core/backup_module/worker/transferworker.h
 )
 
 # Backup Models sources
 set(BACKUP_MODELS_SOURCES
-    core/backup_module/models/StagingModel.cpp
-    core/backup_module/models/StagingModel.h
+    core/backup_module/models/stagingmodel.cpp
+    core/backup_module/models/stagingmodel.h
 )
 
 # Utilities sources
 set(UTILS_SOURCES
-    core/utils/file_utils/FileWatcher.cpp
-    core/utils/file_utils/FileWatcher.h
+    core/utils/file_utils/filewatcher.cpp
+    core/utils/file_utils/filewatcher.h
     core/utils/file_utils/fileoperations.cpp
     core/utils/file_utils/fileoperations.h
-    core/utils/common_utils/Utils.cpp
-    core/utils/common_utils/Utils.h
+    core/utils/common_utils/utils.cpp
+    core/utils/common_utils/utils.h
     config/configmanager/configmanager.cpp
     config/configmanager/configmanager.h
 )

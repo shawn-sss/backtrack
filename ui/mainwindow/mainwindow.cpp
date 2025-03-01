@@ -196,7 +196,8 @@ void MainWindow::setupToolBar() {
     ui->toolBar->addWidget(spacer);
     ui->toolBar->addAction(ui->actionExit);
 
-    for (QAction* action : ui->toolBar->actions()) {
+    const QList<QAction*> actions = ui->toolBar->actions();
+    for (QAction* action : actions) {
         if (QWidget* widget = ui->toolBar->widgetForAction(action)) {
             widget->setCursor(Qt::PointingHandCursor);
         }

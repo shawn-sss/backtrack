@@ -1,8 +1,8 @@
 #ifndef CUSTOMTITLEBAR_H
 #define CUSTOMTITLEBAR_H
 
-#include "titlebarmode.h"
-#include "titlebarstyles.h"
+#include "customtitlebarmode.h"
+#include "customtitlebarstyling.h"
 
 #include <QPointer>
 #include <QWidget>

@@ -1,16 +1,11 @@
 #include "customtitlebar.h"
-#include "titlebarstyles.h"
-
+#include "customtitlebarstyling.h"
 #include "../../config/_constants.h"
 
 #include <QLabel>
 #include <QPushButton>
 #include <QPointer>
 #include <QHBoxLayout>
-
-// Button size constants
-static constexpr int BUTTON_WIDTH = 30;
-static constexpr int BUTTON_HEIGHT = 25;
 
 // Constructor
 CustomTitleBar::CustomTitleBar(QWidget *parent)
@@ -50,7 +45,7 @@ QPushButton* CustomTitleBar::createButton(const QString &label, const QString &s
     auto *button = new QPushButton(label, this);
     button->setStyleSheet(TitleBarStyles::BUTTON_BASE_STYLE + style);
     button->setToolTip(tooltip);
-    button->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    button->setFixedSize(TitleBarStyles::Button::WIDTH, TitleBarStyles::Button::HEIGHT);
     button->setCursor(Qt::PointingHandCursor);
     return button;
 }

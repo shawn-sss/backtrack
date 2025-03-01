@@ -1,7 +1,6 @@
 #include "utils.h"
 
 #include "../../../../config/_constants.h"
-#include "../../../ui/customtitlebar/customtitlebar.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
 
 #include <QMainWindow>
@@ -27,22 +26,14 @@ namespace UI {
 void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition) {
     if (event->button() == Qt::LeftButton) {
         dragging = true;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         lastMousePosition = event->globalPosition().toPoint() - window->frameGeometry().topLeft();
-#else
-        lastMousePosition = event->globalPos() - window->frameGeometry().topLeft();
-#endif
         event->accept();
     }
 }
 
 void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, const QPoint &lastMousePosition) {
     if (dragging && (event->buttons() & Qt::LeftButton)) {
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
         window->move(event->globalPosition().toPoint() - lastMousePosition);
-#else
-        window->move(event->globalPos() - lastMousePosition);
-#endif
         event->accept();
     }
 }

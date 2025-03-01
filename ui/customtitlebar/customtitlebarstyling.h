@@ -1,5 +1,5 @@
-#ifndef TITLEBARSTYLES_H
-#define TITLEBARSTYLES_H
+#ifndef CUSTOMTITLEBARSTYLING_H
+#define CUSTOMTITLEBARSTYLING_H
 
 #include <QString>
 
@@ -53,6 +53,12 @@ namespace TitleBar {
 constexpr int HEIGHT = 40;
 }
 
+// Button size constants - moved from customtitlebar.cpp
+namespace Button {
+constexpr int WIDTH = 30;
+constexpr int HEIGHT = 25;
+}
+
 } // namespace TitleBarStyles
 
-#endif // TITLEBARSTYLES_H
+#endif // CUSTOMTITLEBARSTYLING_H
