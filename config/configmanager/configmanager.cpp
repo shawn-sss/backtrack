@@ -21,11 +21,13 @@ ConfigManager::ConfigManager() {
 
 // Config file path management
 QString ConfigManager::getConfigFilePath() const {
-    static const QString configDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    static const QString configFilePath = configDir + "/" + AppConfig::CONFIG_FILE_NAME;
-    QDir().mkpath(configDir);
+    static const QString baseConfigDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    static const QString artifactsDir = baseConfigDir + "/" + AppConfig::RUNTIME_STORAGE_FOLDER;
+    static const QString configFilePath = artifactsDir + "/" + AppConfig::CONFIG_FILE_NAME;
+    QDir().mkpath(artifactsDir);
     return configFilePath;
 }
+
 
 // Returns public-facing config file path
 QString ConfigManager::getConfigFilePathPublic() const {

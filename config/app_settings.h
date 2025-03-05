@@ -15,6 +15,7 @@ constexpr auto APP_VERSION = "v0.4";
 // Application configuration
 namespace AppConfig {
 constexpr auto BACKUP_CONFIG_FOLDER = "_MyDataBackupApp";
+constexpr auto RUNTIME_STORAGE_FOLDER = "artifacts";
 constexpr auto CONFIG_FILE_NAME = "config.json";
 constexpr auto BACKUP_LOGS_DIRECTORY = "logs";
 const QString BACKUP_LOG_FILE_SUFFIX = "log.json";
