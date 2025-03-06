@@ -31,13 +31,27 @@ void BackupController::createBackup(const QString &destinationPath,
 
     cleanupAfterTransfer();
 
+    // Set the backup root path (needed for the service to work correctly)
+    backupService->setBackupRoot(destinationPath);
+
+    const QString configFolderPath = QDir(destinationPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
+    const QString configFilePath = QDir(configFolderPath).filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
+
+    if (!QFile::exists(configFilePath)) {
+        backupService->initializeBackupRootIfNeeded();
+    } else {
+    }
+
     const QString timestamp = QDateTime::currentDateTime().toString(TimestampFormats::BACKUP_FOLDER_TIMESTAMP_FORMAT);
     const QString backupFolderName = ConfigManager::getInstance().getBackupPrefix() + timestamp;
 
     QDir destDir(destinationPath);
     const QString backupFolderPath = destDir.filePath(backupFolderName);
 
-    if (!createBackupFolder(backupFolderPath)) return;
+    if (!createBackupFolder(backupFolderPath)) {
+        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
+        return;
+    }
 
     progressBar->setVisible(true);
     progressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);

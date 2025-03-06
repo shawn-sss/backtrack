@@ -1,5 +1,4 @@
 #include "backupservice.h"
-
 #include "../../../config/_constants.h"
 #include "../../utils/file_utils/fileoperations.h"
 #include "../../../core/utils/common_utils/utils.h"
@@ -9,6 +8,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QDebug>
 
 // Constructor
 BackupService::BackupService(const QString &backupRoot)
@@ -21,6 +22,36 @@ void BackupService::setBackupRoot(const QString &path) {
 
 QString BackupService::getBackupRoot() const {
     return backupRootPath;
+}
+
+// Initializes _MyDataBackupApp folder, logs folder, and backup_config.json if they don't exist
+void BackupService::initializeBackupRootIfNeeded() {
+    const QString configFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
+    const QString logsFolderPath = QDir(configFolderPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
+    const QString configFilePath = QDir(configFolderPath).filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
+
+    if (QFile::exists(configFilePath)) {
+        return;  // Already initialized
+    }
+
+    // Create folders (logs etc.)
+    QString errorMessage;
+    if (!FileOperations::createBackupInfrastructure(backupRootPath, errorMessage)) {
+        qWarning() << "Failed to create backup infrastructure:" << errorMessage;
+        return;
+    }
+
+    // Generate the config JSON
+    QJsonObject backupConfig;
+    backupConfig["app_name"] = AppInfo::APP_DISPLAY_TITLE;
+    backupConfig["app_author"] = AppInfo::AUTHOR_NAME;
+    backupConfig["app_version"] = AppInfo::APP_VERSION;
+    backupConfig["backup_root"] = backupRootPath;
+    backupConfig["creation_time"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+
+    if (!FileOperations::writeJsonToFile(configFilePath, backupConfig)) {
+        qWarning() << "Failed to write backup_config.json to:" << configFilePath;
+    }
 }
 
 // File and folder collection
@@ -61,7 +92,7 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return logFiles.isEmpty() ? QJsonObject() : FileOperations::readJsonFromFile(logFiles.first().absoluteFilePath());
 }
 
-// Creates a backup summary file
+// Creates a backup summary file (log file)
 void BackupService::createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) {
     const QJsonObject summaryObject = createBackupMetadata(backupFolderPath, selectedItems, backupDuration);
     const QString logsFolderPath = QDir(QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER)).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
@@ -98,7 +129,6 @@ quint64 BackupService::getTotalBackupSize() const {
     return totalSize;
 }
 
-// Generates metadata for a new backup
 QJsonObject BackupService::createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const {
     QJsonObject summaryObject;
     summaryObject[BackupMetadataKeys::NAME] = QFileInfo(backupFolderPath).fileName();

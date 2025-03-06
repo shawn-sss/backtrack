@@ -24,6 +24,10 @@ public:
     void setBackupRoot(const QString &path);
     QString getBackupRoot() const;
 
+    // Backup infrastructure initialization
+public:
+    void initializeBackupRootIfNeeded();  // NEW: ensures _MyDataBackupApp and backup_config.json exist
+
     // Backup status and metadata
 public:
     BackupStatus scanForBackupStatus() const;

@@ -116,36 +116,20 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
 
 // Backup infrastructure setup
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
-    QDir backupRoot(backupDir);
-    if (!backupRoot.exists() && !backupRoot.mkpath(".")) {
+    const QString configFolderPath = QDir(backupDir).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
+    const QString logsFolderPath = QDir(configFolderPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
+
+    if (!QDir(configFolderPath).exists() && !QDir().mkpath(configFolderPath)) {
         errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_DIRECTORY).arg(AppConfig::BACKUP_CONFIG_FOLDER);
         return false;
     }
 
-    QString backupSettingsPath = backupRoot.filePath(AppConfig::BACKUP_CONFIG_FOLDER);
-    QDir settingsDir(backupSettingsPath);
-    if (!settingsDir.exists() && !settingsDir.mkpath(".")) {
-        errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_DIRECTORY).arg(AppConfig::BACKUP_CONFIG_FOLDER);
-        return false;
-    }
-
-    QString settingsFilePath = settingsDir.filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
-    if (!QFile::exists(settingsFilePath)) {
-        QFile file(settingsFilePath);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_FILE).arg(AppConfig::BACKUP_CONFIG_FILE_NAME);
-            return false;
-        }
-        file.close();
-    }
-
-    QString backupLogsPath = settingsDir.filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
-    QDir logsDir(backupLogsPath);
-    if (!logsDir.exists() && !logsDir.mkpath(".")) {
+    if (!QDir(logsFolderPath).exists() && !QDir().mkpath(logsFolderPath)) {
         errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_DIRECTORY).arg(AppConfig::BACKUP_LOGS_DIRECTORY);
         return false;
     }
 
+    // Note: No more `backup_config.json` creation here. BackupService owns that.
     return true;
 }
 
