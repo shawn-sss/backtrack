@@ -45,7 +45,7 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList &selectedItems)
 BackupStatus BackupService::scanForBackupStatus() const {
     const QString configFolderPath = QDir(backupRootPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
     const QString logsFolderPath = QDir(configFolderPath).filePath(AppConfig::BACKUP_LOGS_DIRECTORY);
-    const QString configFilePath = QDir(configFolderPath).filePath(AppConfig::CONFIG_FILE_NAME);
+    const QString configFilePath = QDir(configFolderPath).filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
 
     if (!QDir(configFolderPath).exists()) return BackupStatus::None;
     return (!QDir(logsFolderPath).exists() || !QFile::exists(configFilePath)) ? BackupStatus::Broken : BackupStatus::Valid;

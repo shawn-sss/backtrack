@@ -104,7 +104,7 @@ void FileWatcher::startWatching(const QString &rootPath) {
     QSet<QString> pathsToWatch;
     pathsToWatch.insert(rootDir.filePath(AppConfig::BACKUP_CONFIG_FOLDER));
     pathsToWatch.insert(rootDir.filePath(AppConfig::BACKUP_LOGS_DIRECTORY));
-    pathsToWatch.insert(rootDir.filePath(AppConfig::CONFIG_FILE_NAME));
+    pathsToWatch.insert(rootDir.filePath(AppConfig::BACKUP_CONFIG_FILE_NAME));
 
     for (const QFileInfo &dirInfo : rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         pathsToWatch.insert(dirInfo.absoluteFilePath());

@@ -427,7 +427,7 @@ void MainWindow::exitApplication() {
 // Shows the help dialog
 void MainWindow::showHelpDialog() {
     const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
-    .arg(ConfigManager::getInstance().getConfigFilePathPublic());
+    .arg(ConfigManager::getInstance().getInstallMetadataFilePathPublic());
 
     QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE,
                              HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);

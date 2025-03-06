@@ -4,40 +4,45 @@
 #include <QString>
 #include <QJsonObject>
 
-// Constants for default values
 class ConfigManager {
-private:
-    static constexpr auto DEFAULT_BACKUP_DIRECTORY = "C:\\temp";
-    static constexpr auto DEFAULT_BACKUP_PREFIX = "Backup_";
-
-    // Singleton instance management
 public:
     static ConfigManager& getInstance();
 
-    // Configuration handling
-public:
-    void load();
-    void save();
+    // Metadata management (App installation details)
+    void loadInstallMetadata();
+    void saveInstallMetadata();
+    QString getInstallMetadataFilePathPublic() const;
 
-    // Backup directory management
-public:
+    // User configuration management (Backup settings)
+    void loadUserConfig();
+    void saveUserConfig();
+    QString getUserConfigFilePathPublic() const;
+
+    // First-run check (both files required)
+    bool isFirstRun() const;
+
+    // Backup directory management (from user config)
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
 
-    // Backup prefix management
-public:
+    // Backup prefix management (from user config)
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // Config file path access
-public:
-    QString getConfigFilePathPublic() const;
-
-    // Internal/private methods and members
 private:
-    ConfigManager();
-    QString getConfigFilePath() const;
-    QJsonObject settings;
+    ConfigManager();  // Singleton private constructor
+
+    // Internal file path helpers
+    QString getInstallMetadataFilePath() const;
+    QString getUserConfigFilePath() const;
+    QString getAppInstallDir() const;
+
+    // Default setup for first run
+    void setupDefaults();
+
+    // Internal data storage
+    QJsonObject installMetadata;  // App install metadata
+    QJsonObject userSettings;     // Backup settings
 };
 
 #endif // CONFIGMANAGER_H

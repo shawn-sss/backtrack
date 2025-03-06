@@ -129,11 +129,11 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
         return false;
     }
 
-    QString settingsFilePath = settingsDir.filePath(AppConfig::CONFIG_FILE_NAME);
+    QString settingsFilePath = settingsDir.filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
     if (!QFile::exists(settingsFilePath)) {
         QFile file(settingsFilePath);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_FILE).arg(AppConfig::CONFIG_FILE_NAME);
+            errorMessage = QString(ErrorMessages::ERROR_CREATE_BACKUP_FILE).arg(AppConfig::BACKUP_CONFIG_FILE_NAME);
             return false;
         }
         file.close();
