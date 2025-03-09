@@ -39,13 +39,13 @@ QString ConfigManager::getAppInstallDirPublic() const {
 
 // Construct full file path
 QString ConfigManager::getFilePath(const QString& fileName) const {
-    return getAppInstallDir() + "/" + AppConfig::RUNTIME_STORAGE_FOLDER + "/" + fileName;
+    return getAppInstallDir() + "/" + AppConfig::APPDATA_SETUP_FOLDER + "/" + fileName;
 }
 
 // Check if first run
 bool ConfigManager::isFirstRun() const {
-    return !QFile::exists(getFilePath(AppConfig::INSTALL_METADATA_FILE_NAME)) ||
-           !QFile::exists(getFilePath(AppConfig::USER_CONFIG_FILE_NAME));
+    return !QFile::exists(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE)) ||
+           !QFile::exists(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE));
 }
 
 // Initialize default settings
@@ -94,22 +94,22 @@ bool saveJsonFile(const QString& path, const QJsonObject& data) {
 
 // Load install metadata
 void ConfigManager::loadInstallMetadata() {
-    loadJsonFile(getFilePath(AppConfig::INSTALL_METADATA_FILE_NAME), installMetadata);
+    loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE), installMetadata);
 }
 
 // Save install metadata
 void ConfigManager::saveInstallMetadata() {
-    saveJsonFile(getFilePath(AppConfig::INSTALL_METADATA_FILE_NAME), installMetadata);
+    saveJsonFile(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE), installMetadata);
 }
 
 // Load user configuration
 void ConfigManager::loadUserConfig() {
-    loadJsonFile(getFilePath(AppConfig::USER_CONFIG_FILE_NAME), userSettings);
+    loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE), userSettings);
 }
 
 // Save user configuration
 void ConfigManager::saveUserConfig() {
-    saveJsonFile(getFilePath(AppConfig::USER_CONFIG_FILE_NAME), userSettings);
+    saveJsonFile(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE), userSettings);
 }
 
 // Retrieve backup directory

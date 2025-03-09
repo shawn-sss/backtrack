@@ -16,13 +16,16 @@ constexpr auto APP_VERSION = "0.4";
 
 // Application configuration
 namespace AppConfig {
-constexpr auto BACKUP_CONFIG_FOLDER = "_MyDataBackupApp";
-constexpr auto RUNTIME_STORAGE_FOLDER = "artifacts";
-constexpr auto INSTALL_METADATA_FILE_NAME = "install_metadata.json";
-constexpr auto USER_CONFIG_FILE_NAME = "user_config.json";
-constexpr auto BACKUP_CONFIG_FILE_NAME = "backup_config.json";
-constexpr auto BACKUP_LOGS_DIRECTORY = "logs";
-inline auto BACKUP_LOG_FILE_SUFFIX = QStringLiteral("log.json");
+// Directory for application-specific data
+constexpr auto APPDATA_SETUP_FOLDER = "app_config";
+constexpr auto APPDATA_SETUP_INFO_FILE = "app_init.json";
+constexpr auto APPDATA_SETUP_USER_SETTINGS_FILE = "user_settings.json";
+
+// Directory for backup-specific data
+constexpr auto BACKUP_SETUP_FOLDER = "_MyDataBackupApp";
+constexpr auto BACKUP_SETUP_INFO_FILE = "backup_init.json";
+constexpr auto BACKUP_SETUP_LOGS_FOLDER = "logs";
+inline auto BACKUP_SETUP_LOGS_FILE = QStringLiteral("log.json");
 }
 
 #endif // APP_CONFIG_H

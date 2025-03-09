@@ -36,7 +36,7 @@ void BackupController::createBackup(const QString &destinationPath,
     cleanupAfterTransfer();
 
     const QString configFilePath = QDir(destinationPath).filePath(
-        QStringLiteral("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_CONFIG_FILE_NAME));
+        QStringLiteral("%1/%2").arg(AppConfig::BACKUP_SETUP_FOLDER, AppConfig::BACKUP_SETUP_INFO_FILE));
 
     if (!QFile::exists(configFilePath)) {
         backupService->initializeBackupRootIfNeeded();
@@ -92,10 +92,10 @@ void BackupController::createBackup(const QString &destinationPath,
 void BackupController::deleteBackup(const QString &backupPath) {
     const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
         QStringLiteral("%1/%2/%3_%4")
-            .arg(AppConfig::BACKUP_CONFIG_FOLDER,
-                 AppConfig::BACKUP_LOGS_DIRECTORY,
+            .arg(AppConfig::BACKUP_SETUP_FOLDER,
+                 AppConfig::BACKUP_SETUP_LOGS_FOLDER,
                  QFileInfo(backupPath).fileName(),
-                 AppConfig::BACKUP_LOG_FILE_SUFFIX));
+                 AppConfig::BACKUP_SETUP_LOGS_FILE));
 
     if (!QFile::remove(logFilePath)) {
         emit errorOccurred(QFile::exists(logFilePath)
