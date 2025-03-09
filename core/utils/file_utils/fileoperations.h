@@ -1,19 +1,19 @@
 #ifndef FILEOPERATIONS_H
 #define FILEOPERATIONS_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QDir>
-#include <QSet>
-#include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonObject>
+#include <QSet>
+#include <QString>
 
-// FileOperations namespace - file and directory utilities
 namespace FileOperations {
 
 // Directory and file management
-bool copyDirectoryRecursively(const QString &source, const QString &destination);
-bool createDirectory(const QString &path);
+bool copyDirectoryRecursively(const QString &sourcePath, const QString &destinationPath);
 bool deleteDirectory(const QString &path);
+bool createDirectory(const QString &path);
 
 // File size calculation
 quint64 calculateDirectorySize(const QDir &dir);

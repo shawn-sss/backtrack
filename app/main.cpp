@@ -1,9 +1,14 @@
-#include <QApplication>
+// Project includes different directory
 #include "../config/_constants.h"
 #include "../config/configmanager/configmanager.h"
 #include "../ui/mainwindow/mainwindow.h"
 
+// Built-in Qt includes
+#include <QApplication>
+
+// Entry point for application
 int main(int argc, char *argv[]) {
+
     // Initialize application
     QApplication app(argc, argv);
 

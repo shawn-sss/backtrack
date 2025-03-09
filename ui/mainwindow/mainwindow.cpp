@@ -1,22 +1,28 @@
+// Project includes same directory
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "../../config/_constants.h"
+// Project includes different directory
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/toolbarmanager/toolbarmanagerstyling.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"
+#include "../../core/utils/file_utils/filewatcher.h"
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/common_utils/utils.h"
-#include "../../core/utils/file_utils/filewatcher.h"
 
-#include <QBuffer>
+// Built-in Qt includes
+#include <QFileSystemModel>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QFileSystemModel>
+#include <QBuffer>
+#include <QAbstractItemModel>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QWidget>
 
-// Constructor
+// Constructor - Initializes main window components
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -26,28 +32,33 @@ MainWindow::MainWindow(QWidget *parent)
     backupService(new BackupService(ConfigManager::getInstance().getBackupDirectory())),
     stagingModel(new StagingModel(this)),
     backupController(new BackupController(backupService, this)) {
+
     ui->setupUi(this);
+
+    // Setup and initialize UI components
     configureWindow();
+    initializeUI();
     setupLayout();
     setupToolBar();
-    initializeUI();
+    applyButtonCursors();
     initializeBackupSystem();
     setupConnections();
-    applyButtonCursors();
 }
 
-// Destructor
+// Destructor - Cleans up allocated resources
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-// Configures main window properties
+// ## Window and Layout Configuration ##
+
+// Configure basic window properties
 void MainWindow::configureWindow() {
     setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     setStatusBar(nullptr);
 }
 
-// Sets up the layout
+// Set up main layout structure
 void MainWindow::setupLayout() {
     titleBar = setupCustomTitleBar(this, TitleBarMode::MainWindow);
 
@@ -66,7 +77,7 @@ void MainWindow::setupLayout() {
         contentLayout->addWidget(ui->toolBar, 0, Qt::AlignLeft);
     }
 
-    auto *contentContainer = centralWidget();
+    QWidget *contentContainer = centralWidget();
     contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     contentLayout->addWidget(contentContainer, 1);
 
@@ -74,7 +85,7 @@ void MainWindow::setupLayout() {
     setCentralWidget(container);
 }
 
-// Configures the toolbar appearance
+// Configure toolbar appearance
 void MainWindow::configureToolBar() {
     ui->toolBar->setFloatable(false);
     ui->toolBar->setMovable(false);
@@ -84,20 +95,49 @@ void MainWindow::configureToolBar() {
     ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
-// Applies pointing hand cursor to buttons
-void MainWindow::applyButtonCursors() {
-    const QList<QPushButton*> buttons = {
-        ui->AddToBackupButton,
-        ui->RemoveFromBackupButton,
-        ui->CreateBackupButton,
-        ui->ChangeBackupDestinationButton,
-        ui->DeleteBackupButton
-    };
+// Full toolbar setup
+void MainWindow::setupToolBar() {
+    if (!ui->toolBar) return;
+    setupToolbarActions();
+    ui->toolBar->clear();
+    ui->toolBar->addAction(ui->actionOpenSettings);
+    ui->toolBar->addAction(ui->actionHelp);
+    ui->toolBar->addAction(ui->actionAbout);
 
-    for (auto *button : buttons) {
-        button->setCursor(Qt::PointingHandCursor);
+    auto *spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->toolBar->addWidget(spacer);
+    ui->toolBar->addAction(ui->actionExit);
+
+    const QList<QAction*> actions = ui->toolBar->actions();
+    for (QAction* action : actions) {
+        if (QWidget* widget = ui->toolBar->widgetForAction(action)) {
+            widget->setCursor(Qt::PointingHandCursor);
+        }
     }
 }
+
+// Configures toolbar actions
+void MainWindow::setupToolbarActions() {
+    const struct {
+        QAction*& action;
+        const QString& iconPath;
+        const QString& label;
+    } actions[] = {
+        { ui->actionOpenSettings, Resources::Toolbar::SETTINGS_ICON_PATH, Labels::Toolbar::SETTINGS },
+        { ui->actionExit, Resources::Toolbar::EXIT_ICON_PATH, Labels::Toolbar::EXIT },
+        { ui->actionHelp, Resources::Toolbar::HELP_ICON_PATH, Labels::Toolbar::HELP },
+        { ui->actionAbout, Resources::Toolbar::ABOUT_ICON_PATH, Labels::Toolbar::ABOUT }
+    };
+
+    for (const auto& action : actions) {
+        if (!action.action) action.action = new QAction(this);
+        action.action->setIcon(QIcon(action.iconPath));
+        action.action->setText(action.label);
+    }
+}
+
+// ## UI Initialization and Setup ##
 
 // Initializes the UI
 void MainWindow::initializeUI() {
@@ -162,60 +202,32 @@ void MainWindow::setupConnections() {
     }
 }
 
-// Configures toolbar actions
-void MainWindow::setupToolbarActions() {
-    const struct {
-        QAction*& action;
-        const QString& iconPath;
-        const QString& label;
-    } actions[] = {
-        { ui->actionOpenSettings, Resources::Toolbar::SETTINGS_ICON_PATH, Labels::Toolbar::SETTINGS },
-        { ui->actionExit, Resources::Toolbar::EXIT_ICON_PATH, Labels::Toolbar::EXIT },
-        { ui->actionHelp, Resources::Toolbar::HELP_ICON_PATH, Labels::Toolbar::HELP },
-        { ui->actionAbout, Resources::Toolbar::ABOUT_ICON_PATH, Labels::Toolbar::ABOUT }
+// Connects backup-related signals
+void MainWindow::connectBackupSignals() {
+    connect(backupController, &BackupController::backupCreated, this, &MainWindow::refreshBackupStatus);
+    connect(backupController, &BackupController::backupDeleted, this, &MainWindow::refreshBackupStatus);
+    connect(backupController, &BackupController::errorOccurred, this,
+            [this](const QString &error) {
+                QMessageBox::critical(this, ErrorMessages::BACKUP_DELETION_ERROR_TITLE, error);
+            });
+}
+
+// Applies pointing hand cursor to buttons
+void MainWindow::applyButtonCursors() {
+    const QList<QPushButton*> buttons = {
+        ui->AddToBackupButton,
+        ui->RemoveFromBackupButton,
+        ui->CreateBackupButton,
+        ui->ChangeBackupDestinationButton,
+        ui->DeleteBackupButton
     };
 
-    for (const auto& action : actions) {
-        if (!action.action) action.action = new QAction(this);
-        action.action->setIcon(QIcon(action.iconPath));
-        action.action->setText(action.label);
+    for (auto *button : buttons) {
+        button->setCursor(Qt::PointingHandCursor);
     }
 }
 
-// Full toolbar setup
-void MainWindow::setupToolBar() {
-    if (!ui->toolBar) return;
-    setupToolbarActions();
-    ui->toolBar->clear();
-    ui->toolBar->addAction(ui->actionOpenSettings);
-    ui->toolBar->addAction(ui->actionHelp);
-    ui->toolBar->addAction(ui->actionAbout);
-
-    auto *spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->toolBar->addWidget(spacer);
-    ui->toolBar->addAction(ui->actionExit);
-
-    const QList<QAction*> actions = ui->toolBar->actions();
-    for (QAction* action : actions) {
-        if (QWidget* widget = ui->toolBar->widgetForAction(action)) {
-            widget->setCursor(Qt::PointingHandCursor);
-        }
-    }
-}
-
-// Mouse event handling
-void MainWindow::mousePressEvent(QMouseEvent *event) {
-    Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
-}
-
-void MainWindow::mouseMoveEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
-}
-
-void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseRelease(event, dragging);
-}
+// ## Backup System Functions ##
 
 // Refreshes the backup status
 void MainWindow::refreshBackupStatus() {
@@ -347,6 +359,8 @@ void MainWindow::onBackupDirectoryChanged() {
     refreshBackupStatus();
 }
 
+// ## Backup Status & UI Updates ##
+
 // Updates the backup status label
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     const QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressSettings::STATUS_LIGHT_SIZE);
@@ -402,16 +416,48 @@ void MainWindow::updateLastBackupInfo() {
         }
         return;
     }
+
     ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(BackupMetadataKeys::NAME).toString());
+
     ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP +
                                           Utils::Formatting::formatTimestamp(QDateTime::fromString(
                                                                                  metadata.value(BackupMetadataKeys::TIMESTAMP).toString(), Qt::ISODate),
                                                                              TimestampFormats::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
+
     ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION +
                                          Utils::Formatting::formatDuration(metadata.value(BackupMetadataKeys::DURATION).toInt()));
+
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE +
                                      metadata.value(BackupMetadataKeys::SIZE_READABLE).toString());
 }
+
+// ## Event Handlers ##
+
+// Mouse event handling
+void MainWindow::mousePressEvent(QMouseEvent *event) {
+    Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *event) {
+    Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
+    Utils::UI::handleMouseRelease(event, dragging);
+}
+
+// Handles the close event
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (backupController->isBackupInProgress()) {
+        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS,
+                             WarningMessages::WARNING_OPERATION_STILL_RUNNING);
+        event->ignore();
+        return;
+    }
+    QMainWindow::closeEvent(event);
+}
+
+// ## Menu & Toolbar Actions ##
 
 // Opens the settings dialog
 void MainWindow::openSettings() {
@@ -427,7 +473,7 @@ void MainWindow::exitApplication() {
 // Shows the help dialog
 void MainWindow::showHelpDialog() {
     const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
-    .arg(ConfigManager::getInstance().getInstallMetadataFilePathPublic());
+    .arg(ConfigManager::getInstance().getAppInstallDirPublic());
 
     QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE,
                              HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
@@ -442,26 +488,7 @@ void MainWindow::onAboutButtonClicked() {
                                       AppInfo::AUTHOR_NAME));
 }
 
-// Handles the close event
-void MainWindow::closeEvent(QCloseEvent *event) {
-    if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS,
-                             WarningMessages::WARNING_OPERATION_STILL_RUNNING);
-        event->ignore();
-        return;
-    }
-    QMainWindow::closeEvent(event);
-}
-
-// Connects backup-related signals
-void MainWindow::connectBackupSignals() {
-    connect(backupController, &BackupController::backupCreated, this, &MainWindow::refreshBackupStatus);
-    connect(backupController, &BackupController::backupDeleted, this, &MainWindow::refreshBackupStatus);
-    connect(backupController, &BackupController::errorOccurred, this,
-            [this](const QString &error) {
-                QMessageBox::critical(this, ErrorMessages::BACKUP_DELETION_ERROR_TITLE, error);
-            });
-}
+// ## File & View Setup ##
 
 // Sets up the destination view
 void MainWindow::setupDestinationView() {

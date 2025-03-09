@@ -1,40 +1,47 @@
+// Project includes same directory
 #include "settingsdialog.h"
-#include "ui_settingsdialog.h"
 
+// Project includes different directory
 #include "../../config/_constants.h"
 #include "../../core/utils/common_utils/utils.h"
 
+// Built-in Qt includes
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 
-// Constructor
+// Constructor - initializes settings dialog
 SettingsDialog::SettingsDialog(QWidget *parent)
-    : QDialog(parent), dragging(false) {
+    : QDialog(parent), titleBar(nullptr), dragging(false) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
-    setMinimumSize(600, 400);
+    setMinimumSize(QSize(600, 400));
 
     setupLayout();
     setupConnections();
 }
 
-// Destructor
-SettingsDialog::~SettingsDialog() {}
+// Destructor - default behavior
+SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the dialog layout, including title bar and content area
+// Sets up the layout for the settings dialog
 void SettingsDialog::setupLayout() {
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
+    // Initialize and add custom title bar
     titleBar = setupCustomTitleBar(this, TitleBarMode::Dialog);
     mainLayout->addWidget(titleBar);
 
+    // Create content area
     auto *contentArea = new QWidget(this);
+    contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     auto *contentLayout = new QVBoxLayout(contentArea);
     contentLayout->setContentsMargins(10, 10, 10, 10);
     contentLayout->setSpacing(10);
 
-    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    // Create and configure button box
+    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, contentArea);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
 
@@ -44,7 +51,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(contentArea, 1);
 }
 
-// Sets up signal connections to handle window controls
+// Establishes signal connections for title bar actions
 void SettingsDialog::setupConnections() {
     if (titleBar) {
         connect(titleBar, &CustomTitleBar::minimizeRequested, this, &SettingsDialog::showMinimized);
@@ -52,27 +59,27 @@ void SettingsDialog::setupConnections() {
     }
 }
 
-// Accepts and saves the dialog
+// Handles saving and closing the dialog
 void SettingsDialog::onSaveClicked() {
     accept();
 }
 
-// Cancels and closes the dialog
+// Handles canceling and closing the dialog
 void SettingsDialog::onCancelClicked() {
     reject();
 }
 
-// Handles mouse press for window dragging
+// Handles mouse press event for window dragging
 void SettingsDialog::mousePressEvent(QMouseEvent *event) {
     Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
 }
 
-// Handles mouse move for window dragging
+// Handles mouse move event for window dragging
 void SettingsDialog::mouseMoveEvent(QMouseEvent *event) {
     Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
 }
 
-// Handles mouse release for window dragging
+// Handles mouse release event for window dragging
 void SettingsDialog::mouseReleaseEvent(QMouseEvent *event) {
     Utils::UI::handleMouseRelease(event, dragging);
 }

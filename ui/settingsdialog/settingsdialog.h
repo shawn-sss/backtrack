@@ -1,44 +1,49 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include <QPointer>
+// Project includes same directory
+#include "../customtitlebar/customtitlebar.h"
+#include "../customtitlebar/customtitlebarmode.h"
+
+// Built-in Qt includes
 #include <QDialog>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
 #include <QMouseEvent>
 
-#include "../../ui/customtitlebar/customtitlebar.h"
-
-// SettingsDialog class definition
+// Dialog window for application settings with a custom title bar
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
+    // Constructor and Destructor
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog() override;
 
-    // Event handling for dragging
 protected:
+    // Mouse event handlers for window dragging
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-    // Internal slots
-private slots:
-    void onSaveClicked();
-    void onCancelClicked();
-
-    // Internal setup methods
 private:
+    // Initializes UI layout
     void setupLayout();
+    // Establishes signal connections
     void setupConnections();
 
-    // Internal UI elements
-private:
-    QPointer<CustomTitleBar> titleBar;
-
-    // Internal state variables
-private:
+    // Custom title bar component
+    CustomTitleBar *titleBar;
+    // Dragging state
+    bool dragging;
+    // Last recorded mouse position for dragging
     QPoint lastMousePosition;
-    bool dragging = false;
+
+private slots:
+    // Handles save action
+    void onSaveClicked();
+    // Handles cancel action
+    void onCancelClicked();
 };
 
 #endif // SETTINGSDIALOG_H

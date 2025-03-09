@@ -1,43 +1,45 @@
 #ifndef BACKUPCONTROLLER_H
 #define BACKUPCONTROLLER_H
 
-#include <QStringList>
+// Built-in Qt includes
 #include <QObject>
+#include <QStringList>
 
-// Forward declarations
+// Forward declarations Qt classes
 class QProgressBar;
 class QThread;
+
+// Forward declarations custom classes
 class BackupService;
 
-// BackupController class definition
+// Manages backup operations
 class BackupController : public QObject {
     Q_OBJECT
 
 public:
+    // Constructor & Destructor
     explicit BackupController(BackupService *service, QObject *parent = nullptr);
     ~BackupController();
 
-    // Backup operations
-public:
+    // Backup management
     void createBackup(const QString &destinationPath, const QStringList &stagingList, QProgressBar *progressBar);
     void deleteBackup(const QString &backupPath);
     bool isBackupInProgress() const;
 
-    // Signals
 signals:
+    // Signals for backup status
     void backupCreated();
     void backupDeleted();
     void errorOccurred(const QString &error);
 
-    // Internal utility methods
 private:
+    // Internal helper functions
     void cleanupAfterTransfer();
     bool createBackupFolder(const QString &path);
 
-    // Internal variables
-private:
+    // Internal state
     BackupService *backupService;
-    QThread *workerThread = nullptr;
+    QThread *workerThread;
 };
 
 #endif // BACKUPCONTROLLER_H

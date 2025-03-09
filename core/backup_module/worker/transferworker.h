@@ -1,42 +1,42 @@
 #ifndef TRANSFERWORKER_H
 #define TRANSFERWORKER_H
 
-#include <QDir>
-#include <QStringList>
-#include <QFileInfo>
+// Built-in Qt includes
 #include <QObject>
+#include <QFileInfo>
+#include <QStringList>
 
-// TransferWorker handles file transfer operations
+// Handles file transfers for backup
 class TransferWorker : public QObject {
     Q_OBJECT
 
 public:
+    // Constructor
     explicit TransferWorker(const QStringList &files, const QString &destination, QObject *parent = nullptr);
     Q_DISABLE_COPY(TransferWorker)
 
-    // Transfer control
 public slots:
+    // Starts or stops transfer
     void startTransfer();
     void stopTransfer();
 
-    // Transfer progress and status signals
 signals:
+    // Transfer progress and status signals
     void progressUpdated(int progress);
     void transferComplete();
     void errorOccurred(const QString &error);
     void finished();
 
-    // Internal file processing
 private:
+    // Processing functions
     bool processDriveRoot(const QString &driveRoot);
     bool processFileOrFolder(const QString &filePath);
     bool copyItem(const QFileInfo &fileInfo, const QString &destinationPath);
 
-    // Internal variables
-private:
-    const QStringList files;
-    const QString destination;
-    bool stopRequested = false;
+    // Internal state
+    QStringList files;
+    QString destination;
+    std::atomic<bool> stopRequested{false};
 };
 
 #endif // TRANSFERWORKER_H

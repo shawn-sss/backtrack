@@ -1,26 +1,29 @@
 #ifndef TOOLBARMANAGERSTYLING_H
 #define TOOLBARMANAGERSTYLING_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QSize>
-
-// Icon size styles
-namespace IconStyles {
-inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
-}
+#include <QString>
 
 // Toolbar appearance styles
 namespace ToolbarStyles {
-inline constexpr auto DEFAULT_STYLE =
+
+// Default icon size
+inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
+
+// Default toolbar style
+inline const QString DEFAULT_STYLE = QStringLiteral(
     "background-color: transparent; "
     "border: none; "
-    "padding: 5px;";
+    "padding: 5px;"
+    );
 
-inline constexpr auto MINIMAL_STYLE =
+// Minimal toolbar style
+inline const QString MINIMAL_STYLE = QStringLiteral(
     "background-color: transparent; "
-    "border: none;";
+    "border: none;"
+    );
 
-inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
-}
+} // namespace ToolbarStyles
 
 #endif // TOOLBARMANAGERSTYLING_H

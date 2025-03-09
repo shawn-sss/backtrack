@@ -1,11 +1,14 @@
+// Project includes same directory
 #include "customtitlebar.h"
 #include "customtitlebarstyling.h"
+
+// Project includes different directory
 #include "../../config/_constants.h"
 
+// Built-in Qt includes
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QPointer>
-#include <QHBoxLayout>
 
 // Constructor
 CustomTitleBar::CustomTitleBar(QWidget *parent)
@@ -25,7 +28,7 @@ CustomTitleBar::CustomTitleBar(QWidget *parent)
 
 // Sets up layout for the title bar
 void CustomTitleBar::setupLayout() {
-    QPointer<QHBoxLayout> layout = new QHBoxLayout(this);
+    QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(5, 0, 5, 0);
     layout->setSpacing(5);
 
@@ -41,9 +44,9 @@ void CustomTitleBar::setupLayout() {
 }
 
 // Creates and returns a standardized button
-QPushButton* CustomTitleBar::createButton(const QString &label, const QString &style, const QString &tooltip) {
+QPushButton* CustomTitleBar::createButton(const QString &label, const QString &fullStyle, const QString &tooltip) {
     auto *button = new QPushButton(label, this);
-    button->setStyleSheet(TitleBarStyles::BUTTON_BASE_STYLE + style);
+    button->setStyleSheet(fullStyle);
     button->setToolTip(tooltip);
     button->setFixedSize(TitleBarStyles::Button::WIDTH, TitleBarStyles::Button::HEIGHT);
     button->setCursor(Qt::PointingHandCursor);
@@ -57,7 +60,7 @@ QSize CustomTitleBar::minimumSizeHint() const {
 
 // Returns preferred size for the title bar
 QSize CustomTitleBar::sizeHint() const {
-    return QSize(parentWidget() ? parentWidget()->width() : 400, TitleBarStyles::TitleBar::HEIGHT);
+    return QSize(parentWidget() ? (parentWidget()->width() > 0 ? parentWidget()->width() : 400) : 400, TitleBarStyles::TitleBar::HEIGHT);
 }
 
 // Sets up and returns a custom title bar for the given window
@@ -68,14 +71,13 @@ QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode)
     if (mode == TitleBarMode::Dialog) {
         flags |= Qt::Dialog;
     }
-    window->setWindowFlags(flags);
+    window->setWindowFlags(window->windowFlags() | flags);
 
     if (auto existingTitleBar = window->findChild<CustomTitleBar *>()) {
         return existingTitleBar;
     }
 
-    auto titleBar = new CustomTitleBar(window);
-    titleBar->setFixedHeight(TitleBarStyles::TitleBar::HEIGHT);
+    auto *titleBar = new CustomTitleBar(window);
 
     QObject::connect(titleBar, &CustomTitleBar::minimizeRequested, window, &QWidget::showMinimized);
     QObject::connect(titleBar, &CustomTitleBar::closeRequested, window, &QWidget::close);

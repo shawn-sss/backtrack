@@ -1,8 +1,9 @@
 #ifndef UI_CONFIG_H
 #define UI_CONFIG_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QSize>
+#include <QString>
 
 // Backup UI labels
 namespace Labels {

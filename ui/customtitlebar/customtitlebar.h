@@ -1,44 +1,48 @@
 #ifndef CUSTOMTITLEBAR_H
 #define CUSTOMTITLEBAR_H
 
+// Project includes same directory
 #include "customtitlebarmode.h"
-#include "customtitlebarstyling.h"
 
+// Built-in Qt includes
 #include <QPointer>
 #include <QWidget>
 
-// Forward declarations
+// Forward declarations Qt classes
 class QLabel;
 class QPushButton;
 
-// CustomTitleBar class definition
+// Custom title bar for application windows
 class CustomTitleBar : public QWidget {
     Q_OBJECT
 
 public:
+    // Constructor
     explicit CustomTitleBar(QWidget *parent = nullptr);
 
+    // Provides size hints for layout management
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
-    // Signals for window control
 signals:
+    // Signals for minimizing and closing the window
     void minimizeRequested();
     void closeRequested();
 
-    // Internal setup methods
 private:
+    // Initializes the layout and components
     void setupLayout();
+
+    // Creates a styled button for the title bar
     QPushButton* createButton(const QString &label, const QString &style, const QString &tooltip);
 
-    // Internal UI elements
-private:
+    // UI components
     QLabel *titleLabel;
     QPushButton *minimizeButton;
     QPushButton *closeButton;
 };
 
-// Factory function to create a custom title bar for a window
+// Configures and returns a custom title bar for a given window
 QPointer<CustomTitleBar> setupCustomTitleBar(QWidget *window, TitleBarMode mode);
 
 #endif // CUSTOMTITLEBAR_H

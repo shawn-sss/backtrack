@@ -1,48 +1,49 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
+// Built-in Qt includes
 #include <QString>
 #include <QJsonObject>
 
 class ConfigManager {
 public:
+    // Singleton instance
     static ConfigManager& getInstance();
 
-    // Metadata management (App installation details)
+    // Install metadata management
     void loadInstallMetadata();
     void saveInstallMetadata();
-    QString getInstallMetadataFilePathPublic() const;
 
-    // User configuration management (Backup settings)
+    // User configuration management
     void loadUserConfig();
     void saveUserConfig();
-    QString getUserConfigFilePathPublic() const;
 
-    // First-run check (both files required)
+    // First-run check
     bool isFirstRun() const;
 
-    // Backup directory management (from user config)
+    // Backup settings management
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
-
-    // Backup prefix management (from user config)
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
+    // Public install directory accessor
+    QString getAppInstallDirPublic() const;
+
 private:
-    ConfigManager();  // Singleton private constructor
+    // Constructor
+    ConfigManager();
 
-    // Internal file path helpers
-    QString getInstallMetadataFilePath() const;
-    QString getUserConfigFilePath() const;
-    QString getAppInstallDir() const;
-
-    // Default setup for first run
+    // Default setup
     void setupDefaults();
 
+    // Internal path management
+    QString getFilePath(const QString& fileName) const;
+    QString getAppInstallDir() const;
+
     // Internal data storage
-    QJsonObject installMetadata;  // App install metadata
-    QJsonObject userSettings;     // Backup settings
+    QJsonObject installMetadata;
+    QJsonObject userSettings;
 };
 
 #endif // CONFIGMANAGER_H

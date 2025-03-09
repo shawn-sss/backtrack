@@ -1,62 +1,53 @@
 #ifndef BACKUPSERVICE_H
 #define BACKUPSERVICE_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QSet>
-#include <QJsonObject>
+#include <QString>
+#include <QStringList>
 #include <QJsonArray>
+#include <QJsonObject>
 
-// Backup status enum
+// Defines possible backup statuses
 enum class BackupStatus {
     None,
     Broken,
     Valid
 };
 
-// BackupService class definition
+// Handles backup operations and metadata
 class BackupService {
 public:
+    // Constructor
     explicit BackupService(const QString &backupRoot);
     Q_DISABLE_COPY(BackupService)
 
     // Backup root management
-public:
     void setBackupRoot(const QString &path);
     QString getBackupRoot() const;
 
-    // Backup infrastructure initialization
-public:
-    void initializeBackupRootIfNeeded();  // NEW: ensures _MyDataBackupApp and backup_config.json exist
+    // Backup initialization
+    void initializeBackupRootIfNeeded();
 
-    // Backup status and metadata
-public:
+    // Backup status retrieval
     BackupStatus scanForBackupStatus() const;
     QJsonObject getLastBackupMetadata() const;
 
-    // Backup summary management
-public:
+    // Backup summary creation
     void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
 
     // Backup statistics
-public:
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
-    // Internal metadata creation
 private:
+    // Generates metadata for a backup
     QJsonObject createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const;
 
-    // Internal size calculations
-private:
+    // Calculates total size of selected backup items
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
 
-    // File and folder collection
-private:
-    void collectBackupFiles(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) const;
-    void collectBackupFolders(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) const;
-
-    // Internal variables
-private:
+    // Backup root directory path
     QString backupRootPath;
 };
 

@@ -1,12 +1,13 @@
 #ifndef BACKUP_SETTINGS_H
 #define BACKUP_SETTINGS_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QDir>
+#include <QString>
 
 // Default root paths
 namespace BackupPaths {
-const QString DEFAULT_ROOT_PATH = "";
+inline auto DEFAULT_ROOT_PATH = QLatin1String("");
 const QString DEFAULT_FILE_DIALOG_ROOT = QDir::rootPath();
 }
 

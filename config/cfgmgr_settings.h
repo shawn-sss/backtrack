@@ -1,8 +1,9 @@
 #ifndef CFGMGR_SETTINGS_H
 #define CFGMGR_SETTINGS_H
 
-#include <QString>
+// Built-in Qt includes
 #include <QDir>
+#include <QString>
 
 // Configuration keys
 namespace ConfigKeys {
@@ -10,12 +11,13 @@ constexpr auto BACKUP_DIRECTORY_KEY = "backup_directory";
 constexpr auto BACKUP_PREFIX_KEY = "backup_prefix";
 }
 
-// Default values (moved from ConfigManager.h)
+// Default configuration values
 namespace ConfigDefaults {
 constexpr auto BACKUP_DIRECTORY = "C:\\temp";
 constexpr auto BACKUP_PREFIX = "Backup_";
 }
 
+// Install metadata keys
 namespace InstallMetadataKeys {
 constexpr auto APP_NAME = "app_name";
 constexpr auto APP_AUTHOR = "app_author";
@@ -24,4 +26,5 @@ constexpr auto INSTALL_DIRECTORY = "install_dir";
 constexpr auto INSTALL_TIMESTAMP = "install_time";
 }
 
-#endif // CFGMGR_SETTINGS_H
+#endif
+ // CFGMGR_SETTINGS_H

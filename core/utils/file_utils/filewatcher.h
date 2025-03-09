@@ -1,42 +1,37 @@
 #ifndef FILEWATCHER_H
 #define FILEWATCHER_H
 
-#include <QString>
-#include <QStringList>
+// Built-in Qt includes
 #include <QObject>
 #include <QFileSystemWatcher>
+#include <QStringList>
 
-// FileWatcher class definition
+// Monitors file and directory changes
 class FileWatcher : public QObject {
     Q_OBJECT
 
 public:
+    // Constructor
     explicit FileWatcher(QObject *parent = nullptr);
-    ~FileWatcher() override = default;
 
-    // Path management
-public:
+    // Watchlist management
+    void updateWatchList(const QStringList &paths);
     void addPath(const QString &path);
     void addPaths(const QStringList &paths);
     void removePath(const QString &path);
     void removeAllPaths();
 
     // Retrieve watched paths
-public:
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 
-    // Monitoring and watch list updates
-public:
+    // Starts monitoring a root path
     void startWatching(const QString &rootPath);
-    void updateWatchList(const QStringList &paths);
 
-    // Signals for file and directory changes
 signals:
     void directoryChanged(const QString &path);
     void fileChanged(const QString &path);
 
-    // Internal variables
 private:
     QFileSystemWatcher *watcher;
     QStringList watchList;

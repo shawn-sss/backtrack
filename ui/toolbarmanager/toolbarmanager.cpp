@@ -1,30 +1,32 @@
+// Project includes same directory
 #include "toolbarmanager.h"
 #include "toolbarmanagerstyling.h"
 
+// Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/resources_settings.h"
 
+// Built-in Qt includes
 #include <QFile>
-#include <QToolButton>
-#include <QSvgRenderer>
-#include <QPainter>
 #include <QPixmap>
+#include <QPainter>
+#include <QSvgRenderer>
+#include <QToolButton>
 
-// Constructor
+// Built-in standard C++ library
+#include <array>
+
+// Constructor - Initializes the toolbar manager and actions
 ToolbarManager::ToolbarManager(QObject *parent)
-    : QObject(parent),
-    actionOpenSettings(new QAction(this)),
-    actionExit(new QAction(this)),
-    actionHelp(new QAction(this)),
-    actionAbout(new QAction(this)) {}
+    : QObject(parent), actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}
 
-// Initializes the toolbar by applying appearance and adding actions
+// Initializes the toolbar with appearance settings and actions
 void ToolbarManager::initialize(QToolBar *toolBar) {
     setupAppearance(toolBar);
     addActions(toolBar);
 }
 
-// Sets toolbar appearance and basic behavior
+// Configures the appearance of the toolbar
 void ToolbarManager::setupAppearance(QToolBar *toolBar) {
     toolBar->setFloatable(false);
     toolBar->setMovable(false);
@@ -34,47 +36,50 @@ void ToolbarManager::setupAppearance(QToolBar *toolBar) {
     toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
-// Adds all actions to the toolbar
+// Adds actions to the toolbar
 void ToolbarManager::addActions(QToolBar *toolBar) {
     toolBar->clear();
 
-    actionOpenSettings->setText(Labels::Toolbar::SETTINGS);
-    actionExit->setText(Labels::Toolbar::EXIT);
-    actionHelp->setText(Labels::Toolbar::HELP);
-    actionAbout->setText(Labels::Toolbar::ABOUT);
+    // Define labels and icons for each action
+    const std::array<std::pair<QString, QString>, 4> actionData = {{
+        {Labels::Toolbar::SETTINGS, Resources::Toolbar::SETTINGS_ICON_PATH},
+        {Labels::Toolbar::EXIT, Resources::Toolbar::EXIT_ICON_PATH},
+        {Labels::Toolbar::HELP, Resources::Toolbar::HELP_ICON_PATH},
+        {Labels::Toolbar::ABOUT, Resources::Toolbar::ABOUT_ICON_PATH}
+    }};
 
-    actionOpenSettings->setIcon(QIcon(Resources::Toolbar::SETTINGS_ICON_PATH));
-    actionExit->setIcon(QIcon(Resources::Toolbar::EXIT_ICON_PATH));
-    actionHelp->setIcon(QIcon(Resources::Toolbar::HELP_ICON_PATH));
-    actionAbout->setIcon(QIcon(Resources::Toolbar::ABOUT_ICON_PATH));
+    // Add actions to the toolbar
+    for (size_t i = 0; i < actions.size(); ++i) {
+        actions[i]->setText(actionData[i].first);
+        actions[i]->setIcon(QIcon(actionData[i].second));
+        toolBar->addAction(actions[i]);
+    }
 
-    toolBar->addAction(actionOpenSettings);
-    toolBar->addAction(actionHelp);
-    toolBar->addAction(actionAbout);
-
-    auto *spacer = new QWidget(toolBar);
+    // Add a spacer to align the exit button to the right
+    QWidget *spacer = new QWidget(toolBar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     toolBar->addWidget(spacer);
 
-    toolBar->addAction(actionExit);
+    // Move the exit button to the right-most position
+    toolBar->addAction(actions[1]);
 }
 
 // Returns the action for opening settings
 QAction* ToolbarManager::getActionOpenSettings() const {
-    return actionOpenSettings;
+    return actions[0];
 }
 
-// Returns the action for exiting the app
+// Returns the action for exiting the application
 QAction* ToolbarManager::getActionExit() const {
-    return actionExit;
+    return actions[1];
 }
 
-// Returns the action for opening help
+// Returns the action for accessing help
 QAction* ToolbarManager::getActionHelp() const {
-    return actionHelp;
+    return actions[2];
 }
 
-// Returns the action for opening the about dialog
+// Returns the action for displaying the about dialog
 QAction* ToolbarManager::getActionAbout() const {
-    return actionAbout;
+    return actions[3];
 }

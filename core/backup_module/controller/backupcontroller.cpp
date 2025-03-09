@@ -1,60 +1,60 @@
+// Project includes same directory
 #include "backupcontroller.h"
 
+// Project includes different directory
 #include "../../../config/_constants.h"
 #include "../../../config/configmanager/configmanager.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
 
+// Built-in Qt includes
 #include <QDir>
-#include <QDateTime>
 #include <QFile>
-#include <QStringList>
+#include <QDateTime>
 #include <QThread>
 #include <QProgressBar>
+#include <QStringList>
 
-// Constructor and destructor
+// Constructor
 BackupController::BackupController(BackupService *service, QObject *parent)
     : QObject(parent), backupService(service), workerThread(nullptr) {}
 
+// Destructor
 BackupController::~BackupController() {
     cleanupAfterTransfer();
 }
 
-// Creates a backup process and starts the transfer worker
+// Initiates a backup process
 void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
-    if (isBackupInProgress()) {
+    if (workerThread && workerThread->isRunning()) {
         emit errorOccurred(WarningMessages::WARNING_BACKUP_OPERATION_RUNNING);
         return;
     }
 
     cleanupAfterTransfer();
 
-    // Set the backup root path (needed for the service to work correctly)
-    backupService->setBackupRoot(destinationPath);
-
-    const QString configFolderPath = QDir(destinationPath).filePath(AppConfig::BACKUP_CONFIG_FOLDER);
-    const QString configFilePath = QDir(configFolderPath).filePath(AppConfig::BACKUP_CONFIG_FILE_NAME);
+    const QString configFilePath = QDir(destinationPath).filePath(
+        QStringLiteral("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_CONFIG_FILE_NAME));
 
     if (!QFile::exists(configFilePath)) {
         backupService->initializeBackupRootIfNeeded();
-    } else {
     }
 
-    const QString timestamp = QDateTime::currentDateTime().toString(TimestampFormats::BACKUP_FOLDER_TIMESTAMP_FORMAT);
-    const QString backupFolderName = ConfigManager::getInstance().getBackupPrefix() + timestamp;
-
-    QDir destDir(destinationPath);
-    const QString backupFolderPath = destDir.filePath(backupFolderName);
+    const QString backupFolderPath = QDir(destinationPath).filePath(
+        ConfigManager::getInstance().getBackupPrefix() +
+        QDateTime::currentDateTime().toString(TimestampFormats::BACKUP_FOLDER_TIMESTAMP_FORMAT));
 
     if (!createBackupFolder(backupFolderPath)) {
         emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
         return;
     }
 
-    progressBar->setVisible(true);
+    progressBar->setRange(ProgressSettings::PROGRESS_BAR_MIN_VALUE,
+                          ProgressSettings::PROGRESS_BAR_MAX_VALUE);
     progressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);
+    progressBar->setVisible(true);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -82,32 +82,29 @@ void BackupController::createBackup(const QString &destinationPath,
                 cleanupAfterTransfer();
             });
 
-    connect(worker, &TransferWorker::finished, this, &BackupController::cleanupAfterTransfer);
     connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
     connect(workerThread, &QThread::finished, workerThread, &QObject::deleteLater);
 
     workerThread->start();
 }
 
-// Deletes an existing backup and its log file
+// Deletes a backup from storage
 void BackupController::deleteBackup(const QString &backupPath) {
-    const QString logsFolderPath = QDir(backupService->getBackupRoot()).filePath(
-        QString("%1/%2").arg(AppConfig::BACKUP_CONFIG_FOLDER, AppConfig::BACKUP_LOGS_DIRECTORY));
-    const QString logFileName = QFileInfo(backupPath).fileName() + "_" + AppConfig::BACKUP_LOG_FILE_SUFFIX;
-    const QString logFilePath = QDir(logsFolderPath).filePath(logFileName);
-
-    if (!QFile::exists(logFilePath)) {
-        emit errorOccurred(ErrorMessages::ERROR_BACKUP_LOG_NOT_FOUND);
-        return;
-    }
+    const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
+        QStringLiteral("%1/%2/%3_%4")
+            .arg(AppConfig::BACKUP_CONFIG_FOLDER,
+                 AppConfig::BACKUP_LOGS_DIRECTORY,
+                 QFileInfo(backupPath).fileName(),
+                 AppConfig::BACKUP_LOG_FILE_SUFFIX));
 
     if (!QFile::remove(logFilePath)) {
-        emit errorOccurred(ErrorMessages::ERROR_DELETING_BACKUP_LOG);
+        emit errorOccurred(QFile::exists(logFilePath)
+                           ? ErrorMessages::ERROR_DELETING_BACKUP_LOG
+                           : ErrorMessages::ERROR_BACKUP_LOG_NOT_FOUND);
         return;
     }
 
-    QDir backupDir(backupPath);
-    if (!backupDir.removeRecursively()) {
+    if (!QDir(backupPath).removeRecursively()) {
         emit errorOccurred(ErrorMessages::ERROR_DELETING_BACKUP_DIRECTORY);
         return;
     }
@@ -120,23 +117,16 @@ bool BackupController::isBackupInProgress() const {
     return workerThread && workerThread->isRunning();
 }
 
-// Creates a folder for the backup at the given path
+// Creates a new backup folder
 bool BackupController::createBackupFolder(const QString &path) {
-    if (!QDir().mkpath(path)) {
-        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
-        return false;
-    }
-    return true;
+    return QDir().mkpath(path);
 }
 
-// Cleans up after a transfer, ensuring the worker thread is properly stopped
+// Cleans up resources after backup transfer completes
 void BackupController::cleanupAfterTransfer() {
-    if (workerThread && workerThread->isRunning()) {
+    if (workerThread) {
         workerThread->quit();
         workerThread->wait();
-    }
-
-    if (workerThread) {
         workerThread->deleteLater();
         workerThread = nullptr;
     }
