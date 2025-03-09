@@ -114,7 +114,7 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
     const QDir backupDirectory(backupDir);
     const QString appFolderPath = backupDirectory.filePath(AppConfig::BACKUP_SETUP_FOLDER);
-    const QString logsFolderPath = QDir(appFolderPath).filePath(AppConfig::BACKUP_SETUP_LOGS_FOLDER);
+    const QString logsFolderPath = QDir(appFolderPath).filePath(AppConfig::BACKUP_LOGS_FOLDER);
 
     if (!QDir().mkpath(appFolderPath)) {
         errorMessage = QString("Failed to create directory: %1").arg(AppConfig::BACKUP_SETUP_FOLDER);
@@ -122,7 +122,7 @@ bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage)
     }
 
     if (!QDir().mkpath(logsFolderPath)) {
-        errorMessage = QString("Failed to create logs directory: %1").arg(AppConfig::BACKUP_SETUP_LOGS_FOLDER);
+        errorMessage = QString("Failed to create logs directory: %1").arg(AppConfig::BACKUP_LOGS_FOLDER);
         return false;
     }
 

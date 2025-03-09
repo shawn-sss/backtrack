@@ -93,9 +93,9 @@ void BackupController::deleteBackup(const QString &backupPath) {
     const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
         QStringLiteral("%1/%2/%3_%4")
             .arg(AppConfig::BACKUP_SETUP_FOLDER,
-                 AppConfig::BACKUP_SETUP_LOGS_FOLDER,
+                 AppConfig::BACKUP_LOGS_FOLDER,
                  QFileInfo(backupPath).fileName(),
-                 AppConfig::BACKUP_SETUP_LOGS_FILE));
+                 AppConfig::BACKUP_LOGS_FILE));
 
     if (!QFile::remove(logFilePath)) {
         emit errorOccurred(QFile::exists(logFilePath)
