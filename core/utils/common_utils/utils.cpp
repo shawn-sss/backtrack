@@ -13,6 +13,7 @@
 #include <QTreeView>
 #include <QFileSystemModel>
 
+
 namespace Utils {
 
 // UI-related utilities
@@ -22,16 +23,17 @@ namespace UI {
 void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition) {
     if (event->button() == Qt::LeftButton) {
         dragging = true;
-        lastMousePosition = event->globalPosition().toPoint() - window->frameGeometry().topLeft();
+        lastMousePosition = event->globalPosition().toPoint();
         event->accept();
     }
 }
 
 // Handles window movement on mouse drag
-void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, const QPoint &lastMousePosition) {
-    if (dragging && (event->buttons() & Qt::LeftButton)) {
-        window->move(event->globalPosition().toPoint() - lastMousePosition);
-        event->accept();
+void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition) {
+    if (dragging && window) {
+        QPoint delta = event->globalPosition().toPoint() - lastMousePosition;
+        window->move(window->pos() + delta);
+        lastMousePosition = event->globalPosition().toPoint();
     }
 }
 
@@ -57,7 +59,7 @@ void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int
     if (!progressBar) return;
 
     progressBar->setRange(minValue, maxValue);
-    progressBar->setValue(ProgressSettings::PROGRESS_BAR_DEFAULT_VISIBILITY ? minValue : maxValue);
+    progressBar->setValue(minValue);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }

@@ -9,7 +9,7 @@
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 
-// Constructor - initializes settings dialog
+// Constructor
 SettingsDialog::SettingsDialog(QWidget *parent)
     : QDialog(parent), titleBar(nullptr), dragging(false) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
@@ -19,7 +19,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     setupConnections();
 }
 
-// Destructor - default behavior
+// Destructor
 SettingsDialog::~SettingsDialog() = default;
 
 // Sets up the layout for the settings dialog
@@ -28,11 +28,9 @@ void SettingsDialog::setupLayout() {
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // Initialize and add custom title bar
     titleBar = setupCustomTitleBar(this, TitleBarMode::Dialog);
     mainLayout->addWidget(titleBar);
 
-    // Create content area
     auto *contentArea = new QWidget(this);
     contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -40,7 +38,6 @@ void SettingsDialog::setupLayout() {
     contentLayout->setContentsMargins(10, 10, 10, 10);
     contentLayout->setSpacing(10);
 
-    // Create and configure button box
     auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, contentArea);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
@@ -71,12 +68,18 @@ void SettingsDialog::onCancelClicked() {
 
 // Handles mouse press event for window dragging
 void SettingsDialog::mousePressEvent(QMouseEvent *event) {
-    Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
+    if (titleBar && titleBar->rect().contains(titleBar->mapFromGlobal(event->globalPosition().toPoint()))) {
+        Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
+    } else {
+        event->ignore();
+    }
 }
 
 // Handles mouse move event for window dragging
 void SettingsDialog::mouseMoveEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
+    if (dragging) {
+        Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
+    }
 }
 
 // Handles mouse release event for window dragging

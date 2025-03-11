@@ -38,9 +38,6 @@ public:
 protected:
     // Event handling for window and mouse events
     void closeEvent(QCloseEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     // UI Initialization and Setup
@@ -80,11 +77,11 @@ private slots:
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
 
-    // Menu and toolbar actions
+    // Toolbar actions
     void openSettings();
-    void exitApplication();
     void showHelpDialog();
     void onAboutButtonClicked();
+    void exitApplication();
 
     // File watcher callbacks
     void onBackupDirectoryChanged();

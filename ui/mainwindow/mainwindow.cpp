@@ -3,6 +3,7 @@
 #include "ui_mainwindow.h"
 
 // Project includes different directory
+#include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/toolbarmanager/toolbarmanagerstyling.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
@@ -433,19 +434,6 @@ void MainWindow::updateLastBackupInfo() {
 
 // ## Event Handlers ##
 
-// Mouse event handling
-void MainWindow::mousePressEvent(QMouseEvent *event) {
-    Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
-}
-
-void MainWindow::mouseMoveEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
-}
-
-void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseRelease(event, dragging);
-}
-
 // Handles the close event
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (backupController->isBackupInProgress()) {
@@ -465,11 +453,6 @@ void MainWindow::openSettings() {
     settingsDialog.exec();
 }
 
-// Exits the application
-void MainWindow::exitApplication() {
-    QApplication::quit();
-}
-
 // Shows the help dialog
 void MainWindow::showHelpDialog() {
     const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
@@ -486,6 +469,11 @@ void MainWindow::onAboutButtonClicked() {
                                  .arg(AppInfo::APP_VERSION,
                                       AppInfo::APP_DISPLAY_TITLE,
                                       AppInfo::AUTHOR_NAME));
+}
+
+// Exits the application
+void MainWindow::exitApplication() {
+    QApplication::quit();
 }
 
 // ## File & View Setup ##

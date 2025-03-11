@@ -24,9 +24,20 @@ public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+protected:
+    // Handles UI painting
+    void paintEvent(QPaintEvent *event) override;
+
+    // Handles mouse interactions
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
 signals:
     // Signals for minimizing and closing the window
     void minimizeRequested();
+    void maximizeRequested();
     void closeRequested();
 
 private:
@@ -39,7 +50,12 @@ private:
     // UI components
     QLabel *titleLabel;
     QPushButton *minimizeButton;
+    QPushButton *maximizeButton;
     QPushButton *closeButton;
+
+    bool dragging = false;
+    QPoint lastMousePosition;
+
 };
 
 // Configures and returns a custom title bar for a given window

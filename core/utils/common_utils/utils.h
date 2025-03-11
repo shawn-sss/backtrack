@@ -1,25 +1,24 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// Project includes different directory
-#include "../../../../config/_constants.h"
-#include "../../../core/backup_module/models/stagingmodel.h"
-
-// Built-in Qt includes
-#include <QDateTime>
+// Project includes
 #include <QMouseEvent>
-#include <QPixmap>
-#include <QProgressBar>
-#include <QTreeView>
 #include <QWidget>
+#include <QTreeView>
+#include <QProgressBar>
+#include <QPixmap>
 #include <QString>
+#include <QDateTime>
+
+// Include StagingModel header
+#include "../../../core/backup_module/models/stagingmodel.h"
 
 namespace Utils {
 
 // UI-related utility functions
 namespace UI {
 void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition);
-void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, const QPoint &lastMousePosition);
+void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition);
 void handleMouseRelease(QMouseEvent *event, bool &dragging);
 void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount);
 void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible);
