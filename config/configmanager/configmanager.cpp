@@ -27,14 +27,14 @@ ConfigManager::ConfigManager() {
     loadUserConfig();
 }
 
-// Retrieve app install directory
-QString ConfigManager::getAppInstallDir() const {
-    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
-}
-
 // Public accessor for app install directory
 QString ConfigManager::getAppInstallDirPublic() const {
     return getAppInstallDir();
+}
+
+// Retrieve app install directory
+QString ConfigManager::getAppInstallDir() const {
+    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
 // Construct full file path
@@ -50,25 +50,29 @@ bool ConfigManager::isFirstRun() const {
 
 // Initialize default settings
 void ConfigManager::setupDefaults() {
-    installMetadata = {
-        {"app_name", AppInfo::APP_DISPLAY_TITLE},
-        {"app_author", AppInfo::AUTHOR_NAME},
-        {"app_version", AppInfo::APP_VERSION},
-        {"install_dir", getAppInstallDir()},
-        {"install_time", QDateTime::currentDateTimeUtc().toString(Qt::ISODate)}
+    QJsonObject installData;
+    installData["location"] = getAppInstallDir();
+    installData["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+
+    QJsonObject appMetadata;
+    appMetadata["app_name"] = AppInfo::APP_DISPLAY_TITLE;
+    appMetadata["app_author"] = AppInfo::AUTHOR_NAME;
+    appMetadata["app_version"] = AppInfo::APP_VERSION;
+    appMetadata["install"] = installData;
+
+    saveJsonFile(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE), appMetadata);
+
+    QJsonObject userConfig;
+    userConfig["backup_config"] = QJsonObject{
+        {"location", ConfigDefaults::BACKUP_DIRECTORY},
+        {"prefix", ConfigDefaults::BACKUP_PREFIX}
     };
 
-    userSettings = {
-        {ConfigKeys::BACKUP_DIRECTORY_KEY, ConfigDefaults::BACKUP_DIRECTORY},
-        {ConfigKeys::BACKUP_PREFIX_KEY, ConfigDefaults::BACKUP_PREFIX}
-    };
-
-    saveInstallMetadata();
-    saveUserConfig();
+    saveJsonFile(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE), userConfig);
 }
 
 // Load JSON from file
-bool loadJsonFile(const QString& path, QJsonObject& target) {
+bool ConfigManager::loadJsonFile(const QString& path, QJsonObject& target) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
@@ -82,19 +86,22 @@ bool loadJsonFile(const QString& path, QJsonObject& target) {
 }
 
 // Save JSON to file
-bool saveJsonFile(const QString& path, const QJsonObject& data) {
+bool ConfigManager::saveJsonFile(const QString& path, const QJsonObject& data) {
     QDir().mkpath(QFileInfo(path).absolutePath());
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
         return false;
     }
-    file.write(QJsonDocument(data).toJson(QJsonDocument::Compact));
+    file.write(QJsonDocument(data).toJson(QJsonDocument::Indented));
     return file.commit();
 }
 
 // Load install metadata
 void ConfigManager::loadInstallMetadata() {
-    loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE), installMetadata);
+    QJsonObject rootObject;
+    if (loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE), rootObject)) {
+        installMetadata = rootObject;
+    }
 }
 
 // Save install metadata
@@ -104,7 +111,10 @@ void ConfigManager::saveInstallMetadata() {
 
 // Load user configuration
 void ConfigManager::loadUserConfig() {
-    loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE), userSettings);
+    QJsonObject rootObject;
+    if (loadJsonFile(getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE), rootObject)) {
+        userSettings = rootObject;
+    }
 }
 
 // Save user configuration
@@ -114,26 +124,32 @@ void ConfigManager::saveUserConfig() {
 
 // Retrieve backup directory
 QString ConfigManager::getBackupDirectory() const {
-    return userSettings.value(ConfigKeys::BACKUP_DIRECTORY_KEY).toString(ConfigDefaults::BACKUP_DIRECTORY);
+    return userSettings["backup_config"].toObject().value("location").toString(ConfigDefaults::BACKUP_DIRECTORY);
 }
 
 // Set backup directory
 void ConfigManager::setBackupDirectory(const QString& dir) {
-    if (userSettings.value(ConfigKeys::BACKUP_DIRECTORY_KEY).toString() != dir) {
-        userSettings[ConfigKeys::BACKUP_DIRECTORY_KEY] = dir;
+    QJsonObject backupSettings = userSettings["backup_config"].toObject();
+
+    if (backupSettings["location"].toString() != dir) {
+        backupSettings["location"] = dir;
+        userSettings["backup_config"] = backupSettings;
         saveUserConfig();
     }
 }
 
 // Retrieve backup prefix
 QString ConfigManager::getBackupPrefix() const {
-    return userSettings.value(ConfigKeys::BACKUP_PREFIX_KEY).toString(ConfigDefaults::BACKUP_PREFIX);
+    return userSettings["backup_config"].toObject().value("prefix").toString(ConfigDefaults::BACKUP_PREFIX);
 }
 
 // Set backup prefix
 void ConfigManager::setBackupPrefix(const QString& prefix) {
-    if (userSettings.value(ConfigKeys::BACKUP_PREFIX_KEY).toString() != prefix) {
-        userSettings[ConfigKeys::BACKUP_PREFIX_KEY] = prefix;
+    QJsonObject backupSettings = userSettings["backup_config"].toObject();
+
+    if (backupSettings["prefix"].toString() != prefix) {
+        backupSettings["prefix"] = prefix;
+        userSettings["backup_config"] = backupSettings;
         saveUserConfig();
     }
 }

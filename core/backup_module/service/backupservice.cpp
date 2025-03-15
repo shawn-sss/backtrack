@@ -41,16 +41,19 @@ void BackupService::initializeBackupRootIfNeeded() {
         return;
     }
 
-    QJsonObject backupConfig{
-        {"app_name", AppInfo::APP_DISPLAY_TITLE},
-        {"app_author", AppInfo::AUTHOR_NAME},
-        {"app_version", AppInfo::APP_VERSION},
-        {"backup_root", backupRootPath},
-        {"creation_time", QDateTime::currentDateTimeUtc().toString(Qt::ISODate)}
-    };
+    QJsonObject backupData;
+    backupData["location"] = backupRootPath;
+    backupData["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
+
+    QJsonObject backupConfig;
+    backupConfig["app_name"] = AppInfo::APP_DISPLAY_TITLE;
+    backupConfig["app_author"] = AppInfo::AUTHOR_NAME;
+    backupConfig["app_version"] = AppInfo::APP_VERSION;
+    backupConfig["backup"] = backupData;
 
     FileOperations::writeJsonToFile(configFilePath, backupConfig);
 }
+
 
 // Calculates total backup size
 qint64 BackupService::calculateTotalBackupSize(const QStringList &items) const {

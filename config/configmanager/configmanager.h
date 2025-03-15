@@ -41,6 +41,10 @@ private:
     QString getFilePath(const QString& fileName) const;
     QString getAppInstallDir() const;
 
+    // JSON file handling
+    bool saveJsonFile(const QString& path, const QJsonObject& data);
+    bool loadJsonFile(const QString& path, QJsonObject& target);
+
     // Internal data storage
     QJsonObject installMetadata;
     QJsonObject userSettings;

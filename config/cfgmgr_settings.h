@@ -26,5 +26,9 @@ constexpr auto INSTALL_DIRECTORY = "install_dir";
 constexpr auto INSTALL_TIMESTAMP = "install_time";
 }
 
+namespace InstallMetadata {
+constexpr auto INSTALL_NOTES = "Install location metadata. Do not modify.";
+}
+
 #endif
  // CFGMGR_SETTINGS_H
