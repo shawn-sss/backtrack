@@ -5,6 +5,7 @@
 #include "../../../config/_constants.h"
 #include "../../utils/file_utils/fileoperations.h"
 #include "../../../core/utils/common_utils/utils.h"
+#include "../../../core/utils/file_utils/jsonmanager.h"
 
 // Built-in Qt includes
 #include <QDir>
@@ -51,9 +52,8 @@ void BackupService::initializeBackupRootIfNeeded() {
     backupConfig["app_version"] = AppInfo::APP_VERSION;
     backupConfig["backup"] = backupData;
 
-    FileOperations::writeJsonToFile(configFilePath, backupConfig);
+    JsonManager::saveJsonFile(configFilePath, backupConfig);
 }
-
 
 // Calculates total backup size
 qint64 BackupService::calculateTotalBackupSize(const QStringList &items) const {
@@ -78,7 +78,17 @@ BackupStatus BackupService::scanForBackupStatus() const {
 QJsonObject BackupService::getLastBackupMetadata() const {
     const QDir logsDir(QDir(backupRootPath).filePath(QStringLiteral("%1/%2").arg(AppConfig::BACKUP_SETUP_FOLDER, AppConfig::BACKUP_LOGS_FOLDER)));
     QFileInfoList logFiles = logsDir.entryInfoList({"*_" + AppConfig::BACKUP_LOGS_FILE}, QDir::Files, QDir::Time);
-    return logFiles.isEmpty() ? QJsonObject() : FileOperations::readJsonFromFile(logFiles.first().absoluteFilePath());
+
+    if (logFiles.isEmpty()) {
+        return QJsonObject();
+    }
+
+    QJsonObject metadata;
+    if (JsonManager::loadJsonFile(logFiles.first().absoluteFilePath(), metadata)) {
+        return metadata;
+    }
+
+    return QJsonObject();  // Return empty if loading fails
 }
 
 // Creates a backup summary log
@@ -88,7 +98,7 @@ void BackupService::createBackupSummary(const QString &backupFolderPath, const Q
         QDir().mkpath(logsFolderPath);
     }
     QString logFileName = QFileInfo(backupFolderPath).fileName() + "_" + AppConfig::BACKUP_LOGS_FILE;
-    FileOperations::writeJsonToFile(QDir(logsFolderPath).filePath(logFileName), createBackupMetadata(backupFolderPath, selectedItems, backupDuration));
+    JsonManager::saveJsonFile(QDir(logsFolderPath).filePath(logFileName), createBackupMetadata(backupFolderPath, selectedItems, backupDuration));
 }
 
 // Counts total backups
@@ -102,11 +112,13 @@ quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
     const QDir logsDir(QDir(backupRootPath).filePath(QStringLiteral("%1/%2")
                                                          .arg(AppConfig::BACKUP_SETUP_FOLDER, AppConfig::BACKUP_LOGS_FOLDER)));
-        const QFileInfoList logFiles = logsDir.entryInfoList({"*_" + AppConfig::BACKUP_LOGS_FILE}, QDir::Files);
+    const QFileInfoList logFiles = logsDir.entryInfoList({"*_" + AppConfig::BACKUP_LOGS_FILE}, QDir::Files);
 
     for (const QFileInfo &logFile : logFiles) {
-        QJsonObject metadata = FileOperations::readJsonFromFile(logFile.absoluteFilePath());
-        totalSize += metadata.value(BackupMetadataKeys::SIZE_BYTES).toVariant().toULongLong();
+        QJsonObject metadata;
+        if (JsonManager::loadJsonFile(logFile.absoluteFilePath(), metadata)) {
+            totalSize += metadata.value(BackupMetadataKeys::SIZE_BYTES).toVariant().toULongLong();
+        }
     }
     return totalSize;
 }

@@ -18,10 +18,6 @@ bool createDirectory(const QString &path);
 // File size calculation
 quint64 calculateDirectorySize(const QDir &dir);
 
-// JSON file handling
-bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject);
-QJsonObject readJsonFromFile(const QString &filePath);
-
 // Recursive file and directory collection
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray);
 void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray);

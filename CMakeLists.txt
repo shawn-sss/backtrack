@@ -99,6 +99,8 @@ set(UTILS_SOURCES
     core/utils/common_utils/utils.h
     config/configmanager/configmanager.cpp
     config/configmanager/configmanager.h
+    core/utils/file_utils/jsonmanager.cpp
+    core/utils/file_utils/jsonmanager.h
 )
 
 # Combine all sources

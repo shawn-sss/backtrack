@@ -55,28 +55,6 @@ quint64 calculateDirectorySize(const QDir &dir) {
     return totalSize;
 }
 
-// Writes a JSON object to a file
-bool writeJsonToFile(const QString &filePath, const QJsonObject &jsonObject) {
-    QSaveFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly)) return false;
-
-    QJsonDocument doc(jsonObject);
-    if (file.write(doc.toJson()) == -1) return false;
-
-    return file.commit();
-}
-
-// Reads a JSON object from a file
-QJsonObject readJsonFromFile(const QString &filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly)) return QJsonObject();
-
-    const QByteArray data = file.readAll();
-    const QJsonDocument doc = QJsonDocument::fromJson(data);
-
-    return doc.isObject() ? doc.object() : QJsonObject();
-}
-
 // Collects all files within a directory recursively
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {
     QDir dir(dirPath);

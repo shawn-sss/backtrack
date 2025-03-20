@@ -1,6 +1,9 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
+// Project includes different directory
+#include "../../core/utils/file_utils/jsonmanager.h"
+
 // Built-in Qt includes
 #include <QString>
 #include <QJsonObject>
@@ -38,16 +41,17 @@ private:
     void setupDefaults();
 
     // Internal path management
+    void setupFilePaths();
     QString getFilePath(const QString& fileName) const;
     QString getAppInstallDir() const;
-
-    // JSON file handling
-    bool saveJsonFile(const QString& path, const QJsonObject& data);
-    bool loadJsonFile(const QString& path, QJsonObject& target);
 
     // Internal data storage
     QJsonObject installMetadata;
     QJsonObject userSettings;
+
+    // Cached JSON file paths
+    QString appMetadataPath;
+    QString userConfigPath;
 };
 
 #endif // CONFIGMANAGER_H
