@@ -21,6 +21,7 @@ class StagingModel;
 class FileWatcher;
 class BackupController;
 class CustomTitleBar;
+class ToolbarManager;
 
 // Forward declaration UI class
 namespace Ui {class MainWindow;}
@@ -42,10 +43,7 @@ protected:
 private:
     // UI Initialization and Setup
     void configureWindow();
-    void configureToolBar();
     void setupLayout();
-    void setupToolBar();
-    void setupToolbarActions();
     void applyButtonCursors();
     void initializeUI();
     void initializeBackupSystem();
@@ -77,12 +75,6 @@ private slots:
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
 
-    // Toolbar actions
-    void openSettings();
-    void showHelpDialog();
-    void onAboutButtonClicked();
-    void exitApplication();
-
     // File watcher callbacks
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
@@ -102,9 +94,9 @@ private:
     BackupService *backupService = nullptr;
     BackupController *backupController = nullptr;
 
-    // Dragging state for frameless window
-    QPoint lastMousePosition;
-    bool dragging = false;
+    // Toolbar utilization
+    QToolBar *toolBar;
+    ToolbarManager *toolbarManager;
 };
 
 #endif // MAINWINDOW_H

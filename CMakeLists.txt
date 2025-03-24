@@ -50,16 +50,12 @@ set(PROJECT_SETTINGS
 
 # UI sources
 set(UI_SOURCES
-    ui/customtitlebar/customtitlebar.cpp
-    ui/customtitlebar/customtitlebar.h
     ui/mainwindow/mainWindow.cpp
     ui/mainwindow/mainWindow.h
     ui/mainwindow/mainWindow.ui
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
-    ui/customtitlebar/customtitlebarmode.h
-    ui/customtitlebar/customtitlebarstyling.h
     ui/toolbarmanager/toolbarmanager.h
     ui/toolbarmanager/toolbarmanager.cpp
     ui/toolbarmanager/toolbarmanagerstyling.h

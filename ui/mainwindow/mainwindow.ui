@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1148</width>
-    <height>343</height>
+    <width>1225</width>
+    <height>361</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>810</x>
-      <y>160</y>
+      <x>930</x>
+      <y>148</y>
       <width>291</width>
       <height>84</height>
      </rect>
@@ -60,8 +60,8 @@
    <widget class="QProgressBar" name="TransferProgressBar">
     <property name="geometry">
      <rect>
-      <x>810</x>
-      <y>260</y>
+      <x>930</x>
+      <y>248</y>
       <width>241</width>
       <height>23</height>
      </rect>
@@ -73,8 +73,8 @@
    <widget class="QWidget" name="layoutWidget_2">
     <property name="geometry">
      <rect>
-      <x>810</x>
-      <y>30</y>
+      <x>930</x>
+      <y>18</y>
       <width>291</width>
       <height>106</height>
      </rect>
@@ -120,123 +120,118 @@
      </item>
     </layout>
    </widget>
-   <widget class="QWidget" name="layoutWidget_3">
+   <widget class="QFrame" name="BackupViewContainer">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>788</width>
-      <height>278</height>
+      <width>911</width>
+      <height>291</height>
      </rect>
     </property>
-    <layout class="QHBoxLayout" name="BackupViewLayout">
-     <item>
-      <layout class="QVBoxLayout" name="SourceLayout">
-       <item>
-        <widget class="QLabel" name="SourceTreeTitleLabel">
-         <property name="text">
-          <string>Source</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeView" name="DriveTreeView"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="AddToBackupButton">
-         <property name="text">
-          <string>Add to Backup</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="StagingLayout">
-       <item>
-        <widget class="QLabel" name="StagingListTitleLabel">
-         <property name="text">
-          <string>Staging</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeView" name="BackupStagingTreeView"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="RemoveFromBackupButton">
-         <property name="text">
-          <string>Remove from Backup</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="CreateBackupButton">
-         <property name="text">
-          <string>Create Backup</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="DestinationLayout">
-       <item>
-        <widget class="QLabel" name="DestinationTreeTitleLabel">
-         <property name="text">
-          <string>Destination</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTreeView" name="BackupDestinationView"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="ChangeBackupDestinationButton">
-         <property name="text">
-          <string>Change Location</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="DeleteBackupButton">
-         <property name="text">
-          <string>Delete Backup</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QWidget" name="layoutWidget_3">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>6</y>
+       <width>890</width>
+       <height>278</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="BackupViewLayout">
+      <item>
+       <layout class="QVBoxLayout" name="SourceLayout">
+        <item>
+         <widget class="QLabel" name="SourceTreeTitleLabel">
+          <property name="text">
+           <string>Source</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeView" name="DriveTreeView">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="AddToBackupButton">
+          <property name="text">
+           <string>Add to Backup</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="StagingLayout">
+        <item>
+         <widget class="QLabel" name="StagingListTitleLabel">
+          <property name="text">
+           <string>Staging</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeView" name="BackupStagingTreeView"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="RemoveFromBackupButton">
+          <property name="text">
+           <string>Remove from Backup</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="CreateBackupButton">
+          <property name="text">
+           <string>Create Backup</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="DestinationLayout">
+        <item>
+         <widget class="QLabel" name="DestinationTreeTitleLabel">
+          <property name="text">
+           <string>Destination</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTreeView" name="BackupDestinationView"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="ChangeBackupDestinationButton">
+          <property name="text">
+           <string>Change Location</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="DeleteBackupButton">
+          <property name="text">
+           <string>Delete Backup</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </widget>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1148</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
   </widget>
   <action name="actionOpenSettings">
    <property name="text">

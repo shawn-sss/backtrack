@@ -1,85 +1,118 @@
-// Project includes same directory
 #include "toolbarmanager.h"
 #include "toolbarmanagerstyling.h"
 
-// Project includes different directory
 #include "../../config/_constants.h"
-#include "../../config/resources_settings.h"
+#include "../../config/configmanager/configmanager.h"
+#include "../../ui/settingsdialog/settingsdialog.h"
 
-// Built-in Qt includes
-#include <QFile>
-#include <QPixmap>
-#include <QPainter>
-#include <QSvgRenderer>
+#include <QApplication>
+#include <QToolBar>
 #include <QToolButton>
+#include <QSizePolicy>
+#include <QCursor>
+#include <QIcon>
+#include <QMessageBox>
+#include <QWidget>
 
-// Built-in standard C++ library
-#include <array>
-
-// Constructor - Initializes the toolbar manager and actions
 ToolbarManager::ToolbarManager(QObject *parent)
-    : QObject(parent), actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}
+    : QObject(parent),
+    actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}
 
-// Initializes the toolbar with appearance settings and actions
 void ToolbarManager::initialize(QToolBar *toolBar) {
     setupAppearance(toolBar);
+    createActions();
     addActions(toolBar);
+    applyCursorStyle(toolBar);
 }
 
-// Configures the appearance of the toolbar
 void ToolbarManager::setupAppearance(QToolBar *toolBar) {
-    toolBar->setFloatable(false);
+    toolBar->setOrientation(Qt::Vertical);
     toolBar->setMovable(false);
+    toolBar->setFloatable(false);
     toolBar->setVisible(true);
     toolBar->setIconSize(ToolbarStyles::DEFAULT_ICON_SIZE);
     toolBar->setStyleSheet(ToolbarStyles::DEFAULT_STYLE);
     toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 }
 
-// Adds actions to the toolbar
+void ToolbarManager::createActions() {
+    // Settings
+    actions[0]->setText(Labels::Toolbar::SETTINGS);
+    actions[0]->setIcon(QIcon(Resources::Toolbar::SETTINGS_ICON_PATH));
+    connect(actions[0], &QAction::triggered, this, &ToolbarManager::showSettings);
+
+    // Exit
+    actions[1]->setText(Labels::Toolbar::EXIT);
+    actions[1]->setIcon(QIcon(Resources::Toolbar::EXIT_ICON_PATH));
+    connect(actions[1], &QAction::triggered, qApp, &QApplication::quit);
+
+    // Help
+    actions[2]->setText(Labels::Toolbar::HELP);
+    actions[2]->setIcon(QIcon(Resources::Toolbar::HELP_ICON_PATH));
+    connect(actions[2], &QAction::triggered, this, &ToolbarManager::showHelp);
+
+    // About
+    actions[3]->setText(Labels::Toolbar::ABOUT);
+    actions[3]->setIcon(QIcon(Resources::Toolbar::ABOUT_ICON_PATH));
+    connect(actions[3], &QAction::triggered, this, &ToolbarManager::showAbout);
+}
+
 void ToolbarManager::addActions(QToolBar *toolBar) {
     toolBar->clear();
+    toolBar->addAction(actions[0]); // Settings
+    toolBar->addAction(actions[2]); // Help
+    toolBar->addAction(actions[3]); // About
 
-    // Define labels and icons for each action
-    const std::array<std::pair<QString, QString>, 4> actionData = {{
-        {Labels::Toolbar::SETTINGS, Resources::Toolbar::SETTINGS_ICON_PATH},
-        {Labels::Toolbar::EXIT, Resources::Toolbar::EXIT_ICON_PATH},
-        {Labels::Toolbar::HELP, Resources::Toolbar::HELP_ICON_PATH},
-        {Labels::Toolbar::ABOUT, Resources::Toolbar::ABOUT_ICON_PATH}
-    }};
-
-    // Add actions to the toolbar
-    for (size_t i = 0; i < actions.size(); ++i) {
-        actions[i]->setText(actionData[i].first);
-        actions[i]->setIcon(QIcon(actionData[i].second));
-        toolBar->addAction(actions[i]);
-    }
-
-    // Add a spacer to align the exit button to the right
+    // Spacer to push Exit to bottom
     QWidget *spacer = new QWidget(toolBar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     toolBar->addWidget(spacer);
 
-    // Move the exit button to the right-most position
-    toolBar->addAction(actions[1]);
+    toolBar->addAction(actions[1]); // Exit
 }
 
-// Returns the action for opening settings
-QAction* ToolbarManager::getActionOpenSettings() const {
-    return actions[0];
+void ToolbarManager::applyCursorStyle(QToolBar *toolBar) {
+    for (QAction *action : actions) {
+        if (QWidget *w = toolBar->widgetForAction(action)) {
+            w->setCursor(Qt::PointingHandCursor);
+        }
+    }
 }
 
-// Returns the action for exiting the application
-QAction* ToolbarManager::getActionExit() const {
-    return actions[1];
+// ---------- Internal Dialog Handlers ----------
+
+void ToolbarManager::showSettings() {
+    SettingsDialog dialog(qobject_cast<QWidget*>(parent()));
+    dialog.exec();
 }
 
-// Returns the action for accessing help
-QAction* ToolbarManager::getActionHelp() const {
-    return actions[2];
+void ToolbarManager::showHelp() {
+    const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
+    .arg(ConfigManager::getInstance().getAppInstallDirPublic());
+
+    QMessageBox::information(
+        qobject_cast<QWidget*>(parent()),
+        HelpInfo::HELP_WINDOW_TITLE,
+        HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage
+        );
 }
 
-// Returns the action for displaying the about dialog
-QAction* ToolbarManager::getActionAbout() const {
-    return actions[3];
+void ToolbarManager::showAbout() {
+    const QString aboutText = QString(AboutInfo::ABOUT_WINDOW_MESSAGE)
+    .arg(AppInfo::APP_VERSION,
+         AppInfo::APP_DISPLAY_TITLE,
+         AppInfo::AUTHOR_NAME);
+
+    QMessageBox::information(
+        qobject_cast<QWidget*>(parent()),
+        AboutInfo::ABOUT_WINDOW_TITLE,
+        aboutText
+        );
 }
+
+// ---------- Public Access to Actions ----------
+
+QAction* ToolbarManager::getActionOpenSettings() const { return actions[0]; }
+QAction* ToolbarManager::getActionExit() const         { return actions[1]; }
+QAction* ToolbarManager::getActionHelp() const         { return actions[2]; }
+QAction* ToolbarManager::getActionAbout() const        { return actions[3]; }

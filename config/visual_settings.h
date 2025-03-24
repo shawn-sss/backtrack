@@ -66,6 +66,23 @@ constexpr auto WINDOW_BACKGROUND = "#2B2B2B";
 
 // General button styling
 namespace Styles {
+namespace BackupViewContainer {
+constexpr auto STYLE = R"(
+    #BackupViewContainer {
+        background-color: #f5f5f5;
+        border: 1px solid #cccccc;
+        border-radius: 10px;
+        padding: 10px;
+    }
+
+    #DestinationTreeTitleLabel,
+    #SourceTreeTitleLabel,
+    #StagingListTitleLabel {
+        color: black;
+        font-weight: bold;
+    }
+)";
+}
 namespace GeneralButton {
 constexpr auto STYLE =
     "QPushButton { background: #444; color: white; border-radius: 5px; padding: 5px; }"

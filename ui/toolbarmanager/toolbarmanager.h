@@ -2,9 +2,9 @@
 #define TOOLBARMANAGER_H
 
 // Built-in Qt includes
-#include <QAction>
-#include <QToolBar>
 #include <QObject>
+#include <QToolBar>
+#include <QAction>
 
 // Built-in standard C++ library
 #include <array>
@@ -27,13 +27,24 @@ public:
     QAction* getActionAbout() const;
 
 private:
+    // Creat toolbar actions
+    std::array<QAction*, 4> actions;
+    void createActions();
+
     // Configures toolbar appearance
     void setupAppearance(QToolBar *toolBar);
+
     // Adds all actions to the toolbar
     void addActions(QToolBar *toolBar);
 
-    // Stores toolbar actions
-    std::array<QAction*, 4> actions;
+    // Adds cursor styling
+    void applyCursorStyle(QToolBar *toolBar);
+
+private slots:
+    // Toolbar button slots
+    void showSettings();
+    void showHelp();
+    void showAbout();
 };
 
 #endif // TOOLBARMANAGER_H

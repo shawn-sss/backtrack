@@ -11,12 +11,10 @@
 
 // Constructor
 SettingsDialog::SettingsDialog(QWidget *parent)
-    : QDialog(parent), titleBar(nullptr), dragging(false) {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
+    : QDialog(parent) {
+    setWindowFlags(Qt::Dialog);
     setMinimumSize(QSize(600, 400));
-
     setupLayout();
-    setupConnections();
 }
 
 // Destructor
@@ -25,17 +23,14 @@ SettingsDialog::~SettingsDialog() = default;
 // Sets up the layout for the settings dialog
 void SettingsDialog::setupLayout() {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-
-    titleBar = setupCustomTitleBar(this, TitleBarMode::Dialog);
-    mainLayout->addWidget(titleBar);
+    mainLayout->setContentsMargins(10, 10, 10, 10);
+    mainLayout->setSpacing(10);
 
     auto *contentArea = new QWidget(this);
     contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto *contentLayout = new QVBoxLayout(contentArea);
-    contentLayout->setContentsMargins(10, 10, 10, 10);
+    contentLayout->setContentsMargins(0, 0, 0, 0);
     contentLayout->setSpacing(10);
 
     auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, contentArea);
@@ -45,15 +40,7 @@ void SettingsDialog::setupLayout() {
     contentLayout->addStretch();
     contentLayout->addWidget(buttonBox);
 
-    mainLayout->addWidget(contentArea, 1);
-}
-
-// Establishes signal connections for title bar actions
-void SettingsDialog::setupConnections() {
-    if (titleBar) {
-        connect(titleBar, &CustomTitleBar::minimizeRequested, this, &SettingsDialog::showMinimized);
-        connect(titleBar, &CustomTitleBar::closeRequested, this, &SettingsDialog::close);
-    }
+    mainLayout->addWidget(contentArea);
 }
 
 // Handles saving and closing the dialog
@@ -64,25 +51,4 @@ void SettingsDialog::onSaveClicked() {
 // Handles canceling and closing the dialog
 void SettingsDialog::onCancelClicked() {
     reject();
-}
-
-// Handles mouse press event for window dragging
-void SettingsDialog::mousePressEvent(QMouseEvent *event) {
-    if (titleBar && titleBar->rect().contains(titleBar->mapFromGlobal(event->globalPosition().toPoint()))) {
-        Utils::UI::handleMousePress(this, event, dragging, lastMousePosition);
-    } else {
-        event->ignore();
-    }
-}
-
-// Handles mouse move event for window dragging
-void SettingsDialog::mouseMoveEvent(QMouseEvent *event) {
-    if (dragging) {
-        Utils::UI::handleMouseMove(this, event, dragging, lastMousePosition);
-    }
-}
-
-// Handles mouse release event for window dragging
-void SettingsDialog::mouseReleaseEvent(QMouseEvent *event) {
-    Utils::UI::handleMouseRelease(event, dragging);
 }

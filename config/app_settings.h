@@ -16,6 +16,10 @@ constexpr auto APP_VERSION = "0.4";
 
 // Application configuration
 namespace AppConfig {
+constexpr QSize kMinimumWindowSize(500, 250);
+constexpr QSize kDefaultWindowSize(1300, 320);
+constexpr QSize kMaximumWindowSize(2000, 800);
+
 // Directory for application-specific data
 constexpr auto APPDATA_SETUP_FOLDER = "app_config";
 constexpr auto APPDATA_SETUP_INFO_FILE = "app_init.json";

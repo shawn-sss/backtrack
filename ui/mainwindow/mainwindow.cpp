@@ -5,8 +5,7 @@
 // Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
-#include "../../ui/toolbarmanager/toolbarmanagerstyling.h"
-#include "../../ui/settingsdialog/settingsdialog.h"
+#include "../../ui/toolbarmanager/toolbarmanager.h"
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"
 #include "../../core/utils/file_utils/filewatcher.h"
@@ -15,35 +14,42 @@
 
 // Built-in Qt includes
 #include <QFileSystemModel>
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QBuffer>
-#include <QAbstractItemModel>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QWidget>
+#include <QMessageBox>
 
 // Constructor - Initializes main window components
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
-    destinationModel(new QFileSystemModel(this)),
     sourceModel(new QFileSystemModel(this)),
+    destinationModel(new QFileSystemModel(this)),
     fileWatcher(new FileWatcher(this)),
     backupService(new BackupService(ConfigManager::getInstance().getBackupDirectory())),
     stagingModel(new StagingModel(this)),
-    backupController(new BackupController(backupService, this)) {
+    backupController(new BackupController(backupService, this)),
+    toolBar(new QToolBar(this)),
+    toolbarManager(new ToolbarManager(this)) {
 
     ui->setupUi(this);
 
-    // Setup and initialize UI components
     configureWindow();
     initializeUI();
     setupLayout();
-    setupToolBar();
+
+    addToolBar(Qt::LeftToolBarArea, toolBar);
+    toolbarManager->initialize(toolBar);
+
     applyButtonCursors();
     initializeBackupSystem();
     setupConnections();
+
+    ui->BackupViewContainer->setStyleSheet(Styles::BackupViewContainer::STYLE);
+    ui->BackupViewLayout->setContentsMargins(0, 0, 0, 0);
+    ui->BackupViewLayout->setSpacing(3);
+    ui->BackupViewLayout->setStretch(0, 1);
+    ui->BackupViewLayout->setStretch(1, 1);
+    ui->BackupViewLayout->setStretch(2, 1);
 }
 
 // Destructor - Cleans up allocated resources
@@ -54,95 +60,38 @@ MainWindow::~MainWindow() {
 // ## Window and Layout Configuration ##
 
 // Configure basic window properties
-void MainWindow::configureWindow() {
-    setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
-    setStatusBar(nullptr);
+void MainWindow::configureWindow()
+{
+    setMinimumSize(AppConfig::kMinimumWindowSize);
+    resize(AppConfig::kDefaultWindowSize);
+    setMaximumSize(AppConfig::kMaximumWindowSize);
+
+    if (QScreen *screen = QGuiApplication::primaryScreen()) {
+        const QRect screenGeometry = screen->availableGeometry();
+        const QPoint center = screenGeometry.center() - QPoint(AppConfig::kDefaultWindowSize.width() / 2,
+                                                               AppConfig::kDefaultWindowSize.height() / 2);
+        move(center);
+    }
 }
 
 // Set up main layout structure
 void MainWindow::setupLayout() {
-    titleBar = setupCustomTitleBar(this, TitleBarMode::MainWindow);
-
     auto *container = new QWidget(this);
-    auto *mainLayout = new QVBoxLayout(container);
+    auto *mainLayout = new QHBoxLayout(container);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-    mainLayout->addWidget(titleBar, 0, Qt::AlignTop);
-
-    auto *contentLayout = new QHBoxLayout();
-    contentLayout->setContentsMargins(0, 0, 0, 0);
-    contentLayout->setSpacing(0);
-
-    if (ui->toolBar) {
-        configureToolBar();
-        contentLayout->addWidget(ui->toolBar, 0, Qt::AlignLeft);
-    }
 
     QWidget *contentContainer = centralWidget();
     contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    contentLayout->addWidget(contentContainer, 1);
+    mainLayout->addWidget(contentContainer, 1);
 
-    mainLayout->addLayout(contentLayout, 1);
     setCentralWidget(container);
-}
-
-// Configure toolbar appearance
-void MainWindow::configureToolBar() {
-    ui->toolBar->setFloatable(false);
-    ui->toolBar->setMovable(false);
-    ui->toolBar->setVisible(true);
-    ui->toolBar->setIconSize(ToolbarStyles::DEFAULT_ICON_SIZE);
-    ui->toolBar->setStyleSheet(ToolbarStyles::MINIMAL_STYLE);
-    ui->toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-}
-
-// Full toolbar setup
-void MainWindow::setupToolBar() {
-    if (!ui->toolBar) return;
-    setupToolbarActions();
-    ui->toolBar->clear();
-    ui->toolBar->addAction(ui->actionOpenSettings);
-    ui->toolBar->addAction(ui->actionHelp);
-    ui->toolBar->addAction(ui->actionAbout);
-
-    auto *spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    ui->toolBar->addWidget(spacer);
-    ui->toolBar->addAction(ui->actionExit);
-
-    const QList<QAction*> actions = ui->toolBar->actions();
-    for (QAction* action : actions) {
-        if (QWidget* widget = ui->toolBar->widgetForAction(action)) {
-            widget->setCursor(Qt::PointingHandCursor);
-        }
-    }
-}
-
-// Configures toolbar actions
-void MainWindow::setupToolbarActions() {
-    const struct {
-        QAction*& action;
-        const QString& iconPath;
-        const QString& label;
-    } actions[] = {
-        { ui->actionOpenSettings, Resources::Toolbar::SETTINGS_ICON_PATH, Labels::Toolbar::SETTINGS },
-        { ui->actionExit, Resources::Toolbar::EXIT_ICON_PATH, Labels::Toolbar::EXIT },
-        { ui->actionHelp, Resources::Toolbar::HELP_ICON_PATH, Labels::Toolbar::HELP },
-        { ui->actionAbout, Resources::Toolbar::ABOUT_ICON_PATH, Labels::Toolbar::ABOUT }
-    };
-
-    for (const auto& action : actions) {
-        if (!action.action) action.action = new QAction(this);
-        action.action->setIcon(QIcon(action.iconPath));
-        action.action->setText(action.label);
-    }
 }
 
 // ## UI Initialization and Setup ##
 
 // Initializes the UI
 void MainWindow::initializeUI() {
-    setupToolBar();
     Utils::UI::setupProgressBar(
         ui->TransferProgressBar,
         ProgressSettings::PROGRESS_BAR_MIN_VALUE,
@@ -188,19 +137,6 @@ void MainWindow::setupConnections() {
         connect(conn.button, &QPushButton::clicked, this, conn.slot);
     }
 
-    const struct {
-        QAction* action;
-        void (MainWindow::*slot)();
-    } actionConnections[] = {
-        { ui->actionOpenSettings, &MainWindow::openSettings },
-        { ui->actionExit, &MainWindow::exitApplication },
-        { ui->actionHelp, &MainWindow::showHelpDialog },
-        { ui->actionAbout, &MainWindow::onAboutButtonClicked }
-    };
-
-    for (const auto& conn : actionConnections) {
-        connect(conn.action, &QAction::triggered, this, conn.slot);
-    }
 }
 
 // Connects backup-related signals
@@ -443,37 +379,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         return;
     }
     QMainWindow::closeEvent(event);
-}
-
-// ## Menu & Toolbar Actions ##
-
-// Opens the settings dialog
-void MainWindow::openSettings() {
-    SettingsDialog settingsDialog(this);
-    settingsDialog.exec();
-}
-
-// Shows the help dialog
-void MainWindow::showHelpDialog() {
-    const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
-    .arg(ConfigManager::getInstance().getAppInstallDirPublic());
-
-    QMessageBox::information(this, HelpInfo::HELP_WINDOW_TITLE,
-                             HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage);
-}
-
-// Shows the about dialog
-void MainWindow::onAboutButtonClicked() {
-    QMessageBox::information(this, AboutInfo::ABOUT_WINDOW_TITLE,
-                             QString(AboutInfo::ABOUT_WINDOW_MESSAGE)
-                                 .arg(AppInfo::APP_VERSION,
-                                      AppInfo::APP_DISPLAY_TITLE,
-                                      AppInfo::AUTHOR_NAME));
-}
-
-// Exits the application
-void MainWindow::exitApplication() {
-    QApplication::quit();
 }
 
 // ## File & View Setup ##
