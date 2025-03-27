@@ -1,33 +1,30 @@
 #ifndef TOOLBARMANAGERSTYLING_H
 #define TOOLBARMANAGERSTYLING_H
 
-// Built-in Qt includes
-#include <QSize>
 #include <QString>
+#include <QSize>
 
-// Toolbar appearance styles
 namespace ToolbarStyles {
 
-// Default icon size
+// Icon size for toolbar actions
 inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
 
-// Default toolbar style
-inline const QString DEFAULT_STYLE = QStringLiteral(
+// Shared QToolButton style
+inline const QString BASE_STYLE = QStringLiteral(
     "QToolBar {"
     "    background-color: transparent;"
     "    border: none;"
-    "    padding: 2px;"
     "}"
-    "QToolButton {"
-    "    background-color: white;"
+    "QToolBar QToolButton {"
     "    border-radius: 16px;"
     "    padding: 8px;"
     "    margin: 4px;"
-    "}"
-    "QToolButton:hover {"
-    "    background-color: #f0f0f0;"
+    "    min-width: 40px;"
+    "    min-height: 40px;"
+    "    font-size: 14px;"
+    "    border: none;"
     "}"
     );
-}
+} // namespace ToolbarStyles
 
 #endif // TOOLBARMANAGERSTYLING_H

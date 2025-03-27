@@ -1,0 +1,52 @@
+/* MAIN BACKUP WINDOW ////////////////////////////// */
+/* Backup content container */
+#BackupViewContainer {
+    background-color: #2b2b2b;
+}
+
+/* Section title labels */
+#DestinationTreeTitleLabel,
+#SourceTreeTitleLabel,
+#StagingListTitleLabel {
+    color: #f0f0f0;
+}
+
+/* Tree/list views */
+#DriveTreeView,
+#BackupStagingTreeView,
+#BackupDestinationView {
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+}
+
+/* TOOLBAR //////////////////////////////////////// */
+QToolbar {
+    background-color: transparent;
+}
+
+#MainToolBar QToolButton {
+    background-color: #444444;
+    color: #f0f0f0;
+}
+
+#MainToolBar QToolButton:hover {
+    background-color: #5c5c5c;
+}
+
+/* CUSTOM BUTTONS ////////////////////////////// */
+#ChangeBackupDestinationButton,
+#DeleteBackupButton,
+#AddToBackupButton,
+#CreateBackupButton,
+#RemoveFromBackupButton {
+    background-color: #444444;
+    color: #f0f0f0;
+}
+
+#ChangeBackupDestinationButton:hover,
+#DeleteBackupButton:hover,
+#AddToBackupButton:hover,
+#CreateBackupButton:hover,
+#RemoveFromBackupButton:hover {
+    background-color: #5c5c5c;
+}

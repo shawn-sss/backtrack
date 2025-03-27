@@ -33,6 +33,8 @@ set(APP_SOURCES
 # Project resources
 set(PROJECT_RESOURCES
     resources/resource.qrc
+    resources/styles/light.qss
+    resources/styles/dark.qss
 )
 
 # Project settings
@@ -97,6 +99,8 @@ set(UTILS_SOURCES
     config/configmanager/configmanager.h
     core/utils/file_utils/jsonmanager.cpp
     core/utils/file_utils/jsonmanager.h
+    config/thememanager/thememanager.cpp
+    config/thememanager/thememanager.h
 )
 
 # Combine all sources

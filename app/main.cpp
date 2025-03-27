@@ -1,7 +1,8 @@
 // Project includes different directory
 #include "../config/_constants.h"
-#include "../config/configmanager/configmanager.h"
 #include "../ui/mainwindow/mainwindow.h"
+#include "../config/configmanager/configmanager.h"
+#include "../config/thememanager/thememanager.h"
 
 // Built-in Qt includes
 #include <QApplication>
@@ -23,6 +24,8 @@ int main(int argc, char *argv[]) {
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::APP_DISPLAY_TITLE);
     mainWindow.setWindowIcon(QIcon(Resources::Application::ICON_PATH));
+    ThemeManager::applyTheme();
+    ThemeManager::installEventFilter(&app);
     mainWindow.show();
 
     // Start event loop

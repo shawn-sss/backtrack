@@ -5,5 +5,7 @@
         <file>help.svg</file>
         <file>exit.svg</file>
         <file>about.svg</file>
+        <file>styles/dark.qss</file>
+        <file>styles/light.qss</file>
     </qresource>
 </RCC>

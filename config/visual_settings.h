@@ -69,17 +69,41 @@ namespace Styles {
 namespace BackupViewContainer {
 constexpr auto STYLE = R"(
     #BackupViewContainer {
-        background-color: #f5f5f5;
-        border: 1px solid #cccccc;
         border-radius: 10px;
         padding: 10px;
+        border: 1px solid; /* Let theme override color */
     }
 
     #DestinationTreeTitleLabel,
     #SourceTreeTitleLabel,
     #StagingListTitleLabel {
-        color: black;
         font-weight: bold;
+    }
+
+    #DriveTreeView,
+    #BackupStagingTreeView,
+    #BackupDestinationView {
+        border: 1px solid;
+    }
+
+    #MainToolBar QToolButton {
+        border-radius: 16px;
+        padding: 8px;
+        margin: 4px;
+        min-width: 40px;
+        min-height: 40px;
+        font-size: 14px;
+        border: none;
+    }
+
+    #ChangeBackupDestinationButton,
+    #DeleteBackupButton,
+    #AddToBackupButton,
+    #CreateBackupButton,
+    #RemoveFromBackupButton {
+        border: 1px solid;
+        border-radius: 6px;
+        padding: 6px 12px;
     }
 )";
 }
