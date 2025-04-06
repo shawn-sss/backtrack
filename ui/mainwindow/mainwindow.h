@@ -79,6 +79,10 @@ private slots:
     void onBackupDirectoryChanged();
     void onFileChanged(const QString &path);
 
+    // Backup feedback
+    void onBackupCompleted();
+    void onBackupError(const QString &error);
+
 private:
     // UI Elements
     Ui::MainWindow *ui = nullptr;

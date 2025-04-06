@@ -11,12 +11,14 @@
 #include "../../core/utils/file_utils/filewatcher.h"
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/common_utils/utils.h"
+#include "../../core/backup_module/styles/backup_styling.h"
 
 // Built-in Qt includes
 #include <QFileSystemModel>
 #include <QFileDialog>
 #include <QBuffer>
 #include <QMessageBox>
+#include <QTimer>
 
 // Constructor - Initializes main window components
 MainWindow::MainWindow(QWidget *parent)
@@ -99,7 +101,11 @@ void MainWindow::initializeUI() {
         ProgressSettings::PROGRESS_BAR_HEIGHT,
         ProgressSettings::PROGRESS_BAR_TEXT_VISIBLE
         );
-    ui->TransferProgressBar->setVisible(false);
+    if (ui->TransferProgressBar->value() == 0) {
+        ui->TransferProgressBar->setVisible(false);
+        ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    }
 }
 
 // Initializes the backup system
@@ -142,7 +148,11 @@ void MainWindow::setupConnections() {
 // Connects backup-related signals
 void MainWindow::connectBackupSignals() {
     connect(backupController, &BackupController::backupCreated, this, &MainWindow::refreshBackupStatus);
+    connect(backupController, &BackupController::backupCreated, this, &MainWindow::onBackupCompleted);
+
     connect(backupController, &BackupController::backupDeleted, this, &MainWindow::refreshBackupStatus);
+
+    connect(backupController, &BackupController::errorOccurred, this, &MainWindow::onBackupError);
     connect(backupController, &BackupController::errorOccurred, this,
             [this](const QString &error) {
                 QMessageBox::critical(this, ErrorMessages::BACKUP_DELETION_ERROR_TITLE, error);
@@ -243,14 +253,17 @@ void MainWindow::onCreateBackupClicked() {
                              ErrorMessages::ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
         return;
     }
+
     const QString backupRoot = destinationModel->rootPath();
     QString errorMessage;
     if (!FileOperations::createBackupInfrastructure(backupRoot, errorMessage)) {
         QMessageBox::critical(this, ErrorMessages::ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
         return;
     }
+
     ui->TransferProgressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
+    ui->TransferProgressText->setVisible(false);
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
 
@@ -379,6 +392,21 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         return;
     }
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::onBackupCompleted() {
+    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
+    QTimer::singleShot(3000, this, [this]() {
+        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    });
+}
+
+
+void MainWindow::onBackupError(const QString &error) {
+    Q_UNUSED(error);
+    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
 }
 
 // ## File & View Setup ##

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1225</width>
+    <width>1236</width>
     <height>426</height>
    </rect>
   </property>
@@ -14,112 +14,6 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>930</x>
-      <y>148</y>
-      <width>291</width>
-      <height>84</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="LastBackupLayout">
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="LastBackupNameLabel">
-       <property name="text">
-        <string>LastBackupName</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="LastBackupTimestampLabel">
-       <property name="text">
-        <string>LastBackupTimestamp</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="LastBackupDurationLabel">
-       <property name="text">
-        <string>LastBackupDuration</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="LastBackupSizeLabel">
-       <property name="text">
-        <string>LastBackupSize</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QProgressBar" name="TransferProgressBar">
-    <property name="geometry">
-     <rect>
-      <x>930</x>
-      <y>248</y>
-      <width>241</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="value">
-     <number>24</number>
-    </property>
-   </widget>
-   <widget class="QWidget" name="layoutWidget_2">
-    <property name="geometry">
-     <rect>
-      <x>930</x>
-      <y>18</y>
-      <width>291</width>
-      <height>106</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="BackupStatusLayout">
-     <property name="leftMargin">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="BackupStatusLabel">
-       <property name="text">
-        <string>BackupStatus</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="BackupLocationLabel">
-       <property name="text">
-        <string>BackupLocation</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="BackupTotalCountLabel">
-       <property name="text">
-        <string>BackupTotalCount</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="BackupTotalSizeLabel">
-       <property name="text">
-        <string>BackupTotalSize</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="BackupLocationStatusLabel">
-       <property name="text">
-        <string>BackupLocationStatus</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QFrame" name="BackupViewContainer">
     <property name="geometry">
      <rect>
@@ -232,18 +126,147 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QLabel" name="testLabel">
+   <widget class="QTabWidget" name="DetailsTabWidget">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>320</y>
-      <width>49</width>
-      <height>16</height>
+      <x>930</x>
+      <y>10</y>
+      <width>291</width>
+      <height>251</height>
      </rect>
     </property>
-    <property name="text">
-     <string>TextLabel</string>
+    <property name="currentIndex">
+     <number>0</number>
     </property>
+    <widget class="QWidget" name="BackupDetails">
+     <attribute name="title">
+      <string>Backup Details</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>291</width>
+        <height>106</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="BackupStatusLayout">
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="BackupStatusLabel">
+         <property name="text">
+          <string>BackupStatus</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="BackupLocationLabel">
+         <property name="text">
+          <string>BackupLocation</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="BackupTotalCountLabel">
+         <property name="text">
+          <string>BackupTotalCount</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="BackupTotalSizeLabel">
+         <property name="text">
+          <string>BackupTotalSize</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="BackupLocationStatusLabel">
+         <property name="text">
+          <string>BackupLocationStatus</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="LastBackup">
+     <attribute name="title">
+      <string>Last Backup</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>291</width>
+        <height>84</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="LastBackupLayout">
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="LastBackupNameLabel">
+         <property name="text">
+          <string>LastBackupName</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="LastBackupTimestampLabel">
+         <property name="text">
+          <string>LastBackupTimestamp</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="LastBackupDurationLabel">
+         <property name="text">
+          <string>LastBackupDuration</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="LastBackupSizeLabel">
+         <property name="text">
+          <string>LastBackupSize</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>270</y>
+      <width>291</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QProgressBar" name="TransferProgressBar">
+       <property name="value">
+        <number>24</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="TransferProgressText">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <action name="actionOpenSettings">
