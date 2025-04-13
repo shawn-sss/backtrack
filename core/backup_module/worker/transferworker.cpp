@@ -14,12 +14,12 @@
 TransferWorker::TransferWorker(const QStringList &files, const QString &destination, QObject *parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// Stops ongoing transfer
+// Requests the transfer to stop
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
-// Starts the transfer process
+// Begins the file/folder transfer process
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -54,7 +54,7 @@ void TransferWorker::startTransfer() {
     emit finished();
 }
 
-// Processes the root of a drive
+// Handles copying the contents of a drive root
 bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     if (stopRequested.load()) return false;
 
@@ -94,7 +94,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     return true;
 }
 
-// Processes individual files or folders
+// Handles copying a single file or directory
 bool TransferWorker::processFileOrFolder(const QString &filePath) {
     if (stopRequested.load()) return false;
 
@@ -104,7 +104,7 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
     return copyItem(fileInfo, destPath);
 }
 
-// Copies a file or directory
+// Copies a single file or recursively copies a directory
 bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
     if (!fileInfo.isReadable()) {
         emit errorOccurred(QString(ErrorMessages::ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));

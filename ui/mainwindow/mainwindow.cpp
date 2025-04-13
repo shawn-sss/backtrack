@@ -90,6 +90,21 @@ void MainWindow::setupLayout() {
     setCentralWidget(container);
 }
 
+// Applies pointing hand cursor to buttons
+void MainWindow::applyButtonCursors() {
+    const QList<QPushButton*> buttons = {
+        ui->AddToBackupButton,
+        ui->RemoveFromBackupButton,
+        ui->CreateBackupButton,
+        ui->ChangeBackupDestinationButton,
+        ui->DeleteBackupButton
+    };
+
+    for (auto *button : buttons) {
+        button->setCursor(Qt::PointingHandCursor);
+    }
+}
+
 // ## UI Initialization and Setup ##
 
 // Initializes the UI
@@ -159,69 +174,102 @@ void MainWindow::connectBackupSignals() {
             });
 }
 
-// Applies pointing hand cursor to buttons
-void MainWindow::applyButtonCursors() {
-    const QList<QPushButton*> buttons = {
-        ui->AddToBackupButton,
-        ui->RemoveFromBackupButton,
-        ui->CreateBackupButton,
-        ui->ChangeBackupDestinationButton,
-        ui->DeleteBackupButton
-    };
+// ## File & View Setup ##
 
-    for (auto *button : buttons) {
-        button->setCursor(Qt::PointingHandCursor);
-    }
+// Sets up the source view
+void MainWindow::setupSourceTreeView() {
+    sourceModel->setRootPath(BackupPaths::DEFAULT_ROOT_PATH);
+    sourceModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
+
+    ui->DriveTreeView->setModel(sourceModel);
+    ui->DriveTreeView->setRootIndex(sourceModel->index(BackupPaths::DEFAULT_ROOT_PATH));
+    ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    removeAllColumnsFromTreeView(ui->DriveTreeView);
 }
 
-// ## Backup System Functions ##
+// Sets up the backup staging view
+void MainWindow::setupBackupStagingTreeView() {
+    ui->BackupStagingTreeView->setModel(stagingModel);
+    ui->BackupStagingTreeView->header()->setVisible(true);
+    ui->BackupStagingTreeView->header()->setStretchLastSection(true);
+    ui->BackupStagingTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-// Refreshes the backup status
-void MainWindow::refreshBackupStatus() {
-    const BackupStatus status = backupService->scanForBackupStatus();
-    const QString statusColor = [status]() -> QString {
-        switch (status) {
-        case BackupStatus::Valid:
-            return Colors::BACKUP_STATUS_COLOR_FOUND;
-        case BackupStatus::Broken:
-            return Colors::BACKUP_STATUS_COLOR_WARNING;
-        default:
-            return Colors::BACKUP_STATUS_COLOR_NOT_FOUND;
-        }
-    }();
-    updateBackupStatusLabel(statusColor);
-    updateBackupLocationLabel(backupService->getBackupRoot());
-    updateBackupTotalCountLabel();
-    updateBackupTotalSizeLabel();
-    updateBackupLocationStatusLabel(backupService->getBackupRoot());
-    updateLastBackupInfo();
+    removeAllColumnsFromTreeView(ui->BackupStagingTreeView);
 }
 
-// Changes the backup destination
-void MainWindow::onChangeBackupDestinationClicked() {
-    const QString selectedDir = QFileDialog::getExistingDirectory(
-        this,
-        InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
-        BackupPaths::DEFAULT_FILE_DIALOG_ROOT
-        );
-    if (selectedDir.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE,
-                             ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
-        return;
-    }
-    if (!FileOperations::createDirectory(selectedDir)) {
-        QMessageBox::critical(this, ErrorMessages::BACKUP_DIRECTORY_ERROR_TITLE,
-                              ErrorMessages::ERROR_CREATING_BACKUP_DIRECTORY);
-        return;
-    }
-    backupService->setBackupRoot(selectedDir);
-    destinationModel->setRootPath(selectedDir);
+// Sets up the destination view
+void MainWindow::setupDestinationView() {
+    destinationModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
+    destinationModel->sort(0, Qt::DescendingOrder);
+
     ui->BackupDestinationView->setModel(destinationModel);
-    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
-    refreshBackupStatus();
-    startWatchingBackupDirectory(selectedDir);
-    updateFileWatcher();
+    ui->BackupDestinationView->setRootIndex(
+        destinationModel->setRootPath(ConfigManager::getInstance().getBackupDirectory())
+        );
+
+    removeAllColumnsFromTreeView(ui->BackupDestinationView);
 }
+
+// Removes unnecessary columns from a tree view
+void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
+    if (!treeView) return;
+
+    if (QAbstractItemModel *model = treeView->model(); model) {
+        for (int i = UISettings::TreeView::START_HIDDEN_COLUMN;
+             i < UISettings::TreeView::DEFAULT_COLUMN_COUNT; ++i) {
+            treeView->setColumnHidden(i, true);
+        }
+    }
+}
+
+// ## File Watcher Management ##
+
+// Starts watching a directory for changes
+void MainWindow::startWatchingBackupDirectory(const QString &path) {
+    fileWatcher->startWatching(path);
+    connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
+}
+
+// Updates the file watcher
+void MainWindow::updateFileWatcher() {
+    const QString watchPath = destinationModel->rootPath();
+    if (!fileWatcher->watchedDirectories().contains(watchPath)) {
+        fileWatcher->startWatching(watchPath);
+    }
+}
+
+// Responds to file change event
+void MainWindow::onFileChanged(const QString &path) {
+    Q_UNUSED(path);
+    refreshBackupStatus();
+}
+
+// Responds to backup directory change event
+void MainWindow::onBackupDirectoryChanged() {
+    updateFileWatcher();
+    refreshBackupStatus();
+}
+
+// ## Backup Feedback ##
+
+// Handles backup completion
+void MainWindow::onBackupCompleted() {
+    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
+    QTimer::singleShot(3000, this, [this]() {
+        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    });
+}
+
+// Handles backup error
+void MainWindow::onBackupError(const QString &error) {
+    Q_UNUSED(error);
+    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
+}
+
+// ## Backup Operations ##
 
 // Adds selected files to backup staging
 void MainWindow::onAddToBackupClicked() {
@@ -283,33 +331,79 @@ void MainWindow::onDeleteBackupClicked() {
     }
 }
 
-// Starts watching a directory for changes
-void MainWindow::startWatchingBackupDirectory(const QString &path) {
-    fileWatcher->startWatching(path);
-    connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
-}
-
-// Updates the file watcher
-void MainWindow::updateFileWatcher() {
-    const QString watchPath = destinationModel->rootPath();
-    if (!fileWatcher->watchedDirectories().contains(watchPath)) {
-        fileWatcher->startWatching(watchPath);
+// Changes the backup destination
+void MainWindow::onChangeBackupDestinationClicked() {
+    const QString selectedDir = QFileDialog::getExistingDirectory(
+        this,
+        InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
+        BackupPaths::DEFAULT_FILE_DIALOG_ROOT
+        );
+    if (selectedDir.isEmpty()) {
+        QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE,
+                             ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
+        return;
     }
-}
-
-// Responds to file change event
-void MainWindow::onFileChanged(const QString &path) {
-    Q_UNUSED(path);
+    if (!FileOperations::createDirectory(selectedDir)) {
+        QMessageBox::critical(this, ErrorMessages::BACKUP_DIRECTORY_ERROR_TITLE,
+                              ErrorMessages::ERROR_CREATING_BACKUP_DIRECTORY);
+        return;
+    }
+    backupService->setBackupRoot(selectedDir);
+    destinationModel->setRootPath(selectedDir);
+    ui->BackupDestinationView->setModel(destinationModel);
+    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
     refreshBackupStatus();
-}
-
-// Responds to backup directory change event
-void MainWindow::onBackupDirectoryChanged() {
+    startWatchingBackupDirectory(selectedDir);
     updateFileWatcher();
-    refreshBackupStatus();
 }
 
-// ## Backup Status & UI Updates ##
+// ## Backup System Status & UI Updates ##
+
+// Refreshes the backup status
+void MainWindow::refreshBackupStatus() {
+    const BackupStatus status = backupService->scanForBackupStatus();
+    const QString statusColor = [status]() -> QString {
+        switch (status) {
+        case BackupStatus::Valid:
+            return Colors::BACKUP_STATUS_COLOR_FOUND;
+        case BackupStatus::Broken:
+            return Colors::BACKUP_STATUS_COLOR_WARNING;
+        default:
+            return Colors::BACKUP_STATUS_COLOR_NOT_FOUND;
+        }
+    }();
+    updateBackupStatusLabel(statusColor);
+    updateBackupLocationLabel(backupService->getBackupRoot());
+    updateBackupTotalCountLabel();
+    updateBackupTotalSizeLabel();
+    updateBackupLocationStatusLabel(backupService->getBackupRoot());
+    updateLastBackupInfo();
+}
+
+// Updates last backup information
+void MainWindow::updateLastBackupInfo() {
+    const QJsonObject metadata = backupService->getLastBackupMetadata();
+    if (metadata.isEmpty()) {
+        for (auto* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
+                            ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
+            label->setText(Utilities::DEFAULT_VALUE_NOT_AVAILABLE);
+        }
+        return;
+    }
+
+    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(BackupMetadataKeys::NAME).toString());
+
+    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP +
+                                          Utils::Formatting::formatTimestamp(QDateTime::fromString(
+                                                                                 metadata.value(BackupMetadataKeys::TIMESTAMP).toString(), Qt::ISODate),
+                                                                             TimestampFormats::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
+
+    ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION +
+                                         Utils::Formatting::formatDuration(metadata.value(BackupMetadataKeys::DURATION).toInt()));
+
+    ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE +
+                                     metadata.value(BackupMetadataKeys::SIZE_READABLE).toString());
+}
 
 // Updates the backup status label
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
@@ -356,31 +450,6 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     ui->BackupLocationStatusLabel->setText(Labels::Backup::LOCATION_ACCESS + status);
 }
 
-// Updates last backup information
-void MainWindow::updateLastBackupInfo() {
-    const QJsonObject metadata = backupService->getLastBackupMetadata();
-    if (metadata.isEmpty()) {
-        for (auto* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
-                            ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
-            label->setText(Utilities::DEFAULT_VALUE_NOT_AVAILABLE);
-        }
-        return;
-    }
-
-    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(BackupMetadataKeys::NAME).toString());
-
-    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP +
-                                          Utils::Formatting::formatTimestamp(QDateTime::fromString(
-                                                                                 metadata.value(BackupMetadataKeys::TIMESTAMP).toString(), Qt::ISODate),
-                                                                             TimestampFormats::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
-
-    ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION +
-                                         Utils::Formatting::formatDuration(metadata.value(BackupMetadataKeys::DURATION).toInt()));
-
-    ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE +
-                                     metadata.value(BackupMetadataKeys::SIZE_READABLE).toString());
-}
-
 // ## Event Handlers ##
 
 // Handles the close event
@@ -392,68 +461,4 @@ void MainWindow::closeEvent(QCloseEvent *event) {
         return;
     }
     QMainWindow::closeEvent(event);
-}
-
-void MainWindow::onBackupCompleted() {
-    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_COMPLETION_MESSAGE);
-    ui->TransferProgressText->setVisible(true);
-    QTimer::singleShot(3000, this, [this]() {
-        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
-    });
-}
-
-
-void MainWindow::onBackupError(const QString &error) {
-    Q_UNUSED(error);
-    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
-    ui->TransferProgressText->setVisible(true);
-}
-
-// ## File & View Setup ##
-
-// Sets up the destination view
-void MainWindow::setupDestinationView() {
-    destinationModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
-    destinationModel->sort(0, Qt::DescendingOrder);
-
-    ui->BackupDestinationView->setModel(destinationModel);
-    ui->BackupDestinationView->setRootIndex(
-        destinationModel->setRootPath(ConfigManager::getInstance().getBackupDirectory())
-        );
-
-    removeAllColumnsFromTreeView(ui->BackupDestinationView);
-}
-
-// Sets up the backup staging view
-void MainWindow::setupBackupStagingTreeView() {
-    ui->BackupStagingTreeView->setModel(stagingModel);
-    ui->BackupStagingTreeView->header()->setVisible(true);
-    ui->BackupStagingTreeView->header()->setStretchLastSection(true);
-    ui->BackupStagingTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-    removeAllColumnsFromTreeView(ui->BackupStagingTreeView);
-}
-
-// Sets up the source view
-void MainWindow::setupSourceTreeView() {
-    sourceModel->setRootPath(BackupPaths::DEFAULT_ROOT_PATH);
-    sourceModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
-
-    ui->DriveTreeView->setModel(sourceModel);
-    ui->DriveTreeView->setRootIndex(sourceModel->index(BackupPaths::DEFAULT_ROOT_PATH));
-    ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-    removeAllColumnsFromTreeView(ui->DriveTreeView);
-}
-
-// Removes unnecessary columns from a tree view
-void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
-    if (!treeView) return;
-
-    if (QAbstractItemModel *model = treeView->model(); model) {
-        for (int i = UISettings::TreeView::START_HIDDEN_COLUMN;
-             i < UISettings::TreeView::DEFAULT_COLUMN_COUNT; ++i) {
-            treeView->setColumnHidden(i, true);
-        }
-    }
 }

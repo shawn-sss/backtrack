@@ -3,7 +3,6 @@
 
 // Project includes different directory
 #include "../../config/_constants.h"
-#include "../../core/utils/common_utils/utils.h"
 
 // Built-in Qt includes
 #include <QVBoxLayout>

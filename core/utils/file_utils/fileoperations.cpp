@@ -13,7 +13,7 @@
 
 namespace FileOperations {
 
-// Copies a directory and its contents recursively
+// Copies a directory and all its contents recursively
 bool copyDirectoryRecursively(const QString &sourcePath, const QString &destinationPath) {
     QDir sourceDir(sourcePath);
     if (!sourceDir.exists()) return false;
@@ -33,19 +33,19 @@ bool copyDirectoryRecursively(const QString &sourcePath, const QString &destinat
     return true;
 }
 
-// Deletes a directory and its contents
+// Deletes a directory and all its contents
 bool deleteDirectory(const QString &path) {
     QDir dir(path);
     return dir.exists() && dir.removeRecursively();
 }
 
-// Creates a directory if it does not exist
+// Creates a directory if it does not already exist
 bool createDirectory(const QString &path) {
     QDir dir(path);
     return dir.exists() || dir.mkpath(".");
 }
 
-// Calculates the total size of a directory
+// Calculates the total size of a directory recursively
 quint64 calculateDirectorySize(const QDir &dir) {
     quint64 totalSize = 0;
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
@@ -55,7 +55,7 @@ quint64 calculateDirectorySize(const QDir &dir) {
     return totalSize;
 }
 
-// Collects all files within a directory recursively
+// Collects all file paths in a directory (recursively)
 void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles, QJsonArray &filesArray) {
     QDir dir(dirPath);
     if (!dir.exists()) return;
@@ -72,7 +72,7 @@ void collectFilesRecursively(const QString &dirPath, QSet<QString> &uniqueFiles,
     }
 }
 
-// Collects all directories within a directory recursively
+// Collects all folder paths in a directory (recursively)
 void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &uniqueFolders, QJsonArray &foldersArray) {
     QDir dir(dirPath);
     if (!dir.exists()) return;
@@ -88,7 +88,7 @@ void collectDirectoriesRecursively(const QString &dirPath, QSet<QString> &unique
     }
 }
 
-// Creates the required directory structure for backups
+// Creates required subfolders for backup structure (including logs)
 bool createBackupInfrastructure(const QString &backupDir, QString &errorMessage) {
     const QDir backupDirectory(backupDir);
     const QString appFolderPath = backupDirectory.filePath(AppConfig::BACKUP_SETUP_FOLDER);

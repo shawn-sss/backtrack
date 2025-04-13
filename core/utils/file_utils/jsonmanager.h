@@ -7,10 +7,10 @@
 
 class JsonManager {
 public:
-    // Load JSON from file
+    // Loads a JSON object from the given file path
     static bool loadJsonFile(const QString& path, QJsonObject& target);
 
-    // Save JSON to file
+    // Saves a JSON object to the given file path
     static bool saveJsonFile(const QString& path, const QJsonObject& data);
 };
 

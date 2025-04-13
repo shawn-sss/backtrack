@@ -37,7 +37,7 @@ public:
     ~MainWindow() override;
 
 protected:
-    // Event handling for window and mouse events
+    // Handles window close event
     void closeEvent(QCloseEvent *event) override;
 
 private:

@@ -16,13 +16,13 @@ FileWatcher::FileWatcher(QObject *parent)
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::fileChanged);
 }
 
-// Updates the watch list with new paths
+// Replaces the entire watch list with new paths
 void FileWatcher::updateWatchList(const QStringList &paths) {
     removeAllPaths();
     addPaths(paths);
 }
 
-// Adds a single path to the watcher
+// Adds a single file or directory to the watch list
 void FileWatcher::addPath(const QString &path) {
     QString normalizedPath = QDir::fromNativeSeparators(path);
     if (!normalizedPath.isEmpty() &&
@@ -33,7 +33,7 @@ void FileWatcher::addPath(const QString &path) {
     }
 }
 
-// Adds multiple paths to the watcher
+// Adds multiple files or directories to the watch list
 void FileWatcher::addPaths(const QStringList &paths) {
     QStringList newPaths;
 
@@ -57,7 +57,7 @@ void FileWatcher::addPaths(const QStringList &paths) {
     }
 }
 
-// Removes a single path from the watcher
+// Removes a single path from the watch list
 void FileWatcher::removePath(const QString &path) {
     QString normalizedPath = QDir::fromNativeSeparators(path);
     if (watcher->directories().contains(normalizedPath) ||
@@ -66,7 +66,7 @@ void FileWatcher::removePath(const QString &path) {
     }
 }
 
-// Removes all watched paths
+// Removes all watched files and directories
 void FileWatcher::removeAllPaths() {
     QStringList allPaths = watcher->directories() + watcher->files();
     if (!allPaths.isEmpty()) {
@@ -74,17 +74,17 @@ void FileWatcher::removeAllPaths() {
     }
 }
 
-// Returns the list of watched directories
+// Returns all currently watched directories
 QStringList FileWatcher::watchedDirectories() const {
     return watcher->directories();
 }
 
-// Returns the list of watched files
+// Returns all currently watched files
 QStringList FileWatcher::watchedFiles() const {
     return watcher->files();
 }
 
-// Starts watching directories and files under the given root path
+// Begins watching a backup root and its key subpaths
 void FileWatcher::startWatching(const QString &rootPath) {
     removeAllPaths();
 

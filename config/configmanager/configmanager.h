@@ -13,6 +13,12 @@ public:
     // Singleton instance
     static ConfigManager& getInstance();
 
+    // First-run check
+    bool isFirstRun() const;
+
+    // Public install directory accessor
+    QString getAppInstallDirPublic() const;
+
     // Install metadata management
     void loadInstallMetadata();
     void saveInstallMetadata();
@@ -21,17 +27,11 @@ public:
     void loadUserConfig();
     void saveUserConfig();
 
-    // First-run check
-    bool isFirstRun() const;
-
     // Backup settings management
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
-
-    // Public install directory accessor
-    QString getAppInstallDirPublic() const;
 
 private:
     // Constructor

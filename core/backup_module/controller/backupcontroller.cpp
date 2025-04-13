@@ -24,7 +24,7 @@ BackupController::~BackupController() {
     cleanupAfterTransfer();
 }
 
-// Initiates a backup process
+// Starts a new backup operation in a worker thread
 void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
@@ -88,7 +88,7 @@ void BackupController::createBackup(const QString &destinationPath,
     workerThread->start();
 }
 
-// Deletes a backup from storage
+// Deletes a backup and its associated log file
 void BackupController::deleteBackup(const QString &backupPath) {
     const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
         QStringLiteral("%1/%2/%3_%4")
@@ -112,17 +112,17 @@ void BackupController::deleteBackup(const QString &backupPath) {
     emit backupDeleted();
 }
 
-// Checks if a backup operation is currently running
+// Returns true if a backup operation is in progress
 bool BackupController::isBackupInProgress() const {
     return workerThread && workerThread->isRunning();
 }
 
-// Creates a new backup folder
+// Creates the backup destination folder
 bool BackupController::createBackupFolder(const QString &path) {
     return QDir().mkpath(path);
 }
 
-// Cleans up resources after backup transfer completes
+// Cleans up the worker thread after a backup transfer
 void BackupController::cleanupAfterTransfer() {
     if (workerThread) {
         workerThread->quit();

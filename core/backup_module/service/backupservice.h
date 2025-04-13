@@ -18,36 +18,42 @@ enum class BackupStatus {
 // Handles backup operations and metadata
 class BackupService {
 public:
-    // Constructor
+    // Constructs a BackupService for the given root path
     explicit BackupService(const QString &backupRoot);
     Q_DISABLE_COPY(BackupService)
 
-    // Backup root management
+    // Sets the backup root path
     void setBackupRoot(const QString &path);
+
+    // Returns the current backup root path
     QString getBackupRoot() const;
 
-    // Backup initialization
+    // Initializes backup folder structure if missing
     void initializeBackupRootIfNeeded();
 
-    // Backup status retrieval
+    // Checks the status of the backup structure
     BackupStatus scanForBackupStatus() const;
+
+    // Returns metadata for the most recent backup
     QJsonObject getLastBackupMetadata() const;
 
-    // Backup summary creation
+    // Writes a summary log for a completed backup
     void createBackupSummary(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration);
 
-    // Backup statistics
+    // Returns the number of completed backups
     int getBackupCount() const;
+
+    // Returns the total size of all backups in bytes
     quint64 getTotalBackupSize() const;
 
 private:
-    // Generates metadata for a backup
+    // Builds metadata JSON object for a backup
     QJsonObject createBackupMetadata(const QString &backupFolderPath, const QStringList &selectedItems, qint64 backupDuration) const;
 
-    // Calculates total size of selected backup items
+    // Calculates the total size of selected files/folders
     qint64 calculateTotalBackupSize(const QStringList &selectedItems) const;
 
-    // Backup root directory path
+    // Root directory for backups
     QString backupRootPath;
 };
 

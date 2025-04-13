@@ -1,11 +1,10 @@
-// Project includes (same directory)
+// Project includes same directory
 #include "thememanager.h"
-//#include "../../ui/toolbarmanager/toolbarmanager.h"
 
-// Qt includes
-#include <QApplication>
+// Built-in Qt includes
 #include <QFile>
 #include <QSettings>
+#include <QApplication>
 #include <QAbstractNativeEventFilter>
 
 #ifdef Q_OS_WIN
@@ -19,13 +18,14 @@ constexpr auto LIGHT_THEME_PATH = ":/resources/styles/light.qss";
 
 AppTheme _currentTheme = AppTheme::Light;
 
+// Filters system theme change events on Windows
 class ThemeChangeFilter : public QAbstractNativeEventFilter {
 public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
 #ifdef Q_OS_WIN
         MSG* msg = static_cast<MSG*>(message);
         if (msg->message == WM_SETTINGCHANGE) {
-            ThemeManager::applyTheme();  // Will only reapply if theme changed
+            ThemeManager::applyTheme();
         }
 #endif
         return false;
@@ -35,6 +35,7 @@ public:
 ThemeChangeFilter* eventFilter = nullptr;
 }
 
+// Determines if current OS theme is dark
 bool ThemeManager::isDarkTheme() {
 #ifdef Q_OS_WIN
     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
@@ -45,6 +46,7 @@ bool ThemeManager::isDarkTheme() {
 #endif
 }
 
+// Applies current theme to the application
 void ThemeManager::applyTheme() {
     AppTheme newTheme = isDarkTheme() ? AppTheme::Dark : AppTheme::Light;
     _currentTheme = newTheme;
@@ -60,7 +62,7 @@ void ThemeManager::applyTheme() {
     }
 }
 
-
+// Installs a native event filter to watch for theme changes
 void ThemeManager::installEventFilter(QObject* target) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {
@@ -70,6 +72,7 @@ void ThemeManager::installEventFilter(QObject* target) {
 #endif
 }
 
+// Returns the currently active application theme
 AppTheme ThemeManager::currentTheme() {
     return _currentTheme;
 }

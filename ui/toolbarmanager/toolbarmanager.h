@@ -27,8 +27,7 @@ public:
     QAction* getActionAbout() const;
 
 private:
-    // Creat toolbar actions
-    std::array<QAction*, 4> actions;
+    // Creates toolbar actions
     void createActions();
 
     // Configures toolbar appearance
@@ -40,10 +39,17 @@ private:
     // Adds cursor styling
     void applyCursorStyle(QToolBar *toolBar);
 
+    // Toolbar action storage
+    std::array<QAction*, 4> actions;
+
 private slots:
-    // Toolbar button slots
+    // Opens the settings dialog
     void showSettings();
+
+    // Shows help content
     void showHelp();
+
+    // Shows the about dialog
     void showAbout();
 };
 

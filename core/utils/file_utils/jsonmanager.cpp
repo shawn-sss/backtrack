@@ -8,7 +8,7 @@
 #include <QDir>
 #include <QDebug>
 
-// Load JSON from file
+// Loads a JSON object from a file into the target
 bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -22,7 +22,7 @@ bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     return true;
 }
 
-// Save JSON to file
+// Saves a JSON object to a file (creates dirs if needed)
 bool JsonManager::saveJsonFile(const QString& path, const QJsonObject& data) {
     QDir().mkpath(QFileInfo(path).absolutePath());
     QSaveFile file(path);

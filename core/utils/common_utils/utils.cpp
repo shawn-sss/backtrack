@@ -13,7 +13,6 @@
 #include <QTreeView>
 #include <QFileSystemModel>
 
-
 namespace Utils {
 
 // UI-related utilities
@@ -129,11 +128,12 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + Units::Time::UNIT_DAYS;
 }
 
-// Formats timestamps
+// Formats timestamp using custom string format
 QString formatTimestamp(const QDateTime &datetime, const QString &format) {
     return datetime.toString(format);
 }
 
+// Formats timestamp using Qt::DateFormat
 QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
@@ -143,7 +143,7 @@ QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
 // Backup utilities
 namespace Backup {
 
-// Adds selected paths from a QTreeView to the staging model
+// Adds selected paths from tree view to staging model
 void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
@@ -159,7 +159,7 @@ void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) 
     }
 }
 
-// Removes selected paths from the staging model
+// Removes selected paths from staging model
 void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 

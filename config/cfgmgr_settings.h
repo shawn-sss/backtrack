@@ -7,6 +7,7 @@
 
 // Configuration keys
 namespace ConfigKeys {
+constexpr auto BACKUP_CONFIG_GROUP = "backup_config";
 constexpr auto BACKUP_DIRECTORY_KEY = "backup_directory";
 constexpr auto BACKUP_PREFIX_KEY = "backup_prefix";
 }

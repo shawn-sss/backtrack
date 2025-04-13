@@ -15,7 +15,7 @@ StagingModel::StagingModel(QObject *parent)
     stagedPaths.reserve(10);
 }
 
-// Creates index for model
+// Creates an index for a row in the flat model
 QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) const {
     if (!parent.isValid() && row >= 0 && row < stagedPaths.size() && column == 0) {
         return createIndex(row, column);
@@ -23,22 +23,22 @@ QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) 
     return {};
 }
 
-// Returns parent index (always empty, flat list)
+// Returns the parent index (none, as model is flat)
 QModelIndex StagingModel::parent(const QModelIndex &) const {
     return {};
 }
 
-// Returns row count
+// Returns the number of rows in the model
 int StagingModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : stagedPaths.size();
 }
 
-// Returns column count
+// Returns number of columns in the model (always 1)
 int StagingModel::columnCount(const QModelIndex &) const {
     return 1;
 }
 
-// Retrieves data for a given index and role
+// Provides data for the given index and role
 QVariant StagingModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= stagedPaths.size()) {
         return {};
@@ -68,7 +68,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-// Retrieves header data
+// Provides header label for the staging list view
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return UISettings::TreeView::STAGING_COLUMN_NAME;
@@ -76,7 +76,7 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
     return {};
 }
 
-// Adds a new path to the staged list
+// Adds a new file path to the staging list
 void StagingModel::addPath(const QString &path) {
     if (!path.isEmpty() && !stagedPathsSet.contains(path)) {
         beginInsertRows({}, stagedPaths.size(), stagedPaths.size());
@@ -86,7 +86,7 @@ void StagingModel::addPath(const QString &path) {
     }
 }
 
-// Removes a path from the staged list
+// Removes a file path from the staging list
 void StagingModel::removePath(const QString &path) {
     int index = stagedPaths.indexOf(path);
     if (index != -1) {
@@ -97,7 +97,7 @@ void StagingModel::removePath(const QString &path) {
     }
 }
 
-// Returns the list of staged paths
+// Returns the list of currently staged paths
 QStringList StagingModel::getStagedPaths() const {
     return stagedPaths.toList();
 }

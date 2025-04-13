@@ -12,19 +12,21 @@ class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    // Constructor and Destructor
+    // Constructs and initializes the dialog
     explicit SettingsDialog(QWidget *parent = nullptr);
+
+    // Destructor
     ~SettingsDialog() override;
 
 private:
-    // Initializes UI layout
+    // Sets up the dialog's layout and controls
     void setupLayout();
 
 private slots:
-    // Handles save action
+    // Saves and accepts the dialog
     void onSaveClicked();
 
-    // Handles cancel action
+    // Cancels and closes the dialog
     void onCancelClicked();
 };
 
