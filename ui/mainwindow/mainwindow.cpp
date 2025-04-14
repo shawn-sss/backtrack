@@ -111,15 +111,15 @@ void MainWindow::applyButtonCursors() {
 void MainWindow::initializeUI() {
     Utils::UI::setupProgressBar(
         ui->TransferProgressBar,
-        ProgressSettings::PROGRESS_BAR_MIN_VALUE,
-        ProgressSettings::PROGRESS_BAR_MAX_VALUE,
-        ProgressSettings::PROGRESS_BAR_HEIGHT,
-        ProgressSettings::PROGRESS_BAR_TEXT_VISIBLE
+        ProgressSettings::k_PROGRESS_BAR_MIN_VALUE,
+        ProgressSettings::k_PROGRESS_BAR_MAX_VALUE,
+        ProgressUI::k_PROGRESS_BAR_HEIGHT,
+        ProgressSettings::k_PROGRESS_BAR_TEXT_VISIBLE
         );
     if (ui->TransferProgressBar->value() == 0) {
         ui->TransferProgressBar->setVisible(false);
         ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 }
 
@@ -127,8 +127,8 @@ void MainWindow::initializeUI() {
 void MainWindow::initializeBackupSystem() {
     const QString backupDirectory = ConfigManager::getInstance().getBackupDirectory();
     if (!FileOperations::createDirectory(backupDirectory)) {
-        QMessageBox::critical(this, ErrorMessages::BACKUP_INITIALIZATION_FAILED_TITLE,
-                              ErrorMessages::ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
+                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
     }
     setupDestinationView();
     setupSourceTreeView();
@@ -170,7 +170,7 @@ void MainWindow::connectBackupSignals() {
     connect(backupController, &BackupController::errorOccurred, this, &MainWindow::onBackupError);
     connect(backupController, &BackupController::errorOccurred, this,
             [this](const QString &error) {
-                QMessageBox::critical(this, ErrorMessages::BACKUP_DELETION_ERROR_TITLE, error);
+                QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE, error);
             });
 }
 
@@ -216,8 +216,8 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
     if (!treeView) return;
 
     if (QAbstractItemModel *model = treeView->model(); model) {
-        for (int i = UISettings::TreeView::START_HIDDEN_COLUMN;
-             i < UISettings::TreeView::DEFAULT_COLUMN_COUNT; ++i) {
+        for (int i = UISettings::TreeView::k_START_HIDDEN_COLUMN;
+             i < UISettings::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
             treeView->setColumnHidden(i, true);
         }
     }
@@ -255,17 +255,17 @@ void MainWindow::onBackupDirectoryChanged() {
 
 // Handles backup completion
 void MainWindow::onBackupCompleted() {
-    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_COMPLETION_MESSAGE);
     ui->TransferProgressText->setVisible(true);
     QTimer::singleShot(3000, this, [this]() {
-        ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     });
 }
 
 // Handles backup error
 void MainWindow::onBackupError(const QString &error) {
     Q_UNUSED(error);
-    ui->TransferProgressText->setText(ProgressSettings::PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     ui->TransferProgressText->setVisible(true);
 }
 
@@ -275,8 +275,8 @@ void MainWindow::onBackupError(const QString &error) {
 void MainWindow::onAddToBackupClicked() {
     const QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::BACKUP_SELECTION_REQUIRED_TITLE,
-                             ErrorMessages::ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
+        QMessageBox::warning(this, ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
+                             ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
         return;
     }
     Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
@@ -286,8 +286,8 @@ void MainWindow::onAddToBackupClicked() {
 void MainWindow::onRemoveFromBackupClicked() {
     const QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::REMOVE_SELECTION_REQUIRED_TITLE,
-                             ErrorMessages::ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL);
+        QMessageBox::warning(this, ErrorMessages::k_REMOVE_SELECTION_REQUIRED_TITLE,
+                             ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL);
         return;
     }
     Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
@@ -297,19 +297,19 @@ void MainWindow::onRemoveFromBackupClicked() {
 void MainWindow::onCreateBackupClicked() {
     const QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
-                             ErrorMessages::ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
+        QMessageBox::warning(this, ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
+                             ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
         return;
     }
 
     const QString backupRoot = destinationModel->rootPath();
     QString errorMessage;
     if (!FileOperations::createBackupInfrastructure(backupRoot, errorMessage)) {
-        QMessageBox::critical(this, ErrorMessages::ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
+        QMessageBox::critical(this, ErrorMessages::k_ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
         return;
     }
 
-    ui->TransferProgressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);
+    ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
     ui->TransferProgressText->setVisible(false);
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
@@ -319,13 +319,13 @@ void MainWindow::onCreateBackupClicked() {
 void MainWindow::onDeleteBackupClicked() {
     const QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
-        QMessageBox::warning(this, ErrorMessages::BACKUP_DELETION_ERROR_TITLE,
-                             ErrorMessages::ERROR_BACKUP_DELETE_FAILED);
+        QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+                             ErrorMessages::k_ERROR_BACKUP_DELETE_FAILED);
         return;
     }
     const QString selectedPath = destinationModel->filePath(selectedIndex);
-    if (QMessageBox::question(this, WarningMessages::WARNING_CONFIRM_BACKUP_DELETION,
-                              QString(WarningMessages::MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
+    if (QMessageBox::question(this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
+                              QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
         backupController->deleteBackup(selectedPath);
     }
@@ -335,17 +335,17 @@ void MainWindow::onDeleteBackupClicked() {
 void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
         this,
-        InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
+        InfoMessages::k_SELECT_BACKUP_DESTINATION_TITLE,
         Backup::Paths::k_DEFAULT_FILE_DIALOG_ROOT
         );
     if (selectedDir.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE,
-                             ErrorMessages::ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
+        QMessageBox::warning(this, ErrorMessages::k_BACKUP_LOCATION_REQUIRED_TITLE,
+                             ErrorMessages::k_ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
         return;
     }
     if (!FileOperations::createDirectory(selectedDir)) {
-        QMessageBox::critical(this, ErrorMessages::BACKUP_DIRECTORY_ERROR_TITLE,
-                              ErrorMessages::ERROR_CREATING_BACKUP_DIRECTORY);
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DIRECTORY_ERROR_TITLE,
+                              ErrorMessages::k_ERROR_CREATING_BACKUP_DIRECTORY);
         return;
     }
     backupService->setBackupRoot(selectedDir);
@@ -365,11 +365,11 @@ void MainWindow::refreshBackupStatus() {
     const QString statusColor = [status]() -> QString {
         switch (status) {
         case BackupStatus::Valid:
-            return Colors::BACKUP_STATUS_COLOR_FOUND;
+            return Colors::k_BACKUP_STATUS_COLOR_FOUND;
         case BackupStatus::Broken:
-            return Colors::BACKUP_STATUS_COLOR_WARNING;
+            return Colors::k_BACKUP_STATUS_COLOR_WARNING;
         default:
-            return Colors::BACKUP_STATUS_COLOR_NOT_FOUND;
+            return Colors::k_BACKUP_STATUS_COLOR_NOT_FOUND;
         }
     }();
     updateBackupStatusLabel(statusColor);
@@ -386,39 +386,39 @@ void MainWindow::updateLastBackupInfo() {
     if (metadata.isEmpty()) {
         for (auto* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                             ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
-            label->setText(Utilities::DEFAULT_VALUE_NOT_AVAILABLE);
+            label->setText(Utilities::k_DEFAULT_VALUE_NOT_AVAILABLE);
         }
         return;
     }
 
-    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(Backup::MetadataKeys::k_NAME).toString());
+    ui->LastBackupNameLabel->setText(Labels::LastBackup::k_NAME + metadata.value(Backup::MetadataKeys::k_NAME).toString());
 
-    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP +
+    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP +
                                           Utils::Formatting::formatTimestamp(QDateTime::fromString(
                                                                                  metadata.value(Backup::MetadataKeys::k_TIMESTAMP).toString(), Qt::ISODate),
                                                                              Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT));
 
-    ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION +
+    ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION +
                                          Utils::Formatting::formatDuration(metadata.value(Backup::MetadataKeys::k_DURATION).toInt()));
 
-    ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE +
+    ui->LastBackupSizeLabel->setText(Labels::LastBackup::k_SIZE +
                                      metadata.value(Backup::MetadataKeys::k_SIZE_READABLE).toString());
 }
 
 // Updates the backup status label
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
-    const QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressSettings::STATUS_LIGHT_SIZE);
+    const QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressUI::k_STATUS_LIGHT_SIZE);
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, Labels::Backup::STATUS_LIGHT_IMAGE_FORMAT);
+    pixmap.save(&buffer, Labels::Backup::k_STATUS_LIGHT_IMAGE_FORMAT);
 
-    const QString pixmapHtml = QString(HTMLTemplates::STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
-    const QString combinedHtml = QString(HTMLTemplates::STATUS_LABEL_HTML).arg(Labels::Backup::FOUND, pixmapHtml);
+    const QString pixmapHtml = QString(HTMLTemplates::k_STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
+    const QString combinedHtml = QString(HTMLTemplates::k_STATUS_LABEL_HTML).arg(Labels::Backup::k_FOUND, pixmapHtml);
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
-    const bool backupExists = (statusColor == Colors::BACKUP_STATUS_COLOR_FOUND);
+    const bool backupExists = (statusColor == Colors::k_BACKUP_STATUS_COLOR_FOUND);
     for (QLabel* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                           ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
         label->setVisible(backupExists);
@@ -427,17 +427,17 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
 
 // Updates backup location label
 void MainWindow::updateBackupLocationLabel(const QString &location) {
-    ui->BackupLocationLabel->setText(Labels::Backup::LOCATION + location);
+    ui->BackupLocationLabel->setText(Labels::Backup::k_LOCATION + location);
 }
 
 // Updates backup count label
 void MainWindow::updateBackupTotalCountLabel() {
-    ui->BackupTotalCountLabel->setText(Labels::Backup::TOTAL_COUNT + QString::number(backupService->getBackupCount()));
+    ui->BackupTotalCountLabel->setText(Labels::Backup::k_TOTAL_COUNT + QString::number(backupService->getBackupCount()));
 }
 
 // Updates backup size label
 void MainWindow::updateBackupTotalSizeLabel() {
-    ui->BackupTotalSizeLabel->setText(Labels::Backup::TOTAL_SIZE +
+    ui->BackupTotalSizeLabel->setText(Labels::Backup::k_TOTAL_SIZE +
                                       Utils::Formatting::formatSize(backupService->getTotalBackupSize()));
 }
 
@@ -445,9 +445,9 @@ void MainWindow::updateBackupTotalSizeLabel() {
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
     const QString status = dirInfo.exists()
-                               ? (dirInfo.isWritable() ? DirectoryStatus::WRITABLE : DirectoryStatus::READ_ONLY)
-                               : DirectoryStatus::UNKNOWN;
-    ui->BackupLocationStatusLabel->setText(Labels::Backup::LOCATION_ACCESS + status);
+                               ? (dirInfo.isWritable() ? DirectoryStatus::k_WRITABLE : DirectoryStatus::k_READ_ONLY)
+                               : DirectoryStatus::k_UNKNOWN;
+    ui->BackupLocationStatusLabel->setText(Labels::Backup::k_LOCATION_ACCESS + status);
 }
 
 // ## Event Handlers ##
@@ -455,8 +455,8 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 // Handles the close event
 void MainWindow::closeEvent(QCloseEvent *event) {
     if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::ERROR_OPERATION_IN_PROGRESS,
-                             WarningMessages::WARNING_OPERATION_STILL_RUNNING);
+        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
+                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
         event->ignore();
         return;
     }

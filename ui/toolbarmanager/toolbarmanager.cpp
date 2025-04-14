@@ -47,20 +47,20 @@ void ToolbarManager::setupAppearance(QToolBar *toolBar) {
 
 // Creates all toolbar actions and connects their signals
 void ToolbarManager::createActions() {
-    actions[0]->setText(Labels::Toolbar::SETTINGS);
-    actions[0]->setIcon(QIcon(Resources::Toolbar::SETTINGS_ICON_PATH));
+    actions[0]->setText(Labels::Toolbar::k_SETTINGS);
+    actions[0]->setIcon(QIcon(Resources::Toolbar::k_SETTINGS_ICON_PATH));
     connect(actions[0], &QAction::triggered, this, &ToolbarManager::showSettings);
 
-    actions[1]->setText(Labels::Toolbar::EXIT);
-    actions[1]->setIcon(QIcon(Resources::Toolbar::EXIT_ICON_PATH));
+    actions[1]->setText(Labels::Toolbar::k_EXIT);
+    actions[1]->setIcon(QIcon(Resources::Toolbar::k_EXIT_ICON_PATH));
     connect(actions[1], &QAction::triggered, qApp, &QApplication::quit);
 
-    actions[2]->setText(Labels::Toolbar::HELP);
-    actions[2]->setIcon(QIcon(Resources::Toolbar::HELP_ICON_PATH));
+    actions[2]->setText(Labels::Toolbar::k_HELP);
+    actions[2]->setIcon(QIcon(Resources::Toolbar::k_HELP_ICON_PATH));
     connect(actions[2], &QAction::triggered, this, &ToolbarManager::showHelp);
 
-    actions[3]->setText(Labels::Toolbar::ABOUT);
-    actions[3]->setIcon(QIcon(Resources::Toolbar::ABOUT_ICON_PATH));
+    actions[3]->setText(Labels::Toolbar::k_ABOUT);
+    actions[3]->setIcon(QIcon(Resources::Toolbar::k_ABOUT_ICON_PATH));
     connect(actions[3], &QAction::triggered, this, &ToolbarManager::showAbout);
 }
 
@@ -105,26 +105,26 @@ void ToolbarManager::showSettings() {
 
 // Slot: Displays help information
 void ToolbarManager::showHelp() {
-    const QString extendedMessage = QString(HelpInfo::HELP_EXTENDED_MESSAGE)
+    const QString extendedMessage = QString(HelpInfo::k_HELP_EXTENDED_MESSAGE)
     .arg(ConfigManager::getInstance().getAppInstallDirPublic());
 
     QMessageBox::information(
         qobject_cast<QWidget*>(parent()),
-        HelpInfo::HELP_WINDOW_TITLE,
-        HelpInfo::HELP_WINDOW_MESSAGE + extendedMessage
+        HelpInfo::k_HELP_WINDOW_TITLE,
+        HelpInfo::k_HELP_WINDOW_MESSAGE + extendedMessage
         );
 }
 
 // Slot: Displays about window with app details
 void ToolbarManager::showAbout() {
-    const QString aboutText = QString(AboutInfo::ABOUT_WINDOW_MESSAGE)
+    const QString aboutText = QString(AboutInfo::k_ABOUT_WINDOW_MESSAGE)
     .arg(AppInfo::k_APP_VERSION,
          AppInfo::k_APP_DISPLAY_TITLE,
          AppInfo::k_AUTHOR_NAME);
 
     QMessageBox::information(
         qobject_cast<QWidget*>(parent()),
-        AboutInfo::ABOUT_WINDOW_TITLE,
+        AboutInfo::k_ABOUT_WINDOW_TITLE,
         aboutText
         );
 }

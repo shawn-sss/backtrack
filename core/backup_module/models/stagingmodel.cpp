@@ -71,7 +71,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
 // Provides header label for the staging list view
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
-        return UISettings::TreeView::STAGING_COLUMN_NAME;
+        return UISettings::TreeView::k_STAGING_COLUMN_NAME;
     }
     return {};
 }

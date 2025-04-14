@@ -85,17 +85,17 @@ namespace Formatting {
 // Formats file size into readable units
 QString formatSize(qint64 size) {
     constexpr std::array units = {
-        Units::FileSize::SIZE_UNIT_BYTES,
-        Units::FileSize::SIZE_UNIT_KILOBYTES,
-        Units::FileSize::SIZE_UNIT_MEGABYTES,
-        Units::FileSize::SIZE_UNIT_GIGABYTES
+        Units::FileSize::k_SIZE_UNIT_BYTES,
+        Units::FileSize::k_SIZE_UNIT_KILOBYTES,
+        Units::FileSize::k_SIZE_UNIT_MEGABYTES,
+        Units::FileSize::k_SIZE_UNIT_GIGABYTES
     };
 
     int unitIndex = 0;
     double sizeInUnits = size;
 
-    while (sizeInUnits >= Units::FileSize::SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
-        sizeInUnits /= Units::FileSize::SIZE_CONVERSION_FACTOR;
+    while (sizeInUnits >= Units::FileSize::k_SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+        sizeInUnits /= Units::FileSize::k_SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
 
@@ -110,22 +110,22 @@ QString formatDuration(qint64 milliseconds) {
     constexpr qint64 HOURS_IN_DAY = 24;
 
     if (milliseconds < MS_IN_SECOND)
-        return QString::number(milliseconds) + Units::Time::UNIT_MILLISECONDS;
+        return QString::number(milliseconds) + Units::Time::k_UNIT_MILLISECONDS;
 
     qint64 seconds = milliseconds / MS_IN_SECOND;
     if (seconds < SECONDS_IN_MINUTE)
-        return QString::number(seconds) + Units::Time::UNIT_SECONDS;
+        return QString::number(seconds) + Units::Time::k_UNIT_SECONDS;
 
     qint64 minutes = seconds / SECONDS_IN_MINUTE;
     if (minutes < MINUTES_IN_HOUR)
-        return QString::number(minutes) + Units::Time::UNIT_MINUTES;
+        return QString::number(minutes) + Units::Time::k_UNIT_MINUTES;
 
     qint64 hours = minutes / MINUTES_IN_HOUR;
     if (hours < HOURS_IN_DAY)
-        return QString::number(hours) + Units::Time::UNIT_HOURS;
+        return QString::number(hours) + Units::Time::k_UNIT_HOURS;
 
     qint64 days = hours / HOURS_IN_DAY;
-    return QString::number(days) + Units::Time::UNIT_DAYS;
+    return QString::number(days) + Units::Time::k_UNIT_DAYS;
 }
 
 // Formats timestamp using custom string format

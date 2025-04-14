@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     // Initialize main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::k_APP_DISPLAY_TITLE);
-    mainWindow.setWindowIcon(QIcon(Resources::Application::ICON_PATH));
+    mainWindow.setWindowIcon(QIcon(Resources::Application::k_ICON_PATH));
     ThemeManager::applyTheme();
     ThemeManager::installEventFilter(&app);
     mainWindow.show();

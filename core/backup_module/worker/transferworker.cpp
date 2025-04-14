@@ -32,7 +32,7 @@ void TransferWorker::startTransfer() {
 
     for (const QString &filePath : std::as_const(files)) {
         if (stopRequested.load()) {
-            emit errorOccurred(WarningMessages::WARNING_OPERATION_STILL_RUNNING);
+            emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
             emit finished();
             return;
         }
@@ -60,7 +60,7 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     const QFileInfo fileInfo(driveRoot);
     if (!fileInfo.isDir() || !fileInfo.exists()) {
-        emit errorOccurred(QString(ErrorMessages::ERROR_NO_ITEMS_SELECTED_FOR_BACKUP).arg(driveRoot));
+        emit errorOccurred(QString(ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP).arg(driveRoot));
         return false;
     }
 
@@ -75,12 +75,12 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     QDir backupDir(driveBackupFolder);
     if (backupDir.exists() && !backupDir.removeRecursively()) {
-        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
 
     if (!backupDir.mkpath(QStringLiteral("."))) {
-        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
 
@@ -107,13 +107,13 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
 // Copies a single file or recursively copies a directory
 bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
     if (!fileInfo.isReadable()) {
-        emit errorOccurred(QString(ErrorMessages::ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
     QFile destinationFile(destinationPath);
     if (destinationFile.exists() && !destinationFile.remove()) {
-        emit errorOccurred(QString(ErrorMessages::ERROR_TRANSFER_FAILED).arg(destinationPath));
+        emit errorOccurred(QString(ErrorMessages::k_ERROR_TRANSFER_FAILED).arg(destinationPath));
         return false;
     }
 
@@ -122,7 +122,7 @@ bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinat
                              : QFile::copy(fileInfo.absoluteFilePath(), destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString(ErrorMessages::ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(QString(ErrorMessages::k_ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 

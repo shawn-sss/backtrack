@@ -48,17 +48,17 @@ void ConfigManager::setupDefaults() {
     installData["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
 
     QJsonObject appMetadata;
-    appMetadata[InstallMetadataKeys::APP_NAME] = AppInfo::k_APP_DISPLAY_TITLE;
-    appMetadata[InstallMetadataKeys::APP_AUTHOR] = AppInfo::k_AUTHOR_NAME;
-    appMetadata[InstallMetadataKeys::APP_VERSION] = AppInfo::k_APP_VERSION;
+    appMetadata[InstallMetadataKeys::k_APP_NAME] = AppInfo::k_APP_DISPLAY_TITLE;
+    appMetadata[InstallMetadataKeys::k_APP_AUTHOR] = AppInfo::k_AUTHOR_NAME;
+    appMetadata[InstallMetadataKeys::k_APP_VERSION] = AppInfo::k_APP_VERSION;
     appMetadata["install"] = installData;
 
     JsonManager::saveJsonFile(appMetadataPath, appMetadata);
 
     QJsonObject userConfig;
-    userConfig[ConfigKeys::BACKUP_CONFIG_GROUP] = QJsonObject{
-        {ConfigKeys::BACKUP_DIRECTORY_KEY, ConfigDefaults::BACKUP_DIRECTORY},
-        {ConfigKeys::BACKUP_PREFIX_KEY, ConfigDefaults::BACKUP_PREFIX}
+    userConfig[ConfigKeys::k_BACKUP_CONFIG_GROUP] = QJsonObject{
+        {ConfigKeys::k_BACKUP_DIRECTORY_KEY, ConfigDefaults::k_BACKUP_DIRECTORY},
+        {ConfigKeys::k_BACKUP_PREFIX_KEY, ConfigDefaults::k_BACKUP_PREFIX}
     };
 
     JsonManager::saveJsonFile(userConfigPath, userConfig);
@@ -98,48 +98,48 @@ void ConfigManager::saveUserConfig() {
 
 // Retrieve backup directory
 QString ConfigManager::getBackupDirectory() const {
-    if (!userSettings.contains(ConfigKeys::BACKUP_CONFIG_GROUP) ||
-        !userSettings[ConfigKeys::BACKUP_CONFIG_GROUP].isObject()) {
-        return ConfigDefaults::BACKUP_DIRECTORY;
+    if (!userSettings.contains(ConfigKeys::k_BACKUP_CONFIG_GROUP) ||
+        !userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP].isObject()) {
+        return ConfigDefaults::k_BACKUP_DIRECTORY;
     }
 
-    return userSettings[ConfigKeys::BACKUP_CONFIG_GROUP]
+    return userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP]
         .toObject()
-        .value(ConfigKeys::BACKUP_DIRECTORY_KEY)
-        .toString(ConfigDefaults::BACKUP_DIRECTORY);
+        .value(ConfigKeys::k_BACKUP_DIRECTORY_KEY)
+        .toString(ConfigDefaults::k_BACKUP_DIRECTORY);
 }
 
 // Set backup directory
 void ConfigManager::setBackupDirectory(const QString& dir) {
-    QJsonObject backupSettings = userSettings[ConfigKeys::BACKUP_CONFIG_GROUP].toObject();
+    QJsonObject backupSettings = userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP].toObject();
 
-    if (backupSettings[ConfigKeys::BACKUP_DIRECTORY_KEY].toString() != dir) {
-        backupSettings[ConfigKeys::BACKUP_DIRECTORY_KEY] = dir;
-        userSettings[ConfigKeys::BACKUP_CONFIG_GROUP] = backupSettings;
+    if (backupSettings[ConfigKeys::k_BACKUP_DIRECTORY_KEY].toString() != dir) {
+        backupSettings[ConfigKeys::k_BACKUP_DIRECTORY_KEY] = dir;
+        userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP] = backupSettings;
         saveUserConfig();
     }
 }
 
 // Retrieve backup prefix
 QString ConfigManager::getBackupPrefix() const {
-    if (!userSettings.contains(ConfigKeys::BACKUP_CONFIG_GROUP) ||
-        !userSettings[ConfigKeys::BACKUP_CONFIG_GROUP].isObject()) {
-        return ConfigDefaults::BACKUP_PREFIX;
+    if (!userSettings.contains(ConfigKeys::k_BACKUP_CONFIG_GROUP) ||
+        !userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP].isObject()) {
+        return ConfigDefaults::k_BACKUP_PREFIX;
     }
 
-    return userSettings[ConfigKeys::BACKUP_CONFIG_GROUP]
+    return userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP]
         .toObject()
-        .value(ConfigKeys::BACKUP_PREFIX_KEY)
-        .toString(ConfigDefaults::BACKUP_PREFIX);
+        .value(ConfigKeys::k_BACKUP_PREFIX_KEY)
+        .toString(ConfigDefaults::k_BACKUP_PREFIX);
 }
 
 // Set backup prefix
 void ConfigManager::setBackupPrefix(const QString& prefix) {
-    QJsonObject backupSettings = userSettings[ConfigKeys::BACKUP_CONFIG_GROUP].toObject();
+    QJsonObject backupSettings = userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP].toObject();
 
-    if (backupSettings[ConfigKeys::BACKUP_PREFIX_KEY].toString() != prefix) {
-        backupSettings[ConfigKeys::BACKUP_PREFIX_KEY] = prefix;
-        userSettings[ConfigKeys::BACKUP_CONFIG_GROUP] = backupSettings;
+    if (backupSettings[ConfigKeys::k_BACKUP_PREFIX_KEY].toString() != prefix) {
+        backupSettings[ConfigKeys::k_BACKUP_PREFIX_KEY] = prefix;
+        userSettings[ConfigKeys::k_BACKUP_CONFIG_GROUP] = backupSettings;
         saveUserConfig();
     }
 }

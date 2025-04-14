@@ -29,7 +29,7 @@ void BackupController::createBackup(const QString &destinationPath,
                                     const QStringList &stagingList,
                                     QProgressBar *progressBar) {
     if (workerThread && workerThread->isRunning()) {
-        emit errorOccurred(WarningMessages::WARNING_BACKUP_OPERATION_RUNNING);
+        emit errorOccurred(WarningMessages::k_WARNING_BACKUP_OPERATION_RUNNING);
         return;
     }
 
@@ -47,13 +47,13 @@ void BackupController::createBackup(const QString &destinationPath,
         QDateTime::currentDateTime().toString(Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
 
     if (!createBackupFolder(backupFolderPath)) {
-        emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
         return;
     }
 
-    progressBar->setRange(ProgressSettings::PROGRESS_BAR_MIN_VALUE,
-                          ProgressSettings::PROGRESS_BAR_MAX_VALUE);
-    progressBar->setValue(ProgressSettings::PROGRESS_BAR_MIN_VALUE);
+    progressBar->setRange(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE,
+                          ProgressSettings::k_PROGRESS_BAR_MAX_VALUE);
+    progressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     progressBar->setVisible(true);
 
     qint64 startTime = QDateTime::currentMSecsSinceEpoch();
@@ -69,7 +69,7 @@ void BackupController::createBackup(const QString &destinationPath,
             [this, backupFolderPath, stagingList, startTime, progressBar]() {
                 qint64 backupDuration = QDateTime::currentMSecsSinceEpoch() - startTime;
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
-                progressBar->setValue(ProgressSettings::PROGRESS_BAR_MAX_VALUE);
+                progressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MAX_VALUE);
                 progressBar->setVisible(false);
                 emit backupCreated();
                 cleanupAfterTransfer();
@@ -99,13 +99,13 @@ void BackupController::deleteBackup(const QString &backupPath) {
 
     if (!QFile::remove(logFilePath)) {
         emit errorOccurred(QFile::exists(logFilePath)
-                           ? ErrorMessages::ERROR_DELETING_BACKUP_LOG
-                           : ErrorMessages::ERROR_BACKUP_LOG_NOT_FOUND);
+                           ? ErrorMessages::k_ERROR_DELETING_BACKUP_LOG
+                           : ErrorMessages::k_ERROR_BACKUP_LOG_NOT_FOUND);
         return;
     }
 
     if (!QDir(backupPath).removeRecursively()) {
-        emit errorOccurred(ErrorMessages::ERROR_DELETING_BACKUP_DIRECTORY);
+        emit errorOccurred(ErrorMessages::k_ERROR_DELETING_BACKUP_DIRECTORY);
         return;
     }
 

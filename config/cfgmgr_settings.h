@@ -1,35 +1,34 @@
 #ifndef CFGMGR_SETTINGS_H
 #define CFGMGR_SETTINGS_H
 
-// Built-in Qt includes
 #include <QDir>
 #include <QString>
 
-// Configuration keys
+// Configuration keys for backup settings
 namespace ConfigKeys {
-constexpr auto BACKUP_CONFIG_GROUP = "backup_config";
-constexpr auto BACKUP_DIRECTORY_KEY = "backup_directory";
-constexpr auto BACKUP_PREFIX_KEY = "backup_prefix";
+constexpr auto k_BACKUP_CONFIG_GROUP = "backup_config";
+constexpr auto k_BACKUP_DIRECTORY_KEY = "backup_directory";
+constexpr auto k_BACKUP_PREFIX_KEY = "backup_prefix";
 }
 
-// Default configuration values
+// Default values for backup configuration
 namespace ConfigDefaults {
-constexpr auto BACKUP_DIRECTORY = "C:\\temp";
-constexpr auto BACKUP_PREFIX = "Backup_";
+constexpr auto k_BACKUP_DIRECTORY = "C:\\temp";
+constexpr auto k_BACKUP_PREFIX = "Backup_";
 }
 
-// Install metadata keys
+// Metadata keys for installation information
 namespace InstallMetadataKeys {
-constexpr auto APP_NAME = "app_name";
-constexpr auto APP_AUTHOR = "app_author";
-constexpr auto APP_VERSION = "app_version";
-constexpr auto INSTALL_DIRECTORY = "install_dir";
-constexpr auto INSTALL_TIMESTAMP = "install_time";
+constexpr auto k_APP_NAME = "app_name";
+constexpr auto k_APP_AUTHOR = "app_author";
+constexpr auto k_APP_VERSION = "app_version";
+constexpr auto k_INSTALL_DIRECTORY = "install_dir";
+constexpr auto k_INSTALL_TIMESTAMP = "install_time";
 }
 
+// Notes related to install metadata
 namespace InstallMetadata {
-constexpr auto INSTALL_NOTES = "Install location metadata. Do not modify.";
+constexpr auto k_INSTALL_NOTES = "Install location metadata. Do not modify.";
 }
 
-#endif
- // CFGMGR_SETTINGS_H
+#endif // CFGMGR_SETTINGS_H
