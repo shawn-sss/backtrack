@@ -44,7 +44,7 @@ void BackupController::createBackup(const QString &destinationPath,
 
     const QString backupFolderPath = QDir(destinationPath).filePath(
         ConfigManager::getInstance().getBackupPrefix() +
-        QDateTime::currentDateTime().toString(TimestampFormats::BACKUP_FOLDER_TIMESTAMP_FORMAT));
+        QDateTime::currentDateTime().toString(Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
 
     if (!createBackupFolder(backupFolderPath)) {
         emit errorOccurred(ErrorMessages::ERROR_CREATING_BACKUP_FOLDER);

@@ -117,7 +117,7 @@ quint64 BackupService::getTotalBackupSize() const {
     for (const QFileInfo &logFile : logFiles) {
         QJsonObject metadata;
         if (JsonManager::loadJsonFile(logFile.absoluteFilePath(), metadata)) {
-            totalSize += metadata.value(BackupMetadataKeys::SIZE_BYTES).toVariant().toULongLong();
+            totalSize += metadata.value(Backup::MetadataKeys::k_SIZE_BYTES).toVariant().toULongLong();
         }
     }
     return totalSize;
@@ -143,17 +143,17 @@ QJsonObject BackupService::createBackupMetadata(const QString &backupFolderPath,
     const qint64 totalSize = calculateTotalBackupSize(selectedItems);
 
     return QJsonObject{
-        {BackupMetadataKeys::NAME, QFileInfo(backupFolderPath).fileName()},
-        {BackupMetadataKeys::TIMESTAMP, Utils::Formatting::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate)},
-        {BackupMetadataKeys::DURATION, backupDuration},
-        {BackupMetadataKeys::DURATION_READABLE, Utils::Formatting::formatDuration(backupDuration)},
-        {BackupMetadataKeys::SIZE_BYTES, totalSize},
-        {BackupMetadataKeys::SIZE_READABLE, Utils::Formatting::formatSize(totalSize)},
-        {BackupMetadataKeys::FILE_COUNT, filesArray.size()},
-        {BackupMetadataKeys::FOLDER_COUNT, uniqueFolders.size()},
-        {BackupMetadataKeys::USER_SELECTED_ITEMS, userItemsArray},
-        {BackupMetadataKeys::USER_SELECTED_ITEM_COUNT, selectedItems.size()},
-        {BackupMetadataKeys::BACKUP_FILES, filesArray},
-        {BackupMetadataKeys::BACKUP_FOLDERS, foldersArray}
+        {Backup::MetadataKeys::k_NAME, QFileInfo(backupFolderPath).fileName()},
+        {Backup::MetadataKeys::k_TIMESTAMP, Utils::Formatting::formatTimestamp(QDateTime::currentDateTime(), Qt::ISODate)},
+        {Backup::MetadataKeys::k_DURATION, backupDuration},
+        {Backup::MetadataKeys::k_DURATION_READABLE, Utils::Formatting::formatDuration(backupDuration)},
+        {Backup::MetadataKeys::k_SIZE_BYTES, totalSize},
+        {Backup::MetadataKeys::k_SIZE_READABLE, Utils::Formatting::formatSize(totalSize)},
+        {Backup::MetadataKeys::k_FILE_COUNT, filesArray.size()},
+        {Backup::MetadataKeys::k_FOLDER_COUNT, uniqueFolders.size()},
+        {Backup::MetadataKeys::k_USER_SELECTED_ITEMS, userItemsArray},
+        {Backup::MetadataKeys::k_USER_SELECTED_ITEM_COUNT, selectedItems.size()},
+        {Backup::MetadataKeys::k_BACKUP_FILES, filesArray},
+        {Backup::MetadataKeys::k_BACKUP_FOLDERS, foldersArray}
     };
 }

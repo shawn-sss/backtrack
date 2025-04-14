@@ -66,12 +66,12 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
 
     const QStorageInfo storageInfo(driveRoot);
     const QString driveName = storageInfo.displayName().isEmpty()
-                                  ? BackupConfiguration::DEFAULT_DRIVE_LABEL
+                                  ? Backup::DriveConfig::k_DEFAULT_DRIVE_LABEL
                                   : storageInfo.displayName();
 
     const QString driveBackupFolder = QDir(destination).filePath(
         QStringLiteral("%1 (%2 %3)")
-            .arg(driveName, driveRoot.left(1), BackupConfiguration::DRIVE_LABEL_SUFFIX));
+            .arg(driveName, driveRoot.left(1), Backup::DriveConfig::k_DRIVE_LABEL_SUFFIX));
 
     QDir backupDir(driveBackupFolder);
     if (backupDir.exists() && !backupDir.removeRecursively()) {

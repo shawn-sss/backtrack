@@ -178,11 +178,11 @@ void MainWindow::connectBackupSignals() {
 
 // Sets up the source view
 void MainWindow::setupSourceTreeView() {
-    sourceModel->setRootPath(BackupPaths::DEFAULT_ROOT_PATH);
-    sourceModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
+    sourceModel->setRootPath(Backup::Paths::k_DEFAULT_ROOT_PATH);
+    sourceModel->setFilter(Backup::FileSystem::k_FILE_SYSTEM_FILTER);
 
     ui->DriveTreeView->setModel(sourceModel);
-    ui->DriveTreeView->setRootIndex(sourceModel->index(BackupPaths::DEFAULT_ROOT_PATH));
+    ui->DriveTreeView->setRootIndex(sourceModel->index(Backup::Paths::k_DEFAULT_ROOT_PATH));
     ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     removeAllColumnsFromTreeView(ui->DriveTreeView);
@@ -200,7 +200,7 @@ void MainWindow::setupBackupStagingTreeView() {
 
 // Sets up the destination view
 void MainWindow::setupDestinationView() {
-    destinationModel->setFilter(FileSystemSettings::FILE_SYSTEM_FILTER);
+    destinationModel->setFilter(Backup::FileSystem::k_FILE_SYSTEM_FILTER);
     destinationModel->sort(0, Qt::DescendingOrder);
 
     ui->BackupDestinationView->setModel(destinationModel);
@@ -336,7 +336,7 @@ void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
         this,
         InfoMessages::SELECT_BACKUP_DESTINATION_TITLE,
-        BackupPaths::DEFAULT_FILE_DIALOG_ROOT
+        Backup::Paths::k_DEFAULT_FILE_DIALOG_ROOT
         );
     if (selectedDir.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::BACKUP_LOCATION_REQUIRED_TITLE,
@@ -391,18 +391,18 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(BackupMetadataKeys::NAME).toString());
+    ui->LastBackupNameLabel->setText(Labels::LastBackup::NAME + metadata.value(Backup::MetadataKeys::k_NAME).toString());
 
     ui->LastBackupTimestampLabel->setText(Labels::LastBackup::TIMESTAMP +
                                           Utils::Formatting::formatTimestamp(QDateTime::fromString(
-                                                                                 metadata.value(BackupMetadataKeys::TIMESTAMP).toString(), Qt::ISODate),
-                                                                             TimestampFormats::BACKUP_TIMESTAMP_DISPLAY_FORMAT));
+                                                                                 metadata.value(Backup::MetadataKeys::k_TIMESTAMP).toString(), Qt::ISODate),
+                                                                             Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT));
 
     ui->LastBackupDurationLabel->setText(Labels::LastBackup::DURATION +
-                                         Utils::Formatting::formatDuration(metadata.value(BackupMetadataKeys::DURATION).toInt()));
+                                         Utils::Formatting::formatDuration(metadata.value(Backup::MetadataKeys::k_DURATION).toInt()));
 
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::SIZE +
-                                     metadata.value(BackupMetadataKeys::SIZE_READABLE).toString());
+                                     metadata.value(Backup::MetadataKeys::k_SIZE_READABLE).toString());
 }
 
 // Updates the backup status label
