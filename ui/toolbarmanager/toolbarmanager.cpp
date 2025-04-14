@@ -118,9 +118,9 @@ void ToolbarManager::showHelp() {
 // Slot: Displays about window with app details
 void ToolbarManager::showAbout() {
     const QString aboutText = QString(AboutInfo::ABOUT_WINDOW_MESSAGE)
-    .arg(AppInfo::APP_VERSION,
-         AppInfo::APP_DISPLAY_TITLE,
-         AppInfo::AUTHOR_NAME);
+    .arg(AppInfo::k_APP_VERSION,
+         AppInfo::k_APP_DISPLAY_TITLE,
+         AppInfo::k_AUTHOR_NAME);
 
     QMessageBox::information(
         qobject_cast<QWidget*>(parent()),

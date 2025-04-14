@@ -32,8 +32,8 @@ ConfigManager::ConfigManager() {
 
 // Setup JSON file paths
 void ConfigManager::setupFilePaths() {
-    appMetadataPath = getFilePath(AppConfig::APPDATA_SETUP_INFO_FILE);
-    userConfigPath = getFilePath(AppConfig::APPDATA_SETUP_USER_SETTINGS_FILE);
+    appMetadataPath = getFilePath(AppConfig::k_APPDATA_SETUP_INFO_FILE);
+    userConfigPath = getFilePath(AppConfig::k_APPDATA_SETUP_USER_SETTINGS_FILE);
 }
 
 // Check if first run
@@ -48,9 +48,9 @@ void ConfigManager::setupDefaults() {
     installData["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
 
     QJsonObject appMetadata;
-    appMetadata[InstallMetadataKeys::APP_NAME] = AppInfo::APP_DISPLAY_TITLE;
-    appMetadata[InstallMetadataKeys::APP_AUTHOR] = AppInfo::AUTHOR_NAME;
-    appMetadata[InstallMetadataKeys::APP_VERSION] = AppInfo::APP_VERSION;
+    appMetadata[InstallMetadataKeys::APP_NAME] = AppInfo::k_APP_DISPLAY_TITLE;
+    appMetadata[InstallMetadataKeys::APP_AUTHOR] = AppInfo::k_AUTHOR_NAME;
+    appMetadata[InstallMetadataKeys::APP_VERSION] = AppInfo::k_APP_VERSION;
     appMetadata["install"] = installData;
 
     JsonManager::saveJsonFile(appMetadataPath, appMetadata);
@@ -156,5 +156,5 @@ QString ConfigManager::getAppInstallDir() const {
 
 // Construct full file path
 QString ConfigManager::getFilePath(const QString& fileName) const {
-    return getAppInstallDir() + "/" + AppConfig::APPDATA_SETUP_FOLDER + "/" + fileName;
+    return getAppInstallDir() + "/" + AppConfig::k_APPDATA_SETUP_FOLDER + "/" + fileName;
 }

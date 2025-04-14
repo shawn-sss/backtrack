@@ -64,14 +64,14 @@ MainWindow::~MainWindow() {
 // Configure basic window properties
 void MainWindow::configureWindow()
 {
-    setMinimumSize(AppConfig::kMinimumWindowSize);
-    resize(AppConfig::kDefaultWindowSize);
-    setMaximumSize(AppConfig::kMaximumWindowSize);
+    setMinimumSize(AppConfig::k_MINIMUM_WINDOW_SIZE);
+    resize(AppConfig::k_DEFAULT_WINDOW_SIZE);
+    setMaximumSize(AppConfig::k_MAXIMUM_WINDOW_SIZE);
 
     if (QScreen *screen = QGuiApplication::primaryScreen()) {
         const QRect screenGeometry = screen->availableGeometry();
-        const QPoint center = screenGeometry.center() - QPoint(AppConfig::kDefaultWindowSize.width() / 2,
-                                                               AppConfig::kDefaultWindowSize.height() / 2);
+        const QPoint center = screenGeometry.center() - QPoint(AppConfig::k_DEFAULT_WINDOW_SIZE.width() / 2,
+                                                               AppConfig::k_DEFAULT_WINDOW_SIZE.height() / 2);
         move(center);
     }
 }

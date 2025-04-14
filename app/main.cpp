@@ -17,12 +17,12 @@ int main(int argc, char *argv[]) {
     ConfigManager::getInstance();
 
     // Set application properties
-    app.setApplicationName(AppInfo::APP_DISPLAY_TITLE);
-    app.setApplicationDisplayName(AppInfo::APP_DISPLAY_TITLE);
+    app.setApplicationName(AppInfo::k_APP_DISPLAY_TITLE);
+    app.setApplicationDisplayName(AppInfo::k_APP_DISPLAY_TITLE);
 
     // Initialize main window
     MainWindow mainWindow;
-    mainWindow.setWindowTitle(AppInfo::APP_DISPLAY_TITLE);
+    mainWindow.setWindowTitle(AppInfo::k_APP_DISPLAY_TITLE);
     mainWindow.setWindowIcon(QIcon(Resources::Application::ICON_PATH));
     ThemeManager::applyTheme();
     ThemeManager::installEventFilter(&app);
