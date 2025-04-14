@@ -4,6 +4,7 @@
 // Built-in Qt includes
 #include <QDir>
 #include <QString>
+#include <QStringLiteral>
 
 // Root path settings for backups
 namespace Backup::Paths {
@@ -42,6 +43,14 @@ constexpr auto k_USER_SELECTED_ITEMS = "user_selected_items";
 constexpr auto k_USER_SELECTED_ITEM_COUNT = "user_selected_item_count";
 constexpr auto k_BACKUP_FILES = "backup_files";
 constexpr auto k_BACKUP_FOLDERS = "backup_folders";
+}
+
+// Backup infrastructure setup paths (moved from AppConfig)
+namespace Backup::Infrastructure {
+constexpr auto k_BACKUP_SETUP_FOLDER = "_MyDataBackupApp";
+constexpr auto k_BACKUP_SETUP_INFO_FILE = "backup_init.json";
+constexpr auto k_BACKUP_LOGS_FOLDER = "logs";
+inline auto k_BACKUP_LOGS_FILE = QStringLiteral("log.json");
 }
 
 #endif // BACKUP_SETTINGS_H

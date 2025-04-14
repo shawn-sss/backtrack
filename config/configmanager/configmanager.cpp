@@ -48,8 +48,8 @@ void ConfigManager::setupDefaults() {
     installData["timestamp"] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
 
     QJsonObject appMetadata;
-    appMetadata[InstallMetadataKeys::k_APP_NAME] = AppInfo::k_APP_DISPLAY_TITLE;
-    appMetadata[InstallMetadataKeys::k_APP_AUTHOR] = AppInfo::k_AUTHOR_NAME;
+    appMetadata[InstallMetadataKeys::k_APP_AUTHOR] = AppInfo::k_APP_AUTHOR_NAME;
+    appMetadata[InstallMetadataKeys::k_APP_NAME] = AppInfo::k_APP_NAME;
     appMetadata[InstallMetadataKeys::k_APP_VERSION] = AppInfo::k_APP_VERSION;
     appMetadata["install"] = installData;
 

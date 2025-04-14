@@ -119,8 +119,8 @@ void ToolbarManager::showHelp() {
 void ToolbarManager::showAbout() {
     const QString aboutText = QString(AboutInfo::k_ABOUT_WINDOW_MESSAGE)
     .arg(AppInfo::k_APP_VERSION,
-         AppInfo::k_APP_DISPLAY_TITLE,
-         AppInfo::k_AUTHOR_NAME);
+         AppInfo::k_APP_NAME,
+         AppInfo::k_APP_AUTHOR_NAME);
 
     QMessageBox::information(
         qobject_cast<QWidget*>(parent()),

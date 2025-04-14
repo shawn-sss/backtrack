@@ -93,9 +93,9 @@ void FileWatcher::startWatching(const QString &rootPath) {
 
     QSet<QString> pathsToWatch = {
         rootPath,
-        rootDir.filePath(AppConfig::k_BACKUP_SETUP_FOLDER),
-        rootDir.filePath(AppConfig::k_BACKUP_SETUP_INFO_FILE),
-        rootDir.filePath(AppConfig::k_BACKUP_LOGS_FOLDER)
+        rootDir.filePath(Backup::Infrastructure::k_BACKUP_SETUP_FOLDER),
+        rootDir.filePath(Backup::Infrastructure::k_BACKUP_SETUP_INFO_FILE),
+        rootDir.filePath(Backup::Infrastructure::k_BACKUP_LOGS_FOLDER)
     };
 
     const QFileInfoList subDirs = rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);

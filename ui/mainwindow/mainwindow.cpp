@@ -365,11 +365,11 @@ void MainWindow::refreshBackupStatus() {
     const QString statusColor = [status]() -> QString {
         switch (status) {
         case BackupStatus::Valid:
-            return Colors::k_BACKUP_STATUS_COLOR_FOUND;
+            return UIColors::k_BACKUP_STATUS_COLOR_FOUND;
         case BackupStatus::Broken:
-            return Colors::k_BACKUP_STATUS_COLOR_WARNING;
+            return UIColors::k_BACKUP_STATUS_COLOR_WARNING;
         default:
-            return Colors::k_BACKUP_STATUS_COLOR_NOT_FOUND;
+            return UIColors::k_BACKUP_STATUS_COLOR_NOT_FOUND;
         }
     }();
     updateBackupStatusLabel(statusColor);
@@ -418,7 +418,7 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
-    const bool backupExists = (statusColor == Colors::k_BACKUP_STATUS_COLOR_FOUND);
+    const bool backupExists = (statusColor == UIColors::k_BACKUP_STATUS_COLOR_FOUND);
     for (QLabel* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                           ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
         label->setVisible(backupExists);
@@ -445,8 +445,8 @@ void MainWindow::updateBackupTotalSizeLabel() {
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
     const QString status = dirInfo.exists()
-                               ? (dirInfo.isWritable() ? DirectoryStatus::k_WRITABLE : DirectoryStatus::k_READ_ONLY)
-                               : DirectoryStatus::k_UNKNOWN;
+                               ? (dirInfo.isWritable() ? Labels::DirectoryStatus::k_WRITABLE : Labels::DirectoryStatus::k_READ_ONLY)
+                               : Labels::DirectoryStatus::k_UNKNOWN;
     ui->BackupLocationStatusLabel->setText(Labels::Backup::k_LOCATION_ACCESS + status);
 }
 

@@ -43,6 +43,7 @@ set(PROJECT_SETTINGS
     config/app_settings.h
     config/backup_settings.h
     config/cfgmgr_settings.h
+    config/labels_settings.h
     config/messages_settings.h
     config/progress_settings.h
     config/utilities_settings.h
