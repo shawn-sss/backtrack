@@ -11,7 +11,7 @@
 namespace AppInfo {
 constexpr auto k_APP_AUTHOR_NAME = "Shawn SSS";
 constexpr auto k_APP_NAME = "MyDataBackupApp";
-constexpr auto k_APP_VERSION = "0.4";
+constexpr auto k_APP_VERSION = "0.5";
 }
 
 // Application settings
