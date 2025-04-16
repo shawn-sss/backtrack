@@ -18,6 +18,7 @@ class QCloseEvent;
 // Forward declarations custom classes
 class BackupService;
 class StagingModel;
+class DestinationProxyModel;
 class FileWatcher;
 class BackupController;
 class CustomTitleBar;
@@ -92,6 +93,7 @@ private:
     QFileSystemModel *destinationModel = nullptr;
     QFileSystemModel *sourceModel = nullptr;
     StagingModel *stagingModel = nullptr;
+    DestinationProxyModel *destinationProxyModel = nullptr;
 
     // Backup & File watcher
     FileWatcher *fileWatcher = nullptr;

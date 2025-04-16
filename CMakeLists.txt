@@ -87,6 +87,8 @@ set(BACKUP_WORKER_SOURCES
 set(BACKUP_MODELS_SOURCES
     core/backup_module/models/stagingmodel.cpp
     core/backup_module/models/stagingmodel.h
+    core/backup_module/models/destinationproxymodel.cpp
+    core/backup_module/models/destinationproxymodel.h
 )
 
 # Utilities sources

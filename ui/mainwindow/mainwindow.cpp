@@ -8,10 +8,11 @@
 #include "../../ui/toolbarmanager/toolbarmanager.h"
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"
+#include "../../core/backup_module/styles/backup_styling.h"
+#include "../../core/backup_module/models/destinationproxymodel.h"
 #include "../../core/utils/file_utils/filewatcher.h"
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/common_utils/utils.h"
-#include "../../core/backup_module/styles/backup_styling.h"
 
 // Built-in Qt includes
 #include <QFileSystemModel>
@@ -20,7 +21,7 @@
 #include <QMessageBox>
 #include <QTimer>
 
-// Constructor - Initializes main window components
+// Constructor
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -54,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->BackupViewLayout->setStretch(2, 1);
 }
 
-// Destructor - Cleans up allocated resources
+// Destructor
 MainWindow::~MainWindow() {
     delete ui;
 }
@@ -157,7 +158,6 @@ void MainWindow::setupConnections() {
     for (const auto& conn : buttonConnections) {
         connect(conn.button, &QPushButton::clicked, this, conn.slot);
     }
-
 }
 
 // Connects backup-related signals
@@ -200,13 +200,23 @@ void MainWindow::setupBackupStagingTreeView() {
 
 // Sets up the destination view
 void MainWindow::setupDestinationView() {
-    destinationModel->setFilter(Backup::FileSystem::k_FILE_SYSTEM_FILTER);
+    destinationModel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    destinationModel->setNameFilters(QStringList() << "*");
+    destinationModel->setNameFilterDisables(false);
     destinationModel->sort(0, Qt::DescendingOrder);
 
-    ui->BackupDestinationView->setModel(destinationModel);
-    ui->BackupDestinationView->setRootIndex(
-        destinationModel->setRootPath(ConfigManager::getInstance().getBackupDirectory())
-        );
+    if (!destinationProxyModel) {
+        destinationProxyModel = new DestinationProxyModel(this);
+        destinationProxyModel->setSourceModel(destinationModel);
+        destinationProxyModel->setExcludedFolderName(Backup::Infrastructure::k_BACKUP_SETUP_FOLDER);
+    }
+
+    ui->BackupDestinationView->setModel(destinationProxyModel);
+
+    QString backupDir = ConfigManager::getInstance().getBackupDirectory();
+    QModelIndex sourceRootIndex = destinationModel->setRootPath(backupDir);
+    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
+    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
 
     removeAllColumnsFromTreeView(ui->BackupDestinationView);
 }
