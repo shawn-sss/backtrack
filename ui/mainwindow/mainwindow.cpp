@@ -327,13 +327,33 @@ void MainWindow::onCreateBackupClicked() {
 
 // Deletes the selected backup
 void MainWindow::onDeleteBackupClicked() {
+    if (!destinationModel) {
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+                              ErrorMessages::k_ERROR_DESTINATION_MODEL_NULL);
+        return;
+    }
+
     const QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
         QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
                              ErrorMessages::k_ERROR_BACKUP_DELETE_FAILED);
         return;
     }
-    const QString selectedPath = destinationModel->filePath(selectedIndex);
+
+    auto fsModel = qobject_cast<QFileSystemModel *>(destinationModel);
+    if (!fsModel) {
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+                              ErrorMessages::k_ERROR_MODEL_TYPE_INVALID);
+        return;
+    }
+
+    const QString selectedPath = fsModel->filePath(destinationProxyModel->mapToSource(selectedIndex));
+    if (selectedPath.isEmpty()) {
+        QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+                             ErrorMessages::k_ERROR_SELECTED_PATH_INVALID);
+        return;
+    }
+
     if (QMessageBox::question(this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
                               QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {

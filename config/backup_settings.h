@@ -45,7 +45,7 @@ constexpr auto k_BACKUP_FILES = "backup_files";
 constexpr auto k_BACKUP_FOLDERS = "backup_folders";
 }
 
-// Backup infrastructure setup paths (moved from AppConfig)
+// Backup infrastructure setup paths
 namespace Backup::Infrastructure {
 constexpr auto k_BACKUP_SETUP_FOLDER = "_MyDataBackupApp";
 constexpr auto k_BACKUP_SETUP_INFO_FILE = "backup_init.json";

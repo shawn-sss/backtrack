@@ -32,6 +32,10 @@ constexpr auto k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP = "No items are currently stag
 
 constexpr auto k_BACKUP_DELETION_ERROR_TITLE = "Backup Deletion Failed";
 constexpr auto k_ERROR_BACKUP_DELETE_FAILED = "The selected backup could not be deleted.\nPlease try again.";
+constexpr auto k_BACKUP_ERROR_FOLDER_NOT_FOUND = "The backup initialization folder could not be found.\nPlease try again.";
+constexpr auto k_ERROR_DESTINATION_MODEL_NULL = "The backup list could not be loaded due to an internal error.\nPlease try again.";
+constexpr auto k_ERROR_MODEL_TYPE_INVALID = "An unexpected error occurred while accessing the backup list.\nPlease try again.";
+constexpr auto k_ERROR_SELECTED_PATH_INVALID = "The selected backup path could not be determined.\nPlease try again.";
 
 constexpr auto k_BACKUP_VALIDATION_FAILED_TITLE = "Backup Validation Failed";
 constexpr auto k_ERROR_INVALID_BACKUP_DIRECTORY = "The selected folder does not contain a valid backup.\nPlease verify the location and try again.";
