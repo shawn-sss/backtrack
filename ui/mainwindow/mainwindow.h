@@ -14,6 +14,7 @@ class QPushButton;
 class QWidget;
 class QMouseEvent;
 class QCloseEvent;
+class QTimer;
 
 // Forward declarations custom classes
 class BackupService;
@@ -75,6 +76,7 @@ private slots:
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
+    void onCooldownFinished();
 
     // File watcher callbacks
     void onBackupDirectoryChanged();
@@ -90,15 +92,17 @@ private:
     CustomTitleBar *titleBar = nullptr;
 
     // File models
-    QFileSystemModel *destinationModel = nullptr;
     QFileSystemModel *sourceModel = nullptr;
     StagingModel *stagingModel = nullptr;
+    QFileSystemModel *destinationModel = nullptr;
     DestinationProxyModel *destinationProxyModel = nullptr;
 
     // Backup & File watcher
     FileWatcher *fileWatcher = nullptr;
     BackupService *backupService = nullptr;
     BackupController *backupController = nullptr;
+    QTimer* createBackupCooldownTimer;
+    QTimer *backupCooldownTimer;
 
     // Toolbar utilization
     QToolBar *toolBar;

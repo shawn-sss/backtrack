@@ -32,8 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
     stagingModel(new StagingModel(this)),
     backupController(new BackupController(backupService, this)),
     toolBar(new QToolBar(this)),
-    toolbarManager(new ToolbarManager(this)) {
-
+    toolbarManager(new ToolbarManager(this)),
+    createBackupCooldownTimer(new QTimer(this))
+{
     ui->setupUi(this);
 
     configureWindow();
@@ -53,6 +54,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->BackupViewLayout->setStretch(0, 1);
     ui->BackupViewLayout->setStretch(1, 1);
     ui->BackupViewLayout->setStretch(2, 1);
+
+    createBackupCooldownTimer->setSingleShot(true);
+    connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
+        ui->CreateBackupButton->setEnabled(true);
+    });
 }
 
 // Destructor
@@ -281,6 +287,11 @@ void MainWindow::onBackupError(const QString &error) {
 
 // ## Backup Operations ##
 
+// Enables backup button after cooldown
+void MainWindow::onCooldownFinished() {
+    ui->CreateBackupButton->setEnabled(true);
+}
+
 // Adds selected files to backup staging
 void MainWindow::onAddToBackupClicked() {
     const QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
@@ -319,9 +330,13 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
+    ui->CreateBackupButton->setEnabled(false);
+    createBackupCooldownTimer->start(3000);
+
     ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
     ui->TransferProgressText->setVisible(false);
+
     backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
 
