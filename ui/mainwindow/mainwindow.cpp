@@ -393,10 +393,15 @@ void MainWindow::onChangeBackupDestinationClicked() {
                               ErrorMessages::k_ERROR_CREATING_BACKUP_DIRECTORY);
         return;
     }
+
     backupService->setBackupRoot(selectedDir);
-    destinationModel->setRootPath(selectedDir);
-    ui->BackupDestinationView->setModel(destinationModel);
-    ui->BackupDestinationView->setRootIndex(destinationModel->index(selectedDir));
+
+    QModelIndex sourceRootIndex = destinationModel->setRootPath(selectedDir);
+
+    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
+    ui->BackupDestinationView->setModel(destinationProxyModel);
+    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+
     refreshBackupStatus();
     startWatchingBackupDirectory(selectedDir);
     updateFileWatcher();
