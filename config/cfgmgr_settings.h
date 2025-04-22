@@ -14,7 +14,7 @@ constexpr auto k_BACKUP_PREFIX_KEY = "backup_prefix";
 // Default values for backup configuration
 namespace ConfigDefaults {
 constexpr auto k_BACKUP_DIRECTORY = "C:\\temp";
-constexpr auto k_BACKUP_PREFIX = "Backup_";
+constexpr auto k_BACKUP_PREFIX = "Backup";
 }
 
 // Metadata keys for installation information

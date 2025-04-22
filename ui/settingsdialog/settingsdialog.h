@@ -3,9 +3,8 @@
 
 // Built-in Qt includes
 #include <QDialog>
-#include <QVBoxLayout>
-#include <QDialogButtonBox>
-#include <QMouseEvent>
+#include <QListWidget>
+#include <QStackedWidget>
 
 // Dialog window for application settings
 class SettingsDialog : public QDialog {
@@ -21,6 +20,11 @@ public:
 private:
     // Sets up the dialog's layout and controls
     void setupLayout();
+    QWidget* createUserSettingsPage();
+    QWidget* createSystemSettingsPage();
+    QListWidget *categoryList;
+    QStackedWidget *settingsStack;
+    QLineEdit *backupPrefixEdit;
 
 private slots:
     // Saves and accepts the dialog
