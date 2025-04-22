@@ -4,6 +4,7 @@
 // Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
+#include "../../config/thememanager/thememanager.h"
 
 // Built-in Qt includes
 #include <QVBoxLayout>
@@ -14,6 +15,11 @@
 #include <QSpacerItem>
 #include <QSizePolicy>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QListWidget>
+#include <QStackedWidget>
+#include <QSettings>
+
 
 // Constructor
 SettingsDialog::SettingsDialog(QWidget *parent)
@@ -78,7 +84,22 @@ QWidget* SettingsDialog::createUserSettingsPage() {
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto *widget = new QWidget();
     auto *layout = new QVBoxLayout(widget);
-    layout->addWidget(new QLabel("System Settings go here."));
+
+    // Theme selection dropdown
+    layout->addWidget(new QLabel("Theme:"));
+    themeComboBox = new QComboBox(widget);
+    themeComboBox->addItem("System Default", static_cast<int>(UserThemePreference::Auto));
+    themeComboBox->addItem("Light Mode", static_cast<int>(UserThemePreference::Light));
+    themeComboBox->addItem("Dark Mode", static_cast<int>(UserThemePreference::Dark));
+    layout->addWidget(themeComboBox);
+
+    // Connect dropdown selection change to theme update
+    connect(themeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
+        auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->itemData(index).toInt());
+        ThemeManager::setUserThemePreference(selectedTheme);
+        ThemeManager::applyTheme();
+    });
+
     layout->addStretch();
     return widget;
 }

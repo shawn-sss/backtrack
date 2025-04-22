@@ -5,6 +5,7 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QStackedWidget>
+#include <QComboBox>
 
 // Dialog window for application settings
 class SettingsDialog : public QDialog {
@@ -25,6 +26,8 @@ private:
     QListWidget *categoryList;
     QStackedWidget *settingsStack;
     QLineEdit *backupPrefixEdit;
+
+    QComboBox *themeComboBox;
 
 private slots:
     // Saves and accepts the dialog

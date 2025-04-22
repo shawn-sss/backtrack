@@ -1,24 +1,28 @@
-#pragma once
+#ifndef THEMEMANAGER_H
+#define THEMEMANAGER_H
 
 #include <QObject>
 
-// Application theme options
 enum class AppTheme {
     Light,
     Dark
 };
 
-namespace ThemeManager {
+enum class UserThemePreference {
+    Auto,
+    Dark,
+    Light
+};
 
-// Applies the appropriate theme stylesheet to the app
-void applyTheme();
+class ThemeManager {
+public:
+    static bool isDarkTheme();
+    static void applyTheme();
+    static void installEventFilter(QObject* target);
+    static AppTheme currentTheme();
 
-// Returns true if the system theme is currently dark
-bool isDarkTheme();
+    static UserThemePreference getUserThemePreference();
+    static void setUserThemePreference(UserThemePreference preference);
+};
 
-// Installs a native event filter to detect theme changes
-void installEventFilter(QObject* target);
-
-// Returns the currently active theme
-AppTheme currentTheme();
-}
+#endif // THEMEMANAGER_H

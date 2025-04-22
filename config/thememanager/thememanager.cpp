@@ -1,7 +1,4 @@
-// Project includes same directory
 #include "thememanager.h"
-
-// Built-in Qt includes
 #include <QFile>
 #include <QSettings>
 #include <QApplication>
@@ -11,14 +8,12 @@
 #include <windows.h>
 #endif
 
-// Internal constants and theme state
 namespace {
 constexpr auto DARK_THEME_PATH  = ":/resources/styles/dark.qss";
 constexpr auto LIGHT_THEME_PATH = ":/resources/styles/light.qss";
 
 AppTheme _currentTheme = AppTheme::Light;
 
-// Filters system theme change events on Windows
 class ThemeChangeFilter : public QAbstractNativeEventFilter {
 public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
@@ -46,14 +41,32 @@ bool ThemeManager::isDarkTheme() {
 #endif
 }
 
-// Applies current theme to the application
+// Retrieves user theme preference
+UserThemePreference ThemeManager::getUserThemePreference() {
+    QSettings settings("YourCompany", "YourApp");
+    return static_cast<UserThemePreference>(settings.value("UserTheme", static_cast<int>(UserThemePreference::Auto)).toInt());
+}
+
+// Stores user theme preference
+void ThemeManager::setUserThemePreference(UserThemePreference preference) {
+    QSettings settings("YourCompany", "YourApp");
+    settings.setValue("UserTheme", static_cast<int>(preference));
+}
+
+// Applies current theme, respecting user override
 void ThemeManager::applyTheme() {
-    AppTheme newTheme = isDarkTheme() ? AppTheme::Dark : AppTheme::Light;
+    UserThemePreference preference = getUserThemePreference();
+    AppTheme newTheme;
+
+    if (preference == UserThemePreference::Auto) {
+        newTheme = isDarkTheme() ? AppTheme::Dark : AppTheme::Light;
+    } else {
+        newTheme = (preference == UserThemePreference::Dark) ? AppTheme::Dark : AppTheme::Light;
+    }
+
     _currentTheme = newTheme;
 
-    const QString qssPath = (_currentTheme == AppTheme::Dark)
-                                ? DARK_THEME_PATH
-                                : LIGHT_THEME_PATH;
+    const QString qssPath = (_currentTheme == AppTheme::Dark) ? DARK_THEME_PATH : LIGHT_THEME_PATH;
 
     QFile file(qssPath);
     if (file.open(QFile::ReadOnly)) {
