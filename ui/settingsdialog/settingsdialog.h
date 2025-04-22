@@ -26,7 +26,6 @@ private:
     QListWidget *categoryList;
     QStackedWidget *settingsStack;
     QLineEdit *backupPrefixEdit;
-
     QComboBox *themeComboBox;
 
 private slots:

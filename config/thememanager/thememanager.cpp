@@ -1,4 +1,7 @@
+// Project includes same directory
 #include "thememanager.h"
+
+// Built-in Qt includes
 #include <QFile>
 #include <QSettings>
 #include <QApplication>
@@ -9,11 +12,15 @@
 #endif
 
 namespace {
+
+// Paths to the theme stylesheets
 constexpr auto DARK_THEME_PATH  = ":/resources/styles/dark.qss";
 constexpr auto LIGHT_THEME_PATH = ":/resources/styles/light.qss";
 
-AppTheme _currentTheme = AppTheme::Light;
+// Holds the current application theme state
+AppTheme _currentTheme = AppTheme::Dark;
 
+// Native event filter to detect Windows system theme changes
 class ThemeChangeFilter : public QAbstractNativeEventFilter {
 public:
     bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override {
@@ -30,7 +37,7 @@ public:
 ThemeChangeFilter* eventFilter = nullptr;
 }
 
-// Determines if current OS theme is dark
+// Checks if the current operating system theme is dark
 bool ThemeManager::isDarkTheme() {
 #ifdef Q_OS_WIN
     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
@@ -41,19 +48,19 @@ bool ThemeManager::isDarkTheme() {
 #endif
 }
 
-// Retrieves user theme preference
+// Gets the user's saved theme preference
 UserThemePreference ThemeManager::getUserThemePreference() {
     QSettings settings("YourCompany", "YourApp");
     return static_cast<UserThemePreference>(settings.value("UserTheme", static_cast<int>(UserThemePreference::Auto)).toInt());
 }
 
-// Stores user theme preference
+// Sets the user's theme preference
 void ThemeManager::setUserThemePreference(UserThemePreference preference) {
     QSettings settings("YourCompany", "YourApp");
     settings.setValue("UserTheme", static_cast<int>(preference));
 }
 
-// Applies current theme, respecting user override
+// Applies the appropriate theme based on user preference and system setting
 void ThemeManager::applyTheme() {
     UserThemePreference preference = getUserThemePreference();
     AppTheme newTheme;
@@ -75,7 +82,7 @@ void ThemeManager::applyTheme() {
     }
 }
 
-// Installs a native event filter to watch for theme changes
+// Installs a native event filter for detecting system theme changes
 void ThemeManager::installEventFilter(QObject* target) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {
