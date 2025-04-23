@@ -1,17 +1,54 @@
+/* GLOBAL STYLES ////////////////////////////// */
+QWidget {
+    background-color: #2b2b2b;
+    color: #f0f0f0;
+}
+
+QPushButton, QToolButton {
+    background-color: #444444;
+    color: #f0f0f0;
+    border: 1px solid #666;
+    padding: 4px 8px;
+}
+
+QPushButton:hover, QToolButton:hover {
+    background-color: #5c5c5c;
+}
+
+/* Input fields */
+QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
+    background-color: #3a3a3a;
+    color: #f0f0f0;
+    border: 1px solid #666;
+}
+
+QMenu {
+    background-color: #2b2b2b;
+    color: #f0f0f0;
+}
+
+QMenu::item:selected {
+    background-color: #444444;
+}
+
+/* Tooltips */
+QToolTip {
+    background-color: #444444;
+    color: #ffffff;
+    border: 1px solid #888888;
+}
+
 /* MAIN BACKUP WINDOW ////////////////////////////// */
-/* Backup content container */
 #BackupViewContainer {
     background-color: #2b2b2b;
 }
 
-/* Section title labels */
 #DestinationTreeTitleLabel,
 #SourceTreeTitleLabel,
 #StagingListTitleLabel {
     color: #f0f0f0;
 }
 
-/* Tree/list views */
 #DriveTreeView,
 #BackupStagingTreeView,
 #BackupDestinationView {
@@ -19,8 +56,8 @@
     color: #f0f0f0;
 }
 
-/* TOOLBAR //////////////////////////////////////// */
-QToolbar {
+/* TOOLBAR */
+QToolBar {
     background-color: transparent;
 }
 
@@ -33,7 +70,7 @@ QToolbar {
     background-color: #5c5c5c;
 }
 
-/* CUSTOM BUTTONS ////////////////////////////// */
+/* CUSTOM BUTTONS */
 #ChangeBackupDestinationButton,
 #DeleteBackupButton,
 #AddToBackupButton,

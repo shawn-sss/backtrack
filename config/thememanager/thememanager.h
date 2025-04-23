@@ -3,6 +3,8 @@
 
 // Built-in Qt includes
 #include <QObject>
+#include <QStyle>
+#include <QApplication>
 
 // Enum representing available application themes
 enum class AppTheme {
@@ -13,22 +15,21 @@ enum class AppTheme {
 // Enum representing user's theme preference
 enum class UserThemePreference {
     Auto,
-    Dark,
-    Light
+    Light,
+    Dark
 };
 
 // Static class for managing application theme behavior
 class ThemeManager {
 public:
-    // System and application theme management
     static bool isDarkTheme();
-    static void applyTheme();
-    static void installEventFilter(QObject* target);
     static AppTheme currentTheme();
 
-    // User preference storage and retrieval
     static UserThemePreference getUserThemePreference();
     static void setUserThemePreference(UserThemePreference preference);
+
+    static void applyTheme();
+    static void installEventFilter(QObject* target);
 };
 
 #endif // THEMEMANAGER_H

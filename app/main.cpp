@@ -9,8 +9,6 @@
 
 // Entry point for application
 int main(int argc, char *argv[]) {
-
-    // Initialize application
     QApplication app(argc, argv);
 
     // Load configuration
@@ -20,14 +18,15 @@ int main(int argc, char *argv[]) {
     app.setApplicationName(AppInfo::k_APP_NAME);
     app.setApplicationDisplayName(AppInfo::k_APP_NAME);
 
+    // Apply theme
+    ThemeManager::applyTheme();
+    ThemeManager::installEventFilter(&app);
+
     // Initialize main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::k_APP_NAME);
     mainWindow.setWindowIcon(QIcon(Resources::Application::k_ICON_PATH));
-    ThemeManager::applyTheme();
-    ThemeManager::installEventFilter(&app);
     mainWindow.show();
 
-    // Start event loop
     return app.exec();
 }

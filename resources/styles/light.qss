@@ -1,17 +1,52 @@
+/* GLOBAL STYLES ////////////////////////////// */
+QWidget {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+
+QPushButton, QToolButton {
+    background-color: #dcdcdc;
+    color: #000000;
+    border: 1px solid #aaaaaa;
+    padding: 4px 8px;
+}
+
+QPushButton:hover, QToolButton:hover {
+    background-color: #bbbbbb;
+}
+
+QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #cccccc;
+}
+
+QMenu {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+
+QMenu::item:selected {
+    background-color: #dcdcdc;
+}
+
+QToolTip {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid #aaaaaa;
+}
+
 /* MAIN BACKUP WINDOW ////////////////////////////// */
-/* Backup content container */
 #BackupViewContainer {
     background-color: #f5f5f5;
 }
 
-/* Section title labels */
 #DestinationTreeTitleLabel,
 #SourceTreeTitleLabel,
 #StagingListTitleLabel {
     color: #000000;
 }
 
-/* Tree/list views */
 #DriveTreeView,
 #BackupStagingTreeView,
 #BackupDestinationView {
@@ -19,7 +54,7 @@
     color: #000000;
 }
 
-/* TOOLBAR //////////////////////////////////////// */
+/* TOOLBAR */
 #MainToolBar {
     background-color: transparent;
 }
@@ -33,7 +68,7 @@
     background-color: #bbbbbb;
 }
 
-/* CUSTOM BUTTONS ////////////////////////////// */
+/* CUSTOM BUTTONS */
 #ChangeBackupDestinationButton,
 #DeleteBackupButton,
 #AddToBackupButton,

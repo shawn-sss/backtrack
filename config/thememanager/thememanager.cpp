@@ -4,7 +4,7 @@
 // Built-in Qt includes
 #include <QFile>
 #include <QSettings>
-#include <QApplication>
+#include <QStyleFactory>
 #include <QAbstractNativeEventFilter>
 
 #ifdef Q_OS_WIN
@@ -13,7 +13,7 @@
 
 namespace {
 
-// Paths to the theme stylesheets
+// Theme stylesheet paths
 constexpr auto DARK_THEME_PATH  = ":/resources/styles/dark.qss";
 constexpr auto LIGHT_THEME_PATH = ":/resources/styles/light.qss";
 
@@ -35,6 +35,7 @@ public:
 };
 
 ThemeChangeFilter* eventFilter = nullptr;
+
 }
 
 // Checks if the current operating system theme is dark
@@ -74,6 +75,9 @@ void ThemeManager::applyTheme() {
     _currentTheme = newTheme;
 
     const QString qssPath = (_currentTheme == AppTheme::Dark) ? DARK_THEME_PATH : LIGHT_THEME_PATH;
+
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    qApp->setPalette(qApp->style()->standardPalette());
 
     QFile file(qssPath);
     if (file.open(QFile::ReadOnly)) {
