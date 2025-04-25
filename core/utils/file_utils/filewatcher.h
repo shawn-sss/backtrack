@@ -1,7 +1,7 @@
 #ifndef FILEWATCHER_H
 #define FILEWATCHER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QObject>
 #include <QFileSystemWatcher>
 #include <QStringList>

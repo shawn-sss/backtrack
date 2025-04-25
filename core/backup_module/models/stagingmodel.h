@@ -1,7 +1,7 @@
 #ifndef STAGINGMODEL_H
 #define STAGINGMODEL_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QVector>
 #include <QSet>
 #include <QAbstractItemModel>

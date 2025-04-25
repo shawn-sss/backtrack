@@ -1,7 +1,7 @@
 #ifndef APP_CONFIG_H
 #define APP_CONFIG_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QSize>
 #include <QString>

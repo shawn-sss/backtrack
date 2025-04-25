@@ -1,13 +1,11 @@
-// Project includes same directory
+// Project includes
 #include "backupservice.h"
-
-// Project includes different directory
 #include "../../../config/_constants.h"
 #include "../../utils/file_utils/fileoperations.h"
 #include "../../../core/utils/common_utils/utils.h"
 #include "../../../core/utils/file_utils/jsonmanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QFileInfo>
 #include <QDateTime>

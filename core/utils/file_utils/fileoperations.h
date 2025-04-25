@@ -1,7 +1,7 @@
 #ifndef FILEOPERATIONS_H
 #define FILEOPERATIONS_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonObject>

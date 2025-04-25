@@ -1,8 +1,6 @@
-// Project includes same directory
+// Project includes
 #include "toolbarmanager.h"
 #include "toolbarmanagerstyling.h"
-
-// Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
@@ -17,7 +15,7 @@
 #include <QMessageBox>
 #include <QWidget>
 
-// Constructor: Initializes all toolbar actions
+// Constructor
 ToolbarManager::ToolbarManager(QObject *parent)
     : QObject(parent),
     actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}

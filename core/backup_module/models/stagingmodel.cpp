@@ -1,10 +1,8 @@
-// Project includes same directory
+// Project includes
 #include "stagingmodel.h"
-
-// Project includes different directory
 #include "../../../config/_constants.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QFileInfo>
 #include <QStorageInfo>
 #include <QFileIconProvider>

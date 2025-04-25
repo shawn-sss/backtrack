@@ -1,7 +1,7 @@
 #ifndef TRANSFERWORKER_H
 #define TRANSFERWORKER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QObject>
 #include <QFileInfo>
 #include <QStringList>

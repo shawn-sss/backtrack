@@ -1,7 +1,7 @@
-// Project includes same directory
+// Project includes
 #include "destinationproxymodel.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QModelIndex>
 
 // Constructor

@@ -1,6 +1,7 @@
 #ifndef VISUAL_SETTINGS_H
 #define VISUAL_SETTINGS_H
 
+// Qt includes
 #include <QSize>
 #include <QString>
 

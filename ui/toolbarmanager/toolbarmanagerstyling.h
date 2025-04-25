@@ -1,6 +1,7 @@
 #ifndef TOOLBARMANAGERSTYLING_H
 #define TOOLBARMANAGERSTYLING_H
 
+// Qt includes
 #include <QString>
 #include <QSize>
 

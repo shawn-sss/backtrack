@@ -1,7 +1,7 @@
 #ifndef THEMEMANAGER_H
 #define THEMEMANAGER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QObject>
 #include <QStyle>
 #include <QApplication>

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QMainWindow>
 #include <QPoint>
 #include <QString>

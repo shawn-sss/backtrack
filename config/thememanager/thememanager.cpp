@@ -1,7 +1,8 @@
-// Project includes same directory
+// Project includes
 #include "thememanager.h"
+#include "../configmanager/configmanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QFile>
 #include <QSettings>
 #include <QStyleFactory>
@@ -49,21 +50,9 @@ bool ThemeManager::isDarkTheme() {
 #endif
 }
 
-// Gets the user's saved theme preference
-UserThemePreference ThemeManager::getUserThemePreference() {
-    QSettings settings("YourCompany", "YourApp");
-    return static_cast<UserThemePreference>(settings.value("UserTheme", static_cast<int>(UserThemePreference::Auto)).toInt());
-}
-
-// Sets the user's theme preference
-void ThemeManager::setUserThemePreference(UserThemePreference preference) {
-    QSettings settings("YourCompany", "YourApp");
-    settings.setValue("UserTheme", static_cast<int>(preference));
-}
-
 // Applies the appropriate theme based on user preference and system setting
 void ThemeManager::applyTheme() {
-    UserThemePreference preference = getUserThemePreference();
+    UserThemePreference preference = ConfigManager::getInstance().getThemePreference();
     AppTheme newTheme;
 
     if (preference == UserThemePreference::Auto) {

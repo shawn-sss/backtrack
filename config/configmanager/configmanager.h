@@ -1,10 +1,11 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
-// Project includes different directory
+// Project includes
 #include "../../core/utils/file_utils/jsonmanager.h"
+#include "../thememanager/thememanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QString>
 #include <QJsonObject>
 
@@ -26,6 +27,10 @@ public:
     // User configuration management
     void loadUserConfig();
     void saveUserConfig();
+
+    // Theme configuration management
+    UserThemePreference getThemePreference() const;
+    void setThemePreference(UserThemePreference preference);
 
     // Backup settings management
     QString getBackupDirectory() const;

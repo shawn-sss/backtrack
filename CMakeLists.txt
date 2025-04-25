@@ -105,6 +105,8 @@ set(UTILS_SOURCES
     core/utils/file_utils/jsonmanager.h
     config/thememanager/thememanager.cpp
     config/thememanager/thememanager.h
+    config/thememanager/themeutils.cpp
+    config/thememanager/themeutils.h
 )
 
 # Combine all sources

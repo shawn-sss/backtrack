@@ -1,7 +1,7 @@
-// Project includes same directory
+// Project includes
 #include "jsonmanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QFile>
 #include <QSaveFile>
 #include <QJsonDocument>

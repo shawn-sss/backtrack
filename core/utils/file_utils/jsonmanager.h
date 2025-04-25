@@ -1,7 +1,7 @@
 #ifndef JSONMANAGER_H
 #define JSONMANAGER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QString>
 #include <QJsonObject>
 

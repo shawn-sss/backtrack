@@ -1,6 +1,7 @@
 #ifndef UTILITIES_SETTINGS_H
 #define UTILITIES_SETTINGS_H
 
+// Qt includes
 #include <QString>
 
 // Default values

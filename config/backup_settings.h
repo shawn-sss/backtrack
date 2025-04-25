@@ -1,7 +1,7 @@
 #ifndef BACKUP_SETTINGS_H
 #define BACKUP_SETTINGS_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QString>
 #include <QStringLiteral>

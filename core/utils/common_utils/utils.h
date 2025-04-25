@@ -1,7 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// Built-in Qt includes
+// Project includes
+#include "../../../core/backup_module/models/stagingmodel.h"
+
+// Qt includes
 #include <QMouseEvent>
 #include <QWidget>
 #include <QTreeView>
@@ -9,9 +12,6 @@
 #include <QPixmap>
 #include <QString>
 #include <QDateTime>
-
-// Include StagingModel header
-#include "../../../core/backup_module/models/stagingmodel.h"
 
 namespace Utils {
 

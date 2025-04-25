@@ -1,10 +1,10 @@
-// Project includes different directory
+// Project includes
 #include "../config/_constants.h"
 #include "../ui/mainwindow/mainwindow.h"
 #include "../config/configmanager/configmanager.h"
 #include "../config/thememanager/thememanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QApplication>
 
 // Entry point for application

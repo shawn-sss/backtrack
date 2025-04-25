@@ -1,7 +1,7 @@
 #ifndef DESTINATIONPROXYMODEL_H
 #define DESTINATIONPROXYMODEL_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QString>
 #include <QSortFilterProxyModel>
 

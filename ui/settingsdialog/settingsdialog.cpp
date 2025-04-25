@@ -1,12 +1,10 @@
-// Project includes same directory
+// Project includes
 #include "settingsdialog.h"
-
-// Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../config/thememanager/thememanager.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFormLayout>
@@ -91,9 +89,16 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     themeComboBox->addItem("Dark Mode", static_cast<int>(UserThemePreference::Dark));
     layout->addWidget(themeComboBox);
 
+    UserThemePreference savedPref = ConfigManager::getInstance().getThemePreference();
+    int index = themeComboBox->findData(static_cast<int>(savedPref));
+    if (index != -1) {
+        QSignalBlocker blocker(themeComboBox);
+        themeComboBox->setCurrentIndex(index);
+    }
+
     connect(themeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
         auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->itemData(index).toInt());
-        ThemeManager::setUserThemePreference(selectedTheme);
+        ConfigManager::getInstance().setThemePreference(selectedTheme);
         ThemeManager::applyTheme();
     });
 

@@ -1,7 +1,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QDialog>
 #include <QListWidget>
 #include <QStackedWidget>

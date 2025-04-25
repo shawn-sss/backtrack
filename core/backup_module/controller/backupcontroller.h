@@ -1,7 +1,7 @@
 #ifndef BACKUPCONTROLLER_H
 #define BACKUPCONTROLLER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QObject>
 #include <QStringList>
 

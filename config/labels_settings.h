@@ -1,6 +1,7 @@
 #ifndef LABELS_SETTINGS_H
 #define LABELS_SETTINGS_H
 
+// Qt includes
 #include <QString>
 
 // Backup UI labels

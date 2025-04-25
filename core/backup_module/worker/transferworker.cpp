@@ -1,11 +1,9 @@
-// Project includes same directory
+// Project includes
 #include "transferworker.h"
-
-// Project includes different directory
 #include "../../../config/_constants.h"
 #include "../../utils/file_utils/fileoperations.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QFile>
 #include <QStorageInfo>

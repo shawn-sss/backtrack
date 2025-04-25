@@ -1,12 +1,12 @@
 #ifndef TOOLBARMANAGER_H
 #define TOOLBARMANAGER_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QObject>
 #include <QToolBar>
 #include <QAction>
 
-// Built-in standard C++ library
+// C++ library
 #include <array>
 
 // Manages the application's toolbar appearance and actions

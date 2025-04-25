@@ -1,7 +1,7 @@
 #ifndef BACKUPSERVICE_H
 #define BACKUPSERVICE_H
 
-// Built-in Qt includes
+// Qt includes
 #include <QSet>
 #include <QString>
 #include <QStringList>

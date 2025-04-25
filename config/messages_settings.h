@@ -1,6 +1,7 @@
 #ifndef MESSAGES_SETTINGS_H
 #define MESSAGES_SETTINGS_H
 
+// Qt includes
 #include <QString>
 
 // Informational messages

@@ -1,11 +1,10 @@
-// Project includes same directory
+// Project includes
 #include "configmanager.h"
-
-// Project includes different directory
 #include "../_constants.h"
 #include "../../core/utils/file_utils/jsonmanager.h"
+#include "../thememanager/themeutils.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QFile>
 #include <QDateTime>
@@ -60,6 +59,8 @@ void ConfigManager::setupDefaults() {
         {ConfigKeys::k_BACKUP_DIRECTORY_KEY, ConfigDefaults::k_BACKUP_DIRECTORY},
         {ConfigKeys::k_BACKUP_PREFIX_KEY, ConfigDefaults::k_BACKUP_PREFIX}
     };
+
+    userConfig[ConfigKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(UserThemePreference::Auto);
 
     JsonManager::saveJsonFile(userConfigPath, userConfig);
 }
@@ -158,3 +159,19 @@ QString ConfigManager::getAppInstallDir() const {
 QString ConfigManager::getFilePath(const QString& fileName) const {
     return getAppInstallDir() + "/" + AppConfig::k_APPDATA_SETUP_FOLDER + "/" + fileName;
 }
+
+// Get saved theme preference
+UserThemePreference ConfigManager::getThemePreference() const {
+    if (userSettings.contains(ConfigKeys::k_THEME_PREFERENCE_KEY)) {
+        const QString prefStr = userSettings.value(ConfigKeys::k_THEME_PREFERENCE_KEY).toString();
+        return stringToUserThemePreference(prefStr);
+    }
+    return UserThemePreference::Auto;
+}
+
+// Set and persist theme preference
+void ConfigManager::setThemePreference(UserThemePreference preference) {
+    userSettings[ConfigKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
+    saveUserConfig();
+}
+

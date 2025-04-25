@@ -1,10 +1,8 @@
-// Project includes same directory
+// Project includes
 #include "filewatcher.h"
-
-// Project includes different directory
 #include "../../../config/_constants.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QDir>
 #include <QFileInfo>
 #include <QSet>

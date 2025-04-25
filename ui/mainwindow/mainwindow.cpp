@@ -1,8 +1,6 @@
-// Project includes same directory
+// Project includes
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-// Project includes different directory
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/toolbarmanager/toolbarmanager.h"
@@ -14,7 +12,7 @@
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/common_utils/utils.h"
 
-// Built-in Qt includes
+// Qt includes
 #include <QFileSystemModel>
 #include <QFileDialog>
 #include <QBuffer>

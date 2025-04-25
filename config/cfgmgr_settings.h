@@ -1,6 +1,7 @@
 #ifndef CFGMGR_SETTINGS_H
 #define CFGMGR_SETTINGS_H
 
+// Qt includes
 #include <QDir>
 #include <QString>
 
@@ -9,6 +10,7 @@ namespace ConfigKeys {
 constexpr auto k_BACKUP_CONFIG_GROUP = "backup_config";
 constexpr auto k_BACKUP_DIRECTORY_KEY = "backup_directory";
 constexpr auto k_BACKUP_PREFIX_KEY = "backup_prefix";
+constexpr auto k_THEME_PREFERENCE_KEY = "themePreference";
 }
 
 // Default values for backup configuration
