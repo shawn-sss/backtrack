@@ -6,7 +6,7 @@
 #include <QPoint>
 #include <QString>
 
-// Forward declarations Qt classes
+// Forward declarations (Qt classes)
 class QTreeView;
 class QFileSystemModel;
 class QLabel;
@@ -16,7 +16,7 @@ class QMouseEvent;
 class QCloseEvent;
 class QTimer;
 
-// Forward declarations custom classes
+// Forward declarations (custom classes)
 class BackupService;
 class StagingModel;
 class DestinationProxyModel;
@@ -25,8 +25,8 @@ class BackupController;
 class CustomTitleBar;
 class ToolbarManager;
 
-// Forward declaration UI class
-namespace Ui {class MainWindow;}
+// Forward declaration (UI)
+namespace Ui { class MainWindow; }
 
 // Main application window
 class MainWindow final : public QMainWindow {
@@ -34,16 +34,14 @@ class MainWindow final : public QMainWindow {
     Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
-    // Constructor and Destructor
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+    explicit MainWindow(QWidget* parent = nullptr); // Constructor
+    ~MainWindow() override; // Destructor
 
 protected:
-    // Handles window close event
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent* event) override; // Handle window close event
 
 private:
-    // UI Initialization and Setup
+    // UI Initialization and setup
     void configureWindow();
     void setupLayout();
     void applyButtonCursors();
@@ -51,26 +49,26 @@ private:
     void initializeBackupSystem();
     void setupConnections();
 
-    // Backup view setup and management
+    // Backup view setup
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
-    void removeAllColumnsFromTreeView(QTreeView *treeView);
+    void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // Backup status and monitoring
+    // Backup system monitoring
     void refreshBackupStatus();
     void updateLastBackupInfo();
-    void updateBackupStatusLabel(const QString &statusColor);
-    void updateBackupLocationLabel(const QString &location);
+    void updateBackupStatusLabel(const QString& statusColor);
+    void updateBackupLocationLabel(const QString& location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
-    void updateBackupLocationStatusLabel(const QString &location);
+    void updateBackupLocationStatusLabel(const QString& location);
     void updateFileWatcher();
-    void startWatchingBackupDirectory(const QString &path);
+    void startWatchingBackupDirectory(const QString& path);
     void connectBackupSignals();
 
 private slots:
-    // Backup operations
+    // Backup operation handlers
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -78,35 +76,37 @@ private slots:
     void onDeleteBackupClicked();
     void onCooldownFinished();
 
-    // File watcher callbacks
+    // File watcher event handlers
     void onBackupDirectoryChanged();
-    void onFileChanged(const QString &path);
+    void onFileChanged(const QString& path);
 
-    // Backup feedback
+    // Backup feedback handlers
     void onBackupCompleted();
-    void onBackupError(const QString &error);
+    void onBackupError(const QString& error);
 
 private:
-    // UI Elements
-    Ui::MainWindow *ui = nullptr;
-    CustomTitleBar *titleBar = nullptr;
+    // UI elements
+    Ui::MainWindow* ui = nullptr;
+    CustomTitleBar* titleBar = nullptr;
 
     // File models
-    QFileSystemModel *sourceModel = nullptr;
-    StagingModel *stagingModel = nullptr;
-    QFileSystemModel *destinationModel = nullptr;
-    DestinationProxyModel *destinationProxyModel = nullptr;
+    QFileSystemModel* sourceModel = nullptr;
+    StagingModel* stagingModel = nullptr;
+    QFileSystemModel* destinationModel = nullptr;
+    DestinationProxyModel* destinationProxyModel = nullptr;
 
-    // Backup & File watcher
-    FileWatcher *fileWatcher = nullptr;
-    BackupService *backupService = nullptr;
-    BackupController *backupController = nullptr;
-    QTimer* createBackupCooldownTimer;
-    QTimer *backupCooldownTimer;
+    // Backup system components
+    FileWatcher* fileWatcher = nullptr;
+    BackupService* backupService = nullptr;
+    BackupController* backupController = nullptr;
 
-    // Toolbar utilization
-    QToolBar *toolBar;
-    ToolbarManager *toolbarManager;
+    // Timing components
+    QTimer* createBackupCooldownTimer = nullptr;
+    QTimer* backupCooldownTimer = nullptr;
+
+    // Toolbar components
+    QToolBar* toolBar = nullptr;
+    ToolbarManager* toolbarManager = nullptr;
 };
 
 #endif // MAINWINDOW_H

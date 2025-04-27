@@ -5,7 +5,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(PROJECT_NAME MyDataBackupApp)
-set(PROJECT_VERSION 0.4)
+set(PROJECT_VERSION 0.5)
 set(PROJECT_LANGUAGES CXX)
 
 project(${PROJECT_NAME} VERSION ${PROJECT_VERSION} LANGUAGES ${PROJECT_LANGUAGES})
@@ -107,6 +107,12 @@ set(UTILS_SOURCES
     config/thememanager/thememanager.h
     config/thememanager/themeutils.cpp
     config/thememanager/themeutils.h
+    config/installmetadatamanager/installmetadatamanager.cpp
+    config/installmetadatamanager/installmetadatamanager.h
+    config/backupsettingsmanager/backupsettingsmanager.cpp
+    config/backupsettingsmanager/backupsettingsmanager.h
+    config/usersettingsmanager/usersettingsmanager.cpp
+    config/usersettingsmanager/usersettingsmanager.h
 )
 
 # Combine all sources

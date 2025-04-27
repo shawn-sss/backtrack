@@ -2,37 +2,37 @@
 #define SETTINGSDIALOG_H
 
 // Qt includes
+#include <QComboBox>
 #include <QDialog>
 #include <QListWidget>
 #include <QStackedWidget>
-#include <QComboBox>
+#include <QLineEdit>
 
-// Dialog window for application settings
+// Dialog for managing application settings
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    // Constructs and initializes the dialog
-    explicit SettingsDialog(QWidget *parent = nullptr);
-
-    // Destructor
-    ~SettingsDialog() override;
+    explicit SettingsDialog(QWidget* parent = nullptr); // Constructor
+    ~SettingsDialog() override; // Destructor
 
 private:
-    // Sets up the dialog's layout and controls
+    // Layout setup
     void setupLayout();
+
+    // Settings pages creation
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
-    QListWidget *categoryList;
-    QStackedWidget *settingsStack;
-    QLineEdit *backupPrefixEdit;
-    QComboBox *themeComboBox;
+
+    // UI elements
+    QListWidget* categoryList;
+    QStackedWidget* settingsStack;
+    QLineEdit* backupPrefixEdit;
+    QComboBox* themeComboBox;
 
 private slots:
-    // Saves and accepts the dialog
+    // Button handlers
     void onSaveClicked();
-
-    // Cancels and closes the dialog
     void onCancelClicked();
 };
 

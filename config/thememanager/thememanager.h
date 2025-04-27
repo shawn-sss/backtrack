@@ -1,35 +1,42 @@
-#ifndef THEMEMANAGER_H
-#define THEMEMANAGER_H
+#pragma once
 
 // Qt includes
+#include <QApplication>
 #include <QObject>
 #include <QStyle>
-#include <QApplication>
 
-// Enum representing available application themes
+// Available application themes
 enum class AppTheme {
     Light,
     Dark
 };
 
-// Enum representing user's theme preference
+// User's theme preference
 enum class UserThemePreference {
     Auto,
     Light,
     Dark
 };
 
-// Static class for managing application theme behavior
+// Utilities for theme preferences
+QString userThemePreferenceToString(UserThemePreference preference);
+
+// Manages application themes
 class ThemeManager {
 public:
+    // System theme detection
     static bool isDarkTheme();
+
+    // Current theme retrieval
     static AppTheme currentTheme();
 
+    // User theme preference accessors
     static UserThemePreference getUserThemePreference();
     static void setUserThemePreference(UserThemePreference preference);
 
+    // Theme application
     static void applyTheme();
+
+    // System event filter installation
     static void installEventFilter(QObject* target);
 };
-
-#endif // THEMEMANAGER_H

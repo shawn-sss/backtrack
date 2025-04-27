@@ -1,8 +1,8 @@
 // Project includes
-#include "settingsdialog.h"
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../config/thememanager/thememanager.h"
+#include "settingsdialog.h"
 
 // Qt includes
 #include <QVBoxLayout>
@@ -17,10 +17,14 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QSettings>
+#include <QStandardPaths>
+#include <QStyleFactory>
+#include <QFile>
 
 // Constructor
-SettingsDialog::SettingsDialog(QWidget *parent)
-    : QDialog(parent) {
+SettingsDialog::SettingsDialog(QWidget* parent)
+    : QDialog(parent)
+{
     setWindowFlags(Qt::Dialog);
     setMinimumSize(QSize(600, 400));
     setupLayout();
@@ -29,14 +33,14 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 // Destructor
 SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the layout for the settings dialog
+// Layout setup
 void SettingsDialog::setupLayout() {
-    auto *mainLayout = new QVBoxLayout(this);
+    auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(10, 10, 10, 10);
     mainLayout->setSpacing(10);
 
-    auto *centralWidget = new QWidget(this);
-    auto *centralLayout = new QHBoxLayout(centralWidget);
+    auto* centralWidget = new QWidget(this);
+    auto* centralLayout = new QHBoxLayout(centralWidget);
     centralLayout->setContentsMargins(0, 0, 0, 0);
     centralLayout->setSpacing(10);
 
@@ -54,7 +58,7 @@ void SettingsDialog::setupLayout() {
     connect(categoryList, &QListWidget::currentRowChanged, settingsStack, &QStackedWidget::setCurrentIndex);
     categoryList->setCurrentRow(0);
 
-    auto *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
 
@@ -62,10 +66,10 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// User Settings Page
+// Create user settings page
 QWidget* SettingsDialog::createUserSettingsPage() {
-    auto *widget = new QWidget();
-    auto *layout = new QFormLayout(widget);
+    auto* widget = new QWidget();
+    auto* layout = new QFormLayout(widget);
 
     backupPrefixEdit = new QLineEdit(widget);
     backupPrefixEdit->setText(ConfigManager::getInstance().getBackupPrefix());
@@ -77,10 +81,10 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// System Settings Page
+// Create system settings page
 QWidget* SettingsDialog::createSystemSettingsPage() {
-    auto *widget = new QWidget();
-    auto *layout = new QVBoxLayout(widget);
+    auto* widget = new QWidget();
+    auto* layout = new QVBoxLayout(widget);
 
     layout->addWidget(new QLabel("Theme:"));
     themeComboBox = new QComboBox(widget);
@@ -96,9 +100,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
         themeComboBox->setCurrentIndex(index);
     }
 
-    connect(themeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->itemData(index).toInt());
-        ConfigManager::getInstance().setThemePreference(selectedTheme);
+    connect(themeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [](int) {
         ThemeManager::applyTheme();
     });
 
@@ -106,14 +108,19 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles saving and closing the dialog
+// Handle save button click
 void SettingsDialog::onSaveClicked() {
     QString newPrefix = backupPrefixEdit->text().trimmed();
     ConfigManager::getInstance().setBackupPrefix(newPrefix);
+
+    auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
+    ConfigManager::getInstance().setThemePreference(selectedTheme);
+    ThemeManager::applyTheme();
+
     accept();
 }
 
-// Handles canceling and closing the dialog
+// Handle cancel button click
 void SettingsDialog::onCancelClicked() {
     reject();
 }

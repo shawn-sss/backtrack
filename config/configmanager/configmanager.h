@@ -1,36 +1,21 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
-// Project includes
-#include "../../core/utils/file_utils/jsonmanager.h"
-#include "../thememanager/thememanager.h"
-
 // Qt includes
 #include <QString>
-#include <QJsonObject>
 
+// Project includes
+#include "../thememanager/themeutils.h"
+
+// Forward declarations
+class InstallMetadataManager;
+class UserSettingsManager;
+class BackupSettingsManager;
+
+// Manages application configuration
 class ConfigManager {
 public:
-    // Singleton instance
-    static ConfigManager& getInstance();
-
-    // First-run check
-    bool isFirstRun() const;
-
-    // Public install directory accessor
-    QString getAppInstallDirPublic() const;
-
-    // Install metadata management
-    void loadInstallMetadata();
-    void saveInstallMetadata();
-
-    // User configuration management
-    void loadUserConfig();
-    void saveUserConfig();
-
-    // Theme configuration management
-    UserThemePreference getThemePreference() const;
-    void setThemePreference(UserThemePreference preference);
+    static ConfigManager& getInstance(); // Singleton access
 
     // Backup settings management
     QString getBackupDirectory() const;
@@ -38,25 +23,35 @@ public:
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-private:
-    // Constructor
-    ConfigManager();
+    // Theme preference management
+    UserThemePreference getThemePreference() const;
+    void setThemePreference(UserThemePreference preference);
 
-    // Default setup
+    // Install metadata management
+    void loadInstallMetadata();
+    void saveInstallMetadata();
+
+    // Application paths management
+    QString getAppInstallDirPublic() const;
+    QString getAppInstallDir() const;
+    QString getFilePath(const QString& fileName) const;
+
+private:
+    ConfigManager(); // Constructor
+
+    // Internal helpers
+    void setupFilePaths();
+    bool isFirstRun() const;
     void setupDefaults();
 
-    // Internal path management
-    void setupFilePaths();
-    QString getFilePath(const QString& fileName) const;
-    QString getAppInstallDir() const;
-
-    // Internal data storage
-    QJsonObject installMetadata;
-    QJsonObject userSettings;
-
-    // Cached JSON file paths
+    // File paths
     QString appMetadataPath;
     QString userConfigPath;
+
+    // Sub-managers
+    InstallMetadataManager* installMetadataManager;
+    UserSettingsManager* userSettingsManager;
+    BackupSettingsManager* backupSettingsManager;
 };
 
 #endif // CONFIGMANAGER_H

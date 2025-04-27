@@ -7,10 +7,8 @@
 // Qt includes
 #include <QString>
 
-// Converts a string to UserThemePreference
+// Theme preference conversion utilities
 UserThemePreference stringToUserThemePreference(const QString& value);
-
-// Converts UserThemePreference to a string
 QString userThemePreferenceToString(UserThemePreference pref);
 
 #endif // THEMEUTILS_H
