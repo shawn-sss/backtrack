@@ -2,8 +2,8 @@
 #define CFGMGR_SETTINGS_H
 
 // Qt includes
-#include <QDir>
 #include <QString>
+#include <QDir>
 
 // Configuration keys for backup settings
 namespace ConfigKeys {

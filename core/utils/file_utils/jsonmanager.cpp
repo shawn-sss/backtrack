@@ -2,11 +2,10 @@
 #include "jsonmanager.h"
 
 // Qt includes
+#include <QDir>
 #include <QFile>
 #include <QSaveFile>
 #include <QJsonDocument>
-#include <QDir>
-#include <QDebug>
 
 // Loads a JSON object from a file into the target
 bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {

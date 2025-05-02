@@ -2,8 +2,8 @@
 #define VISUAL_SETTINGS_H
 
 // Qt includes
-#include <QSize>
 #include <QString>
+#include <QSize>
 
 // Tree view UI settings
 namespace UISettings::TreeView {

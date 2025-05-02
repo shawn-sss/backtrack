@@ -5,13 +5,13 @@
 #include "../../../core/backup_module/models/stagingmodel.h"
 
 // Qt includes
-#include <QMouseEvent>
-#include <QWidget>
-#include <QTreeView>
-#include <QProgressBar>
-#include <QPixmap>
 #include <QString>
 #include <QDateTime>
+#include <QPixmap>
+#include <QProgressBar>
+#include <QMouseEvent>
+#include <QTreeView>
+#include <QWidget>
 
 namespace Utils {
 

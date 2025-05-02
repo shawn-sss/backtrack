@@ -5,9 +5,9 @@
 // Qt includes
 #include <QDir>
 #include <QFile>
+#include <QSaveFile>
 #include <QFileInfoList>
 #include <QJsonDocument>
-#include <QSaveFile>
 
 namespace FileOperations {
 

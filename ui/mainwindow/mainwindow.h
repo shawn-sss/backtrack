@@ -2,9 +2,9 @@
 #define MAINWINDOW_H
 
 // Qt includes
-#include <QMainWindow>
-#include <QPoint>
 #include <QString>
+#include <QPoint>
+#include <QMainWindow>
 
 // Forward declarations (Qt classes)
 class QTreeView;

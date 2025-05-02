@@ -1,9 +1,9 @@
 #pragma once
 
 // Qt includes
-#include <QApplication>
 #include <QObject>
 #include <QStyle>
+#include <QApplication>
 
 // Available application themes
 enum class AppTheme {

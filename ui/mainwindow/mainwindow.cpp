@@ -1,4 +1,7 @@
 // Project includes
+#include "mainwindow.h"
+#include "mainwindowstyling.h"
+#include "ui_mainwindow.h"
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/toolbarmanager/toolbarmanager.h"
@@ -9,22 +12,20 @@
 #include "../../core/utils/file_utils/filewatcher.h"
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/common_utils/utils.h"
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 
 // Qt includes
 #include <QBuffer>
-#include <QFileDialog>
-#include <QFileSystemModel>
-#include <QHBoxLayout>
-#include <QMessageBox>
 #include <QPushButton>
-#include <QScreen>
 #include <QSizePolicy>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QTimer>
+#include <QScreen>
+#include <QFileDialog>
 #include <QStandardPaths>
 #include <QStyleFactory>
-#include <QTimer>
-#include <QVBoxLayout>
+#include <QFileSystemModel>
 
 // Constructor
 MainWindow::MainWindow(QWidget* parent)
@@ -169,6 +170,12 @@ void MainWindow::setupConnections() {
     for (const auto& conn : buttonConnections) {
         connect(conn.button, &QPushButton::clicked, this, conn.slot);
     }
+
+    connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
+        ui->CreateBackupButton->setText("Create Backup");
+        ui->CreateBackupButton->setEnabled(true);
+        ui->CreateBackupButton->setStyleSheet(QString());
+    });
 }
 
 // Connect backup-related signals
@@ -335,7 +342,10 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
+    ui->CreateBackupButton->setText("✓");
     ui->CreateBackupButton->setEnabled(false);
+    ui->CreateBackupButton->setStyleSheet(MainWindowStyling::COOLDOWN_BUTTON_STYLE);
+
     createBackupCooldownTimer->start(3000);
 
     ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);

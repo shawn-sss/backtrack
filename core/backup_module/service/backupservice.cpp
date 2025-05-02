@@ -1,14 +1,14 @@
 // Project includes
 #include "backupservice.h"
 #include "../../../config/_constants.h"
-#include "../../utils/file_utils/fileoperations.h"
 #include "../../../core/utils/common_utils/utils.h"
 #include "../../../core/utils/file_utils/jsonmanager.h"
+#include "../../utils/file_utils/fileoperations.h"
 
 // Qt includes
+#include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
-#include <QDateTime>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>

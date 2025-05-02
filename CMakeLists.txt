@@ -63,6 +63,8 @@ set(UI_SOURCES
     ui/toolbarmanager/toolbarmanager.cpp
     ui/toolbarmanager/toolbarmanagerstyling.h
     core/backup_module/styles/backup_styling.h
+    ui/settingsdialog/settingsdialogstyling.h
+    ui/mainwindow/mainwindowstyling.h
 )
 
 # Backup Controller sources

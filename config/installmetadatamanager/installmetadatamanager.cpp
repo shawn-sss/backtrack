@@ -1,16 +1,14 @@
 // Project includes
+#include "installmetadatamanager.h"
 #include "../_constants.h"
 #include "../../core/utils/file_utils/jsonmanager.h"
-#include "installmetadatamanager.h"
 
 // Qt includes
 #include <QDateTime>
 
 // Constructor
 InstallMetadataManager::InstallMetadataManager(const QString& metadataPath)
-    : metadataFilePath(metadataPath)
-{
-}
+    : metadataFilePath(metadataPath) {}
 
 // Load install metadata from file
 void InstallMetadataManager::load() {

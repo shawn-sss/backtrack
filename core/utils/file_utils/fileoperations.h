@@ -2,11 +2,11 @@
 #define FILEOPERATIONS_H
 
 // Qt includes
+#include <QString>
+#include <QSet>
 #include <QDir>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <QSet>
-#include <QString>
 
 namespace FileOperations {
 

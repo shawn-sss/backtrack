@@ -1,27 +1,28 @@
 // Project includes
+#include "settingsdialog.h"
+#include "settingsdialogstyling.h"
 #include "../../config/_constants.h"
 #include "../../config/configmanager/configmanager.h"
 #include "../../config/thememanager/thememanager.h"
-#include "settingsdialog.h"
 
 // Qt includes
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QFormLayout>
-#include <QDialogButtonBox>
+#include <QFontMetrics>
 #include <QLabel>
-#include <QSpacerItem>
 #include <QSizePolicy>
+#include <QSpacerItem>
+#include <QPushButton>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QListWidget>
 #include <QStackedWidget>
-#include <QSettings>
-#include <QStandardPaths>
-#include <QStyleFactory>
-#include <QFile>
+#include <QFormLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
 
-// Constructor
+using namespace SettingsDialogStyling;
+
+// Constructor for the settings dialog
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
 {
@@ -33,7 +34,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 // Destructor
 SettingsDialog::~SettingsDialog() = default;
 
-// Layout setup
+// Sets up the layout and widgets for the dialog
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(10, 10, 10, 10);
@@ -59,14 +60,40 @@ void SettingsDialog::setupLayout() {
     categoryList->setCurrentRow(0);
 
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    saveButton = buttonBox->button(QDialogButtonBox::Ok);
+    saveButton->setText("Save");
+    saveButton->setCursor(Qt::PointingHandCursor);
+
+    QPushButton* cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
+    if (cancelButton) {
+        cancelButton->setCursor(Qt::PointingHandCursor);
+    }
+
+    QFontMetrics fm(saveButton->font());
+    int saveWidth = fm.horizontalAdvance("Save");
+    int cancelWidth = fm.horizontalAdvance("Cancel");
+    int maxWidth = std::max(saveWidth, cancelWidth) + 30;
+
+    saveButton->setFixedWidth(maxWidth);
+    if (cancelButton)
+        cancelButton->setFixedWidth(maxWidth);
+
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
+
+    saveCooldownTimer = new QTimer(this);
+    saveCooldownTimer->setSingleShot(true);
+    connect(saveCooldownTimer, &QTimer::timeout, this, [this]() {
+        saveButton->setText("Save");
+        saveButton->setEnabled(true);
+        saveButton->setStyleSheet(QString());
+    });
 
     mainLayout->addWidget(centralWidget);
     mainLayout->addWidget(buttonBox);
 }
 
-// Create user settings page
+// Creates the user settings page
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -81,12 +108,13 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Create system settings page
+// Creates the system settings page
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
 
     layout->addWidget(new QLabel("Theme:"));
+
     themeComboBox = new QComboBox(widget);
     themeComboBox->addItem("System Default", static_cast<int>(UserThemePreference::Auto));
     themeComboBox->addItem("Light Mode", static_cast<int>(UserThemePreference::Light));
@@ -100,27 +128,30 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
         themeComboBox->setCurrentIndex(index);
     }
 
-    connect(themeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [](int) {
-        ThemeManager::applyTheme();
-    });
-
     layout->addStretch();
     return widget;
 }
 
-// Handle save button click
+// Handles the Save button click logic
 void SettingsDialog::onSaveClicked() {
+    backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
+
     ConfigManager::getInstance().setBackupPrefix(newPrefix);
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ConfigManager::getInstance().setThemePreference(selectedTheme);
     ThemeManager::applyTheme();
 
-    accept();
+    saveButton->setText("✓");
+    saveButton->setEnabled(false);
+    saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
+
+    saveCooldownTimer->start(3000);
 }
 
-// Handle cancel button click
+
+// Handles the Cancel button click logic
 void SettingsDialog::onCancelClicked() {
     reject();
 }

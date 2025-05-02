@@ -2,9 +2,9 @@
 #define BACKUPSERVICE_H
 
 // Qt includes
-#include <QSet>
 #include <QString>
 #include <QStringList>
+#include <QSet>
 #include <QJsonArray>
 #include <QJsonObject>
 

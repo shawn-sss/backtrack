@@ -1,9 +1,9 @@
 // Project includes
+#include "thememanager.h"
 #include "../_constants.h"
-#include "../../core/utils/file_utils/jsonmanager.h"
 #include "../configmanager/configmanager.h"
 #include "../thememanager/themeutils.h"
-#include "thememanager.h"
+#include "../../core/utils/file_utils/jsonmanager.h"
 
 // Qt includes
 #include <QFile>

@@ -3,8 +3,10 @@
 
 // Qt includes
 #include <QObject>
-#include <QFileInfo>
 #include <QStringList>
+#include <QFileInfo>
+
+// C++ includes
 #include <atomic>
 
 // Handles file transfers for backup

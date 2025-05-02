@@ -3,9 +3,9 @@
 #include "../../../config/_constants.h"
 
 // Qt includes
+#include <QSet>
 #include <QDir>
 #include <QFileInfo>
-#include <QSet>
 
 // Constructor
 FileWatcher::FileWatcher(QObject *parent)

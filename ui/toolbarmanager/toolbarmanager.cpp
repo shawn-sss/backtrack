@@ -5,15 +5,15 @@
 #include "../../config/configmanager/configmanager.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
 
-// Built-in Qt includes
-#include <QApplication>
-#include <QToolBar>
-#include <QToolButton>
-#include <QSizePolicy>
+// Qt includes
 #include <QCursor>
 #include <QIcon>
-#include <QMessageBox>
+#include <QSizePolicy>
+#include <QToolButton>
+#include <QToolBar>
 #include <QWidget>
+#include <QMessageBox>
+#include <QApplication>
 
 // Constructor
 ToolbarManager::ToolbarManager(QObject *parent)
@@ -39,8 +39,8 @@ void ToolbarManager::setupAppearance(QToolBar *toolBar) {
     toolBar->setVisible(true);
     toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolBar->setStyleSheet(ToolbarStyles::BASE_STYLE);
-    toolBar->setIconSize(ToolbarStyles::DEFAULT_ICON_SIZE);
+    toolBar->setStyleSheet(ToolbarStyling::BASE_STYLE);
+    toolBar->setIconSize(ToolbarStyling::DEFAULT_ICON_SIZE);
 }
 
 // Creates all toolbar actions and connects their signals

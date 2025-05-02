@@ -5,7 +5,7 @@
 #include <QString>
 #include <QSize>
 
-namespace ToolbarStyles {
+namespace ToolbarStyling {
 
 // Icon size for toolbar actions
 inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);

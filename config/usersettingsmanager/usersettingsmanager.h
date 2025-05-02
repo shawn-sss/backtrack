@@ -2,8 +2,8 @@
 #define USERSETTINGSMANAGER_H
 
 // Qt includes
-#include <QJsonObject>
 #include <QString>
+#include <QJsonObject>
 
 // Manages user settings storage and access
 class UserSettingsManager {

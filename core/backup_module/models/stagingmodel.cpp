@@ -4,8 +4,8 @@
 
 // Qt includes
 #include <QFileInfo>
-#include <QStorageInfo>
 #include <QFileIconProvider>
+#include <QStorageInfo>
 
 // Constructor
 StagingModel::StagingModel(QObject *parent)

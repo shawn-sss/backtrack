@@ -1,20 +1,19 @@
 // Project includes
+#include "configmanager.h"
 #include "../_constants.h"
-#include "../../core/utils/file_utils/jsonmanager.h"
-#include "../usersettingsmanager/usersettingsmanager.h"
 #include "../backupsettingsmanager/backupsettingsmanager.h"
 #include "../installmetadatamanager/installmetadatamanager.h"
 #include "../thememanager/themeutils.h"
-#include "configmanager.h"
+#include "../usersettingsmanager/usersettingsmanager.h"
+#include "../../core/utils/file_utils/jsonmanager.h"
 
 // Qt includes
 #include <QDir>
 #include <QFile>
-#include <QDateTime>
 #include <QSaveFile>
+#include <QDateTime>
 #include <QStandardPaths>
 #include <QJsonDocument>
-#include <QDebug>
 
 // Singleton access
 ConfigManager& ConfigManager::getInstance() {

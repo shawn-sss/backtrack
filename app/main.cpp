@@ -1,8 +1,8 @@
 // Project includes
 #include "../config/_constants.h"
-#include "../ui/mainwindow/mainwindow.h"
 #include "../config/configmanager/configmanager.h"
 #include "../config/thememanager/thememanager.h"
+#include "../ui/mainwindow/mainwindow.h"
 
 // Qt includes
 #include <QApplication>

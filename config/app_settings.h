@@ -2,10 +2,10 @@
 #define APP_CONFIG_H
 
 // Qt includes
-#include <QDir>
-#include <QSize>
 #include <QString>
 #include <QStringLiteral>
+#include <QSize>
+#include <QDir>
 
 // Application metadata
 namespace AppInfo {

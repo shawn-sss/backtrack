@@ -1,12 +1,10 @@
 // Project includes
-#include "../../core/utils/file_utils/jsonmanager.h"
 #include "usersettingsmanager.h"
+#include "../../core/utils/file_utils/jsonmanager.h"
 
 // Constructor
 UserSettingsManager::UserSettingsManager(const QString& configFilePath)
-    : userConfigPath(configFilePath)
-{
-}
+    : userConfigPath(configFilePath) {}
 
 // Load user settings from file
 void UserSettingsManager::load() {

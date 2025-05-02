@@ -1,13 +1,15 @@
-/* GLOBAL STYLES ////////////////////////////// */
+/* === Base widget background and text === */
 QWidget {
     background-color: #f5f5f5;
     color: #000000;
 }
 
+/* === Push and tool buttons === */
 QPushButton, QToolButton {
     background-color: #dcdcdc;
     color: #000000;
-    border: 1px solid #aaaaaa;
+    border: 1px solid black;
+    border-radius: 6px;
     padding: 4px 8px;
 }
 
@@ -15,12 +17,24 @@ QPushButton:hover, QToolButton:hover {
     background-color: #bbbbbb;
 }
 
+/* === Input fields (text boxes, combo boxes, views) === */
 QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     background-color: #ffffff;
     color: #000000;
-    border: 1px solid #cccccc;
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 4px 6px;
 }
 
+/* === Tooltips === */
+QToolTip {
+    background-color: #ffffff;
+    color: #000000;
+    border: 1px solid black;
+    padding: 6px;
+}
+
+/* === Menus === */
 QMenu {
     background-color: #f5f5f5;
     color: #000000;
@@ -30,45 +44,49 @@ QMenu::item:selected {
     background-color: #dcdcdc;
 }
 
-QToolTip {
+/* === QTabWidget (DetailsTabWidget and similar) === */
+QTabWidget::pane {
+    background-color: #ffffff;
+    border: 1px solid black;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+QTabBar {
+    background-color: #f5f5f5;
+}
+
+QTabBar::tab {
+    background-color: #e0e0e0;
+    color: #000000;
+    border: 1px solid black;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    padding: 6px 12px;
+    font-weight: bold;
+}
+
+QTabBar::tab:selected {
     background-color: #ffffff;
     color: #000000;
-    border: 1px solid #aaaaaa;
+    border-color: black;
 }
 
-/* MAIN BACKUP WINDOW ////////////////////////////// */
-#BackupViewContainer {
-    background-color: #f5f5f5;
+/* === QListWidget category pane === */
+QListWidget {
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 4px;
 }
 
-#DestinationTreeTitleLabel,
-#SourceTreeTitleLabel,
-#StagingListTitleLabel {
-    color: #000000;
-}
-
-#DriveTreeView,
-#BackupStagingTreeView,
-#BackupDestinationView {
-    background-color: #f5f5f5;
-    color: #000000;
-}
-
-/* TOOLBAR */
-#MainToolBar {
-    background-color: transparent;
-}
-
-#MainToolBar QToolButton {
+QListWidget::item:selected {
     background-color: #dcdcdc;
-    color: #000000;
+    color: black;
+    font-weight: bold;
 }
 
-#MainToolBar QToolButton:hover {
-    background-color: #bbbbbb;
-}
-
-/* CUSTOM BUTTONS */
+/* === Custom backup buttons === */
 #ChangeBackupDestinationButton,
 #DeleteBackupButton,
 #AddToBackupButton,
@@ -76,6 +94,8 @@ QToolTip {
 #RemoveFromBackupButton {
     background-color: #dcdcdc;
     color: #000000;
+    border: 1px solid black;
+    border-radius: 6px;
 }
 
 #ChangeBackupDestinationButton:hover,

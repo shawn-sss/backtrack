@@ -1,17 +1,17 @@
 // Project includes
 #include "backupcontroller.h"
-#include "../../../config/_constants.h"
-#include "../../../config/configmanager/configmanager.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
+#include "../../../config/_constants.h"
+#include "../../../config/configmanager/configmanager.h"
 
 // Qt includes
+#include <QStringList>
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
-#include <QDateTime>
-#include <QThread>
 #include <QProgressBar>
-#include <QStringList>
+#include <QThread>
 
 // Constructor
 BackupController::BackupController(BackupService *service, QObject *parent)

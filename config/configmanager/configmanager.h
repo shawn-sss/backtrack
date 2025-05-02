@@ -1,11 +1,11 @@
 #ifndef CONFIGMANAGER_H
 #define CONFIGMANAGER_H
 
-// Qt includes
-#include <QString>
-
 // Project includes
 #include "../thememanager/themeutils.h"
+
+// Qt includes
+#include <QString>
 
 // Forward declarations
 class InstallMetadataManager;

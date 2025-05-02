@@ -3,10 +3,10 @@
 
 // Qt includes
 #include <QObject>
-#include <QToolBar>
 #include <QAction>
+#include <QToolBar>
 
-// C++ library
+// C++ includes
 #include <array>
 
 // Manages the application's toolbar appearance and actions

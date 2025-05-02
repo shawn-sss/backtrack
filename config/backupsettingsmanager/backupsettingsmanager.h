@@ -2,8 +2,8 @@
 #define BACKUPSETTINGSMANAGER_H
 
 // Qt includes
-#include <QJsonObject>
 #include <QString>
+#include <QJsonObject>
 
 // Forward declarations
 class UserSettingsManager;
@@ -11,7 +11,8 @@ class UserSettingsManager;
 // Handles backup settings management
 class BackupSettingsManager {
 public:
-    BackupSettingsManager(UserSettingsManager& settingsManager); // Constructor
+    // Constructor
+    BackupSettingsManager(UserSettingsManager& settingsManager);
 
     // Settings access
     QJsonObject getBackupSettings() const;

@@ -3,8 +3,8 @@
 
 // Qt includes
 #include <QObject>
-#include <QFileSystemWatcher>
 #include <QStringList>
+#include <QFileSystemWatcher>
 
 // Monitors file and directory changes
 class FileWatcher : public QObject {

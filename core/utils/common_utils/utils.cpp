@@ -4,10 +4,10 @@
 #include "../../../core/backup_module/models/stagingmodel.h"
 
 // Qt includes
-#include <QMouseEvent>
-#include <QProgressBar>
-#include <QPainter>
 #include <QSet>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QProgressBar>
 #include <QTreeView>
 #include <QFileSystemModel>
 

@@ -2,9 +2,9 @@
 #define BACKUP_SETTINGS_H
 
 // Qt includes
-#include <QDir>
 #include <QString>
 #include <QStringLiteral>
+#include <QDir>
 
 // Root path settings for backups
 namespace Backup::Paths {

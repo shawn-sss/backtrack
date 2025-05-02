@@ -2,8 +2,8 @@
 #define STAGINGMODEL_H
 
 // Qt includes
-#include <QVector>
 #include <QSet>
+#include <QVector>
 #include <QAbstractItemModel>
 
 // Manages staged backup paths
