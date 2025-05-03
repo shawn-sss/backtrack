@@ -45,12 +45,14 @@ void SettingsDialog::setupLayout() {
     centralLayout->setContentsMargins(0, 0, 0, 0);
     centralLayout->setSpacing(10);
 
+    // Category list on the left
     categoryList = new QListWidget(centralWidget);
     categoryList->addItem("User Settings");
     categoryList->addItem("System Settings");
     categoryList->setFixedWidth(150);
     centralLayout->addWidget(categoryList);
 
+    // Settings stack on the right
     settingsStack = new QStackedWidget(centralWidget);
     settingsStack->addWidget(createUserSettingsPage());
     settingsStack->addWidget(createSystemSettingsPage());
@@ -59,28 +61,21 @@ void SettingsDialog::setupLayout() {
     connect(categoryList, &QListWidget::currentRowChanged, settingsStack, &QStackedWidget::setCurrentIndex);
     categoryList->setCurrentRow(0);
 
-    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    // Only include the OK button (no Cancel)
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
     saveButton->setText("Save");
     saveButton->setCursor(Qt::PointingHandCursor);
 
-    QPushButton* cancelButton = buttonBox->button(QDialogButtonBox::Cancel);
-    if (cancelButton) {
-        cancelButton->setCursor(Qt::PointingHandCursor);
-    }
-
+    // Set fixed width to accommodate icon + text when updating label
     QFontMetrics fm(saveButton->font());
-    int saveWidth = fm.horizontalAdvance("Save");
-    int cancelWidth = fm.horizontalAdvance("Cancel");
-    int maxWidth = std::max(saveWidth, cancelWidth) + 30;
+    int saveWidth = fm.horizontalAdvance("🟢 Saved") + 40;
+    saveButton->setFixedWidth(saveWidth);
 
-    saveButton->setFixedWidth(maxWidth);
-    if (cancelButton)
-        cancelButton->setFixedWidth(maxWidth);
-
+    // Connect Save button signal
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
-    connect(buttonBox, &QDialogButtonBox::rejected, this, &SettingsDialog::onCancelClicked);
 
+    // Setup cooldown timer for save feedback
     saveCooldownTimer = new QTimer(this);
     saveCooldownTimer->setSingleShot(true);
     connect(saveCooldownTimer, &QTimer::timeout, this, [this]() {
@@ -121,6 +116,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     themeComboBox->addItem("Dark Mode", static_cast<int>(UserThemePreference::Dark));
     layout->addWidget(themeComboBox);
 
+    // Restore saved preference
     UserThemePreference savedPref = ConfigManager::getInstance().getThemePreference();
     int index = themeComboBox->findData(static_cast<int>(savedPref));
     if (index != -1) {
@@ -137,21 +133,17 @@ void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
 
+    // Save new settings to config
     ConfigManager::getInstance().setBackupPrefix(newPrefix);
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ConfigManager::getInstance().setThemePreference(selectedTheme);
     ThemeManager::applyTheme();
 
-    saveButton->setText("✓");
+    // Update save button to give visual feedback
+    saveButton->setText("✔️ Saved");
     saveButton->setEnabled(false);
     saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
 
     saveCooldownTimer->start(3000);
-}
-
-
-// Handles the Cancel button click logic
-void SettingsDialog::onCancelClicked() {
-    reject();
 }

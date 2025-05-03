@@ -35,7 +35,6 @@ private:
 private slots:
     // Event handlers
     void onSaveClicked();
-    void onCancelClicked();
 };
 
 #endif // SETTINGSDIALOG_H

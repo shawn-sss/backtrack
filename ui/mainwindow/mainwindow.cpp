@@ -204,6 +204,9 @@ void MainWindow::setupSourceTreeView() {
     ui->DriveTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     removeAllColumnsFromTreeView(ui->DriveTreeView);
+
+    ui->DriveTreeView->clearSelection();
+    ui->DriveTreeView->setCurrentIndex(QModelIndex());
 }
 
 // Set up backup staging tree view
@@ -342,7 +345,7 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
-    ui->CreateBackupButton->setText("✓");
+    ui->CreateBackupButton->setText("📦 Backing Up...");
     ui->CreateBackupButton->setEnabled(false);
     ui->CreateBackupButton->setStyleSheet(MainWindowStyling::COOLDOWN_BUTTON_STYLE);
 
