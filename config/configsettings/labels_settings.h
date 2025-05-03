@@ -13,8 +13,19 @@ constexpr auto k_TOTAL_COUNT = "Backup Total Count: ";
 constexpr auto k_TOTAL_SIZE = "Backup Total Size: ";
 constexpr auto k_LOCATION_ACCESS = "Backup Location Access: ";
 
-constexpr auto k_CREATE_BACKUP_BUTTON_TEXT = "Create Backup";
+// Feedback states with emoji
 constexpr auto k_BACKING_UP_BUTTON_TEXT = "📦 Backing Up...";
+constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT = "➕ Added!";
+constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT = "➖ Removed!";
+constexpr auto k_DELETE_BACKUP_BUTTON_TEXT = "🗑️ Deleted!";
+constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT = "📁 Changed!";
+
+// Original button texts
+constexpr auto k_CREATE_BACKUP_BUTTON_TEXT = "Create Backup";
+constexpr auto k_ADD_TO_BACKUP_ORIGINAL_TEXT = "Add to Backup";
+constexpr auto k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT = "Remove from Backup";
+constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT = "Delete Backup";
+constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "Change Location";
 }
 
 // Labels for last backup display

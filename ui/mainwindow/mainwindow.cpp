@@ -25,6 +25,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QScreen>
 #include <QFileDialog>
 #include <QStandardPaths>
@@ -298,7 +299,15 @@ void MainWindow::onAddToBackupClicked() {
                              ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
         return;
     }
+
     Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
+
+    ui->BackupStagingTreeView->clearSelection();
+    ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+    triggerButtonFeedback(ui->AddToBackupButton,
+                          Labels::Backup::k_ADD_TO_BACKUP_BUTTON_TEXT,
+                          Labels::Backup::k_ADD_TO_BACKUP_ORIGINAL_TEXT);
 }
 
 // Remove selected files from backup staging
@@ -309,7 +318,11 @@ void MainWindow::onRemoveFromBackupClicked() {
                              ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL);
         return;
     }
+
     Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
+    triggerButtonFeedback(ui->RemoveFromBackupButton,
+                          Labels::Backup::k_REMOVE_FROM_BACKUP_BUTTON_TEXT,
+                          Labels::Backup::k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT);
 }
 
 // Start the backup process
@@ -328,11 +341,11 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
-    ui->CreateBackupButton->setText(Labels::Backup::k_BACKING_UP_BUTTON_TEXT);
-    ui->CreateBackupButton->setEnabled(false);
-    ui->CreateBackupButton->setStyleSheet(MainWindowStyling::COOLDOWN_BUTTON_STYLE);
+    backupStartTimer.start();
 
-    createBackupCooldownTimer->start(Timing::k_BACKUP_BUTTON_COOLDOWN_MS);
+    ui->CreateBackupButton->setText(Labels::Backup::k_BACKING_UP_BUTTON_TEXT);
+    ui->CreateBackupButton->setStyleSheet(MainWindowStyling::BUTTON_FEEDBACK_STYLE);
+    ui->CreateBackupButton->setEnabled(false);
 
     ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
@@ -374,6 +387,9 @@ void MainWindow::onDeleteBackupClicked() {
                               QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
                               QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
         backupController->deleteBackup(selectedPath);
+        triggerButtonFeedback(ui->DeleteBackupButton,
+                              Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
+                              Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
     }
 }
 
@@ -407,9 +423,31 @@ void MainWindow::onChangeBackupDestinationClicked() {
     refreshBackupStatus();
     startWatchingBackupDirectory(selectedDir);
     updateFileWatcher();
+
+    triggerButtonFeedback(ui->ChangeBackupDestinationButton,
+                          Labels::Backup::k_CHANGE_DESTINATION_BUTTON_TEXT,
+                          Labels::Backup::k_CHANGE_DESTINATION_ORIGINAL_TEXT);
 }
 
 // Backup feedback and cooldown handling
+
+// Display button feedback
+void MainWindow::triggerButtonFeedback(QPushButton* button,
+                                       const QString& feedbackText,
+                                       const QString& originalText,
+                                       int durationMs) {
+    if (!button) return;
+
+    button->setText(feedbackText);
+    button->setStyleSheet(MainWindowStyling::BUTTON_FEEDBACK_STYLE);
+    button->setEnabled(false);
+
+    QTimer::singleShot(Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [button, originalText]() {
+        button->setText(originalText);
+        button->setStyleSheet(QString());
+        button->setEnabled(true);
+    });
+}
 
 // Enable backup button after cooldown
 void MainWindow::onCooldownFinished() {
@@ -420,8 +458,18 @@ void MainWindow::onCooldownFinished() {
 void MainWindow::onBackupCompleted() {
     ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_COMPLETION_MESSAGE);
     ui->TransferProgressText->setVisible(true);
-    QTimer::singleShot(Timing::k_BACKUP_UI_RESET_DELAY_MS, this, [this]() {
-        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+
+    const int elapsed = backupStartTimer.elapsed();
+    const int delay = qMax(0, Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+
+    QTimer::singleShot(delay, this, [this]() {
+        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+        ui->CreateBackupButton->setStyleSheet(QString());
+        ui->CreateBackupButton->setEnabled(true);
+
+        QTimer::singleShot(Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
+            ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+        });
     });
 }
 
@@ -430,6 +478,15 @@ void MainWindow::onBackupError(const QString& error) {
     Q_UNUSED(error);
     ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     ui->TransferProgressText->setVisible(true);
+
+    const int elapsed = backupStartTimer.elapsed();
+    const int delay = qMax(0, Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+
+    QTimer::singleShot(delay, this, [this]() {
+        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+        ui->CreateBackupButton->setStyleSheet(QString());
+        ui->CreateBackupButton->setEnabled(true);
+    });
 }
 
 // Backup status and label updates

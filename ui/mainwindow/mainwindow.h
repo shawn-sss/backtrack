@@ -1,10 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+// Project includes
+#include "../../config/configsettings/_settings.h"
+
 // Qt includes
 #include <QString>
 #include <QPoint>
 #include <QMainWindow>
+#include <QTimer>
+#include <QElapsedTimer>
 
 // Forward declarations (Qt classes)
 class QTreeView;
@@ -26,7 +31,7 @@ class BackupController;
 class CustomTitleBar;
 class ToolbarManager;
 
-// Forward declaration: generated UI class
+// Forward declarations (UI class)
 namespace Ui { class MainWindow; }
 
 // Main application window
@@ -35,11 +40,14 @@ class MainWindow final : public QMainWindow {
     Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
-    explicit MainWindow(QWidget* parent = nullptr); // Constructor
-    ~MainWindow() override;                         // Destructor
+    // Constructor
+    explicit MainWindow(QWidget* parent = nullptr);
+    // Destructor
+    ~MainWindow() override;
 
 protected:
-    void closeEvent(QCloseEvent* event) override;   // Handle close event
+    // Handle close event
+    void closeEvent(QCloseEvent* event) override;
 
 private:
     // UI initialization and setup
@@ -68,6 +76,12 @@ private:
     void startWatchingBackupDirectory(const QString& path);
     void connectBackupSignals();
     void resetCreateBackupButtonState();
+
+    // Unified button feedback handler
+    void triggerButtonFeedback(QPushButton* button,
+                               const QString& feedbackText,
+                               const QString& originalText,
+                               int durationMs = Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
 private slots:
     // Backup operations
@@ -102,9 +116,9 @@ private:
     BackupService* backupService = nullptr;
     BackupController* backupController = nullptr;
 
-    // Timers
+    // Timer for tracking feedback duration
     QTimer* createBackupCooldownTimer = nullptr;
-    QTimer* backupCooldownTimer = nullptr;
+    QElapsedTimer backupStartTimer;
 
     // Toolbar
     QToolBar* toolBar = nullptr;

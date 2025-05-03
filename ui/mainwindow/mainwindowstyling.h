@@ -1,15 +1,14 @@
 #ifndef MAINWINDOWSTYLING_H
 #define MAINWINDOWSTYLING_H
 
-// Qt includes
 #include <QString>
 
 namespace MainWindowStyling {
 
-// Style applied to the "Create Backup" button during cooldown
-inline const QString COOLDOWN_BUTTON_STYLE = QStringLiteral(
+// Unified style for short feedback
+inline const QString BUTTON_FEEDBACK_STYLE = QStringLiteral(
     "QPushButton {"
-    "  background-color: #FFA726;"
+    "  background-color: #64B5F6;"
     "  color: black;"
     "  font-weight: bold;"
     "  border: 1px solid black;"
