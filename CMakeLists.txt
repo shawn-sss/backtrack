@@ -32,23 +32,24 @@ set(APP_SOURCES
 
 # Project resources
 set(PROJECT_RESOURCES
-    resources/resource.qrc
-    resources/styles/light.qss
-    resources/styles/dark.qss
+    resources/icons_resource.qrc
+    resources/themes_resource.qrc
 )
 
 # Project settings
 set(PROJECT_SETTINGS
-    config/_constants.h
-    config/app_settings.h
-    config/backup_settings.h
-    config/cfgmgr_settings.h
-    config/labels_settings.h
-    config/messages_settings.h
-    config/progress_settings.h
-    config/utilities_settings.h
-    config/resources_settings.h
-    config/visual_settings.h
+    config/configsettings/_settings.h
+    config/configsettings/app_settings.h
+    config/configsettings/backup_settings.h
+    config/configsettings/cfgmgr_settings.h
+    config/configsettings/dialog_settings.h
+    config/configsettings/labels_settings.h
+    config/configsettings/messages_settings.h
+    config/configsettings/progress_settings.h
+    config/configsettings/utilities_settings.h
+    config/configsettings/resources_settings.h
+    config/configsettings/timing_settings.h
+    config/configsettings/visual_settings.h
 )
 
 # UI sources
@@ -101,20 +102,18 @@ set(UTILS_SOURCES
     core/utils/file_utils/fileoperations.h
     core/utils/common_utils/utils.cpp
     core/utils/common_utils/utils.h
-    config/configmanager/configmanager.cpp
-    config/configmanager/configmanager.h
+    config/configdirector/configdirector.cpp
+    config/configdirector/configdirector.h
     core/utils/file_utils/jsonmanager.cpp
     core/utils/file_utils/jsonmanager.h
-    config/thememanager/thememanager.cpp
-    config/thememanager/thememanager.h
-    config/thememanager/themeutils.cpp
-    config/thememanager/themeutils.h
-    config/installmetadatamanager/installmetadatamanager.cpp
-    config/installmetadatamanager/installmetadatamanager.h
-    config/backupsettingsmanager/backupsettingsmanager.cpp
-    config/backupsettingsmanager/backupsettingsmanager.h
-    config/usersettingsmanager/usersettingsmanager.cpp
-    config/usersettingsmanager/usersettingsmanager.h
+    config/configmanagers/thememanager/thememanager.cpp
+    config/configmanagers/thememanager/thememanager.h
+    config/configmanagers/installmetadatamanager/installmetadatamanager.cpp
+    config/configmanagers/installmetadatamanager/installmetadatamanager.h
+    config/configmanagers/backupsettingsmanager/backupsettingsmanager.cpp
+    config/configmanagers/backupsettingsmanager/backupsettingsmanager.h
+    config/configmanagers/usersettingsmanager/usersettingsmanager.cpp
+    config/configmanagers/usersettingsmanager/usersettingsmanager.h
 )
 
 # Combine all sources

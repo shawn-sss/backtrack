@@ -2,16 +2,20 @@
 #include "mainwindow.h"
 #include "mainwindowstyling.h"
 #include "ui_mainwindow.h"
-#include "../../config/_constants.h"
-#include "../../config/configmanager/configmanager.h"
+
+#include "../../config/configsettings/_settings.h"
+#include "../../config/configdirector/configdirector.h"
 #include "../../ui/toolbarmanager/toolbarmanager.h"
+
+#include "../../core/utils/common_utils/utils.h"
+#include "../../core/utils/file_utils/filewatcher.h"
+#include "../../core/utils/file_utils/fileoperations.h"
+
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/service/backupservice.h"
 #include "../../core/backup_module/styles/backup_styling.h"
 #include "../../core/backup_module/models/destinationproxymodel.h"
-#include "../../core/utils/file_utils/filewatcher.h"
-#include "../../core/utils/file_utils/fileoperations.h"
-#include "../../core/utils/common_utils/utils.h"
+#include "../../core/backup_module/models/stagingmodel.h"
 
 // Qt includes
 #include <QBuffer>
@@ -26,15 +30,16 @@
 #include <QStandardPaths>
 #include <QStyleFactory>
 #include <QFileSystemModel>
+#include <QHeaderView>
 
-// Constructor
+// Main window constructor
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     sourceModel(new QFileSystemModel(this)),
     destinationModel(new QFileSystemModel(this)),
     fileWatcher(new FileWatcher(this)),
-    backupService(new BackupService(ConfigManager::getInstance().getBackupDirectory())),
+    backupService(new BackupService(ConfigDirector::getInstance().getBackupDirectory())),
     stagingModel(new StagingModel(this)),
     backupController(new BackupController(backupService, this)),
     toolBar(new QToolBar(this)),
@@ -66,12 +71,12 @@ MainWindow::MainWindow(QWidget* parent)
     });
 }
 
-// Destructor
+// Main window destructor
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-// Window and layout configuration
+// UI setup and layout configuration
 
 // Configure basic window properties
 void MainWindow::configureWindow() {
@@ -101,23 +106,6 @@ void MainWindow::setupLayout() {
     setCentralWidget(container);
 }
 
-// Apply pointing hand cursor to buttons
-void MainWindow::applyButtonCursors() {
-    const QList<QPushButton*> buttons = {
-        ui->AddToBackupButton,
-        ui->RemoveFromBackupButton,
-        ui->CreateBackupButton,
-        ui->ChangeBackupDestinationButton,
-        ui->DeleteBackupButton
-    };
-
-    for (auto* button : buttons) {
-        button->setCursor(Qt::PointingHandCursor);
-    }
-}
-
-// UI initialization and setup
-
 // Initialize the UI
 void MainWindow::initializeUI() {
     Utils::UI::setupProgressBar(
@@ -134,21 +122,18 @@ void MainWindow::initializeUI() {
     }
 }
 
-// Initialize the backup system
-void MainWindow::initializeBackupSystem() {
-    const QString backupDirectory = ConfigManager::getInstance().getBackupDirectory();
-    if (!FileOperations::createDirectory(backupDirectory)) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
-                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
-    }
+// Apply pointing hand cursor to buttons
+void MainWindow::applyButtonCursors() {
+    const QList<QPushButton*> buttons = {
+        ui->AddToBackupButton,
+        ui->RemoveFromBackupButton,
+        ui->CreateBackupButton,
+        ui->ChangeBackupDestinationButton,
+        ui->DeleteBackupButton
+    };
 
-    setupDestinationView();
-    setupSourceTreeView();
-    setupBackupStagingTreeView();
-    refreshBackupStatus();
-
-    if (!fileWatcher->watchedDirectories().contains(backupDirectory)) {
-        startWatchingBackupDirectory(backupDirectory);
+    for (auto* button : buttons) {
+        button->setCursor(Qt::PointingHandCursor);
     }
 }
 
@@ -171,11 +156,7 @@ void MainWindow::setupConnections() {
         connect(conn.button, &QPushButton::clicked, this, conn.slot);
     }
 
-    connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
-        ui->CreateBackupButton->setText("Create Backup");
-        ui->CreateBackupButton->setEnabled(true);
-        ui->CreateBackupButton->setStyleSheet(QString());
-    });
+    connect(createBackupCooldownTimer, &QTimer::timeout, this, &MainWindow::resetCreateBackupButtonState);
 }
 
 // Connect backup-related signals
@@ -192,7 +173,32 @@ void MainWindow::connectBackupSignals() {
             });
 }
 
-// File and view setup
+// Reset "Create Backup" button to initial state
+void MainWindow::resetCreateBackupButtonState() {
+    ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+    ui->CreateBackupButton->setEnabled(true);
+    ui->CreateBackupButton->setStyleSheet(QString());
+}
+
+// Backup system initialization and view setup
+
+// Initialize the backup system
+void MainWindow::initializeBackupSystem() {
+    const QString backupDirectory = ConfigDirector::getInstance().getBackupDirectory();
+    if (!FileOperations::createDirectory(backupDirectory)) {
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
+                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
+    }
+
+    setupDestinationView();
+    setupSourceTreeView();
+    setupBackupStagingTreeView();
+    refreshBackupStatus();
+
+    if (!fileWatcher->watchedDirectories().contains(backupDirectory)) {
+        startWatchingBackupDirectory(backupDirectory);
+    }
+}
 
 // Set up source tree view
 void MainWindow::setupSourceTreeView() {
@@ -234,7 +240,7 @@ void MainWindow::setupDestinationView() {
 
     ui->BackupDestinationView->setModel(destinationProxyModel);
 
-    QString backupDir = ConfigManager::getInstance().getBackupDirectory();
+    QString backupDir = ConfigDirector::getInstance().getBackupDirectory();
     QModelIndex sourceRootIndex = destinationModel->setRootPath(backupDir);
     QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
     ui->BackupDestinationView->setRootIndex(proxyRootIndex);
@@ -254,7 +260,7 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView* treeView) {
     }
 }
 
-// File watcher and directory monitoring
+// File watcher setup and monitoring
 
 // Start watching a directory for changes
 void MainWindow::startWatchingBackupDirectory(const QString& path) {
@@ -270,42 +276,19 @@ void MainWindow::updateFileWatcher() {
     }
 }
 
-// Handle file change event
-void MainWindow::onFileChanged(const QString& path) {
-    Q_UNUSED(path);
-    refreshBackupStatus();
-}
-
 // Handle backup directory change event
 void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
     refreshBackupStatus();
 }
 
-// Backup process management
-
-// Handle backup completion
-void MainWindow::onBackupCompleted() {
-    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_COMPLETION_MESSAGE);
-    ui->TransferProgressText->setVisible(true);
-    QTimer::singleShot(3000, this, [this]() {
-        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
-    });
+// Handle file change event
+void MainWindow::onFileChanged(const QString& path) {
+    Q_UNUSED(path);
+    refreshBackupStatus();
 }
 
-// Handle backup error
-void MainWindow::onBackupError(const QString& error) {
-    Q_UNUSED(error);
-    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
-    ui->TransferProgressText->setVisible(true);
-}
-
-// Enable backup button after cooldown
-void MainWindow::onCooldownFinished() {
-    ui->CreateBackupButton->setEnabled(true);
-}
-
-// UI interaction handlers
+// Backup operation handlers
 
 // Add selected files to backup staging
 void MainWindow::onAddToBackupClicked() {
@@ -345,11 +328,11 @@ void MainWindow::onCreateBackupClicked() {
         return;
     }
 
-    ui->CreateBackupButton->setText("📦 Backing Up...");
+    ui->CreateBackupButton->setText(Labels::Backup::k_BACKING_UP_BUTTON_TEXT);
     ui->CreateBackupButton->setEnabled(false);
     ui->CreateBackupButton->setStyleSheet(MainWindowStyling::COOLDOWN_BUTTON_STYLE);
 
-    createBackupCooldownTimer->start(3000);
+    createBackupCooldownTimer->start(Timing::k_BACKUP_BUTTON_COOLDOWN_MS);
 
     ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
@@ -394,8 +377,6 @@ void MainWindow::onDeleteBackupClicked() {
     }
 }
 
-// Backup destination management
-
 // Change the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
@@ -428,7 +409,30 @@ void MainWindow::onChangeBackupDestinationClicked() {
     updateFileWatcher();
 }
 
-// Backup system status and UI updates
+// Backup feedback and cooldown handling
+
+// Enable backup button after cooldown
+void MainWindow::onCooldownFinished() {
+    ui->CreateBackupButton->setEnabled(true);
+}
+
+// Handle backup completion
+void MainWindow::onBackupCompleted() {
+    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
+    QTimer::singleShot(Timing::k_BACKUP_UI_RESET_DELAY_MS, this, [this]() {
+        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+    });
+}
+
+// Handle backup error
+void MainWindow::onBackupError(const QString& error) {
+    Q_UNUSED(error);
+    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setVisible(true);
+}
+
+// Backup status and label updates
 
 // Refresh the backup status
 void MainWindow::refreshBackupStatus() {

@@ -6,7 +6,7 @@
 
 namespace MainWindowStyling {
 
-// Create backup button cooldown style
+// Style applied to the "Create Backup" button during cooldown
 inline const QString COOLDOWN_BUTTON_STYLE = QStringLiteral(
     "QPushButton {"
     "  background-color: #FFA726;"

@@ -1,58 +1,58 @@
 // Project includes
 #include "settingsdialog.h"
 #include "settingsdialogstyling.h"
-#include "../../config/_constants.h"
-#include "../../config/configmanager/configmanager.h"
-#include "../../config/thememanager/thememanager.h"
+#include "../../config/configsettings/_settings.h"
+#include "../../config/configdirector/configdirector.h"
+#include "../../config/configmanagers/thememanager/thememanager.h"
 
 // Qt includes
-#include <QFontMetrics>
 #include <QLabel>
-#include <QSizePolicy>
-#include <QSpacerItem>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QFormLayout>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSpacerItem>
 #include <QDialogButtonBox>
+#include <QFontMetrics>
+#include <QSignalBlocker>
+#include <QSizePolicy>
+#include <QTimer>
 
 using namespace SettingsDialogStyling;
+using namespace SettingsDialogConfig;
 
-// Constructor for the settings dialog
+// Constructor
 SettingsDialog::SettingsDialog(QWidget* parent)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
-    setMinimumSize(QSize(600, 400));
+    setMinimumSize(QSize(k_DIALOG_MIN_WIDTH, k_DIALOG_MIN_HEIGHT));
     setupLayout();
 }
 
 // Destructor
 SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the layout and widgets for the dialog
+// Sets up the full dialog layout, widgets, and connections
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(10, 10, 10, 10);
-    mainLayout->setSpacing(10);
+    mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
+    mainLayout->setSpacing(k_MAIN_SPACING);
 
     auto* centralWidget = new QWidget(this);
     auto* centralLayout = new QHBoxLayout(centralWidget);
     centralLayout->setContentsMargins(0, 0, 0, 0);
-    centralLayout->setSpacing(10);
+    centralLayout->setSpacing(k_MAIN_SPACING);
 
-    // Category list on the left
     categoryList = new QListWidget(centralWidget);
     categoryList->addItem("User Settings");
     categoryList->addItem("System Settings");
-    categoryList->setFixedWidth(150);
+    categoryList->setFixedWidth(k_CATEGORY_LIST_WIDTH);
     centralLayout->addWidget(categoryList);
 
-    // Settings stack on the right
     settingsStack = new QStackedWidget(centralWidget);
     settingsStack->addWidget(createUserSettingsPage());
     settingsStack->addWidget(createSystemSettingsPage());
@@ -61,25 +61,21 @@ void SettingsDialog::setupLayout() {
     connect(categoryList, &QListWidget::currentRowChanged, settingsStack, &QStackedWidget::setCurrentIndex);
     categoryList->setCurrentRow(0);
 
-    // Only include the OK button (no Cancel)
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
-    saveButton->setText("Save");
+    saveButton->setText(k_BUTTON_SAVE_TEXT);
     saveButton->setCursor(Qt::PointingHandCursor);
 
-    // Set fixed width to accommodate icon + text when updating label
     QFontMetrics fm(saveButton->font());
-    int saveWidth = fm.horizontalAdvance("🟢 Saved") + 40;
+    int saveWidth = fm.horizontalAdvance(k_BUTTON_SAVE_WIDTH_TEXT) + 40;
     saveButton->setFixedWidth(saveWidth);
 
-    // Connect Save button signal
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SettingsDialog::onSaveClicked);
 
-    // Setup cooldown timer for save feedback
     saveCooldownTimer = new QTimer(this);
     saveCooldownTimer->setSingleShot(true);
     connect(saveCooldownTimer, &QTimer::timeout, this, [this]() {
-        saveButton->setText("Save");
+        saveButton->setText(k_BUTTON_SAVE_TEXT);
         saveButton->setEnabled(true);
         saveButton->setStyleSheet(QString());
     });
@@ -88,36 +84,35 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Creates the user settings page
+// Creates and returns the user settings page widget
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
 
     backupPrefixEdit = new QLineEdit(widget);
-    backupPrefixEdit->setText(ConfigManager::getInstance().getBackupPrefix());
-    layout->addRow("Backup Prefix:", backupPrefixEdit);
+    backupPrefixEdit->setText(ConfigDirector::getInstance().getBackupPrefix());
+    layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
 
-    layout->addRow(new QLabel("Modify the prefix used when creating backups."));
+    layout->addRow(new QLabel(k_LABEL_BACKUP_PREFIX_TOOLTIP));
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     return widget;
 }
 
-// Creates the system settings page
+// Creates and returns the system settings page widget
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
 
-    layout->addWidget(new QLabel("Theme:"));
+    layout->addWidget(new QLabel(k_LABEL_THEME));
 
     themeComboBox = new QComboBox(widget);
-    themeComboBox->addItem("System Default", static_cast<int>(UserThemePreference::Auto));
-    themeComboBox->addItem("Light Mode", static_cast<int>(UserThemePreference::Light));
-    themeComboBox->addItem("Dark Mode", static_cast<int>(UserThemePreference::Dark));
+    themeComboBox->addItem(k_LABEL_THEME_SYSTEM_DEFAULT, static_cast<int>(UserThemePreference::Auto));
+    themeComboBox->addItem(k_LABEL_THEME_LIGHT_MODE, static_cast<int>(UserThemePreference::Light));
+    themeComboBox->addItem(k_LABEL_THEME_DARK_MODE, static_cast<int>(UserThemePreference::Dark));
     layout->addWidget(themeComboBox);
 
-    // Restore saved preference
-    UserThemePreference savedPref = ConfigManager::getInstance().getThemePreference();
+    UserThemePreference savedPref = ConfigDirector::getInstance().getThemePreference();
     int index = themeComboBox->findData(static_cast<int>(savedPref));
     if (index != -1) {
         QSignalBlocker blocker(themeComboBox);
@@ -128,22 +123,19 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles the Save button click logic
+// Handles saving settings and triggering visual feedback
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
-
-    // Save new settings to config
-    ConfigManager::getInstance().setBackupPrefix(newPrefix);
+    ConfigDirector::getInstance().setBackupPrefix(newPrefix);
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
-    ConfigManager::getInstance().setThemePreference(selectedTheme);
+    ConfigDirector::getInstance().setThemePreference(selectedTheme);
     ThemeManager::applyTheme();
 
-    // Update save button to give visual feedback
-    saveButton->setText("✔️ Saved");
+    saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);
     saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
 
-    saveCooldownTimer->start(3000);
+    saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
 }

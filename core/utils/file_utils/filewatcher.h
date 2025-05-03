@@ -11,31 +11,27 @@ class FileWatcher : public QObject {
     Q_OBJECT
 
 public:
-    // Constructs the file watcher
+    // Constructor
     explicit FileWatcher(QObject *parent = nullptr);
 
-    // Replaces the current watch list with a new set of paths
+    // Updates the entire list of watched paths
     void updateWatchList(const QStringList &paths);
 
-    // Adds a single path to the watch list
+    // Watchlist management
+    // Adds a single path
     void addPath(const QString &path);
-
-    // Adds multiple paths to the watch list
+    // Adds multiple paths
     void addPaths(const QStringList &paths);
-
-    // Removes a single path from the watch list
+    // Removes a single path
     void removePath(const QString &path);
-
-    // Removes all currently watched paths
+    // Removes all paths
     void removeAllPaths();
 
-    // Returns the list of currently watched directories
+    // Accessors for current watch state
     QStringList watchedDirectories() const;
-
-    // Returns the list of currently watched files
     QStringList watchedFiles() const;
 
-    // Begins watching a root path and related folders/files
+    // Begins watching a structured backup directory
     void startWatching(const QString &rootPath);
 
 signals:

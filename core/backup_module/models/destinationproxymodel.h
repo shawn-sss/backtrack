@@ -5,22 +5,22 @@
 #include <QString>
 #include <QSortFilterProxyModel>
 
-// DestinationProxyModel class definition
+// Filters out a specific folder from display in views
 class DestinationProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
 public:
-    // Constructor: Initializes the proxy model with an optional parent object
-    explicit DestinationProxyModel(QObject *parent = nullptr);
+    // Constructor
+    explicit DestinationProxyModel(QObject* parent = nullptr);
 
-    // Sets the folder name to exclude during filtering (case insensitive)
-    void setExcludedFolderName(const QString &folderName);
+    // Set folder name to exclude (case-insensitive)
+    void setExcludedFolderName(const QString& folderName);
 
-    // Determines if a row should be included based on the exclusion rule
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+    // Filter logic override
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
 private:
-    // Stores the folder name to exclude from the model (case insensitive)
+    // Folder name to exclude
     QString excludedFolderName;
 };
 

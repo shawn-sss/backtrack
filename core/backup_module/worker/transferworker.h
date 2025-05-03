@@ -9,40 +9,36 @@
 // C++ includes
 #include <atomic>
 
-// Handles file transfers for backup
+// Executes file/folder transfers for backup operations
 class TransferWorker : public QObject {
     Q_OBJECT
 
 public:
-    // Constructs the transfer worker with files and destination
-    explicit TransferWorker(const QStringList &files, const QString &destination, QObject *parent = nullptr);
+    // Constructor
+    explicit TransferWorker(const QStringList& files, const QString& destination, QObject* parent = nullptr);
     Q_DISABLE_COPY(TransferWorker)
 
 public slots:
-    // Starts the file transfer operation
+    // Starts the transfer operation
     void startTransfer();
 
-    // Requests the transfer to stop
+    // Stops the transfer operation
     void stopTransfer();
 
 signals:
-    // Signals to track progress and transfer status
+    // Transfer status signals
     void progressUpdated(int progress);
     void transferComplete();
-    void errorOccurred(const QString &error);
+    void errorOccurred(const QString& error);
     void finished();
 
 private:
-    // Processes an entire drive root
-    bool processDriveRoot(const QString &driveRoot);
+    // Transfer helpers
+    bool processDriveRoot(const QString& driveRoot);
+    bool processFileOrFolder(const QString& filePath);
+    bool copyItem(const QFileInfo& fileInfo, const QString& destinationPath);
 
-    // Processes a single file or directory
-    bool processFileOrFolder(const QString &filePath);
-
-    // Copies a file or recursively copies a directory
-    bool copyItem(const QFileInfo &fileInfo, const QString &destinationPath);
-
-    // Internal transfer parameters
+    // Internal state
     QStringList files;
     QString destination;
     std::atomic<bool> stopRequested{false};

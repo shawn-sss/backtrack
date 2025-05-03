@@ -1,11 +1,12 @@
 // Project includes
 #include "filewatcher.h"
-#include "../../../config/_constants.h"
+#include "../../../config/configsettings/_settings.h"
 
 // Qt includes
-#include <QSet>
-#include <QDir>
 #include <QFileInfo>
+#include <QDir>
+#include <QSet>
+#include <QFileSystemWatcher>
 
 // Constructor
 FileWatcher::FileWatcher(QObject *parent)
@@ -14,7 +15,7 @@ FileWatcher::FileWatcher(QObject *parent)
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::fileChanged);
 }
 
-// Replaces the entire watch list with new paths
+// Replaces the current watch list with a new set of paths
 void FileWatcher::updateWatchList(const QStringList &paths) {
     removeAllPaths();
     addPaths(paths);
@@ -55,7 +56,7 @@ void FileWatcher::addPaths(const QStringList &paths) {
     }
 }
 
-// Removes a single path from the watch list
+// Removes a single file or directory from the watch list
 void FileWatcher::removePath(const QString &path) {
     QString normalizedPath = QDir::fromNativeSeparators(path);
     if (watcher->directories().contains(normalizedPath) ||
@@ -64,7 +65,7 @@ void FileWatcher::removePath(const QString &path) {
     }
 }
 
-// Removes all watched files and directories
+// Removes all files and directories from the watch list
 void FileWatcher::removeAllPaths() {
     QStringList allPaths = watcher->directories() + watcher->files();
     if (!allPaths.isEmpty()) {
@@ -72,17 +73,17 @@ void FileWatcher::removeAllPaths() {
     }
 }
 
-// Returns all currently watched directories
+// Returns the list of currently watched directories
 QStringList FileWatcher::watchedDirectories() const {
     return watcher->directories();
 }
 
-// Returns all currently watched files
+// Returns the list of currently watched files
 QStringList FileWatcher::watchedFiles() const {
     return watcher->files();
 }
 
-// Begins watching a backup root and its key subpaths
+// Starts watching a backup root and related subpaths
 void FileWatcher::startWatching(const QString &rootPath) {
     removeAllPaths();
 

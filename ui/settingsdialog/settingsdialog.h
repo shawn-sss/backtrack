@@ -2,14 +2,15 @@
 #define SETTINGSDIALOG_H
 
 // Qt includes
-#include <QTimer>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QComboBox>
+#include <QDialog>
 #include <QListWidget>
 #include <QStackedWidget>
-#include <QDialog>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
+#include <QTimer>
 
+// Dialog for managing user and system settings
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -19,12 +20,14 @@ public:
     ~SettingsDialog() override;
 
 private:
-    // Layout and UI setup methods
+    // Layout initialization
     void setupLayout();
+
+    // Page creation helpers
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
 
-    // Core UI elements
+    // Core UI components
     QListWidget* categoryList;
     QStackedWidget* settingsStack;
     QLineEdit* backupPrefixEdit;
@@ -33,7 +36,7 @@ private:
     QTimer* saveCooldownTimer;
 
 private slots:
-    // Event handlers
+    // Handles the Save button logic
     void onSaveClicked();
 };
 

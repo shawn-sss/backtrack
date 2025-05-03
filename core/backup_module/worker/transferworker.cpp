@@ -1,7 +1,7 @@
 // Project includes
-#include "transferworker.h"
-#include "../../../config/_constants.h"
+#include "../../../config/configsettings/_settings.h"
 #include "../../utils/file_utils/fileoperations.h"
+#include "transferworker.h"
 
 // Qt includes
 #include <QDir>
@@ -9,15 +9,15 @@
 #include <QStorageInfo>
 
 // Constructor
-TransferWorker::TransferWorker(const QStringList &files, const QString &destination, QObject *parent)
+TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// Requests the transfer to stop
+// Request transfer to stop early
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
-// Begins the file/folder transfer process
+// Start file/folder transfer in sequence
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -28,7 +28,7 @@ void TransferWorker::startTransfer() {
     const int totalFiles = files.size();
     int completedFiles = 0;
 
-    for (const QString &filePath : std::as_const(files)) {
+    for (const QString& filePath : std::as_const(files)) {
         if (stopRequested.load()) {
             emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
             emit finished();
@@ -52,8 +52,8 @@ void TransferWorker::startTransfer() {
     emit finished();
 }
 
-// Handles copying the contents of a drive root
-bool TransferWorker::processDriveRoot(const QString &driveRoot) {
+// Copy the contents of a full drive (e.g., C:/)
+bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     if (stopRequested.load()) return false;
 
     const QFileInfo fileInfo(driveRoot);
@@ -77,13 +77,13 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
         return false;
     }
 
-    if (!backupDir.mkpath(QStringLiteral("."))) {
+    if (!backupDir.mkpath(".")) {
         emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
         return false;
     }
 
     const QFileInfoList entries = QDir(driveRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
-    for (const QFileInfo &entry : entries) {
+    for (const QFileInfo& entry : entries) {
         if (!copyItem(entry, backupDir.filePath(entry.fileName()))) {
             return false;
         }
@@ -92,8 +92,8 @@ bool TransferWorker::processDriveRoot(const QString &driveRoot) {
     return true;
 }
 
-// Handles copying a single file or directory
-bool TransferWorker::processFileOrFolder(const QString &filePath) {
+// Copy an individual file or folder
+bool TransferWorker::processFileOrFolder(const QString& filePath) {
     if (stopRequested.load()) return false;
 
     const QFileInfo fileInfo(filePath);
@@ -102,8 +102,8 @@ bool TransferWorker::processFileOrFolder(const QString &filePath) {
     return copyItem(fileInfo, destPath);
 }
 
-// Copies a single file or recursively copies a directory
-bool TransferWorker::copyItem(const QFileInfo &fileInfo, const QString &destinationPath) {
+// Copy a file or recursively copy a directory
+bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
     if (!fileInfo.isReadable()) {
         emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
         return false;

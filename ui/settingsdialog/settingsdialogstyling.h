@@ -6,7 +6,7 @@
 
 namespace SettingsDialogStyling {
 
-// Save button cooldown style
+// Style applied to the Save button during cooldown feedback
 inline const QString COOLDOWN_BUTTON_STYLE = QStringLiteral(
     "QPushButton {"
     "  background-color: #28a745;"

@@ -15,8 +15,9 @@ class QWidget;
 class QMouseEvent;
 class QCloseEvent;
 class QTimer;
+class QToolBar;
 
-// Forward declarations (custom classes)
+// Forward declarations (Custom classes)
 class BackupService;
 class StagingModel;
 class DestinationProxyModel;
@@ -25,7 +26,7 @@ class BackupController;
 class CustomTitleBar;
 class ToolbarManager;
 
-// Forward declaration (UI)
+// Forward declaration: generated UI class
 namespace Ui { class MainWindow; }
 
 // Main application window
@@ -35,13 +36,13 @@ class MainWindow final : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget* parent = nullptr); // Constructor
-    ~MainWindow() override; // Destructor
+    ~MainWindow() override;                         // Destructor
 
 protected:
-    void closeEvent(QCloseEvent* event) override; // Handle window close event
+    void closeEvent(QCloseEvent* event) override;   // Handle close event
 
 private:
-    // UI Initialization and setup
+    // UI initialization and setup
     void configureWindow();
     void setupLayout();
     void applyButtonCursors();
@@ -49,13 +50,13 @@ private:
     void initializeBackupSystem();
     void setupConnections();
 
-    // Backup view setup
+    // Backup tree views
     void setupDestinationView();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // Backup system monitoring
+    // Backup status and monitoring
     void refreshBackupStatus();
     void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
@@ -66,9 +67,10 @@ private:
     void updateFileWatcher();
     void startWatchingBackupDirectory(const QString& path);
     void connectBackupSignals();
+    void resetCreateBackupButtonState();
 
 private slots:
-    // Backup operation handlers
+    // Backup operations
     void onAddToBackupClicked();
     void onChangeBackupDestinationClicked();
     void onRemoveFromBackupClicked();
@@ -76,35 +78,35 @@ private slots:
     void onDeleteBackupClicked();
     void onCooldownFinished();
 
-    // File watcher event handlers
+    // File watcher events
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
 
-    // Backup feedback handlers
+    // Backup completion and error handlers
     void onBackupCompleted();
     void onBackupError(const QString& error);
 
 private:
-    // UI elements
+    // UI components
     Ui::MainWindow* ui = nullptr;
     CustomTitleBar* titleBar = nullptr;
 
-    // File models
+    // File system models
     QFileSystemModel* sourceModel = nullptr;
     StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
     DestinationProxyModel* destinationProxyModel = nullptr;
 
-    // Backup system components
+    // Backup components
     FileWatcher* fileWatcher = nullptr;
     BackupService* backupService = nullptr;
     BackupController* backupController = nullptr;
 
-    // Timing components
+    // Timers
     QTimer* createBackupCooldownTimer = nullptr;
     QTimer* backupCooldownTimer = nullptr;
 
-    // Toolbar components
+    // Toolbar
     QToolBar* toolBar = nullptr;
     ToolbarManager* toolbarManager = nullptr;
 };

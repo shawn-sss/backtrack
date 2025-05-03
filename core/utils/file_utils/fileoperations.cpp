@@ -1,12 +1,12 @@
 // Project includes
 #include "fileoperations.h"
-#include "../../../config/_constants.h"
+#include "../../../config/configsettings/_settings.h"
 
 // Qt includes
 #include <QDir>
 #include <QFile>
-#include <QSaveFile>
 #include <QFileInfoList>
+#include <QSaveFile>
 #include <QJsonDocument>
 
 namespace FileOperations {

@@ -1,6 +1,6 @@
 // Project includes
+#include "../../../config/configsettings/_settings.h"
 #include "stagingmodel.h"
-#include "../../../config/_constants.h"
 
 // Qt includes
 #include <QFileInfo>
@@ -8,42 +8,42 @@
 #include <QStorageInfo>
 
 // Constructor
-StagingModel::StagingModel(QObject *parent)
+StagingModel::StagingModel(QObject* parent)
     : QAbstractItemModel(parent) {
     stagedPaths.reserve(10);
 }
 
-// Creates an index for a row in the flat model
-QModelIndex StagingModel::index(int row, int column, const QModelIndex &parent) const {
+// Return index for an item in the flat model
+QModelIndex StagingModel::index(int row, int column, const QModelIndex& parent) const {
     if (!parent.isValid() && row >= 0 && row < stagedPaths.size() && column == 0) {
         return createIndex(row, column);
     }
     return {};
 }
 
-// Returns the parent index (none, as model is flat)
-QModelIndex StagingModel::parent(const QModelIndex &) const {
+// Return parent index (flat model has no hierarchy)
+QModelIndex StagingModel::parent(const QModelIndex&) const {
     return {};
 }
 
-// Returns the number of rows in the model
-int StagingModel::rowCount(const QModelIndex &parent) const {
+// Return number of rows (staged items)
+int StagingModel::rowCount(const QModelIndex& parent) const {
     return parent.isValid() ? 0 : stagedPaths.size();
 }
 
-// Returns number of columns in the model (always 1)
-int StagingModel::columnCount(const QModelIndex &) const {
+// Return number of columns (always 1)
+int StagingModel::columnCount(const QModelIndex&) const {
     return 1;
 }
 
-// Provides data for the given index and role
-QVariant StagingModel::data(const QModelIndex &index, int role) const {
+// Return data for display, tooltip, or decoration
+QVariant StagingModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || index.row() >= stagedPaths.size()) {
         return {};
     }
 
     static QFileIconProvider iconProvider;
-    const QString &path = stagedPaths.at(index.row());
+    const QString& path = stagedPaths.at(index.row());
     QFileInfo fileInfo(path);
 
     switch (role) {
@@ -66,7 +66,7 @@ QVariant StagingModel::data(const QModelIndex &index, int role) const {
     }
 }
 
-// Provides header label for the staging list view
+// Return column header text
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
         return UISettings::TreeView::k_STAGING_COLUMN_NAME;
@@ -74,8 +74,8 @@ QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int 
     return {};
 }
 
-// Adds a new file path to the staging list
-void StagingModel::addPath(const QString &path) {
+// Add a new path to the staging list
+void StagingModel::addPath(const QString& path) {
     if (!path.isEmpty() && !stagedPathsSet.contains(path)) {
         beginInsertRows({}, stagedPaths.size(), stagedPaths.size());
         stagedPaths.append(path);
@@ -84,8 +84,8 @@ void StagingModel::addPath(const QString &path) {
     }
 }
 
-// Removes a file path from the staging list
-void StagingModel::removePath(const QString &path) {
+// Remove a path from the staging list
+void StagingModel::removePath(const QString& path) {
     int index = stagedPaths.indexOf(path);
     if (index != -1) {
         beginRemoveRows({}, index, index);
@@ -95,7 +95,7 @@ void StagingModel::removePath(const QString &path) {
     }
 }
 
-// Returns the list of currently staged paths
+// Return a copy of all staged paths
 QStringList StagingModel::getStagedPaths() const {
     return stagedPaths.toList();
 }

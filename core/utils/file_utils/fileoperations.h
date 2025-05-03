@@ -6,7 +6,6 @@
 #include <QSet>
 #include <QDir>
 #include <QJsonArray>
-#include <QJsonObject>
 
 namespace FileOperations {
 

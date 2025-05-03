@@ -1,7 +1,7 @@
 // Project includes
-#include "utils.h"
-#include "../../../../config/_constants.h"
+#include "../../../../config/configsettings/_settings.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
+#include "utils.h"
 
 // Qt includes
 #include <QSet>
@@ -13,11 +13,10 @@
 
 namespace Utils {
 
-// UI-related utilities
 namespace UI {
 
-// Handles window dragging on mouse press
-void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition) {
+// Enables dragging a window
+void handleMousePress(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (event->button() == Qt::LeftButton) {
         dragging = true;
         lastMousePosition = event->globalPosition().toPoint();
@@ -25,8 +24,8 @@ void handleMousePress(QWidget *window, QMouseEvent *event, bool &dragging, QPoin
     }
 }
 
-// Handles window movement on mouse drag
-void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, QPoint &lastMousePosition) {
+// Moves the window during drag
+void handleMouseMove(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (dragging && window) {
         QPoint delta = event->globalPosition().toPoint() - lastMousePosition;
         window->move(window->pos() + delta);
@@ -34,35 +33,33 @@ void handleMouseMove(QWidget *window, QMouseEvent *event, bool &dragging, QPoint
     }
 }
 
-// Handles mouse release event
-void handleMouseRelease(QMouseEvent *event, bool &dragging) {
+// Ends dragging on mouse release
+void handleMouseRelease(QMouseEvent* event, bool& dragging) {
     if (event->button() == Qt::LeftButton) {
         dragging = false;
         event->accept();
     }
 }
 
-// Hides specific columns in a QTreeView
-void removeAllColumnsFromTreeView(QTreeView *treeView, int startColumn, int columnCount) {
+// Hides tree view columns starting from a column index
+void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int columnCount) {
     if (!treeView || !treeView->model()) return;
-
     for (int i = startColumn; i < columnCount; ++i) {
         treeView->setColumnHidden(i, true);
     }
 }
 
-// Configures a progress bar
-void setupProgressBar(QProgressBar *progressBar, int minValue, int maxValue, int height, bool textVisible) {
+// Configures a progress bar's appearance and behavior
+void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
-
     progressBar->setRange(minValue, maxValue);
     progressBar->setValue(minValue);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
 
-// Creates a status light indicator
-QPixmap createStatusLightPixmap(const QString &color, int size) {
+// Returns a circular status light pixmap
+QPixmap createStatusLightPixmap(const QString& color, int size) {
     QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
 
@@ -77,10 +74,9 @@ QPixmap createStatusLightPixmap(const QString &color, int size) {
 
 } // namespace UI
 
-// Formatting utilities
 namespace Formatting {
 
-// Formats file size into readable units
+// Converts bytes to human-readable size string
 QString formatSize(qint64 size) {
     constexpr std::array units = {
         Units::FileSize::k_SIZE_UNIT_BYTES,
@@ -100,7 +96,7 @@ QString formatSize(qint64 size) {
     return QString::number(sizeInUnits, 'f', 2) + " " + units[unitIndex];
 }
 
-// Formats duration into human-readable format
+// Converts milliseconds to readable duration
 QString formatDuration(qint64 milliseconds) {
     constexpr qint64 MS_IN_SECOND = 1000;
     constexpr qint64 SECONDS_IN_MINUTE = 60;
@@ -126,29 +122,28 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + Units::Time::k_UNIT_DAYS;
 }
 
-// Formats timestamp using custom string format
-QString formatTimestamp(const QDateTime &datetime, const QString &format) {
+// Converts QDateTime to formatted string
+QString formatTimestamp(const QDateTime& datetime, const QString& format) {
     return datetime.toString(format);
 }
 
-// Formats timestamp using Qt::DateFormat
-QString formatTimestamp(const QDateTime &datetime, Qt::DateFormat format) {
+// Converts QDateTime using Qt::DateFormat
+QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
 
 } // namespace Formatting
 
-// Backup utilities
 namespace Backup {
 
-// Adds selected paths from tree view to staging model
-void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) {
+// Adds selected items from tree to staging
+void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
     QSet<QString> uniquePaths;
     const auto selectedIndexes = treeView->selectionModel()->selectedIndexes();
 
-    for (const auto &index : selectedIndexes) {
+    for (const auto& index : selectedIndexes) {
         QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
         if (!filePath.isEmpty() && !uniquePaths.contains(filePath)) {
             uniquePaths.insert(filePath);
@@ -157,21 +152,21 @@ void addSelectedPathsToStaging(QTreeView *treeView, StagingModel *stagingModel) 
     }
 }
 
-// Removes selected paths from staging model
-void removeSelectedPathsFromStaging(QTreeView *treeView, StagingModel *stagingModel) {
+// Removes selected items from staging
+void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
     QSet<QString> uniquePathsToRemove;
     const auto selectedIndexes = treeView->selectionModel()->selectedIndexes();
 
-    for (const auto &index : selectedIndexes) {
+    for (const auto& index : selectedIndexes) {
         QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
         if (!filePath.isEmpty()) {
             uniquePathsToRemove.insert(filePath);
         }
     }
 
-    for (const auto &filePath : uniquePathsToRemove) {
+    for (const auto& filePath : uniquePathsToRemove) {
         stagingModel->removePath(filePath);
     }
 }
