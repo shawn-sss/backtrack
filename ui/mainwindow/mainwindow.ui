@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1236</width>
-    <height>426</height>
+    <width>934</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>193</y>
       <width>911</width>
       <height>291</height>
      </rect>
@@ -129,70 +129,15 @@
    <widget class="QTabWidget" name="DetailsTabWidget">
     <property name="geometry">
      <rect>
-      <x>930</x>
+      <x>630</x>
       <y>10</y>
       <width>291</width>
-      <height>251</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="BackupDetails">
-     <attribute name="title">
-      <string>Backup Details</string>
-     </attribute>
-     <widget class="QWidget" name="layoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>291</width>
-        <height>106</height>
-       </rect>
-      </property>
-      <layout class="QVBoxLayout" name="BackupStatusLayout">
-       <property name="leftMargin">
-        <number>3</number>
-       </property>
-       <item>
-        <widget class="QLabel" name="BackupStatusLabel">
-         <property name="text">
-          <string>BackupStatus</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="BackupLocationLabel">
-         <property name="text">
-          <string>BackupLocation</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="BackupTotalCountLabel">
-         <property name="text">
-          <string>BackupTotalCount</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="BackupTotalSizeLabel">
-         <property name="text">
-          <string>BackupTotalSize</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="BackupLocationStatusLabel">
-         <property name="text">
-          <string>BackupLocationStatus</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
     <widget class="QWidget" name="LastBackup">
      <attribute name="title">
       <string>Last Backup</string>
@@ -200,10 +145,10 @@
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>0</y>
+        <x>-1</x>
+        <y>-1</y>
         <width>291</width>
-        <height>84</height>
+        <height>101</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="LastBackupLayout">
@@ -211,16 +156,16 @@
         <number>3</number>
        </property>
        <item>
-        <widget class="QLabel" name="LastBackupNameLabel">
+        <widget class="QLabel" name="LastBackupTimestampLabel">
          <property name="text">
-          <string>LastBackupName</string>
+          <string>LastBackupTimestamp</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="LastBackupTimestampLabel">
+        <widget class="QLabel" name="LastBackupNameLabel">
          <property name="text">
-          <string>LastBackupTimestamp</string>
+          <string>LastBackupName</string>
          </property>
         </widget>
        </item>
@@ -241,24 +186,37 @@
       </layout>
      </widget>
     </widget>
+    <widget class="QWidget" name="TBD">
+     <attribute name="title">
+      <string>TBD</string>
+     </attribute>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>291</width>
+        <height>106</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="BackupStatusLayout">
+       <property name="leftMargin">
+        <number>3</number>
+       </property>
+      </layout>
+     </widget>
+    </widget>
    </widget>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>270</y>
-      <width>291</width>
+      <x>696</x>
+      <y>522</y>
+      <width>221</width>
       <height>26</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QProgressBar" name="TransferProgressBar">
-       <property name="value">
-        <number>24</number>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QLabel" name="TransferProgressText">
        <property name="text">
@@ -266,7 +224,121 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QProgressBar" name="TransferProgressBar">
+       <property name="value">
+        <number>24</number>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </widget>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>500</y>
+      <width>911</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Orientation::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QFrame" name="testcontainer">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>9</y>
+      <width>611</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QWidget" name="horizontalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>11</y>
+       <width>281</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="testlayout">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="DashboardLabel">
+          <property name="text">
+           <string>Dashboard</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="BackupStatusLabel">
+          <property name="text">
+           <string>BackupStatus</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="BackupLocationLabel">
+          <property name="text">
+           <string>BackupLocation</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="BackupTotalCountLabel">
+          <property name="text">
+           <string>BackupTotalCount</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="BackupTotalSizeLabel">
+          <property name="text">
+           <string>BackupTotalSize</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="BackupLocationStatusLabel">
+          <property name="text">
+           <string>BackupLocationStatus</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+    <widget class="Line" name="line_3">
+     <property name="geometry">
+      <rect>
+       <x>288</x>
+       <y>10</y>
+       <width>20</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+    </widget>
    </widget>
   </widget>
   <action name="actionOpenSettings">

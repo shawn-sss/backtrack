@@ -10,7 +10,7 @@ constexpr auto STYLE = R"(
             #BackupViewContainer {
                 border-radius: 10px;
                 padding: 10px;
-                border: 1px solid; /* Let theme override color */
+                border: 1px solid;
             }
 
             #DestinationTreeTitleLabel,
@@ -43,6 +43,34 @@ constexpr auto STYLE = R"(
                 border: 1px solid;
                 border-radius: 6px;
                 padding: 6px 12px;
+            }
+        )";
+}
+
+// Independent styling for the test container
+namespace TestContainer {
+constexpr auto STYLE = R"(
+            #testcontainer {
+                border: 1px solid black;
+                border-radius: 6px;
+                padding: 10px;
+                background: transparent;
+            }
+
+            #BackupStatusLabel {
+                font-weight: bold;
+                color: white;
+            }
+        )";
+}
+
+// Styling for the dashboard label
+namespace DashboardLabel {
+constexpr auto STYLE = R"(
+            #DashboardLabel {
+                font-size: 18px;
+                font-weight: bold;
+                padding: 0px;
             }
         )";
 }

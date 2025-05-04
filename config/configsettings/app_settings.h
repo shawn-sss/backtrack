@@ -17,7 +17,7 @@ constexpr auto k_APP_VERSION = "0.5";
 // Application window settings
 namespace AppConfig {
 constexpr QSize k_MINIMUM_WINDOW_SIZE(500, 250);
-constexpr QSize k_DEFAULT_WINDOW_SIZE(1300, 320);
+constexpr QSize k_DEFAULT_WINDOW_SIZE(1000, 560);
 constexpr QSize k_MAXIMUM_WINDOW_SIZE(2000, 800);
 
 // Data file paths

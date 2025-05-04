@@ -66,6 +66,16 @@ MainWindow::MainWindow(QWidget* parent)
     ui->BackupViewLayout->setStretch(1, 1);
     ui->BackupViewLayout->setStretch(2, 1);
 
+    ui->testcontainer->setStyleSheet(Styles::TestContainer::STYLE);
+    ui->testlayout->setContentsMargins(0, 0, 0, 0);
+    ui->testlayout->setSpacing(3);
+    ui->testlayout->setStretch(0, 1);
+    ui->testlayout->setStretch(1, 1);
+    ui->testlayout->setStretch(2, 1);
+
+    ui->DashboardLabel->setStyleSheet(Styles::DashboardLabel::STYLE);
+
+
     createBackupCooldownTimer->setSingleShot(true);
     connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
         ui->CreateBackupButton->setEnabled(true);
