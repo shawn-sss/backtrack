@@ -1,23 +1,20 @@
-/* === Base widget background and text === */
+/* === Base background and text === */
 QWidget {
     background-color: #f5f5f5;
     color: #000000;
 }
 
-/* === Push and tool buttons === */
+/* === Buttons === */
 QPushButton, QToolButton {
     background-color: #dcdcdc;
     color: #000000;
-    border: 1px solid black;
-    border-radius: 6px;
-    padding: 4px 8px;
 }
 
 QPushButton:hover, QToolButton:hover {
     background-color: #bbbbbb;
 }
 
-/* === Input fields (text boxes, combo boxes, views) === */
+/* === Input Fields === */
 QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     background-color: #ffffff;
     color: #000000;
@@ -26,25 +23,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     padding: 4px 6px;
 }
 
-/* === Tooltips === */
-QToolTip {
-    background-color: #ffffff;
-    color: #000000;
-    border: 1px solid black;
-    padding: 6px;
-}
-
-/* === Menus === */
-QMenu {
-    background-color: #f5f5f5;
-    color: #000000;
-}
-
-QMenu::item:selected {
-    background-color: #dcdcdc;
-}
-
-/* === QTabWidget (DetailsTabWidget and similar) === */
+/* === Tabs === */
 QTabWidget::pane {
     background-color: #ffffff;
     border: 1px solid black;
@@ -68,13 +47,14 @@ QTabBar::tab {
 }
 
 QTabBar::tab:selected {
-    background-color: #ffffff;
+    background-color: #fcfcfc;
     color: #000000;
-    border-color: black;
 }
 
-/* === QListWidget category pane === */
+/* === List Widget === */
 QListWidget {
+    background-color: #ffffff;
+    color: #000000;
     border: 1px solid black;
     border-radius: 4px;
     padding: 4px;
@@ -86,7 +66,22 @@ QListWidget::item:selected {
     font-weight: bold;
 }
 
-/* === Custom backup buttons === */
+/* === Tooltip and Menu === */
+QToolTip {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+QMenu {
+    background-color: #f5f5f5;
+    color: #000000;
+}
+
+QMenu::item:selected {
+    background-color: #dcdcdc;
+}
+
+/* === Custom Buttons === */
 #ChangeBackupDestinationButton,
 #DeleteBackupButton,
 #AddToBackupButton,
@@ -94,8 +89,6 @@ QListWidget::item:selected {
 #RemoveFromBackupButton {
     background-color: #dcdcdc;
     color: #000000;
-    border: 1px solid black;
-    border-radius: 6px;
 }
 
 #ChangeBackupDestinationButton:hover,

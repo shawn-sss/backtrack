@@ -16,6 +16,7 @@ constexpr auto k_EXIT_ICON_PATH    = ":/resources/icons/exit.svg";
 
 // Theme stylesheet resources
 namespace Resources::Themes {
+constexpr auto k_BASE_THEME_PATH  = ":/resources/themes/base.qss";
 constexpr auto k_DARK_THEME_PATH  = ":/resources/themes/dark.qss";
 constexpr auto k_LIGHT_THEME_PATH = ":/resources/themes/light.qss";
 }

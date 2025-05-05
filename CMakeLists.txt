@@ -61,6 +61,7 @@ set(UI_COMPONENTS
     ui/notificationsdialog/notificationsdialog.h
     ui/notificationsdialog/notificationsdialog.cpp
     ui/notificationsdialog/notificationsdialog.ui
+    ui/notificationsdialog/notificationsdialogstyling.h
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui

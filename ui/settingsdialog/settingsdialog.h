@@ -27,6 +27,9 @@ private:
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
 
+    // Sets cursor and tooltip for the Save button
+    void applyButtonCursorsAndTooltips();
+
     // UI components
     QListWidget* categoryList;
     QStackedWidget* settingsStack;

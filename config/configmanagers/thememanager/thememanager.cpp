@@ -44,7 +44,7 @@ ThemeChangeFilter* eventFilter = nullptr;
 
 } // namespace
 
-// Determines if the OS is currently using dark theme (Windows)
+// Returns true if the system is using a dark theme
 bool ThemeManager::isDarkTheme() {
 #ifdef Q_OS_WIN
     QSettings settings(kThemeRegistryPath, QSettings::NativeFormat);
@@ -59,18 +59,18 @@ AppTheme ThemeManager::currentTheme() {
     return _currentTheme;
 }
 
-// Retrieves the user's theme preference from the config
+// Retrieves the user's theme preference from configuration
 UserThemePreference ThemeManager::getUserThemePreference() {
     return ConfigDirector::getInstance().getThemePreference();
 }
 
-// Sets the user's theme preference in config and applies it
+// Sets the user's theme preference and applies it
 void ThemeManager::setUserThemePreference(UserThemePreference preference) {
     ConfigDirector::getInstance().setThemePreference(preference);
     applyTheme();
 }
 
-// Applies the current theme or system-detected one
+// Applies the selected or system-detected theme
 void ThemeManager::applyTheme() {
     UserThemePreference preference = ConfigDirector::getInstance().getThemePreference();
     AppTheme newTheme;
@@ -83,19 +83,28 @@ void ThemeManager::applyTheme() {
 
     _currentTheme = newTheme;
 
-    const QString qssPath = (_currentTheme == AppTheme::Dark) ? k_DARK_THEME_PATH : k_LIGHT_THEME_PATH;
+    const QString baseQssPath = k_BASE_THEME_PATH;
+    const QString themeQssPath = (_currentTheme == AppTheme::Dark) ? k_DARK_THEME_PATH : k_LIGHT_THEME_PATH;
 
     qApp->setStyle(QStyleFactory::create("Fusion"));
     qApp->setPalette(qApp->style()->standardPalette());
 
-    QFile file(qssPath);
-    if (file.open(QFile::ReadOnly)) {
-        const QString styleSheet = QLatin1String(file.readAll());
-        qApp->setStyleSheet(styleSheet);
+    QString finalStyle;
+
+    QFile baseFile(baseQssPath);
+    if (baseFile.open(QFile::ReadOnly)) {
+        finalStyle += QLatin1String(baseFile.readAll()) + "\n";
     }
+
+    QFile themeFile(themeQssPath);
+    if (themeFile.open(QFile::ReadOnly)) {
+        finalStyle += QLatin1String(themeFile.readAll());
+    }
+
+    qApp->setStyleSheet(finalStyle);
 }
 
-// Installs a native event filter to track system theme changes (Windows only)
+// Installs an event filter to listen for system theme changes
 void ThemeManager::installEventFilter(QObject* target) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {

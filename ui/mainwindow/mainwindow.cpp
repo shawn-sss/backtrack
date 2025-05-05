@@ -158,19 +158,22 @@ void MainWindow::initializeUI() {
     preloadBox.hide(); // Immediately hide
 }
 
-
-// Apply pointing hand cursor to buttons
+// Set pointing hand cursors and tooltips for all main window buttons
 void MainWindow::applyButtonCursors() {
-    const QList<QPushButton*> buttons = {
-        ui->AddToBackupButton,
-        ui->RemoveFromBackupButton,
-        ui->CreateBackupButton,
-        ui->ChangeBackupDestinationButton,
-        ui->DeleteBackupButton
+    const QList<QPair<QPushButton*, QString>> buttons = {
+        { ui->AddToBackupButton, "Add selected items to the backup staging area" },
+        { ui->RemoveFromBackupButton, "Remove selected items from the backup staging area" },
+        { ui->CreateBackupButton, "Start the backup process" },
+        { ui->ChangeBackupDestinationButton, "Change the destination folder for backups" },
+        { ui->DeleteBackupButton, "Delete the selected backup from the destination view" },
+        { ui->NotificationButton, "View backup notifications" }
     };
 
-    for (auto* button : buttons) {
+    for (const auto& pair : buttons) {
+        QPushButton* button = pair.first;
+        const QString& tooltip = pair.second;
         button->setCursor(Qt::PointingHandCursor);
+        button->setToolTip(tooltip);
     }
 }
 
@@ -220,10 +223,9 @@ void MainWindow::setupNotificationButton() {
     connect(&NotificationsManager::instance(), &NotificationsManager::notificationsUpdated,
             this, &MainWindow::updateNotificationButtonState);
 
-    // Badge setup
     notificationBadge = new QLabel(ui->NotificationButton);
+    notificationBadge->setObjectName("NotificationBadge");
     notificationBadge->setFixedSize(10, 10);
-    notificationBadge->setStyleSheet("background-color: red; border-radius: 5px;");
 
     int offset = 2;
     notificationBadge->move(ui->NotificationButton->width() - notificationBadge->width() - offset, offset);
@@ -232,7 +234,6 @@ void MainWindow::setupNotificationButton() {
 
     updateNotificationButtonState();
 }
-
 
 // Update UI for Notifications Button
 void MainWindow::updateNotificationButtonState() {

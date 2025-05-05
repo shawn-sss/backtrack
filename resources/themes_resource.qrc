@@ -2,5 +2,6 @@
     <qresource prefix="/resources">
         <file>themes/dark.qss</file>
         <file>themes/light.qss</file>
+        <file>themes/base.qss</file>
     </qresource>
 </RCC>

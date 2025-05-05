@@ -65,7 +65,8 @@ void SettingsDialog::setupLayout() {
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
     saveButton->setText(k_BUTTON_SAVE_TEXT);
-    saveButton->setCursor(Qt::PointingHandCursor);
+
+    applyButtonCursorsAndTooltips();
 
     QFontMetrics fm(saveButton->font());
     int saveWidth = fm.horizontalAdvance(k_BUTTON_SAVE_WIDTH_TEXT) + 40;
@@ -139,4 +140,10 @@ void SettingsDialog::onSaveClicked() {
     saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
 
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
+}
+
+// Set pointing hand cursor and tooltip for the Save button
+void SettingsDialog::applyButtonCursorsAndTooltips() {
+    saveButton->setCursor(Qt::PointingHandCursor);
+    saveButton->setToolTip("Save your settings and apply changes");
 }
