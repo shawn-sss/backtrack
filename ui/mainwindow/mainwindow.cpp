@@ -608,11 +608,11 @@ void MainWindow::refreshBackupStatus() {
     const QString statusColor = [status]() -> QString {
         switch (status) {
         case BackupStatus::Valid:
-            return UIColors::k_BACKUP_STATUS_COLOR_FOUND;
+            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;
         case BackupStatus::Broken:
-            return UIColors::k_BACKUP_STATUS_COLOR_WARNING;
+            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING;
         default:
-            return UIColors::k_BACKUP_STATUS_COLOR_NOT_FOUND;
+            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND;
         }
     }();
     updateBackupStatusLabel(statusColor);
@@ -654,12 +654,13 @@ void MainWindow::updateBackupStatusLabel(const QString& statusColor) {
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, Labels::Backup::k_STATUS_LIGHT_IMAGE_FORMAT);
 
-    const QString pixmapHtml = QString(HTMLTemplates::k_STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
-    const QString combinedHtml = QString(HTMLTemplates::k_STATUS_LABEL_HTML).arg(Labels::Backup::k_FOUND, pixmapHtml);
+    const QString pixmapHtml = QString(MainWindowStyling::Styles::Visuals::STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
+    QString combinedHtml = QString(MainWindowStyling::Styles::Visuals::STATUS_LABEL_HTML)
+                               .arg(Labels::Backup::k_FOUND, pixmapHtml);
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
     ui->BackupStatusLabel->setText(combinedHtml);
 
-    const bool backupExists = (statusColor == UIColors::k_BACKUP_STATUS_COLOR_FOUND);
+    const bool backupExists = (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND);
     for (QLabel* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                           ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
         label->setVisible(backupExists);
