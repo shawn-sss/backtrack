@@ -8,10 +8,21 @@ QWidget {
 QPushButton, QToolButton {
     background-color: #dcdcdc;
     color: #000000;
+    border: 1px solid black;
+    border-radius: 6px;
+    padding: 4px 8px;
+    min-height: 32px;
+    font-size: 14px;
 }
 
 QPushButton:hover, QToolButton:hover {
     background-color: #bbbbbb;
+}
+
+QPushButton:checked, QToolButton:checked {
+    background-color: #007BFF;
+    color: white;
+    font-weight: bold;
 }
 
 /* === Input Fields === */
@@ -21,6 +32,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     border: 1px solid black;
     border-radius: 4px;
     padding: 4px 6px;
+    font-size: 14px;
 }
 
 /* === Tabs === */
@@ -47,8 +59,9 @@ QTabBar::tab {
 }
 
 QTabBar::tab:selected {
-    background-color: #fcfcfc;
-    color: #000000;
+    background-color: #e6f0ff;
+    color: #007BFF;
+    border-color: #007BFF;
 }
 
 /* === List Widget === */
@@ -58,11 +71,12 @@ QListWidget {
     border: 1px solid black;
     border-radius: 4px;
     padding: 4px;
+    font-size: 14px;
 }
 
 QListWidget::item:selected {
-    background-color: #dcdcdc;
-    color: black;
+    background-color: #cce5ff;
+    color: #007BFF;
     font-weight: bold;
 }
 
@@ -78,23 +92,14 @@ QMenu {
 }
 
 QMenu::item:selected {
-    background-color: #dcdcdc;
+    background-color: #cce5ff;
+    color: #007BFF;
 }
 
-/* === Custom Buttons === */
-#ChangeBackupDestinationButton,
-#DeleteBackupButton,
-#AddToBackupButton,
-#CreateBackupButton,
-#RemoveFromBackupButton {
-    background-color: #dcdcdc;
-    color: #000000;
-}
-
-#ChangeBackupDestinationButton:hover,
-#DeleteBackupButton:hover,
-#AddToBackupButton:hover,
-#CreateBackupButton:hover,
-#RemoveFromBackupButton:hover {
-    background-color: #bbbbbb;
+/* === Input Drop-down Items === */
+QTreeView::item:selected,
+QListView::item:selected,
+QComboBox QAbstractItemView::item:selected {
+    background-color: #cce5ff;
+    color: #007BFF;
 }

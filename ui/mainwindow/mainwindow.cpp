@@ -194,8 +194,6 @@ void MainWindow::setupConnections() {
     for (const auto& conn : buttonConnections) {
         connect(conn.button, &QPushButton::clicked, this, conn.slot);
     }
-
-    connect(createBackupCooldownTimer, &QTimer::timeout, this, &MainWindow::resetCreateBackupButtonState);
 }
 
 // Connect backup-related signals
@@ -403,9 +401,10 @@ void MainWindow::onCreateBackupClicked() {
 
     backupStartTimer.start();
 
-    ui->CreateBackupButton->setText(Labels::Backup::k_BACKING_UP_BUTTON_TEXT);
-    ui->CreateBackupButton->setStyleSheet(MainWindowStyling::BUTTON_FEEDBACK_STYLE);
-    ui->CreateBackupButton->setEnabled(false);
+    triggerButtonFeedback(ui->CreateBackupButton,
+                          Labels::Backup::k_BACKING_UP_BUTTON_TEXT,
+                          Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT,
+                          Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
     ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
@@ -539,23 +538,16 @@ void MainWindow::triggerButtonFeedback(QPushButton* button,
                                        int durationMs) {
     if (!button) return;
 
+    button->setCheckable(true);
+    button->setChecked(true);
     button->setText(feedbackText);
-    button->setStyleSheet(MainWindowStyling::BUTTON_FEEDBACK_STYLE);
     button->setEnabled(false);
 
     QTimer::singleShot(durationMs, this, [button, originalText]() {
+        button->setChecked(false);
         button->setText(originalText);
-        button->setStyleSheet(QString());
         button->setEnabled(true);
     });
-}
-
-
-// Reset "Create Backup" button to initial state
-void MainWindow::resetCreateBackupButtonState() {
-    ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
-    ui->CreateBackupButton->setEnabled(true);
-    ui->CreateBackupButton->setStyleSheet(QString());
 }
 
 // Enable backup button after cooldown

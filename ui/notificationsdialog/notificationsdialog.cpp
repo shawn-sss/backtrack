@@ -9,8 +9,8 @@
 #include <QPushButton>
 #include <QScrollBar>
 #include <QVBoxLayout>
+#include <algorithm>
 
-// Constructor for NotificationsDialog that initializes the dialog with notification items
 NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notifications, QWidget* parent)
     : QDialog(parent)
 {
@@ -29,9 +29,16 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
-    for (const auto& notif : notifications) {
+    QList<AppNotification> sortedNotifications = notifications;
+    std::sort(sortedNotifications.begin(), sortedNotifications.end(),
+              [](const AppNotification& a, const AppNotification& b) {
+                  return a.timestamp > b.timestamp;
+              });
+
+    for (const auto& notif : sortedNotifications) {
         QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
-        QString text = QString("%1\n%2").arg(dateStr, notif.message);
+        QString badge = notif.read ? "" : "🔴 ";
+        QString text = QString("%1%2\n%3").arg(badge, dateStr, notif.message);
 
         auto* item = new QListWidgetItem(text);
 
@@ -46,9 +53,15 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
         listWidget->addItem(item);
     }
 
-    if (notifications.isEmpty()) {
+    if (sortedNotifications.isEmpty()) {
         auto* item = new QListWidgetItem("No notifications.");
         listWidget->addItem(item);
+    }
+
+    if (!sortedNotifications.isEmpty()) {
+        auto* latestItem = listWidget->item(0);
+        listWidget->setCurrentItem(latestItem);
+        listWidget->scrollToItem(latestItem, QAbstractItemView::PositionAtTop);
     }
 
     layout->addWidget(listWidget);
@@ -57,5 +70,4 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
 }
 
-// Destructor for NotificationsDialog
 NotificationsDialog::~NotificationsDialog() = default;
