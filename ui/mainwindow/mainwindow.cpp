@@ -12,7 +12,6 @@
 #include "../../core/backup_module/models/destinationproxymodel.h"
 #include "../../core/backup_module/models/stagingmodel.h"
 #include "../../core/backup_module/service/backupservice.h"
-#include "../../core/backup_module/styles/backup_styling.h"
 
 #include "../../core/utils/common_utils/utils.h"
 #include "../../core/utils/file_utils/fileoperations.h"
@@ -63,21 +62,21 @@ MainWindow::MainWindow(QWidget* parent)
     setupConnections();
     setupNotificationButton();
 
-    ui->BackupViewContainer->setStyleSheet(Styles::BackupViewContainer::STYLE);
+    ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
     ui->BackupViewLayout->setContentsMargins(0, 0, 0, 0);
     ui->BackupViewLayout->setSpacing(3);
     ui->BackupViewLayout->setStretch(0, 1);
     ui->BackupViewLayout->setStretch(1, 1);
     ui->BackupViewLayout->setStretch(2, 1);
 
-    ui->DashboardContainer->setStyleSheet(Styles::DashboardContainer::STYLE);
+    ui->DashboardContainer->setStyleSheet(MainWindowStyling::Styles::DashboardContainer::STYLE);
     ui->DashboardDetails->setContentsMargins(0, 0, 0, 0);
     ui->DashboardDetails->setSpacing(3);
     ui->DashboardDetails->setStretch(0, 1);
     ui->DashboardDetails->setStretch(1, 1);
     ui->DashboardDetails->setStretch(2, 1);
 
-    ui->DashboardLabel->setStyleSheet(Styles::DashboardLabel::STYLE);
+    ui->DashboardLabel->setStyleSheet(MainWindowStyling::Styles::DashboardLabel::STYLE);
 
     createBackupCooldownTimer->setSingleShot(true);
     connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
