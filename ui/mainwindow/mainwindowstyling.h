@@ -32,7 +32,8 @@ constexpr auto STYLE = R"(
     #DeleteBackupButton,
     #AddToBackupButton,
     #CreateBackupButton,
-    #RemoveFromBackupButton {
+    #RemoveFromBackupButton,
+    #NotificationButton {
         /* Shared QPushButton style applied globally */
     }
 )";
@@ -61,9 +62,13 @@ constexpr auto STYLE = R"(
 
 namespace GeneralButton {
 constexpr auto STYLE =
-    "QPushButton { background: #444; color: white; }"
-    "QPushButton:hover { background: #666; }"
-    "QPushButton:pressed { background: #888; }";
+    "QPushButton { "
+        "background: #444; "
+        "color: white; }"
+    "QPushButton:hover { "
+        "background: #666; }"
+    "QPushButton:pressed { "
+        "background: #888; }";
 }
 
 namespace Visuals {

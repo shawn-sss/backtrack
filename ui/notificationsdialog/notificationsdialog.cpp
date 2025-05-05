@@ -1,15 +1,16 @@
-// Project includes
 #include "notificationsdialog.h"
 
 // Qt includes
 #include <QBrush>
 #include <QDateTime>
 #include <QFont>
+#include <QFontMetrics>
 #include <QListWidget>
 #include <QPushButton>
+#include <QScrollBar>
 #include <QVBoxLayout>
 
-// Constructs the notifications dialog and populates the list
+// Constructor for NotificationsDialog that initializes the dialog with notification items
 NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notifications, QWidget* parent)
     : QDialog(parent)
 {
@@ -21,10 +22,16 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     listWidget = new QListWidget(this);
     closeButton = new QPushButton("Close", this);
 
+    closeButton->setToolTip("Close the notifications dialog");
+    closeButton->setCursor(Qt::PointingHandCursor);
+
+    listWidget->setWordWrap(true);
+    listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    listWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
     for (const auto& notif : notifications) {
-        QString text = QString("[%1] %2")
-        .arg(notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP"))
-            .arg(notif.message);
+        QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
+        QString text = QString("%1\n%2").arg(dateStr, notif.message);
 
         auto* item = new QListWidgetItem(text);
 
@@ -40,7 +47,8 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     }
 
     if (notifications.isEmpty()) {
-        listWidget->addItem("No notifications.");
+        auto* item = new QListWidgetItem("No notifications.");
+        listWidget->addItem(item);
     }
 
     layout->addWidget(listWidget);
@@ -49,5 +57,5 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
 }
 
-// Destroys the notifications dialog
+// Destructor for NotificationsDialog
 NotificationsDialog::~NotificationsDialog() = default;

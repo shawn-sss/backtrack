@@ -148,14 +148,13 @@ void MainWindow::initializeUI() {
         ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
-    // ✅ Preload hidden QMessageBox to fix white screen on first use
     QMessageBox preloadBox(this);
     preloadBox.setWindowTitle(" ");
     preloadBox.setText(" ");
     preloadBox.setStandardButtons(QMessageBox::NoButton);
-    preloadBox.setAttribute(Qt::WA_DontShowOnScreen); // Don't flash on screen
-    preloadBox.show(); // Force layout/render
-    preloadBox.hide(); // Immediately hide
+    preloadBox.setAttribute(Qt::WA_DontShowOnScreen);
+    preloadBox.show();
+    preloadBox.hide();
 }
 
 // Set pointing hand cursors and tooltips for all main window buttons
@@ -216,8 +215,6 @@ void MainWindow::connectBackupSignals() {
 // Setup UI for Notifications Button
 void MainWindow::setupNotificationButton() {
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
-    ui->NotificationButton->setCursor(Qt::PointingHandCursor);
-    ui->NotificationButton->setToolTip("View Notifications");
 
     connect(ui->NotificationButton, &QPushButton::clicked, this, &MainWindow::onNotificationButtonClicked);
     connect(&NotificationsManager::instance(), &NotificationsManager::notificationsUpdated,
