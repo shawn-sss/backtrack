@@ -2,29 +2,28 @@
 #define INSTALLMETADATAMANAGER_H
 
 // Qt includes
-#include <QString>
 #include <QJsonObject>
+#include <QString>
 
-// Manages install metadata information
+// Manages installation metadata: reading, writing, and initialization
 class InstallMetadataManager {
 public:
-    // Constructor
+    // Lifecycle
     explicit InstallMetadataManager(const QString& metadataPath);
 
-    // File operations
+    // Metadata file operations
     void load();
     void save();
-    void setupDefaults(const QString& installDir);
 
-    // Metadata access
+    // Initializes default metadata structure and persists it
+    static void initializeDefaults();
+
+    // Metadata accessors
     const QJsonObject& getMetadata() const;
     void setMetadata(const QJsonObject& metadata);
 
 private:
-    // Path to the metadata JSON file
     QString metadataFilePath;
-
-    // Cached install metadata
     QJsonObject installMetadata;
 };
 

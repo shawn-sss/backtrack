@@ -5,35 +5,38 @@
 
 #include "../../config/configsettings/_settings.h"
 #include "../../config/configdirector/configdirector.h"
-#include "../../ui/toolbarmanager/toolbarmanager.h"
-
-#include "../../core/utils/common_utils/utils.h"
-#include "../../core/utils/file_utils/filewatcher.h"
-#include "../../core/utils/file_utils/fileoperations.h"
+#include "../../config/configmanagers/notificationsmanager/notificationstruct.h"
+#include "../../config/configmanagers/notificationsmanager/notificationsmanager.h"
 
 #include "../../core/backup_module/controller/backupcontroller.h"
-#include "../../core/backup_module/service/backupservice.h"
-#include "../../core/backup_module/styles/backup_styling.h"
 #include "../../core/backup_module/models/destinationproxymodel.h"
 #include "../../core/backup_module/models/stagingmodel.h"
+#include "../../core/backup_module/service/backupservice.h"
+#include "../../core/backup_module/styles/backup_styling.h"
+
+#include "../../core/utils/common_utils/utils.h"
+#include "../../core/utils/file_utils/fileoperations.h"
+#include "../../core/utils/file_utils/filewatcher.h"
+#include "../../ui/toolbarmanager/toolbarmanager.h"
+#include "../../ui/notificationsdialog/notificationsdialog.h"
 
 // Qt includes
 #include <QBuffer>
-#include <QPushButton>
-#include <QSizePolicy>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QTimer>
 #include <QElapsedTimer>
-#include <QScreen>
 #include <QFileDialog>
-#include <QStandardPaths>
-#include <QStyleFactory>
 #include <QFileSystemModel>
 #include <QHeaderView>
+#include <QHBoxLayout>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScreen>
+#include <QSizePolicy>
+#include <QStandardPaths>
+#include <QStyleFactory>
+#include <QTimer>
+#include <QVBoxLayout>
 
-// Main window constructor
+// Constructs the main application window and initializes components
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -58,6 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
     applyButtonCursors();
     initializeBackupSystem();
     setupConnections();
+    setupNotificationButton();
 
     ui->BackupViewContainer->setStyleSheet(Styles::BackupViewContainer::STYLE);
     ui->BackupViewLayout->setContentsMargins(0, 0, 0, 0);
@@ -66,15 +70,14 @@ MainWindow::MainWindow(QWidget* parent)
     ui->BackupViewLayout->setStretch(1, 1);
     ui->BackupViewLayout->setStretch(2, 1);
 
-    ui->testcontainer->setStyleSheet(Styles::TestContainer::STYLE);
-    ui->testlayout->setContentsMargins(0, 0, 0, 0);
-    ui->testlayout->setSpacing(3);
-    ui->testlayout->setStretch(0, 1);
-    ui->testlayout->setStretch(1, 1);
-    ui->testlayout->setStretch(2, 1);
+    ui->DashboardContainer->setStyleSheet(Styles::DashboardContainer::STYLE);
+    ui->DashboardDetails->setContentsMargins(0, 0, 0, 0);
+    ui->DashboardDetails->setSpacing(3);
+    ui->DashboardDetails->setStretch(0, 1);
+    ui->DashboardDetails->setStretch(1, 1);
+    ui->DashboardDetails->setStretch(2, 1);
 
     ui->DashboardLabel->setStyleSheet(Styles::DashboardLabel::STYLE);
-
 
     createBackupCooldownTimer->setSingleShot(true);
     connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
@@ -82,9 +85,22 @@ MainWindow::MainWindow(QWidget* parent)
     });
 }
 
-// Main window destructor
+// Destroys the main window and cleans up UI resources
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+// Event handlers
+
+// Handle window close event
+void MainWindow::closeEvent(QCloseEvent* event) {
+    if (backupController->isBackupInProgress()) {
+        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
+                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+        event->ignore();
+        return;
+    }
+    QMainWindow::closeEvent(event);
 }
 
 // UI setup and layout configuration
@@ -126,12 +142,23 @@ void MainWindow::initializeUI() {
         ProgressUI::k_PROGRESS_BAR_HEIGHT,
         ProgressSettings::k_PROGRESS_BAR_TEXT_VISIBLE
         );
+
     if (ui->TransferProgressBar->value() == 0) {
         ui->TransferProgressBar->setVisible(false);
         ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
         ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
+
+    // ✅ Preload hidden QMessageBox to fix white screen on first use
+    QMessageBox preloadBox(this);
+    preloadBox.setWindowTitle(" ");
+    preloadBox.setText(" ");
+    preloadBox.setStandardButtons(QMessageBox::NoButton);
+    preloadBox.setAttribute(Qt::WA_DontShowOnScreen); // Don't flash on screen
+    preloadBox.show(); // Force layout/render
+    preloadBox.hide(); // Immediately hide
 }
+
 
 // Apply pointing hand cursor to buttons
 void MainWindow::applyButtonCursors() {
@@ -184,12 +211,38 @@ void MainWindow::connectBackupSignals() {
             });
 }
 
-// Reset "Create Backup" button to initial state
-void MainWindow::resetCreateBackupButtonState() {
-    ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
-    ui->CreateBackupButton->setEnabled(true);
-    ui->CreateBackupButton->setStyleSheet(QString());
+// Setup UI for Notifications Button
+void MainWindow::setupNotificationButton() {
+    ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
+    ui->NotificationButton->setCursor(Qt::PointingHandCursor);
+    ui->NotificationButton->setToolTip("View Notifications");
+
+    connect(ui->NotificationButton, &QPushButton::clicked, this, &MainWindow::onNotificationButtonClicked);
+    connect(&NotificationsManager::instance(), &NotificationsManager::notificationsUpdated,
+            this, &MainWindow::updateNotificationButtonState);
+
+    // Badge setup
+    notificationBadge = new QLabel(ui->NotificationButton);
+    notificationBadge->setFixedSize(10, 10);
+    notificationBadge->setStyleSheet("background-color: red; border-radius: 5px;");
+
+    int offset = 2;
+    notificationBadge->move(ui->NotificationButton->width() - notificationBadge->width() - offset, offset);
+    notificationBadge->hide();
+    notificationBadge->raise();
+
+    updateNotificationButtonState();
 }
+
+
+// Update UI for Notifications Button
+void MainWindow::updateNotificationButtonState() {
+    const bool hasUnread = !NotificationsManager::instance().unreadNotifications().isEmpty();
+    if (notificationBadge) {
+        notificationBadge->setVisible(hasUnread);
+    }
+}
+
 
 // Backup system initialization and view setup
 
@@ -238,7 +291,7 @@ void MainWindow::setupBackupStagingTreeView() {
 
 // Set up destination view
 void MainWindow::setupDestinationView() {
-    destinationModel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot);
+    destinationModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
     destinationModel->setNameFilters(QStringList() << "*");
     destinationModel->setNameFilterDisables(false);
     destinationModel->sort(0, Qt::DescendingOrder);
@@ -403,6 +456,47 @@ void MainWindow::onDeleteBackupClicked() {
     }
 }
 
+// Display the Notifications
+void MainWindow::onNotificationButtonClicked() {
+    const QList<AppNotification> all = NotificationsManager::instance().allNotifications();
+
+    triggerButtonFeedback(ui->NotificationButton,
+                          Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
+                          Labels::Backup::k_NOTIFICATION_BUTTON_TEXT,
+                          Timing::k_BUTTON_FEEDBACK_DURATION_MS);
+
+    NotificationsDialog* dialog = new NotificationsDialog(all, this);
+    dialog->exec();
+
+    NotificationsManager::instance().markAllAsRead();
+    updateNotificationButtonState();
+}
+
+// Display the next Notifications
+void MainWindow::showNextNotification() {
+    if (notificationQueue.isEmpty()) {
+        isNotificationPopupVisible = false;
+        NotificationsManager::instance().markAllAsRead();
+        updateNotificationButtonState();
+        return;
+    }
+
+    isNotificationPopupVisible = true;
+    const AppNotification notif = notificationQueue.takeFirst();
+    QString message = QString("[%1]\n%2")
+                          .arg(notif.timestamp.toLocalTime().toString("yyyy-MM-dd HH:mm:ss"))
+                          .arg(notif.message);
+
+    QMessageBox* box = new QMessageBox(this);
+    box->setWindowTitle("Notification");
+    box->setText(message);
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    connect(box, &QMessageBox::finished, this, [this](int) {
+        showNextNotification();
+    });
+    box->show();
+}
+
 // Change the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
@@ -452,11 +546,19 @@ void MainWindow::triggerButtonFeedback(QPushButton* button,
     button->setStyleSheet(MainWindowStyling::BUTTON_FEEDBACK_STYLE);
     button->setEnabled(false);
 
-    QTimer::singleShot(Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [button, originalText]() {
+    QTimer::singleShot(durationMs, this, [button, originalText]() {
         button->setText(originalText);
         button->setStyleSheet(QString());
         button->setEnabled(true);
     });
+}
+
+
+// Reset "Create Backup" button to initial state
+void MainWindow::resetCreateBackupButtonState() {
+    ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+    ui->CreateBackupButton->setEnabled(true);
+    ui->CreateBackupButton->setStyleSheet(QString());
 }
 
 // Enable backup button after cooldown
@@ -589,17 +691,4 @@ void MainWindow::updateBackupLocationStatusLabel(const QString& location) {
                                ? (dirInfo.isWritable() ? Labels::DirectoryStatus::k_WRITABLE : Labels::DirectoryStatus::k_READ_ONLY)
                                : Labels::DirectoryStatus::k_UNKNOWN;
     ui->BackupLocationStatusLabel->setText(Labels::Backup::k_LOCATION_ACCESS + status);
-}
-
-// Event handlers
-
-// Handle window close event
-void MainWindow::closeEvent(QCloseEvent* event) {
-    if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
-                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
-        event->ignore();
-        return;
-    }
-    QMainWindow::closeEvent(event);
 }

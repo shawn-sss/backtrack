@@ -2,8 +2,8 @@
 #define TOOLBARMANAGER_H
 
 // Qt includes
-#include <QObject>
 #include <QAction>
+#include <QObject>
 #include <QToolBar>
 
 // C++ includes
@@ -14,30 +14,30 @@ class ToolbarManager : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor
-    explicit ToolbarManager(QObject *parent = nullptr);
+    // Lifecycle
+    explicit ToolbarManager(QObject* parent = nullptr);
 
-    // Initializes the toolbar with appearance and actions
-    void initialize(QToolBar *toolBar);
+    // Initializes the toolbar layout, actions, and style
+    void initialize(QToolBar* toolBar);
 
-    // Accessor methods for individual toolbar actions
+    // Accessors for specific toolbar actions
     QAction* getActionOpenSettings() const;
     QAction* getActionExit() const;
     QAction* getActionHelp() const;
     QAction* getActionAbout() const;
 
 private:
-    // Internal setup helpers
+    // Helpers for configuring toolbar and actions
     void createActions();
-    void setupAppearance(QToolBar *toolBar);
-    void addActions(QToolBar *toolBar);
-    void applyCursorStyle(QToolBar *toolBar);
+    void setupAppearance(QToolBar* toolBar);
+    void addActions(QToolBar* toolBar);
+    void applyCursorStyle(QToolBar* toolBar);
 
-    // Storage for toolbar actions
+    // Action storage
     std::array<QAction*, 4> actions;
 
 private slots:
-    // Slots for handling toolbar actions
+    // Action slots
     void showSettings();
     void showHelp();
     void showAbout();

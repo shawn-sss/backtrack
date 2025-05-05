@@ -3,11 +3,11 @@
 #include "../usersettingsmanager/usersettingsmanager.h"
 #include "backupsettingsmanager.h"
 
-// Constructor
+// Constructor that links the backup manager to the user settings manager
 BackupSettingsManager::BackupSettingsManager(UserSettingsManager& settingsManager)
     : userSettingsManager(settingsManager) {}
 
-// Return the backup settings JSON object
+// Returns the backup configuration settings as a QJsonObject
 QJsonObject BackupSettingsManager::getBackupSettings() const {
     const QJsonObject& settings = userSettingsManager.settings();
     if (!settings.contains(ConfigKeys::k_BACKUP_CONFIG_GROUP) ||
@@ -17,14 +17,14 @@ QJsonObject BackupSettingsManager::getBackupSettings() const {
     return settings[ConfigKeys::k_BACKUP_CONFIG_GROUP].toObject();
 }
 
-// Get the current backup directory from settings
+// Retrieves the currently configured backup directory
 QString BackupSettingsManager::getBackupDirectory() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ConfigKeys::k_BACKUP_DIRECTORY_KEY)
         .toString(ConfigDefaults::k_BACKUP_DIRECTORY);
 }
 
-// Set the backup directory in user settings
+// Updates the backup directory in user settings
 void BackupSettingsManager::setBackupDirectory(const QString& dir) {
     QJsonObject& settings = userSettingsManager.settings();
 
@@ -41,14 +41,14 @@ void BackupSettingsManager::setBackupDirectory(const QString& dir) {
     userSettingsManager.save();
 }
 
-// Get the current backup prefix from settings
+// Retrieves the prefix used for naming backup files
 QString BackupSettingsManager::getBackupPrefix() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ConfigKeys::k_BACKUP_PREFIX_KEY)
         .toString(ConfigDefaults::k_BACKUP_PREFIX);
 }
 
-// Set the backup prefix in user settings
+// Updates the prefix used for naming backup files
 void BackupSettingsManager::setBackupPrefix(const QString& prefix) {
     QJsonObject& settings = userSettingsManager.settings();
 

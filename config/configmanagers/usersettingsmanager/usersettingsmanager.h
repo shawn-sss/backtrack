@@ -2,28 +2,28 @@
 #define USERSETTINGSMANAGER_H
 
 // Qt includes
-#include <QString>
 #include <QJsonObject>
+#include <QString>
 
-// Manages user settings storage and access
+// Handles loading, saving, and modifying user-specific settings
 class UserSettingsManager {
 public:
-    // Constructor
+    // Lifecycle
     explicit UserSettingsManager(const QString& configFilePath);
 
     // File operations
     void load();
     void save() const;
 
-    // Access to settings object
+    // Sets and saves default user settings
+    void initializeDefaults();
+
+    // Accessors for the settings JSON object
     QJsonObject& settings();
     const QJsonObject& settings() const;
 
 private:
-    // Path to the user config file
     QString userConfigPath;
-
-    // In-memory user settings
     QJsonObject userSettings;
 };
 

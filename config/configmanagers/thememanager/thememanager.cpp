@@ -1,18 +1,18 @@
 // Project includes
 #include "../../configsettings/_settings.h"
-#include "../../configsettings/visual_settings.h"
 #include "../../configsettings/resources_settings.h"
+#include "../../configsettings/visual_settings.h"
 #include "../../configdirector/configdirector.h"
 #include "thememanager.h"
 
 // Qt includes
+#include <QAbstractNativeEventFilter>
+#include <QApplication>
 #include <QFile>
 #include <QSettings>
 #include <QStandardPaths>
-#include <QStyleFactory>
-#include <QAbstractNativeEventFilter>
-#include <QApplication>
 #include <QStyle>
+#include <QStyleFactory>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -23,10 +23,10 @@ using namespace PlatformSettings::Windows;
 
 namespace {
 
-// Current theme state (internal)
+// Internal state for the currently applied theme
 AppTheme _currentTheme = AppTheme::Dark;
 
-// Native event filter for system theme changes (Windows only)
+// Event filter to detect Windows system theme changes
 class ThemeChangeFilter : public QAbstractNativeEventFilter {
 public:
     bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override {
@@ -44,7 +44,7 @@ ThemeChangeFilter* eventFilter = nullptr;
 
 } // namespace
 
-// Detect if system theme is dark (Windows only)
+// Determines if the OS is currently using dark theme (Windows)
 bool ThemeManager::isDarkTheme() {
 #ifdef Q_OS_WIN
     QSettings settings(kThemeRegistryPath, QSettings::NativeFormat);
@@ -54,23 +54,23 @@ bool ThemeManager::isDarkTheme() {
 #endif
 }
 
-// Get the currently applied app theme
+// Returns the currently applied theme
 AppTheme ThemeManager::currentTheme() {
     return _currentTheme;
 }
 
-// Get the user's theme preference from config
+// Retrieves the user's theme preference from the config
 UserThemePreference ThemeManager::getUserThemePreference() {
     return ConfigDirector::getInstance().getThemePreference();
 }
 
-// Set the user's theme preference in config and apply it
+// Sets the user's theme preference in config and applies it
 void ThemeManager::setUserThemePreference(UserThemePreference preference) {
     ConfigDirector::getInstance().setThemePreference(preference);
     applyTheme();
 }
 
-// Apply the current or auto-detected theme to the application
+// Applies the current theme or system-detected one
 void ThemeManager::applyTheme() {
     UserThemePreference preference = ConfigDirector::getInstance().getThemePreference();
     AppTheme newTheme;
@@ -95,7 +95,7 @@ void ThemeManager::applyTheme() {
     }
 }
 
-// Install native Windows event filter to monitor system theme changes
+// Installs a native event filter to track system theme changes (Windows only)
 void ThemeManager::installEventFilter(QObject* target) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {

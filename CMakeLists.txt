@@ -24,20 +24,20 @@ if(NOT DEFINED QT_VERSION_MAJOR)
     message(FATAL_ERROR "QT_VERSION_MAJOR is not defined. Ensure Qt5 or Qt6 is found properly.")
 endif()
 
-# App sources
-set(APP_SOURCES
+# Entry Point
+set(ENTRY_POINT_SOURCES
     app/main.cpp
     app/app_manifest.rc
 )
 
-# Project resources
-set(PROJECT_RESOURCES
+# Qt Resource Files
+set(QT_RESOURCE_FILES
     resources/icons_resource.qrc
     resources/themes_resource.qrc
 )
 
-# Project settings
-set(PROJECT_SETTINGS
+# Configuration Settings Headers
+set(CONFIG_SETTINGS_HEADERS
     config/configsettings/_settings.h
     config/configsettings/app_settings.h
     config/configsettings/backup_settings.h
@@ -45,6 +45,7 @@ set(PROJECT_SETTINGS
     config/configsettings/dialog_settings.h
     config/configsettings/labels_settings.h
     config/configsettings/messages_settings.h
+    config/configsettings/notifications_settings.h
     config/configsettings/progress_settings.h
     config/configsettings/utilities_settings.h
     config/configsettings/resources_settings.h
@@ -52,11 +53,14 @@ set(PROJECT_SETTINGS
     config/configsettings/visual_settings.h
 )
 
-# UI sources
-set(UI_SOURCES
-    ui/mainwindow/mainWindow.cpp
-    ui/mainwindow/mainWindow.h
-    ui/mainwindow/mainWindow.ui
+# UI Components
+set(UI_COMPONENTS
+    ui/mainwindow/mainwindow.cpp
+    ui/mainwindow/mainwindow.h
+    ui/mainwindow/mainwindow.ui
+    ui/notificationsdialog/notificationsdialog.h
+    ui/notificationsdialog/notificationsdialog.cpp
+    ui/notificationsdialog/notificationsdialog.ui
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
@@ -68,44 +72,36 @@ set(UI_SOURCES
     ui/mainwindow/mainwindowstyling.h
 )
 
-# Backup Controller sources
-set(BACKUP_CONTROLLER_SOURCES
+# Backup Core - Controller
+set(BACKUP_CONTROLLER
     core/backup_module/controller/backupcontroller.cpp
     core/backup_module/controller/backupcontroller.h
 )
 
-# Backup Service sources
-set(BACKUP_SERVICE_SOURCES
+# Backup Core - Service
+set(BACKUP_SERVICE
     core/backup_module/service/backupservice.cpp
     core/backup_module/service/backupservice.h
 )
 
-# Backup Worker sources
-set(BACKUP_WORKER_SOURCES
+# Backup Core - Worker
+set(BACKUP_WORKER
     core/backup_module/worker/transferworker.cpp
     core/backup_module/worker/transferworker.h
 )
 
-# Backup Models sources
-set(BACKUP_MODELS_SOURCES
+# Backup Core - Models
+set(BACKUP_MODELS
     core/backup_module/models/stagingmodel.cpp
     core/backup_module/models/stagingmodel.h
     core/backup_module/models/destinationproxymodel.cpp
     core/backup_module/models/destinationproxymodel.h
 )
 
-# Utilities sources
-set(UTILS_SOURCES
-    core/utils/file_utils/filewatcher.cpp
-    core/utils/file_utils/filewatcher.h
-    core/utils/file_utils/fileoperations.cpp
-    core/utils/file_utils/fileoperations.h
-    core/utils/common_utils/utils.cpp
-    core/utils/common_utils/utils.h
+# Configuration Management
+set(CONFIG_MANAGEMENT_MODULES
     config/configdirector/configdirector.cpp
     config/configdirector/configdirector.h
-    core/utils/file_utils/jsonmanager.cpp
-    core/utils/file_utils/jsonmanager.h
     config/configmanagers/thememanager/thememanager.cpp
     config/configmanagers/thememanager/thememanager.h
     config/configmanagers/installmetadatamanager/installmetadatamanager.cpp
@@ -114,20 +110,35 @@ set(UTILS_SOURCES
     config/configmanagers/backupsettingsmanager/backupsettingsmanager.h
     config/configmanagers/usersettingsmanager/usersettingsmanager.cpp
     config/configmanagers/usersettingsmanager/usersettingsmanager.h
+    config/configmanagers/notificationsmanager/notificationsmanager.cpp
+    config/configmanagers/notificationsmanager/notificationsmanager.h
+    config/configmanagers/notificationsmanager/notificationstruct.h
 )
 
-# Combine all sources
+# Utility Modules
+set(UTILITY_MODULES
+    core/utils/file_utils/filewatcher.cpp
+    core/utils/file_utils/filewatcher.h
+    core/utils/file_utils/fileoperations.cpp
+    core/utils/file_utils/fileoperations.h
+    core/utils/common_utils/utils.cpp
+    core/utils/common_utils/utils.h
+    core/utils/file_utils/jsonmanager.cpp
+    core/utils/file_utils/jsonmanager.h
+)
+
+# Aggregate All Sources
 set(PROJECT_SOURCES
-    ${APP_SOURCES}
-    ${PROJECT_RESOURCES}
-    ${PROJECT_SETTINGS}
-    ${UI_SOURCES}
-    ${BACKUP_CONTROLLER_SOURCES}
-    ${BACKUP_SERVICE_SOURCES}
-    ${BACKUP_OPERATIONS_SOURCES}
-    ${BACKUP_WORKER_SOURCES}
-    ${BACKUP_MODELS_SOURCES}
-    ${UTILS_SOURCES}
+    ${ENTRY_POINT_SOURCES}
+    ${QT_RESOURCE_FILES}
+    ${CONFIG_SETTINGS_HEADERS}
+    ${UI_COMPONENTS}
+    ${BACKUP_CONTROLLER}
+    ${BACKUP_SERVICE}
+    ${BACKUP_WORKER}
+    ${BACKUP_MODELS}
+    ${CONFIG_MANAGEMENT_MODULES}
+    ${UTILITY_MODULES}
 )
 
 # Add executable (define the target before applying properties)

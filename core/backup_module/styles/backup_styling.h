@@ -48,18 +48,13 @@ constexpr auto STYLE = R"(
 }
 
 // Independent styling for the test container
-namespace TestContainer {
+namespace DashboardContainer {
 constexpr auto STYLE = R"(
-            #testcontainer {
+            #DashboardContainer {
                 border: 1px solid black;
                 border-radius: 6px;
                 padding: 10px;
                 background: transparent;
-            }
-
-            #BackupStatusLabel {
-                font-weight: bold;
-                color: white;
             }
         )";
 }

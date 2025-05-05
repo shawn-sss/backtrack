@@ -2,31 +2,30 @@
 #define BACKUPSETTINGSMANAGER_H
 
 // Qt includes
-#include <QString>
 #include <QJsonObject>
+#include <QString>
 
-// Forward declarations
+// Forward Declaration (Custom class)
 class UserSettingsManager;
 
-// Handles backup settings management
+// Manages backup settings configuration via user settings
 class BackupSettingsManager {
 public:
-    // Constructor
-    BackupSettingsManager(UserSettingsManager& settingsManager);
+    // Lifecycle
+    explicit BackupSettingsManager(UserSettingsManager& settingsManager);
 
-    // Access full backup configuration group
+    // Retrieves the full backup settings object
     QJsonObject getBackupSettings() const;
 
-    // Accessors for backup directory
+    // Backup directory management
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
 
-    // Accessors for backup file prefix
+    // Backup file prefix management
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
 private:
-    // Reference to user settings manager
     UserSettingsManager& userSettingsManager;
 };
 

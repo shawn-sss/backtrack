@@ -7,23 +7,23 @@
 // Project includes
 #include "../../configsettings/visual_settings.h"
 
-// Manages application themes
+// Provides application-wide theme management and system integration
 class ThemeManager {
 public:
-    // Detect if the system is using a dark theme
+    // Detects if the operating system is using a dark theme
     static bool isDarkTheme();
 
-    // Get the current application theme
+    // Returns the currently applied application theme
     static AppTheme currentTheme();
 
-    // Access and modify the user's theme preference
+    // Retrieves and modifies user theme preference from configuration
     static UserThemePreference getUserThemePreference();
     static void setUserThemePreference(UserThemePreference preference);
 
-    // Apply the user's selected or auto-detected theme
+    // Applies the theme according to user preference or auto-detection
     static void applyTheme();
 
-    // Install native OS event filter (for theme changes)
+    // Installs a native OS event filter to detect system theme changes
     static void installEventFilter(QObject* target);
 };
 

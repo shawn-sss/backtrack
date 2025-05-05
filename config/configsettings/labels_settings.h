@@ -14,6 +14,8 @@ constexpr auto k_TOTAL_SIZE = "Backup Total Size: ";
 constexpr auto k_LOCATION_ACCESS = "Backup Location Access: ";
 
 // Feedback states with emoji
+constexpr auto k_NOTIFICATION_BUTTON_TEXT = "Notifications";
+constexpr auto k_NOTIFICATION_FEEDBACK_TEXT = "🔔 Opened!";
 constexpr auto k_BACKING_UP_BUTTON_TEXT = "📦 Backing Up...";
 constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT = "➕ Added!";
 constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT = "➖ Removed!";

@@ -7,48 +7,46 @@
 // Qt includes
 #include <QString>
 
-// Forward declarations
+// Forward Declaration (Custom class)
+class BackupSettingsManager;
 class InstallMetadataManager;
 class UserSettingsManager;
-class BackupSettingsManager;
 
-// Manages application configuration
+// Manages application configuration as a singleton
 class ConfigDirector {
 public:
-    static ConfigDirector& getInstance(); // Singleton access
+    static ConfigDirector& getInstance();
 
-    // Backup settings
+    // Backup settings access and control
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // Theme preference
+    // Theme preference management
     UserThemePreference getThemePreference() const;
     void setThemePreference(UserThemePreference preference);
 
-    // Install metadata
+    // Install metadata lifecycle
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // File path access
+    // Application file path queries
     QString getAppInstallDirPublic() const;
     QString getAppInstallDir() const;
     QString getFilePath(const QString& fileName) const;
 
 private:
-    ConfigDirector(); // Private constructor for singleton
+    ConfigDirector();
 
-    // Helpers for internal setup
+    // Internal setup and lifecycle checks
     void setupFilePaths();
     bool isFirstRun() const;
     void setupDefaults();
 
-    // Cached config file paths
     QString appMetadataPath;
     QString userConfigPath;
 
-    // Configuration managers
     InstallMetadataManager* installMetadataManager;
     UserSettingsManager* userSettingsManager;
     BackupSettingsManager* backupSettingsManager;

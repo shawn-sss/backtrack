@@ -6,7 +6,7 @@
 
 // UI-related timing settings
 namespace Timing {
-constexpr int k_BUTTON_FEEDBACK_DURATION_MS = 3000;
+constexpr int k_BUTTON_FEEDBACK_DURATION_MS = 1000;
 }
 
 #endif // TIMING_SETTINGS_H
