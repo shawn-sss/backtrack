@@ -4,8 +4,9 @@
 // Qt includes
 #include <QString>
 #include <QSortFilterProxyModel>
+#include <QRegularExpression>
 
-// Filters out a specific folder from display in views
+// Proxy model that filters a folder and sorts entries by timestamp
 class DestinationProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
@@ -13,11 +14,14 @@ public:
     // Constructor
     explicit DestinationProxyModel(QObject* parent = nullptr);
 
-    // Set folder name to exclude (case-insensitive)
+    // Set folder name to exclude
     void setExcludedFolderName(const QString& folderName);
 
     // Filter logic override
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
+
+    // Custom sorting override to sort by timestamp within folder name
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
 private:
     // Folder name to exclude

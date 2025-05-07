@@ -289,7 +289,6 @@ void MainWindow::setupDestinationView() {
     destinationModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
     destinationModel->setNameFilters(QStringList() << "*");
     destinationModel->setNameFilterDisables(false);
-    destinationModel->sort(0, Qt::DescendingOrder);
 
     if (!destinationProxyModel) {
         destinationProxyModel = new DestinationProxyModel(this);
@@ -304,13 +303,14 @@ void MainWindow::setupDestinationView() {
     QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
     ui->BackupDestinationView->setRootIndex(proxyRootIndex);
 
+    destinationProxyModel->sort(0);
+
     removeAllColumnsFromTreeView(ui->BackupDestinationView);
 }
 
 // Remove unnecessary columns from tree view
 void MainWindow::removeAllColumnsFromTreeView(QTreeView* treeView) {
     if (!treeView) return;
-
     if (QAbstractItemModel* model = treeView->model(); model) {
         for (int i = UISettings::TreeView::k_START_HIDDEN_COLUMN;
              i < UISettings::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {

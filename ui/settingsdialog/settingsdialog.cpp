@@ -21,6 +21,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 // Required namespaces for styling and configuration constants
 using namespace SettingsDialogStyling;
@@ -91,11 +92,30 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
 
+    auto* descriptionLabel = new QLabel("Backup Prefix Description:");
+    QFont labelFont = descriptionLabel->font();
+    labelFont.setBold(true);
+    descriptionLabel->setFont(labelFont);
+    layout->addRow(descriptionLabel);
+
+    auto* subtitleLabel = new QLabel("This is the first part of each backup name to help group and identify them.");
+    subtitleLabel->setStyleSheet("color: gray; font-size: 11px;");
+    subtitleLabel->setWordWrap(true);
+    layout->addRow(subtitleLabel);
+
     backupPrefixEdit = new QLineEdit(widget);
     backupPrefixEdit->setText(ConfigDirector::getInstance().getBackupPrefix());
+
+    QRegularExpression regex("^[A-Za-z0-9]{0,12}$");
+    backupPrefixEdit->setValidator(new QRegularExpressionValidator(regex, this));
+    backupPrefixEdit->setMaxLength(12);
+
     layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
 
-    layout->addRow(new QLabel(k_LABEL_BACKUP_PREFIX_TOOLTIP));
+    auto* prefixInfoLabel = new QLabel("Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.");
+    prefixInfoLabel->setStyleSheet("color: gray; font-size: 11px;");
+    layout->addRow(prefixInfoLabel);
+
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     return widget;
@@ -129,6 +149,13 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
+
+    static const QRegularExpression prefixRegex("^[A-Za-z0-9]+$");
+    if (!prefixRegex.match(newPrefix).hasMatch()) {
+        QMessageBox::warning(this, "Invalid Prefix", "Only letters (A–Z, a–z) and digits (0–9) are allowed.");
+        return;
+    }
+
     ConfigDirector::getInstance().setBackupPrefix(newPrefix);
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
