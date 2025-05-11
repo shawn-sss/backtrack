@@ -1,4 +1,3 @@
-// Project includes
 #include "../../../../config/configsettings/app_settings.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
 #include "utils.h"
@@ -10,6 +9,8 @@
 #include <QProgressBar>
 #include <QSet>
 #include <QTreeView>
+#include <QTabBar>
+#include <QCursor> // For setting the pointing hand cursor
 
 namespace Utils {
 
@@ -58,6 +59,13 @@ void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int
     progressBar->setFixedHeight(height);
 }
 
+// NEW: Sets the pointing hand cursor on QTabWidget tabs
+void setTabWidgetCursorToPointer(QTabWidget* tabWidget) {
+    if (tabWidget && tabWidget->tabBar()) {
+        tabWidget->tabBar()->setCursor(Qt::PointingHandCursor);
+    }
+}
+
 // Creates a circular pixmap representing status
 QPixmap createStatusLightPixmap(const QString& color, int size) {
     QPixmap pixmap(size, size);
@@ -76,7 +84,6 @@ QPixmap createStatusLightPixmap(const QString& color, int size) {
 
 namespace Formatting {
 
-// Converts byte size to readable format
 QString formatSize(qint64 size) {
     constexpr std::array units = {
         Units::FileSize::k_SIZE_UNIT_BYTES,
@@ -96,7 +103,6 @@ QString formatSize(qint64 size) {
     return QString::number(sizeInUnits, 'f', 2) + " " + units[unitIndex];
 }
 
-// Converts milliseconds to readable time
 QString formatDuration(qint64 milliseconds) {
     constexpr qint64 MS_IN_SECOND = 1000;
     constexpr qint64 SECONDS_IN_MINUTE = 60;
@@ -122,12 +128,10 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + Units::Time::k_UNIT_DAYS;
 }
 
-// Formats QDateTime with string pattern
 QString formatTimestamp(const QDateTime& datetime, const QString& format) {
     return datetime.toString(format);
 }
 
-// Formats QDateTime using Qt enum format
 QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
@@ -136,7 +140,6 @@ QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
 
 namespace Backup {
 
-// Adds selected tree items to staging model
 void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
@@ -152,7 +155,6 @@ void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) 
     }
 }
 
-// Removes selected items from staging model
 void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 

@@ -28,7 +28,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
 
 /* === Tabs === */
 QTabWidget::pane {
-    background-color: #fff;
+    /* background-color: #fff; */
 }
 
 QTabBar {

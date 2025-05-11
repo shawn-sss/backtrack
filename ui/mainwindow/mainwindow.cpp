@@ -113,6 +113,13 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     QMainWindow::closeEvent(event);
 }
 
+// Accessors
+
+// Returns a pointer to the main details tab widget
+QTabWidget* MainWindow::getDetailsTabWidget() {
+    return ui->DetailsTabWidget;
+}
+
 // UI setup and layout configuration
 
 // Configure basic window properties

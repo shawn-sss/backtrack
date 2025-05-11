@@ -45,6 +45,9 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+    // Accessor for the main details tab widget
+    QTabWidget* getDetailsTabWidget();
+
 protected:
     // Window event handling
     void closeEvent(QCloseEvent* event) override;

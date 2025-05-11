@@ -3,6 +3,7 @@
 #include "../config/configsettings/app_settings.h"
 #include "../config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h"
 #include "../ui/mainwindow/mainwindow.h"
+#include "../core/utils/common_utils/utils.h"
 
 // Qt includes
 #include <QApplication>
@@ -28,6 +29,9 @@ int main(int argc, char* argv[]) {
     mainWindow.setWindowTitle(AppInfo::k_APP_NAME);
     mainWindow.setWindowIcon(QIcon(Resources::Application::k_ICON_PATH));
     mainWindow.show();
+
+
+    Utils::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
 
     // Start event loop
     return app.exec();

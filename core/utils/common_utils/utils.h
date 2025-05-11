@@ -9,6 +9,7 @@
 #include <QTreeView>
 #include <QWidget>
 #include <QString>
+#include <QTabWidget>  // Added for cursor utility
 
 // Forward Declaration (Custom class)
 class StagingModel;
@@ -23,6 +24,7 @@ void handleMouseRelease(QMouseEvent* event, bool& dragging);
 void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int columnCount);
 void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int height, bool textVisible);
 QPixmap createStatusLightPixmap(const QString& color, int size);
+void setTabWidgetCursorToPointer(QTabWidget* tabWidget);  // NEW FUNCTION
 }
 
 namespace Formatting {
