@@ -1,9 +1,10 @@
 // Project includes
 #include "settingsdialog.h"
 #include "settingsdialogstyling.h"
-#include "../../config/configsettings/_settings.h"
-#include "../../config/configdirector/configdirector.h"
-#include "../../config/configmanagers/thememanager/thememanager.h"
+#include "settingsdialogconstants.h"
+#include "../../config/configsettings/app_settings.h"
+#include "../../config/ConfigDirector/ConfigDirector.h"
+#include "../../config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h"
 
 // Qt includes
 #include <QComboBox>
@@ -14,6 +15,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QSizePolicy>
@@ -21,13 +23,13 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
-#include <QMessageBox>
 
-// Required namespaces for styling and configuration constants
+using namespace SettingsDialogConstants;
+using namespace ThemeConfigConstants;
+using namespace ThemeConfigConstants::ThemeConstants;
 using namespace SettingsDialogStyling;
-using namespace SettingsDialogConfig;
 
-// Constructs the settings dialog and sets base properties
+// Constructor to initialize settings dialog
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -35,10 +37,10 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     setupLayout();
 }
 
-// Destructor for cleanup
+// Destructor (defaulted)
 SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the layout, page structure, and connections for the dialog
+// Sets up the main layout and content pages
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -87,7 +89,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Creates the user settings configuration page
+// Creates the user settings page with input validation
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -121,7 +123,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Creates the system settings configuration page
+// Creates the system settings page with theme options
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -145,7 +147,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles saving updated user/system settings and visual feedback
+// Handles saving settings and applying configuration changes
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
@@ -160,7 +162,7 @@ void SettingsDialog::onSaveClicked() {
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ConfigDirector::getInstance().setThemePreference(selectedTheme);
-    ThemeManager::applyTheme();
+    ThemeConfigManager::applyTheme();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);
@@ -169,7 +171,7 @@ void SettingsDialog::onSaveClicked() {
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
 }
 
-// Set pointing hand cursor and tooltip for the Save button
+// Applies cursor and tooltip to Save button
 void SettingsDialog::applyButtonCursorsAndTooltips() {
     saveButton->setCursor(Qt::PointingHandCursor);
     saveButton->setToolTip("Save your settings and apply changes");

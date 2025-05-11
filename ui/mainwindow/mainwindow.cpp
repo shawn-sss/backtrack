@@ -2,11 +2,13 @@
 #include "mainwindow.h"
 #include "mainwindowstyling.h"
 #include "ui_mainwindow.h"
+#include "mainwindowlabels.h"
+#include "mainwindowmessages.h"
 
-#include "../../config/configsettings/_settings.h"
+#include "../../config/configsettings/app_settings.h"
 #include "../../config/configdirector/configdirector.h"
-#include "../../config/configmanagers/notificationsmanager/notificationstruct.h"
-#include "../../config/configmanagers/notificationsmanager/notificationsmanager.h"
+#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h"
+#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.h"
 
 #include "../../core/backup_module/controller/backupcontroller.h"
 #include "../../core/backup_module/models/destinationproxymodel.h"
@@ -16,6 +18,7 @@
 #include "../../core/utils/common_utils/utils.h"
 #include "../../core/utils/file_utils/fileoperations.h"
 #include "../../core/utils/file_utils/filewatcher.h"
+
 #include "../../ui/toolbarmanager/toolbarmanager.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 
@@ -26,6 +29,7 @@
 #include <QFileSystemModel>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScreen>
@@ -39,12 +43,18 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
+
+    // File system models
     sourceModel(new QFileSystemModel(this)),
     destinationModel(new QFileSystemModel(this)),
+    stagingModel(new StagingModel(this)),
+
+    // File monitoring and backup services
     fileWatcher(new FileWatcher(this)),
     backupService(new BackupService(ConfigDirector::getInstance().getBackupDirectory())),
-    stagingModel(new StagingModel(this)),
     backupController(new BackupController(backupService, this)),
+
+    // Toolbar and UI helpers
     toolBar(new QToolBar(this)),
     toolbarManager(new ToolbarManager(this)),
     createBackupCooldownTimer(new QTimer(this))
@@ -54,6 +64,7 @@ MainWindow::MainWindow(QWidget* parent)
     configureWindow();
     initializeUI();
     setupLayout();
+
     addToolBar(Qt::LeftToolBarArea, toolBar);
     toolbarManager->initialize(toolBar);
 
@@ -84,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)
     });
 }
 
-// Destroys the main window and cleans up UI resources
+// Destroys the main window
 MainWindow::~MainWindow() {
     delete ui;
 }
@@ -215,7 +226,7 @@ void MainWindow::setupNotificationButton() {
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
 
     connect(ui->NotificationButton, &QPushButton::clicked, this, &MainWindow::onNotificationButtonClicked);
-    connect(&NotificationsManager::instance(), &NotificationsManager::notificationsUpdated,
+    connect(&NotificationConfigManager::instance(), &NotificationConfigManager::notificationsUpdated,
             this, &MainWindow::updateNotificationButtonState);
 
     notificationBadge = new QLabel(ui->NotificationButton);
@@ -232,12 +243,11 @@ void MainWindow::setupNotificationButton() {
 
 // Update UI for Notifications Button
 void MainWindow::updateNotificationButtonState() {
-    const bool hasUnread = !NotificationsManager::instance().unreadNotifications().isEmpty();
+    const bool hasUnread = !NotificationConfigManager::instance().unreadNotifications().isEmpty();
     if (notificationBadge) {
         notificationBadge->setVisible(hasUnread);
     }
 }
-
 
 // Backup system initialization and view setup
 
@@ -454,7 +464,7 @@ void MainWindow::onDeleteBackupClicked() {
 
 // Display the Notifications
 void MainWindow::onNotificationButtonClicked() {
-    const QList<AppNotification> all = NotificationsManager::instance().allNotifications();
+    const QList<NotificationConfigStruct> all = NotificationConfigManager::instance().allNotifications();
 
     triggerButtonFeedback(ui->NotificationButton,
                           Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
@@ -464,7 +474,7 @@ void MainWindow::onNotificationButtonClicked() {
     NotificationsDialog* dialog = new NotificationsDialog(all, this);
     dialog->exec();
 
-    NotificationsManager::instance().markAllAsRead();
+    NotificationConfigManager::instance().markAllAsRead();
     updateNotificationButtonState();
 }
 
@@ -472,13 +482,13 @@ void MainWindow::onNotificationButtonClicked() {
 void MainWindow::showNextNotification() {
     if (notificationQueue.isEmpty()) {
         isNotificationPopupVisible = false;
-        NotificationsManager::instance().markAllAsRead();
+        NotificationConfigManager::instance().markAllAsRead();
         updateNotificationButtonState();
         return;
     }
 
     isNotificationPopupVisible = true;
-    const AppNotification notif = notificationQueue.takeFirst();
+    const NotificationConfigStruct notif = notificationQueue.takeFirst();
     QString message = QString("[%1]\n%2")
                           .arg(notif.timestamp.toLocalTime().toString("yyyy-MM-dd HH:mm:ss"))
                           .arg(notif.message);
@@ -492,6 +502,7 @@ void MainWindow::showNextNotification() {
     });
     box->show();
 }
+
 
 // Change the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {

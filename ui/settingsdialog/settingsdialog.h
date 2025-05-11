@@ -15,31 +15,35 @@ class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    // Lifecycle
+    // Constructor and destructor
     explicit SettingsDialog(QWidget* parent = nullptr);
     ~SettingsDialog() override;
 
 private:
-    // Initializes layout and connects components
+    // Layout setup
     void setupLayout();
 
-    // Creates individual configuration pages
+    // Page creation
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
 
-    // Sets cursor and tooltip for the Save button
+    // UI setup for Save button
     void applyButtonCursorsAndTooltips();
 
-    // UI components
+    // Core widgets
     QListWidget* categoryList;
     QStackedWidget* settingsStack;
+
+    // Input fields
     QLineEdit* backupPrefixEdit;
     QComboBox* themeComboBox;
+
+    // Controls
     QPushButton* saveButton;
     QTimer* saveCooldownTimer;
 
 private slots:
-    // Handles Save action and visual feedback
+    // Save button handler
     void onSaveClicked();
 };
 

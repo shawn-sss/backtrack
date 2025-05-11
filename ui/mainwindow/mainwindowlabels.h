@@ -1,0 +1,56 @@
+// Labels and text constants for MainWindow UI
+#ifndef MAINWINDOWLABELS_H
+#define MAINWINDOWLABELS_H
+
+// Qt includes
+#include <QString>
+
+// Backup-related labels and buttons
+namespace Labels::Backup {
+constexpr auto k_STATUS_LIGHT_IMAGE_FORMAT        = "PNG";
+constexpr auto k_FOUND                            = "Backup Found: ";
+constexpr auto k_LOCATION                         = "Backup Location: ";
+constexpr auto k_TOTAL_COUNT                      = "Backup Total Count: ";
+constexpr auto k_TOTAL_SIZE                       = "Backup Total Size: ";
+constexpr auto k_LOCATION_ACCESS                  = "Backup Location Access: ";
+
+constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "Notifications";
+constexpr auto k_NOTIFICATION_FEEDBACK_TEXT       = "🔔 Opened!";
+constexpr auto k_BACKING_UP_BUTTON_TEXT           = "📦 Backing Up...";
+constexpr auto k_CREATE_BACKUP_BUTTON_TEXT        = "Create Backup";
+
+constexpr auto k_ADD_TO_BACKUP_ORIGINAL_TEXT      = "Add to Backup";
+constexpr auto k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT = "Remove from Backup";
+constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT      = "Delete Backup";
+constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "Change Location";
+
+constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "➕ Added!";
+constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "➖ Removed!";
+constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "🗑️ Deleted!";
+constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "📁 Changed!";
+}
+
+// Last backup information labels
+namespace Labels::LastBackup {
+constexpr auto k_NAME      = "Last Backup Name: ";
+constexpr auto k_TIMESTAMP = "Last Backup Timestamp: ";
+constexpr auto k_DURATION  = "Last Backup Duration: ";
+constexpr auto k_SIZE      = "Last Backup Size: ";
+}
+
+// Toolbar action labels
+namespace Labels::Toolbar {
+constexpr auto k_SETTINGS = "Settings";
+constexpr auto k_HELP     = "Help";
+constexpr auto k_ABOUT    = "About";
+constexpr auto k_EXIT     = "Exit";
+}
+
+// Directory status labels
+namespace Labels::DirectoryStatus {
+constexpr auto k_WRITABLE  = "Writable";
+constexpr auto k_READ_ONLY = "Read-Only";
+constexpr auto k_UNKNOWN   = "Unknown";
+}
+
+#endif // MAINWINDOWLABELS_H

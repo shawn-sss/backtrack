@@ -1,4 +1,4 @@
-/* === Shared QPushButton Structure === */
+/* === Button Base === */
 QPushButton {
     border: 1px solid black;
     border-radius: 6px;
@@ -7,7 +7,7 @@ QPushButton {
     font-size: 14px;
 }
 
-/* === Common Input Fields === */
+/* === Input Fields === */
 QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     border: 1px solid black;
     border-radius: 4px;
@@ -15,7 +15,7 @@ QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
     font-size: 14px;
 }
 
-/* === Common Tab Structure === */
+/* === Tabs === */
 QTabWidget::pane {
     border: 1px solid black;
     border-radius: 6px;
@@ -28,11 +28,11 @@ QTabBar::tab {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     padding: 6px 12px;
-    font-weight: bold;
     font-size: 14px;
+    font-weight: bold;
 }
 
-/* === QListWidget Structure === */
+/* === List Widget === */
 QListWidget {
     border: 1px solid black;
     border-radius: 4px;

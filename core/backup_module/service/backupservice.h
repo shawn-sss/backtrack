@@ -2,20 +2,20 @@
 #define BACKUPSERVICE_H
 
 // Qt includes
-#include <QString>
-#include <QStringList>
-#include <QSet>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QSet>
+#include <QString>
+#include <QStringList>
 
-// Represents the current backup status
+// Represents backup folder status
 enum class BackupStatus {
     None,
     Broken,
     Valid
 };
 
-// Handles backup operations and summary metadata
+// Handles creation, scanning, and summary of backups
 class BackupService {
 public:
     // Constructor
@@ -27,23 +27,25 @@ public:
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
 
-    // Backup structure validation
+    // Validation
     BackupStatus scanForBackupStatus() const;
 
-    // Backup metadata operations
+    // Metadata operations
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
-    // Backup statistics
+    // Statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
 private:
-    // Internal metadata construction
+    // Metadata builder
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
+
+    // Utility for size calculation
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
 
-    // Internal backup root state
+    // Path state
     QString backupRootPath;
 };
 

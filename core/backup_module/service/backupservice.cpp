@@ -1,5 +1,5 @@
 // Project includes
-#include "../../../config/configsettings/_settings.h"
+#include "../../../config/configsettings/app_settings.h"
 #include "../../../config/configdirector/configdirector.h"
 #include "../../../core/utils/common_utils/utils.h"
 #include "../../../core/utils/file_utils/jsonmanager.h"
@@ -11,24 +11,24 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QJsonArray>
-#include <QJsonObject>
 #include <QJsonDocument>
+#include <QJsonObject>
 
-// Constructor
+// Initializes the backup service with a root path
 BackupService::BackupService(const QString& backupRoot)
     : backupRootPath(backupRoot) {}
 
-// Set the backup root directory
+// Sets the root directory for backup operations
 void BackupService::setBackupRoot(const QString& path) {
     backupRootPath = path;
 }
 
-// Get the backup root directory
+// Returns the backup root directory
 QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-// Ensure the backup infrastructure folder and config file exist
+// Initializes infrastructure folder and config if missing
 void BackupService::initializeBackupRootIfNeeded() {
     const QString configFilePath = QDir(backupRootPath).filePath(
         QStringLiteral("%1/%2")
@@ -59,7 +59,7 @@ void BackupService::initializeBackupRootIfNeeded() {
     JsonManager::saveJsonFile(configFilePath, backupConfig);
 }
 
-// Calculate the total size of selected backup items
+// Calculates total size of selected files and folders
 qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     qint64 totalSize = 0;
     for (const QString& item : items) {
@@ -71,7 +71,7 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     return totalSize;
 }
 
-// Scan for presence and validity of backup folder/config
+// Checks the backup directory structure and config validity
 BackupStatus BackupService::scanForBackupStatus() const {
     const QDir configDir(QDir(backupRootPath).filePath(Backup::Infrastructure::k_BACKUP_SETUP_FOLDER));
     if (!configDir.exists()) return BackupStatus::None;
@@ -82,7 +82,7 @@ BackupStatus BackupService::scanForBackupStatus() const {
     return (validLogs && validConfig) ? BackupStatus::Valid : BackupStatus::Broken;
 }
 
-// Load the metadata of the most recent backup
+// Loads the metadata of the most recent backup
 QJsonObject BackupService::getLastBackupMetadata() const {
     const QDir logsDir(QDir(backupRootPath).filePath(
         QStringLiteral("%1/%2")
@@ -105,7 +105,7 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return {};
 }
 
-// Create and write a backup summary log
+// Creates and saves summary metadata for a completed backup
 void BackupService::createBackupSummary(const QString& backupFolderPath,
                                         const QStringList& selectedItems,
                                         qint64 backupDuration) {
@@ -125,7 +125,7 @@ void BackupService::createBackupSummary(const QString& backupFolderPath,
                               createBackupMetadata(backupFolderPath, selectedItems, backupDuration));
 }
 
-// Return the number of completed backup logs
+// Returns the number of backup logs
 int BackupService::getBackupCount() const {
     const QString logsFolderPath = QDir(backupRootPath).filePath(
         QStringLiteral("%1/%2")
@@ -137,7 +137,7 @@ int BackupService::getBackupCount() const {
                                    QDir::Files).size();
 }
 
-// Compute the total size of all completed backups
+// Returns the total size from all backup logs
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
 
@@ -161,7 +161,7 @@ quint64 BackupService::getTotalBackupSize() const {
     return totalSize;
 }
 
-// Create metadata structure for a new backup session
+// Builds metadata object for a backup session
 QJsonObject BackupService::createBackupMetadata(const QString& backupFolderPath,
                                                 const QStringList& selectedItems,
                                                 qint64 backupDuration) const {

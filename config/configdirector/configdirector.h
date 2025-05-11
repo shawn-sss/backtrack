@@ -2,54 +2,63 @@
 #define CONFIGDIRECTOR_H
 
 // Project includes
-#include "../../config/configsettings/_settings.h"
+#include "../../config/configsettings/app_settings.h"
+#include "ConfigDirectorConstants.h"
+#include "../ConfigManagers/ThemeConfigManager/ThemeConfigConstants.h"
 
 // Qt includes
 #include <QString>
+#include <memory>
 
 // Forward Declaration (Custom class)
-class BackupSettingsManager;
-class InstallMetadataManager;
-class UserSettingsManager;
+class BackupConfigManager;
+class InstallConfigManager;
+class NotificationConfigManager;
+class UserConfigManager;
 
-// Manages application configuration as a singleton
 class ConfigDirector {
 public:
+    // Singleton access
     static ConfigDirector& getInstance();
 
-    // Backup settings access and control
+    // Backup settings access
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // Theme preference management
-    UserThemePreference getThemePreference() const;
-    void setThemePreference(UserThemePreference preference);
+    // User theme preference
+    ThemeConfigConstants::UserThemePreference getThemePreference() const;
+    void setThemePreference(ThemeConfigConstants::UserThemePreference preference);
 
-    // Install metadata lifecycle
+    // Install metadata
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // Application file path queries
-    QString getAppInstallDirPublic() const;
+    // File system access
     QString getAppInstallDir() const;
     QString getFilePath(const QString& fileName) const;
 
+    // Public alias for install directory
+    inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
+
 private:
+    // Private constructor for singleton
     ConfigDirector();
 
-    // Internal setup and lifecycle checks
+    // Setup and internal helpers
     void setupFilePaths();
     bool isFirstRun() const;
     void setupDefaults();
 
+    // File paths
     QString appMetadataPath;
     QString userConfigPath;
 
-    InstallMetadataManager* installMetadataManager;
-    UserSettingsManager* userSettingsManager;
-    BackupSettingsManager* backupSettingsManager;
+    // Config managers
+    std::unique_ptr<InstallConfigManager> installConfigManager;
+    std::unique_ptr<UserConfigManager> userConfigManager;
+    std::unique_ptr<BackupConfigManager> backupConfigManager;
 };
 
 #endif // CONFIGDIRECTOR_H

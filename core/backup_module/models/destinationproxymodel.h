@@ -2,11 +2,11 @@
 #define DESTINATIONPROXYMODEL_H
 
 // Qt includes
-#include <QString>
-#include <QSortFilterProxyModel>
 #include <QRegularExpression>
+#include <QSortFilterProxyModel>
+#include <QString>
 
-// Proxy model that filters a folder and sorts entries by timestamp
+// Proxy model that filters and sorts destination folders
 class DestinationProxyModel : public QSortFilterProxyModel {
     Q_OBJECT
 
@@ -14,17 +14,17 @@ public:
     // Constructor
     explicit DestinationProxyModel(QObject* parent = nullptr);
 
-    // Set folder name to exclude
+    // Sets folder name to be excluded
     void setExcludedFolderName(const QString& folderName);
 
-    // Filter logic override
+    // Filters rows based on folder name
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
-    // Custom sorting override to sort by timestamp within folder name
+    // Sorts folders by timestamp if available
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
 private:
-    // Folder name to exclude
+    // Folder to exclude from view
     QString excludedFolderName;
 };
 

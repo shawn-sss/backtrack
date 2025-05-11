@@ -1,17 +1,17 @@
+// Implementation of NotificationsDialog
 #include "notificationsdialog.h"
 
 // Qt includes
 #include <QBrush>
 #include <QDateTime>
 #include <QFont>
-#include <QFontMetrics>
 #include <QListWidget>
 #include <QPushButton>
-#include <QScrollBar>
 #include <QVBoxLayout>
 #include <algorithm>
 
-NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notifications, QWidget* parent)
+// Constructor to initialize and display notifications
+NotificationsDialog::NotificationsDialog(const QList<NotificationConfigStruct>& notifications, QWidget* parent)
     : QDialog(parent)
 {
     setWindowTitle("Notifications");
@@ -20,18 +20,17 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     auto* layout = new QVBoxLayout(this);
 
     listWidget = new QListWidget(this);
-    closeButton = new QPushButton("Close", this);
-
-    closeButton->setToolTip("Close the notifications dialog");
-    closeButton->setCursor(Qt::PointingHandCursor);
-
     listWidget->setWordWrap(true);
     listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
-    QList<AppNotification> sortedNotifications = notifications;
+    closeButton = new QPushButton("Close", this);
+    closeButton->setToolTip("Close the notifications dialog");
+    closeButton->setCursor(Qt::PointingHandCursor);
+
+    QList<NotificationConfigStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
-              [](const AppNotification& a, const AppNotification& b) {
+              [](const NotificationConfigStruct& a, const NotificationConfigStruct& b) {
                   return a.timestamp > b.timestamp;
               });
 
@@ -56,9 +55,7 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     if (sortedNotifications.isEmpty()) {
         auto* item = new QListWidgetItem("No notifications.");
         listWidget->addItem(item);
-    }
-
-    if (!sortedNotifications.isEmpty()) {
+    } else {
         auto* latestItem = listWidget->item(0);
         listWidget->setCurrentItem(latestItem);
         listWidget->scrollToItem(latestItem, QAbstractItemView::PositionAtTop);
@@ -70,4 +67,5 @@ NotificationsDialog::NotificationsDialog(const QList<AppNotification>& notificat
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
 }
 
+// Destructor (defaulted)
 NotificationsDialog::~NotificationsDialog() = default;

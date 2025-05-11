@@ -6,7 +6,7 @@
 
 namespace SettingsDialogStyling {
 
-// Special case style for disabled/cooldown Save button
+// Style for Save button when disabled (cooldown state)
 inline const QString COOLDOWN_BUTTON_STYLE = QStringLiteral(
     "QPushButton#CooldownButton {"
     "  background-color: #cccccc;"
@@ -14,8 +14,6 @@ inline const QString COOLDOWN_BUTTON_STYLE = QStringLiteral(
     "  font-weight: bold;"
     "  border: 1px solid #999;"
     "}");
-
-// Shared QPushButton style is applied globally
 
 } // namespace SettingsDialogStyling
 

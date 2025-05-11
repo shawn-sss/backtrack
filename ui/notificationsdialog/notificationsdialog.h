@@ -2,7 +2,7 @@
 #define NOTIFICATIONSDIALOG_H
 
 // Project includes
-#include "../../config/configmanagers/notificationsmanager/notificationstruct.h"
+#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h"
 
 // Qt includes
 #include <QDialog>
@@ -12,17 +12,17 @@
 class QListWidget;
 class QPushButton;
 
-// Dialog class for displaying user notifications
+// Dialog class for displaying notifications
 class NotificationsDialog : public QDialog {
     Q_OBJECT
 
 public:
     // Constructor and destructor
-    explicit NotificationsDialog(const QList<AppNotification>& notifications, QWidget* parent = nullptr);
+    explicit NotificationsDialog(const QList<NotificationConfigStruct>& notifications, QWidget* parent = nullptr);
     ~NotificationsDialog() override;
 
 private:
-    // UI elements for displaying notifications and closing the dialog
+    // UI elements
     QListWidget* listWidget;
     QPushButton* closeButton;
 };

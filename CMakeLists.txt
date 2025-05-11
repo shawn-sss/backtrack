@@ -25,123 +25,113 @@ if(NOT DEFINED QT_VERSION_MAJOR)
 endif()
 
 # Entry Point
-set(ENTRY_POINT_SOURCES
+set(APP_ENTRY_POINT
     app/main.cpp
     app/app_manifest.rc
 )
 
 # Qt Resource Files
-set(QT_RESOURCE_FILES
+set(QT_RESOURCES
     resources/icons_resource.qrc
     resources/themes_resource.qrc
 )
 
-# Configuration Settings Headers
-set(CONFIG_SETTINGS_HEADERS
-    config/configsettings/_settings.h
-    config/configsettings/app_settings.h
-    config/configsettings/backup_settings.h
-    config/configsettings/cfgmgr_settings.h
-    config/configsettings/dialog_settings.h
-    config/configsettings/labels_settings.h
-    config/configsettings/messages_settings.h
-    config/configsettings/notifications_settings.h
-    config/configsettings/progress_settings.h
-    config/configsettings/utilities_settings.h
-    config/configsettings/resources_settings.h
-    config/configsettings/timing_settings.h
-    config/configsettings/visual_settings.h
-)
-
-# UI Components
-set(UI_COMPONENTS
+# UI - Windows, Dialogs & Styling
+set(UI_SOURCES
     ui/mainwindow/mainwindow.cpp
     ui/mainwindow/mainwindow.h
     ui/mainwindow/mainwindow.ui
+    ui/mainwindow/mainwindowstyling.h
+    ui/mainwindow/mainwindowlabels.h
+    ui/mainwindow/mainwindowmessages.h
+
     ui/notificationsdialog/notificationsdialog.h
     ui/notificationsdialog/notificationsdialog.cpp
     ui/notificationsdialog/notificationsdialog.ui
     ui/notificationsdialog/notificationsdialogstyling.h
+
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
+    ui/settingsdialog/settingsdialogstyling.h
+    ui/settingsdialog/settingsdialogconstants.h
+
     ui/toolbarmanager/toolbarmanager.h
     ui/toolbarmanager/toolbarmanager.cpp
     ui/toolbarmanager/toolbarmanagerstyling.h
-    ui/settingsdialog/settingsdialogstyling.h
-    ui/mainwindow/mainwindowstyling.h
+    ui/toolbarmanager/toolbarmanagerconstants.h
 )
 
-# Backup Core - Controller
-set(BACKUP_CONTROLLER
+# Backup Core - Modules
+set(BACKUP_CORE
     core/backup_module/controller/backupcontroller.cpp
     core/backup_module/controller/backupcontroller.h
-)
 
-# Backup Core - Service
-set(BACKUP_SERVICE
     core/backup_module/service/backupservice.cpp
     core/backup_module/service/backupservice.h
-)
 
-# Backup Core - Worker
-set(BACKUP_WORKER
     core/backup_module/worker/transferworker.cpp
     core/backup_module/worker/transferworker.h
-)
 
-# Backup Core - Models
-set(BACKUP_MODELS
     core/backup_module/models/stagingmodel.cpp
     core/backup_module/models/stagingmodel.h
     core/backup_module/models/destinationproxymodel.cpp
     core/backup_module/models/destinationproxymodel.h
 )
 
-# Configuration Management
-set(CONFIG_MANAGEMENT_MODULES
-    config/configdirector/configdirector.cpp
-    config/configdirector/configdirector.h
-    config/configmanagers/thememanager/thememanager.cpp
-    config/configmanagers/thememanager/thememanager.h
-    config/configmanagers/installmetadatamanager/installmetadatamanager.cpp
-    config/configmanagers/installmetadatamanager/installmetadatamanager.h
-    config/configmanagers/backupsettingsmanager/backupsettingsmanager.cpp
-    config/configmanagers/backupsettingsmanager/backupsettingsmanager.h
-    config/configmanagers/usersettingsmanager/usersettingsmanager.cpp
-    config/configmanagers/usersettingsmanager/usersettingsmanager.h
-    config/configmanagers/notificationsmanager/notificationsmanager.cpp
-    config/configmanagers/notificationsmanager/notificationsmanager.h
-    config/configmanagers/notificationsmanager/notificationstruct.h
+# Config Modules
+set(CONFIG_MODULES
+    config/ConfigDirector/ConfigDirector.cpp
+    config/ConfigDirector/ConfigDirector.h
+    config/ConfigDirector/ConfigDirectorConstants.h
+
+    config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.cpp
+    config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h
+    config/ConfigManagers/ThemeConfigManager/ThemeConfigConstants.h
+
+    config/ConfigManagers/InstallConfigManager/InstallConfigManager.cpp
+    config/ConfigManagers/InstallConfigManager/InstallConfigManager.h
+    config/ConfigManagers/InstallConfigManager/InstallConfigConstants.h
+
+    config/ConfigManagers/BackupConfigManager/BackupConfigManager.cpp
+    config/ConfigManagers/BackupConfigManager/BackupConfigManager.h
+    config/ConfigManagers/BackupConfigManager/BackupConfigConstants.h
+
+    config/ConfigManagers/UserConfigManager/UserConfigManager.cpp
+    config/ConfigManagers/UserConfigManager/UserConfigManager.h
+    config/ConfigManagers/UserConfigManager/UserConfigConstants.h
+
+    config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.cpp
+    config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.h
+    config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h
+    config/ConfigManagers/NotificationConfigManager/NotificationConfigConstants.h
+
+    config/ConfigSettings/app_settings.h
 )
 
-# Utility Modules
-set(UTILITY_MODULES
+# Utilities
+set(UTILITY_SOURCES
     core/utils/file_utils/filewatcher.cpp
     core/utils/file_utils/filewatcher.h
     core/utils/file_utils/fileoperations.cpp
     core/utils/file_utils/fileoperations.h
-    core/utils/common_utils/utils.cpp
-    core/utils/common_utils/utils.h
     core/utils/file_utils/jsonmanager.cpp
     core/utils/file_utils/jsonmanager.h
+    core/utils/common_utils/utils.cpp
+    core/utils/common_utils/utils.h
 )
 
-# Aggregate All Sources
+# Full Project Source List
 set(PROJECT_SOURCES
-    ${ENTRY_POINT_SOURCES}
-    ${QT_RESOURCE_FILES}
-    ${CONFIG_SETTINGS_HEADERS}
-    ${UI_COMPONENTS}
-    ${BACKUP_CONTROLLER}
-    ${BACKUP_SERVICE}
-    ${BACKUP_WORKER}
-    ${BACKUP_MODELS}
-    ${CONFIG_MANAGEMENT_MODULES}
-    ${UTILITY_MODULES}
+    ${APP_ENTRY_POINT}
+    ${QT_RESOURCES}
+    ${UI_SOURCES}
+    ${BACKUP_CORE}
+    ${CONFIG_MODULES}
+    ${UTILITY_SOURCES}
 )
 
-# Add executable (define the target before applying properties)
+# Target Definition
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION

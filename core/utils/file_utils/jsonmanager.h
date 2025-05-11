@@ -6,19 +6,19 @@
 #include <QJsonObject>
 #include <QString>
 
-// Provides utility methods for loading and saving JSON files
+// Handles loading and saving JSON files
 class JsonManager {
 public:
-    // Load JSON data into a QJsonObject
+    // Loads JSON into QJsonObject
     static bool loadJsonFile(const QString& path, QJsonObject& target);
 
-    // Save a QJsonObject to a file
+    // Saves QJsonObject to file
     static bool saveJsonFile(const QString& path, const QJsonObject& data);
 
-    // Load JSON data into a QJsonDocument (object or array)
+    // Loads raw QJsonDocument from file
     static QJsonDocument loadJsonFile(const QString& path);
 
-    // Save a QJsonDocument to a file
+    // Saves QJsonDocument to file
     static bool saveJsonFile(const QString& path, const QJsonDocument& doc);
 };
 

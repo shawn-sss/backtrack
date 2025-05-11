@@ -1,124 +1,114 @@
 // Project includes
-#include "configdirector.h"
-#include "../configmanagers/backupsettingsmanager/backupsettingsmanager.h"
-#include "../configmanagers/installmetadatamanager/installmetadatamanager.h"
-#include "../configmanagers/notificationsmanager/notificationsmanager.h"
-#include "../configmanagers/usersettingsmanager/usersettingsmanager.h"
-#include "../../config/configsettings/_settings.h"
+#include "ConfigDirector.h"
+#include "ConfigDirectorConstants.h"
+#include "../ConfigManagers/BackupConfigManager/BackupConfigManager.h"
+#include "../ConfigManagers/InstallConfigManager/InstallConfigManager.h"
+#include "../ConfigManagers/NotificationConfigManager/NotificationConfigManager.h"
+#include "../ConfigManagers/UserConfigManager/UserConfigManager.h"
+#include "../ConfigManagers/UserConfigManager/UserConfigConstants.h"
+#include "../ConfigManagers/ThemeConfigManager/ThemeConfigConstants.h"
 
 // Qt includes
-#include <QDateTime>
-#include <QDir>
 #include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
 #include <QJsonObject>
-#include <QSaveFile>
 #include <QStandardPaths>
 
-// Singleton instance
+using namespace UserConfigKeys;
+using namespace ThemeConfigConstants;
+
+// Get singleton instance of ConfigDirector
 ConfigDirector& ConfigDirector::getInstance() {
     static ConfigDirector instance;
     return instance;
 }
 
-// Constructor to initialize managers and set up configuration state
-ConfigDirector::ConfigDirector()
-    : installMetadataManager(nullptr)
-    , userSettingsManager(nullptr)
-    , backupSettingsManager(nullptr)
-{
+// Constructor sets up config paths and managers
+ConfigDirector::ConfigDirector() {
     setupFilePaths();
 
-    installMetadataManager = new InstallMetadataManager(appMetadataPath);
-    userSettingsManager = new UserSettingsManager(userConfigPath);
-    backupSettingsManager = new BackupSettingsManager(*userSettingsManager);
+    installConfigManager = std::make_unique<InstallConfigManager>(appMetadataPath);
+    userConfigManager = std::make_unique<UserConfigManager>(userConfigPath);
+    backupConfigManager = std::make_unique<BackupConfigManager>(*userConfigManager);
 
     if (isFirstRun()) {
         setupDefaults();
     }
 
-    installMetadataManager->load();
-    userSettingsManager->load();
+    installConfigManager->load();
+    userConfigManager->load();
 }
 
-// Returns the configured backup directory
+// Returns backup directory path
 QString ConfigDirector::getBackupDirectory() const {
-    return backupSettingsManager->getBackupDirectory();
+    return backupConfigManager->getBackupDirectory();
 }
 
-// Sets the backup directory
+// Sets backup directory path
 void ConfigDirector::setBackupDirectory(const QString& dir) {
-    backupSettingsManager->setBackupDirectory(dir);
+    backupConfigManager->setBackupDirectory(dir);
 }
 
-// Returns the prefix used for backup files
+// Returns backup filename prefix
 QString ConfigDirector::getBackupPrefix() const {
-    return backupSettingsManager->getBackupPrefix();
+    return backupConfigManager->getBackupPrefix();
 }
 
-// Sets the backup file prefix
+// Sets backup filename prefix
 void ConfigDirector::setBackupPrefix(const QString& prefix) {
-    backupSettingsManager->setBackupPrefix(prefix);
+    backupConfigManager->setBackupPrefix(prefix);
 }
 
-// Returns the user's theme preference
+// Returns user theme preference from config
 UserThemePreference ConfigDirector::getThemePreference() const {
-    const QJsonObject& settings = userSettingsManager->settings();
-    if (settings.contains(ConfigKeys::k_THEME_PREFERENCE_KEY)) {
-        const QString prefStr = settings.value(ConfigKeys::k_THEME_PREFERENCE_KEY).toString();
-        return stringToUserThemePreference(prefStr);
+    const QJsonObject& settings = userConfigManager->settings();
+    if (settings.contains(k_THEME_PREFERENCE_KEY)) {
+        return stringToUserThemePreference(settings.value(k_THEME_PREFERENCE_KEY).toString());
     }
     return UserThemePreference::Auto;
 }
 
-// Sets the user's theme preference
+// Updates theme preference in user config
 void ConfigDirector::setThemePreference(UserThemePreference preference) {
-    QJsonObject& settings = userSettingsManager->settings();
-    settings[ConfigKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
-    userSettingsManager->save();
+    QJsonObject& settings = userConfigManager->settings();
+    settings[k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
+    userConfigManager->save();
 }
 
-// Loads the install metadata from file
+// Loads install metadata from config
 void ConfigDirector::loadInstallMetadata() {
-    installMetadataManager->load();
+    installConfigManager->load();
 }
 
-// Saves the current install metadata to file
+// Saves install metadata to config
 void ConfigDirector::saveInstallMetadata() {
-    installMetadataManager->save();
+    installConfigManager->save();
 }
 
-// Returns the application install directory (public wrapper)
-QString ConfigDirector::getAppInstallDirPublic() const {
-    return getAppInstallDir();
-}
-
-// Returns the application install directory path
+// Returns app installation directory path
 QString ConfigDirector::getAppInstallDir() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
-// Returns the full path to a specific config file
+// Returns full file path within app config directory
 QString ConfigDirector::getFilePath(const QString& fileName) const {
-    return getAppInstallDir() + "/" + AppConfig::k_APPDATA_SETUP_FOLDER + "/" + fileName;
+    return getAppInstallDir() + "/" + ConfigDirectorConstants::kAppDataFolder + "/" + fileName;
 }
 
-// Initializes file paths for metadata and user settings
+// Initializes file paths for metadata and user config
 void ConfigDirector::setupFilePaths() {
-    const QString baseDir = getAppInstallDir() + "/" + AppConfig::k_APPDATA_SETUP_FOLDER;
-    appMetadataPath = baseDir + "/" + AppConfig::k_APPDATA_SETUP_INFO_FILE;
-    userConfigPath = baseDir + "/" + AppConfig::k_APPDATA_SETUP_USER_SETTINGS_FILE;
+    const QString baseDir = getAppInstallDir() + "/" + ConfigDirectorConstants::kAppDataFolder;
+    appMetadataPath = baseDir + "/" + ConfigDirectorConstants::kMetadataFile;
+    userConfigPath = baseDir + "/" + ConfigDirectorConstants::kUserSettingsFile;
 }
 
-// Determines whether this is the first time the app is run
+// Checks if this is the first run (missing config files)
 bool ConfigDirector::isFirstRun() const {
     return !QFile::exists(appMetadataPath) || !QFile::exists(userConfigPath);
 }
 
-// Sets up default settings and values on first run
+// Sets default configurations on first run
 void ConfigDirector::setupDefaults() {
-    InstallMetadataManager::initializeDefaults();
-    userSettingsManager->initializeDefaults();
-    NotificationsManager::initializeDefaults();
+    InstallConfigManager::initializeDefaults();
+    userConfigManager->initializeDefaults();
+    NotificationConfigManager::initializeDefaults();
 }

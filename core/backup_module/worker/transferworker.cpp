@@ -1,5 +1,8 @@
 // Project includes
-#include "../../../config/configsettings/_settings.h"
+#include "../../../config/configsettings/app_settings.h"
+#include "../../../config/ConfigSettings/app_settings.h"
+#include "../../../config/configdirector/configdirector.h"
+#include "../../../ui/mainwindow/mainwindowmessages.h"
 #include "../../utils/file_utils/fileoperations.h"
 #include "transferworker.h"
 
@@ -8,16 +11,16 @@
 #include <QFile>
 #include <QStorageInfo>
 
-// Constructor
+// Initializes the transfer worker with source files and destination
 TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// Request transfer to stop early
+// Requests the current transfer to stop early
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
-// Start file/folder transfer in sequence
+// Starts transferring all files and folders
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -52,7 +55,7 @@ void TransferWorker::startTransfer() {
     emit finished();
 }
 
-// Copy the contents of a full drive (e.g., C:/)
+// Copies the contents of a drive root (e.g., C:/)
 bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     if (stopRequested.load()) return false;
 
@@ -73,12 +76,12 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
 
     QDir backupDir(driveBackupFolder);
     if (backupDir.exists() && !backupDir.removeRecursively()) {
-        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
         return false;
     }
 
     if (!backupDir.mkpath(".")) {
-        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
         return false;
     }
 
@@ -92,7 +95,7 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     return true;
 }
 
-// Copy an individual file or folder
+// Copies a single file or folder
 bool TransferWorker::processFileOrFolder(const QString& filePath) {
     if (stopRequested.load()) return false;
 
@@ -102,7 +105,7 @@ bool TransferWorker::processFileOrFolder(const QString& filePath) {
     return copyItem(fileInfo, destPath);
 }
 
-// Copy a file or recursively copy a directory
+// Copies an item to the destination path
 bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
     if (!fileInfo.isReadable()) {
         emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));

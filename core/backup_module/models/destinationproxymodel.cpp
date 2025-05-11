@@ -2,20 +2,20 @@
 #include "destinationproxymodel.h"
 
 // Qt includes
-#include <QModelIndex>
 #include <QFileSystemModel>
+#include <QModelIndex>
 #include <QRegularExpression>
 
-// Constructor
+// Initializes the proxy model
 DestinationProxyModel::DestinationProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent) {}
 
-// Set the name of the folder to exclude from filtering
+// Sets the folder name to exclude from the view
 void DestinationProxyModel::setExcludedFolderName(const QString& folderName) {
     excludedFolderName = folderName.toLower();
 }
 
-// Filter out rows matching the excluded folder name
+// Filters out rows that match the excluded folder name
 bool DestinationProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
     QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
     QString folderName = sourceModel()->data(index, Qt::DisplayRole).toString().toLower();
@@ -23,7 +23,7 @@ bool DestinationProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& s
     return folderName != excludedFolderName;
 }
 
-// Custom sorting logic to order folders by embedded timestamp
+// Sorts folders based on embedded timestamps (descending)
 bool DestinationProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
     QFileSystemModel* model = qobject_cast<QFileSystemModel*>(sourceModel());
 
@@ -43,7 +43,6 @@ bool DestinationProxyModel::lessThan(const QModelIndex& left, const QModelIndex&
     if (leftMatch.hasMatch() && rightMatch.hasMatch()) {
         QString leftTimestamp = leftMatch.captured(1);
         QString rightTimestamp = rightMatch.captured(1);
-
         return leftTimestamp > rightTimestamp;
     }
 

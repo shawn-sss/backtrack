@@ -1,10 +1,13 @@
+// MainWindow UI styling constants
 #ifndef MAINWINDOWSTYLING_H
 #define MAINWINDOWSTYLING_H
 
+// Qt includes
 #include <QString>
 
 namespace MainWindowStyling {
 
+// Container styling for backup views
 namespace Styles {
 
 namespace BackupViewContainer {
@@ -14,29 +17,20 @@ constexpr auto STYLE = R"(
         padding: 10px;
         border: 1px solid;
     }
-
     #DestinationTreeTitleLabel,
     #SourceTreeTitleLabel,
     #StagingListTitleLabel {
         font-weight: bold;
     }
-
     #DriveTreeView,
     #BackupStagingTreeView,
     #BackupDestinationView {
         border: 1px solid;
     }
-
-    #ChangeBackupDestinationButton,
-    #DeleteBackupButton,
-    #AddToBackupButton,
-    #CreateBackupButton,
-    #RemoveFromBackupButton,
-    #NotificationButton {
-    }
 )";
 }
 
+// Dashboard container styling
 namespace DashboardContainer {
 constexpr auto STYLE = R"(
     #DashboardContainer {
@@ -48,6 +42,7 @@ constexpr auto STYLE = R"(
 )";
 }
 
+// Dashboard labels styling
 namespace DashboardLabel {
 constexpr auto STYLE = R"(
     #DashboardLabel {
@@ -58,6 +53,7 @@ constexpr auto STYLE = R"(
 )";
 }
 
+// General button styles
 namespace GeneralButton {
 constexpr auto STYLE = R"(
     QPushButton {
@@ -73,21 +69,22 @@ constexpr auto STYLE = R"(
 )";
 }
 
+// Visual constants (colors and HTML templates)
 namespace Visuals {
-constexpr auto COLOR_GREEN       = "green";
-constexpr auto COLOR_RED         = "red";
-constexpr auto COLOR_YELLOW      = "yellow";
-constexpr auto COLOR_GRAY        = "gray";
-constexpr auto COLOR_TRANSPARENT = "transparent";
-constexpr auto COLOR_WARNING     = "orange";
-constexpr auto COLOR_INFO        = "blue";
+constexpr auto COLOR_GREEN        = "green";
+constexpr auto COLOR_RED          = "red";
+constexpr auto COLOR_YELLOW       = "yellow";
+constexpr auto COLOR_GRAY         = "gray";
+constexpr auto COLOR_TRANSPARENT  = "transparent";
+constexpr auto COLOR_WARNING      = "orange";
+constexpr auto COLOR_INFO         = "blue";
 
-constexpr auto TITLE_BAR         = "#222";
-constexpr auto WINDOW_BACKGROUND = "#2B2B2B";
+constexpr auto TITLE_BAR          = "#222";
+constexpr auto WINDOW_BACKGROUND  = "#2B2B2B";
 
-constexpr auto BACKUP_STATUS_COLOR_FOUND     = COLOR_GREEN;
-constexpr auto BACKUP_STATUS_COLOR_NOT_FOUND = COLOR_RED;
-constexpr auto BACKUP_STATUS_COLOR_WARNING   = COLOR_YELLOW;
+constexpr auto BACKUP_STATUS_COLOR_FOUND      = COLOR_GREEN;
+constexpr auto BACKUP_STATUS_COLOR_NOT_FOUND  = COLOR_RED;
+constexpr auto BACKUP_STATUS_COLOR_WARNING    = COLOR_YELLOW;
 
 constexpr auto STATUS_LIGHT_ICON = "<img src='data:image/png;base64,%1' style='%2'>";
 constexpr auto STATUS_LABEL_HTML = R"(

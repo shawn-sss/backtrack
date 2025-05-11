@@ -7,10 +7,10 @@
 
 namespace ToolbarStyling {
 
-// Default icon size for toolbar buttons
+// Default toolbar icon size
 inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
 
-// Base style applied to QToolBar and QToolButtons
+// Toolbar and button base style
 inline const QString BASE_STYLE = QStringLiteral(
     "QToolBar {"
     "    background-color: transparent;"
@@ -24,8 +24,7 @@ inline const QString BASE_STYLE = QStringLiteral(
     "    min-height: 40px;"
     "    font-size: 14px;"
     "    border: none;"
-    "}"
-    );
+    "}");
 
 } // namespace ToolbarStyling
 

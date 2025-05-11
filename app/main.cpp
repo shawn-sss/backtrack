@@ -1,7 +1,7 @@
 // Project includes
-#include "../config/configsettings/_settings.h"
 #include "../config/configdirector/configdirector.h"
-#include "../config/configmanagers/thememanager/thememanager.h"
+#include "../config/configsettings/app_settings.h"
+#include "../config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h"
 #include "../ui/mainwindow/mainwindow.h"
 
 // Qt includes
@@ -9,25 +9,26 @@
 
 // Entry point for application startup
 int main(int argc, char* argv[]) {
-    // Initialize the Qt application
+    // Init Qt application
     QApplication app(argc, argv);
 
-    // Load application configuration
+    // Load global config
     ConfigDirector::getInstance();
 
-    // Set application metadata
+    // Set basic app metadata
     app.setApplicationName(AppInfo::k_APP_NAME);
     app.setApplicationDisplayName(AppInfo::k_APP_NAME);
 
-    // Apply visual theme and set up event filter for system theme changes
-    ThemeManager::applyTheme();
-    ThemeManager::installEventFilter(&app);
+    // Apply and monitor visual theme
+    ThemeConfigManager::applyTheme();
+    ThemeConfigManager::installEventFilter(&app);
 
-    // Create and show the main window
+    // Set up and show main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(AppInfo::k_APP_NAME);
     mainWindow.setWindowIcon(QIcon(Resources::Application::k_ICON_PATH));
     mainWindow.show();
 
+    // Start event loop
     return app.exec();
 }

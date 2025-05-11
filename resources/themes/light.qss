@@ -1,18 +1,13 @@
-/* === Base background and text === */
+/* === Base Background & Text === */
 QWidget {
     background-color: #f5f5f5;
-    color: #000000;
+    color: #000;
 }
 
 /* === Buttons === */
 QPushButton, QToolButton {
     background-color: #dcdcdc;
-    color: #000000;
-    border: 1px solid black;
-    border-radius: 6px;
-    padding: 4px 8px;
-    min-height: 32px;
-    font-size: 14px;
+    color: #000;
 }
 
 QPushButton:hover, QToolButton:hover {
@@ -27,20 +22,13 @@ QPushButton:checked, QToolButton:checked {
 
 /* === Input Fields === */
 QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
-    background-color: #ffffff;
-    color: #000000;
-    border: 1px solid black;
-    border-radius: 4px;
-    padding: 4px 6px;
-    font-size: 14px;
+    background-color: #fff;
+    color: #000;
 }
 
 /* === Tabs === */
 QTabWidget::pane {
-    background-color: #ffffff;
-    border: 1px solid black;
-    border-radius: 6px;
-    padding: 8px;
+    background-color: #fff;
 }
 
 QTabBar {
@@ -49,13 +37,7 @@ QTabBar {
 
 QTabBar::tab {
     background-color: #e0e0e0;
-    color: #000000;
-    border: 1px solid black;
-    border-bottom: none;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    padding: 6px 12px;
-    font-weight: bold;
+    color: #000;
 }
 
 QTabBar::tab:selected {
@@ -66,12 +48,8 @@ QTabBar::tab:selected {
 
 /* === List Widget === */
 QListWidget {
-    background-color: #ffffff;
-    color: #000000;
-    border: 1px solid black;
-    border-radius: 4px;
-    padding: 4px;
-    font-size: 14px;
+    background-color: #fff;
+    color: #000;
 }
 
 QListWidget::item:selected {
@@ -80,15 +58,15 @@ QListWidget::item:selected {
     font-weight: bold;
 }
 
-/* === Tooltip and Menu === */
+/* === Tooltips & Menus === */
 QToolTip {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #fff;
+    color: #000;
 }
 
 QMenu {
     background-color: #f5f5f5;
-    color: #000000;
+    color: #000;
 }
 
 QMenu::item:selected {
@@ -96,7 +74,7 @@ QMenu::item:selected {
     color: #007BFF;
 }
 
-/* === Input Drop-down Items === */
+/* === Drop-down Selection === */
 QTreeView::item:selected,
 QListView::item:selected,
 QComboBox QAbstractItemView::item:selected {

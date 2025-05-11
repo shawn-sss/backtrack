@@ -5,11 +5,11 @@
 #include <QObject>
 #include <QStringList>
 
-// Forward declarations (Qt classes)
+// Forward Declaration (Qt class)
 class QProgressBar;
 class QThread;
 
-// Forward declarations (Project classes)
+// Forward Declaration (Custom class)
 class BackupService;
 
 // Manages backup operations
@@ -17,23 +17,23 @@ class BackupController : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor & destructor
+    // Constructor and destructor
     explicit BackupController(BackupService* service, QObject* parent = nullptr);
     ~BackupController();
 
-    // Backup operations
+    // Backup interface methods
     void createBackup(const QString& destinationPath, const QStringList& stagingList, QProgressBar* progressBar);
     void deleteBackup(const QString& backupPath);
     bool isBackupInProgress() const;
 
 signals:
-    // Backup operation signals
+    // Events for backup lifecycle
     void backupCreated();
     void backupDeleted();
     void errorOccurred(const QString& error);
 
 private:
-    // Internal helpers
+    // Helper methods
     void cleanupAfterTransfer();
     bool createBackupFolder(const QString& path);
 

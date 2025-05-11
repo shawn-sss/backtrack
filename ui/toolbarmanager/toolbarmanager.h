@@ -14,32 +14,36 @@ class ToolbarManager : public QObject {
     Q_OBJECT
 
 public:
-    // Lifecycle
+    // Constructor and destructor
     explicit ToolbarManager(QObject* parent = nullptr);
 
-    // Initializes the toolbar layout, actions, and style
+    // Initializes the toolbar
     void initialize(QToolBar* toolBar);
 
-    // Accessors for specific toolbar actions
+    // Returns specific actions
     QAction* getActionOpenSettings() const;
     QAction* getActionExit() const;
     QAction* getActionHelp() const;
     QAction* getActionAbout() const;
 
 private:
-    // Helpers for configuring toolbar and actions
-    void createActions();
+    // Toolbar setup helpers
     void setupAppearance(QToolBar* toolBar);
+    void createActions();
     void addActions(QToolBar* toolBar);
     void applyCursorStyle(QToolBar* toolBar);
 
-    // Action storage
+    // Action array
     std::array<QAction*, 4> actions;
 
 private slots:
-    // Action slots
+    // Slot for settings dialog
     void showSettings();
+
+    // Slot for help message
     void showHelp();
+
+    // Slot for about dialog
     void showAbout();
 };
 

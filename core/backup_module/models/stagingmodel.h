@@ -2,13 +2,13 @@
 #define STAGINGMODEL_H
 
 // Qt includes
-#include <QSet>
-#include <QVector>
 #include <QAbstractItemModel>
-#include <QStringList>
+#include <QSet>
 #include <QString>
+#include <QStringList>
+#include <QVector>
 
-// Manages staged backup paths for display and control
+// Manages staged paths for display in a flat list
 class StagingModel : public QAbstractItemModel {
     Q_OBJECT
 
@@ -17,7 +17,7 @@ public:
     explicit StagingModel(QObject* parent = nullptr);
     Q_DISABLE_COPY(StagingModel)
 
-    // QAbstractItemModel interface
+    // QAbstractItemModel overrides
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& child) const override;
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -31,10 +31,10 @@ public:
     QStringList getStagedPaths() const;
 
 private:
-    // Ordered list of staged paths
+    // List of staged paths in order
     QVector<QString> stagedPaths;
 
-    // Set for fast lookup and duplicate avoidance
+    // Set to ensure uniqueness
     QSet<QString> stagedPathsSet;
 };
 

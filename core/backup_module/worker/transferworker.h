@@ -9,7 +9,7 @@
 // C++ includes
 #include <atomic>
 
-// Executes file/folder transfers for backup operations
+// Executes file transfers to backup destination
 class TransferWorker : public QObject {
     Q_OBJECT
 
@@ -19,26 +19,26 @@ public:
     Q_DISABLE_COPY(TransferWorker)
 
 public slots:
-    // Starts the transfer operation
+    // Starts the transfer
     void startTransfer();
 
-    // Stops the transfer operation
+    // Stops the transfer
     void stopTransfer();
 
 signals:
-    // Transfer status signals
+    // Transfer progress and status signals
     void progressUpdated(int progress);
     void transferComplete();
     void errorOccurred(const QString& error);
     void finished();
 
 private:
-    // Transfer helpers
+    // Helpers for specific transfer scenarios
     bool processDriveRoot(const QString& driveRoot);
     bool processFileOrFolder(const QString& filePath);
     bool copyItem(const QFileInfo& fileInfo, const QString& destinationPath);
 
-    // Internal state
+    // Transfer state
     QStringList files;
     QString destination;
     std::atomic<bool> stopRequested{false};

@@ -1,6 +1,7 @@
 // Project includes
-#include "../../../config/configsettings/_settings.h"
+#include "../../../config/configsettings/app_settings.h"
 #include "../../../config/configdirector/configdirector.h"
+#include "../../../ui/mainwindow/mainwindowmessages.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
 #include "backupcontroller.h"
@@ -13,16 +14,16 @@
 #include <QThread>
 #include <QStringList>
 
-// Constructor
+// Initializes the controller with service and parent
 BackupController::BackupController(BackupService* service, QObject* parent)
     : QObject(parent), backupService(service), workerThread(nullptr) {}
 
-// Destructor
+// Cleans up when controller is destroyed
 BackupController::~BackupController() {
     cleanupAfterTransfer();
 }
 
-// Starts a new backup operation in a separate worker thread
+// Starts a new backup operation in a worker thread
 void BackupController::createBackup(const QString& destinationPath,
                                     const QStringList& stagingList,
                                     QProgressBar* progressBar) {
@@ -47,7 +48,7 @@ void BackupController::createBackup(const QString& destinationPath,
         QDateTime::currentDateTime().toString(Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
 
     if (!createBackupFolder(backupFolderPath)) {
-        emit errorOccurred(ErrorMessages::k_ERROR_CREATING_BACKUP_FOLDER);
+        emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
         return;
     }
 
@@ -88,7 +89,7 @@ void BackupController::createBackup(const QString& destinationPath,
     workerThread->start();
 }
 
-// Deletes the specified backup and its log file
+// Deletes a backup folder and its log file
 void BackupController::deleteBackup(const QString& backupPath) {
     const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
         QStringLiteral("%1/%2/%3_%4")
@@ -112,17 +113,17 @@ void BackupController::deleteBackup(const QString& backupPath) {
     emit backupDeleted();
 }
 
-// Returns true if a backup thread is currently active
+// Returns whether a backup operation is running
 bool BackupController::isBackupInProgress() const {
     return workerThread && workerThread->isRunning();
 }
 
-// Attempts to create the given backup folder path
+// Creates a new folder for backup
 bool BackupController::createBackupFolder(const QString& path) {
     return QDir().mkpath(path);
 }
 
-// Cleans up and shuts down the worker thread if one exists
+// Stops and cleans up the worker thread
 void BackupController::cleanupAfterTransfer() {
     if (workerThread) {
         workerThread->quit();

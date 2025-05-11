@@ -6,7 +6,7 @@
 
 namespace NotificationsDialogStyling {
 
-// Style applied to QListWidget items for consistent padding, font, and selection appearance
+// Style for QListWidget items
 inline const QString LIST_WIDGET_STYLE = QStringLiteral(
     "QListWidget::item {"
     "  margin: 0px;"

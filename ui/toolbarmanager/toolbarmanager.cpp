@@ -1,9 +1,12 @@
 // Project includes
 #include "toolbarmanager.h"
 #include "toolbarmanagerstyling.h"
-#include "../../config/configsettings/_settings.h"
+#include "toolbarmanagerconstants.h"
+#include "../../config/configsettings/app_settings.h"
 #include "../../config/configdirector/configdirector.h"
 #include "../../ui/settingsdialog/settingsdialog.h"
+#include "../../ui/mainwindow/mainwindowlabels.h"
+#include "../../ui/mainwindow/mainwindowmessages.h"
 
 // Qt includes
 #include <QAction>
@@ -16,12 +19,12 @@
 #include <QToolButton>
 #include <QWidget>
 
-// Constructor that initializes the action array
+// Constructor that creates toolbar actions
 ToolbarManager::ToolbarManager(QObject* parent)
     : QObject(parent),
     actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}
 
-// Initializes the toolbar with appearance, actions, and behavior
+// Initializes toolbar style and contents
 void ToolbarManager::initialize(QToolBar* toolBar) {
     setupAppearance(toolBar);
     createActions();
@@ -29,7 +32,7 @@ void ToolbarManager::initialize(QToolBar* toolBar) {
     applyCursorStyle(toolBar);
 }
 
-// Configures toolbar appearance and layout policies
+// Configures toolbar style and layout settings
 void ToolbarManager::setupAppearance(QToolBar* toolBar) {
     toolBar->setObjectName("MainToolBar");
     toolBar->setOrientation(Qt::Vertical);
@@ -43,7 +46,7 @@ void ToolbarManager::setupAppearance(QToolBar* toolBar) {
     toolBar->setIconSize(ToolbarStyling::DEFAULT_ICON_SIZE);
 }
 
-// Creates toolbar actions and connects them to their handlers
+// Creates and connects toolbar actions
 void ToolbarManager::createActions() {
     actions[0]->setText(Labels::Toolbar::k_SETTINGS);
     actions[0]->setIcon(QIcon(Resources::Toolbar::k_SETTINGS_ICON_PATH));
@@ -62,7 +65,7 @@ void ToolbarManager::createActions() {
     connect(actions[3], &QAction::triggered, this, &ToolbarManager::showAbout);
 }
 
-// Adds actions to the toolbar and inserts a spacer before the exit action
+// Adds actions and spacer to the toolbar
 void ToolbarManager::addActions(QToolBar* toolBar) {
     toolBar->clear();
     toolBar->addAction(actions[0]);
@@ -76,7 +79,7 @@ void ToolbarManager::addActions(QToolBar* toolBar) {
     toolBar->addAction(actions[1]);
 }
 
-// Applies cursor styling and assigns object names to toolbar buttons
+// Applies hand cursor and object names to buttons
 void ToolbarManager::applyCursorStyle(QToolBar* toolBar) {
     for (int i = 0; i < actions.size(); ++i) {
         QAction* action = actions[i];
@@ -95,13 +98,13 @@ void ToolbarManager::applyCursorStyle(QToolBar* toolBar) {
     }
 }
 
-// Shows the settings dialog
+// Opens the settings dialog
 void ToolbarManager::showSettings() {
     SettingsDialog dialog(qobject_cast<QWidget*>(parent()));
     dialog.exec();
 }
 
-// Displays help content in a message box
+// Shows help message with extended details
 void ToolbarManager::showHelp() {
     const QString extendedMessage = QString(HelpInfo::k_HELP_EXTENDED_MESSAGE)
     .arg(ConfigDirector::getInstance().getAppInstallDirPublic());
@@ -113,7 +116,7 @@ void ToolbarManager::showHelp() {
         );
 }
 
-// Displays about information in a message box
+// Shows about dialog with app info
 void ToolbarManager::showAbout() {
     const QString aboutText = QString(AboutInfo::k_ABOUT_WINDOW_MESSAGE)
     .arg(AppInfo::k_APP_VERSION,
@@ -127,22 +130,22 @@ void ToolbarManager::showAbout() {
         );
 }
 
-// Returns the "Settings" toolbar action
+// Returns Settings action
 QAction* ToolbarManager::getActionOpenSettings() const {
     return actions[0];
 }
 
-// Returns the "Exit" toolbar action
+// Returns Exit action
 QAction* ToolbarManager::getActionExit() const {
     return actions[1];
 }
 
-// Returns the "Help" toolbar action
+// Returns Help action
 QAction* ToolbarManager::getActionHelp() const {
     return actions[2];
 }
 
-// Returns the "About" toolbar action
+// Returns About action
 QAction* ToolbarManager::getActionAbout() const {
     return actions[3];
 }

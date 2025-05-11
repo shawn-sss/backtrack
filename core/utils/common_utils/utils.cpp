@@ -1,21 +1,21 @@
 // Project includes
-#include "../../../../config/configsettings/_settings.h"
+#include "../../../../config/configsettings/app_settings.h"
 #include "../../../core/backup_module/models/stagingmodel.h"
 #include "utils.h"
 
 // Qt includes
-#include <QSet>
+#include <QFileSystemModel>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QProgressBar>
+#include <QSet>
 #include <QTreeView>
-#include <QFileSystemModel>
 
 namespace Utils {
 
 namespace UI {
 
-// Enables dragging a window
+// Starts tracking mouse position for dragging a window
 void handleMousePress(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (event->button() == Qt::LeftButton) {
         dragging = true;
@@ -24,7 +24,7 @@ void handleMousePress(QWidget* window, QMouseEvent* event, bool& dragging, QPoin
     }
 }
 
-// Moves the window during drag
+// Updates window position while dragging
 void handleMouseMove(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (dragging && window) {
         QPoint delta = event->globalPosition().toPoint() - lastMousePosition;
@@ -33,7 +33,7 @@ void handleMouseMove(QWidget* window, QMouseEvent* event, bool& dragging, QPoint
     }
 }
 
-// Ends dragging on mouse release
+// Stops window dragging on mouse release
 void handleMouseRelease(QMouseEvent* event, bool& dragging) {
     if (event->button() == Qt::LeftButton) {
         dragging = false;
@@ -41,7 +41,7 @@ void handleMouseRelease(QMouseEvent* event, bool& dragging) {
     }
 }
 
-// Hides tree view columns starting from a column index
+// Hides columns in a tree view starting at specified index
 void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int columnCount) {
     if (!treeView || !treeView->model()) return;
     for (int i = startColumn; i < columnCount; ++i) {
@@ -49,7 +49,7 @@ void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int colu
     }
 }
 
-// Configures a progress bar's appearance and behavior
+// Configures a progress bar with given settings
 void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar) return;
     progressBar->setRange(minValue, maxValue);
@@ -58,7 +58,7 @@ void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int
     progressBar->setFixedHeight(height);
 }
 
-// Returns a circular status light pixmap
+// Creates a circular pixmap representing status
 QPixmap createStatusLightPixmap(const QString& color, int size) {
     QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
@@ -76,7 +76,7 @@ QPixmap createStatusLightPixmap(const QString& color, int size) {
 
 namespace Formatting {
 
-// Converts bytes to human-readable size string
+// Converts byte size to readable format
 QString formatSize(qint64 size) {
     constexpr std::array units = {
         Units::FileSize::k_SIZE_UNIT_BYTES,
@@ -96,7 +96,7 @@ QString formatSize(qint64 size) {
     return QString::number(sizeInUnits, 'f', 2) + " " + units[unitIndex];
 }
 
-// Converts milliseconds to readable duration
+// Converts milliseconds to readable time
 QString formatDuration(qint64 milliseconds) {
     constexpr qint64 MS_IN_SECOND = 1000;
     constexpr qint64 SECONDS_IN_MINUTE = 60;
@@ -122,12 +122,12 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) + Units::Time::k_UNIT_DAYS;
 }
 
-// Converts QDateTime to formatted string
+// Formats QDateTime with string pattern
 QString formatTimestamp(const QDateTime& datetime, const QString& format) {
     return datetime.toString(format);
 }
 
-// Converts QDateTime using Qt::DateFormat
+// Formats QDateTime using Qt enum format
 QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }
@@ -136,7 +136,7 @@ QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
 
 namespace Backup {
 
-// Adds selected items from tree to staging
+// Adds selected tree items to staging model
 void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
@@ -152,7 +152,7 @@ void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) 
     }
 }
 
-// Removes selected items from staging
+// Removes selected items from staging model
 void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel || !treeView->selectionModel()) return;
 
