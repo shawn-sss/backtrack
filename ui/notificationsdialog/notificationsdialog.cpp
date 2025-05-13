@@ -1,5 +1,6 @@
 // Project includes
 #include "notificationsdialog.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 
 // Qt includes
 #include <QVBoxLayout>
@@ -9,9 +10,12 @@
 #include <QBrush>
 #include <QFont>
 #include <QDateTime>
+#include <QMessageBox>
+
+// C++ includes
 #include <algorithm>
 
-// Constructor to initialize and display notifications
+// Constructs and displays the notifications dialog
 NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
     : QDialog(parent) {
     setWindowTitle("Notifications");
@@ -27,6 +31,10 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     closeButton = new QPushButton("Close", this);
     closeButton->setToolTip("Close the notifications dialog");
     closeButton->setCursor(Qt::PointingHandCursor);
+
+    clearAllButton = new QPushButton("Clear All", this);
+    clearAllButton->setToolTip("Delete all notifications");
+    clearAllButton->setCursor(Qt::PointingHandCursor);
 
     QList<NotificationServiceStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
@@ -59,10 +67,18 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     }
 
     layout->addWidget(listWidget);
+    layout->addWidget(clearAllButton);
     layout->addWidget(closeButton);
 
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
+
+    connect(clearAllButton, &QPushButton::clicked, this, [this]() {
+        if (QMessageBox::question(this, "Confirm", "Clear all notifications?") == QMessageBox::Yes) {
+            NotificationServiceManager::instance().clearAllNotifications();
+            accept();
+        }
+    });
 }
 
-// Destructor (defaulted)
+// Destructor
 NotificationsDialog::~NotificationsDialog() = default;

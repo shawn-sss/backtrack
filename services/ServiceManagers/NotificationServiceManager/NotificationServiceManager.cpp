@@ -64,8 +64,8 @@ void NotificationServiceManager::load() {
 // Saves all notifications to file
 void NotificationServiceManager::save() {
     QJsonArray array;
-    for (const auto& notif : notifications) {
-        array.append(notif.toJson());
+    for (int i = 0; i < notifications.size(); ++i) {
+        array.append(notifications.at(i).toJson());
     }
     JsonManager::saveJsonFile(notificationFilePath(), QJsonDocument(array));
 }
@@ -98,4 +98,16 @@ QList<NotificationServiceStruct> NotificationServiceManager::unreadNotifications
 // Returns all notifications
 const QList<NotificationServiceStruct>& NotificationServiceManager::allNotifications() const {
     return notifications;
+}
+
+// Clears all notifications and resets to default
+void NotificationServiceManager::clearAllNotifications() {
+    notifications.clear();
+    notifications.append({
+        NotificationSettings::k_DEFAULT_WELCOME_MESSAGE,
+        QDateTime::currentDateTimeUtc(),
+        false
+    });
+    save();
+    emit notificationsUpdated();
 }

@@ -8,11 +8,11 @@
 #include <QDialog>
 #include <QList>
 
-// Forward declarations (Qt class)
+// Forward declaration (Qt class)
 class QListWidget;
 class QPushButton;
 
-// Dialog class for displaying notifications
+// Dialog for displaying notifications
 class NotificationsDialog : public QDialog {
     Q_OBJECT
 
@@ -23,6 +23,7 @@ public:
 private:
     QListWidget* listWidget;
     QPushButton* closeButton;
+    QPushButton* clearAllButton;
 };
 
 #endif // NOTIFICATIONSDIALOG_H

@@ -32,19 +32,19 @@ bool copyDirectoryRecursively(const QString& sourcePath, const QString& destinat
     return true;
 }
 
-// Deletes a directory and its contents
+// Deletes a directory and all of its contents
 bool deleteDirectory(const QString& path) {
     QDir dir(path);
     return dir.exists() && dir.removeRecursively();
 }
 
-// Creates a directory if it doesn't exist
+// Creates a directory if it does not already exist
 bool createDirectory(const QString& path) {
     QDir dir(path);
     return dir.exists() || dir.mkpath(".");
 }
 
-// Recursively calculates the total size of a directory
+// Recursively calculates the total size of all files in a directory
 quint64 calculateDirectorySize(const QDir& dir) {
     quint64 totalSize = 0;
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
@@ -57,7 +57,7 @@ quint64 calculateDirectorySize(const QDir& dir) {
     return totalSize;
 }
 
-// Recursively collects file paths in a directory
+// Recursively collects all file paths under a directory
 void collectFilesRecursively(const QString& dirPath, QSet<QString>& uniqueFiles, QJsonArray& filesArray) {
     QDir dir(dirPath);
     if (!dir.exists()) return;
@@ -74,7 +74,7 @@ void collectFilesRecursively(const QString& dirPath, QSet<QString>& uniqueFiles,
     }
 }
 
-// Recursively collects folder paths in a directory
+// Recursively collects all directory paths under a directory
 void collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& uniqueFolders, QJsonArray& foldersArray) {
     QDir dir(dirPath);
     if (!dir.exists()) return;
@@ -90,7 +90,7 @@ void collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& unique
     }
 }
 
-// Creates backup folders and log folder
+// Creates the initial infrastructure for backups including setup and log folders
 bool createBackupInfrastructure(const QString& backupDir, QString& errorMessage) {
     const QDir backupDirectory(backupDir);
     const QString appFolderPath = backupDirectory.filePath(Backup::Storage::k_BACKUP_SETUP_FOLDER);

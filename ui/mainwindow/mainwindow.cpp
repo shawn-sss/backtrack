@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     applyButtonCursors();
     initializeBackupSystem();
+    refreshBackupStatus();
     setupConnections();
     setupNotificationButton();
 
@@ -181,6 +182,7 @@ void MainWindow::applyButtonCursors() {
         { ui->CreateBackupButton, "Start the backup process" },
         { ui->ChangeBackupDestinationButton, "Change the destination folder for backups" },
         { ui->DeleteBackupButton, "Delete the selected backup from the destination view" },
+        { ui->ResetDestinationButton, "Delete ALL contents from the backup destination" },
         { ui->NotificationButton, "View backup notifications" }
     };
 
@@ -204,7 +206,8 @@ void MainWindow::setupConnections() {
         { ui->ChangeBackupDestinationButton, &MainWindow::onChangeBackupDestinationClicked },
         { ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked },
         { ui->CreateBackupButton, &MainWindow::onCreateBackupClicked },
-        { ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked }
+        { ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked },
+        { ui->ResetDestinationButton, &MainWindow::onDeleteAllBackupsClicked }
     };
 
     for (const auto& conn : buttonConnections) {
@@ -345,9 +348,7 @@ void MainWindow::startWatchingBackupDirectory(const QString& path) {
 // Update file watcher
 void MainWindow::updateFileWatcher() {
     const QString watchPath = destinationModel->rootPath();
-    if (!fileWatcher->watchedDirectories().contains(watchPath)) {
-        fileWatcher->startWatching(watchPath);
-    }
+    fileWatcher->startWatching(watchPath);
 }
 
 // Handle backup directory change event
@@ -465,6 +466,64 @@ void MainWindow::onDeleteBackupClicked() {
                               Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
                               Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
     }
+}
+
+void MainWindow::onDeleteAllBackupsClicked() {
+    const QString backupLocation = destinationModel->rootPath();
+
+    if (backupLocation.isEmpty() || !QDir(backupLocation).exists()) {
+        QMessageBox::warning(this,
+                             tr("Delete All Backups"),
+                             tr("The backup location is invalid or not set."));
+        return;
+    }
+
+    const QString warningMsg = tr(
+                                   "⚠️ WARNING: This will permanently delete all files and folders inside:\n\n"
+                                   "%1\n\n"
+                                   "This action cannot be undone. All backups and data in this location will be lost forever.\n\n"
+                                   "Are you sure you want to proceed?"
+                                   ).arg(backupLocation);
+
+    const QMessageBox::StandardButton confirm = QMessageBox::warning(
+        this,
+        tr("Confirm Deletion"),
+        warningMsg,
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No
+        );
+
+    if (confirm != QMessageBox::Yes) {
+        return;
+    }
+
+    QDir dir(backupLocation);
+    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+    bool success = true;
+    for (const QFileInfo& entry : entries) {
+        if (entry.isDir()) {
+            if (!QDir(entry.absoluteFilePath()).removeRecursively()) {
+                success = false;
+            }
+        } else {
+            if (!QFile::remove(entry.absoluteFilePath())) {
+                success = false;
+            }
+        }
+    }
+
+    if (success) {
+        QMessageBox::information(this,
+                                 tr("Deletion Complete"),
+                                 tr("All contents in the backup location have been successfully deleted."));
+    } else {
+        QMessageBox::critical(this,
+                              tr("Deletion Failed"),
+                              tr("Some files or folders could not be deleted. Please check permissions or try again."));
+    }
+
+    refreshBackupStatus();
 }
 
 // Display the Notifications
@@ -607,23 +666,51 @@ void MainWindow::onBackupError(const QString& error) {
 
 // Refresh the backup status
 void MainWindow::refreshBackupStatus() {
-    const BackupStatus status = backupService->scanForBackupStatus();
-    const QString statusColor = [status]() -> QString {
-        switch (status) {
-        case BackupStatus::Valid:
-            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;
-        case BackupStatus::Broken:
-            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING;
-        default:
-            return MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND;
-        }
-    }();
+    if (backupController->isBackupInProgress()) {
+        updateBackupStatusLabel(MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND);
+        return;
+    }
+
+    const BackupScanResult scan = backupService->scanForBackupStatus();
+
+    const QString statusColor = !scan.structureExists
+                                    ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND // red
+                                    : scan.isBroken()
+                                          ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING // yellow
+                                          : MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;  // green
+
     updateBackupStatusLabel(statusColor);
     updateBackupLocationLabel(backupService->getBackupRoot());
     updateBackupTotalCountLabel();
     updateBackupTotalSizeLabel();
     updateBackupLocationStatusLabel(backupService->getBackupRoot());
     updateLastBackupInfo();
+
+    if (scan.isBroken() && !orphanLogNotified) {
+        if (scan.hasOrphanedLogs) {
+            NotificationServiceManager::instance().addNotification(
+                tr("Some backup logs exist without their corresponding backup folders. "
+                   "They may have been deleted outside the application.")
+                );
+        }
+
+        if (scan.hasMissingLogs) {
+            NotificationServiceManager::instance().addNotification(
+                tr("Some backup folders exist without corresponding log files. "
+                   "Log metadata may be missing or was deleted. This may affect size and count reporting.")
+                );
+        }
+
+        if (!scan.validStructure) {
+            NotificationServiceManager::instance().addNotification(
+                tr("The backup structure is partially broken. Please review and consider cleaning or restoring backups.")
+                );
+        }
+
+        orphanLogNotified = true;
+    } else if (!scan.isBroken()) {
+        orphanLogNotified = false;
+    }
 }
 
 // Update last backup information

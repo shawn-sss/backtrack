@@ -17,23 +17,20 @@ public:
     // Singleton access
     static NotificationServiceManager& instance();
 
-    // Initializes default notification file with welcome message
+    // Initializes default notification file
     static void initializeDefaults();
 
-    // Loads and saves notifications
+    // Persistence
     void load();
     void save();
 
-    // Adds a new notification
+    // Notification management
     void addNotification(const QString& message);
-
-    // Marks all notifications as read
     void markAllAsRead();
+    void clearAllNotifications();
 
-    // Returns unread notifications
+    // Notification queries
     QList<NotificationServiceStruct> unreadNotifications() const;
-
-    // Returns all notifications
     const QList<NotificationServiceStruct>& allNotifications() const;
 
 signals:
@@ -42,10 +39,10 @@ signals:
 private:
     NotificationServiceManager();
 
-    // Returns full path to notification file
+    // Internal path resolution
     QString notificationFilePath() const;
 
-    // Stored notifications
+    // Internal storage
     QList<NotificationServiceStruct> notifications;
 };
 

@@ -7,22 +7,12 @@
 
 // Qt includes
 #include <QMainWindow>
-#include <QString>
+#include <QElapsedTimer>
 #include <QPoint>
 #include <QTimer>
-#include <QElapsedTimer>
+#include <QString>
 
-// Forward declarations (Qt class)
-class QCloseEvent;
-class QFileSystemModel;
-class QLabel;
-class QMouseEvent;
-class QPushButton;
-class QToolBar;
-class QTreeView;
-class QWidget;
-
-// Forward declarations (Custom class)
+// Forward declaration (Custom class)
 class BackupController;
 class BackupService;
 class CustomTitleBar;
@@ -32,7 +22,17 @@ class NotificationServiceManager;
 class StagingModel;
 class ToolbarServiceManager;
 
-// Forward declarations (UI class)
+// Forward declaration (Qt class)
+class QCloseEvent;
+class QFileSystemModel;
+class QLabel;
+class QMouseEvent;
+class QPushButton;
+class QToolBar;
+class QTreeView;
+class QWidget;
+
+// Forward declaration (UI class)
 namespace Ui { class MainWindow; }
 
 // Main application window controller
@@ -44,9 +44,11 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+    // Accessors
     QTabWidget* getDetailsTabWidget();
 
 protected:
+    // Qt event overrides
     void closeEvent(QCloseEvent* event) override;
 
 private:
@@ -57,11 +59,11 @@ private:
     void setupConnections();
     void applyButtonCursors();
 
-    // Backup setup
+    // Backup system
     void initializeBackupSystem();
     void connectBackupSignals();
 
-    // Views configuration
+    // Tree views
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
@@ -76,7 +78,7 @@ private:
     void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString& location);
 
-    // File watching
+    // File system watching
     void updateFileWatcher();
     void startWatchingBackupDirectory(const QString& path);
 
@@ -93,18 +95,23 @@ private:
     void showNextNotification();
 
 private slots:
+    // Backup actions
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
+    void onDeleteAllBackupsClicked();
     void onChangeBackupDestinationClicked();
 
+    // File system watchers
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
 
+    // Backup lifecycle
     void onBackupCompleted();
     void onBackupError(const QString& error);
 
+    // Notification interactions
     void onNotificationButtonClicked();
     void onCooldownFinished();
 
@@ -130,6 +137,7 @@ private:
 
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
+    bool orphanLogNotified = false;
 };
 
 #endif // MAINWINDOW_H

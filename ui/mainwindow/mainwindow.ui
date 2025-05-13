@@ -339,6 +339,19 @@
       </widget>
      </widget>
     </widget>
+    <widget class="QPushButton" name="ResetDestinationButton">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>64</y>
+       <width>277</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reset Destination</string>
+     </property>
+    </widget>
    </widget>
    <zorder>DashboardContainer</zorder>
    <zorder>BackupViewContainer</zorder>

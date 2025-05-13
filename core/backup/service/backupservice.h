@@ -15,37 +15,48 @@ enum class BackupStatus {
     Valid
 };
 
+// Describes results of a backup structure scan
+struct BackupScanResult {
+    bool hasOrphanedLogs = false;
+    bool hasMissingLogs = false;
+    bool validStructure = true;
+    bool structureExists = false;
+
+    bool isBroken() const {
+        return structureExists && (!validStructure || hasOrphanedLogs || hasMissingLogs);
+    }
+};
+
 // Handles creation, scanning, and summary of backups
 class BackupService {
 public:
-    // Constructor
     explicit BackupService(const QString& backupRoot);
     Q_DISABLE_COPY(BackupService)
 
-    // Path management
+    // Backup root management
     void setBackupRoot(const QString& path);
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
 
-    // Validation
-    BackupStatus scanForBackupStatus() const;
+    // Backup validation
+    BackupScanResult scanForBackupStatus() const;
 
-    // Metadata operations
+    // Metadata retrieval
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
-    // Statistics
+    // Backup statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
 private:
-    // Metadata builder
+    // Metadata construction
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
 
-    // Utility for size calculation
+    // Size calculation
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
 
-    // Path state
+    // Root path
     QString backupRootPath;
 };
 
