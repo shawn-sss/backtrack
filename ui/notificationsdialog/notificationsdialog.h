@@ -2,13 +2,13 @@
 #define NOTIFICATIONSDIALOG_H
 
 // Project includes
-#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
 
 // Qt includes
 #include <QDialog>
 #include <QList>
 
-// Forward Declaration (Qt class)
+// Forward declarations (Qt class)
 class QListWidget;
 class QPushButton;
 
@@ -17,12 +17,10 @@ class NotificationsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    // Constructor and destructor
-    explicit NotificationsDialog(const QList<NotificationConfigStruct>& notifications, QWidget* parent = nullptr);
+    explicit NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent = nullptr);
     ~NotificationsDialog() override;
 
 private:
-    // UI elements
     QListWidget* listWidget;
     QPushButton* closeButton;
 };

@@ -1,19 +1,18 @@
-// Main application window controller
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 // Project includes
-#include "../../config/configsettings/app_settings.h"
-#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h"
+#include "../../../../constants/system_constants.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
 
 // Qt includes
+#include <QMainWindow>
 #include <QString>
 #include <QPoint>
 #include <QTimer>
-#include <QMainWindow>
 #include <QElapsedTimer>
 
-// Forward Declaration (Qt class)
+// Forward declarations (Qt class)
 class QCloseEvent;
 class QFileSystemModel;
 class QLabel;
@@ -23,54 +22,52 @@ class QToolBar;
 class QTreeView;
 class QWidget;
 
-// Forward Declaration (Custom class)
+// Forward declarations (Custom class)
 class BackupController;
 class BackupService;
 class CustomTitleBar;
 class DestinationProxyModel;
 class FileWatcher;
-class NotificationConfigManager;
+class NotificationServiceManager;
 class StagingModel;
-class ToolbarManager;
+class ToolbarServiceManager;
 
-// Forward Declaration (UI class)
+// Forward declarations (UI class)
 namespace Ui { class MainWindow; }
 
+// Main application window controller
 class MainWindow final : public QMainWindow {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
-    // Constructor and destructor
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
-    // Accessor for the main details tab widget
     QTabWidget* getDetailsTabWidget();
 
 protected:
-    // Window event handling
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    // UI configuration
+    // UI setup
     void configureWindow();
     void initializeUI();
     void setupLayout();
     void setupConnections();
     void applyButtonCursors();
 
-    // Backup initialization
+    // Backup setup
     void initializeBackupSystem();
     void connectBackupSignals();
 
-    // Tree and list view configuration
+    // Views configuration
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
     void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // Backup status management
+    // Backup status display
     void refreshBackupStatus();
     void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
@@ -79,70 +76,59 @@ private:
     void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString& location);
 
-    // File monitoring
+    // File watching
     void updateFileWatcher();
     void startWatchingBackupDirectory(const QString& path);
 
-    // Backup button state and feedback
+    // Backup button feedback
     void resetCreateBackupButtonState();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
-                               int durationMs = Timing::k_BUTTON_FEEDBACK_DURATION_MS);
+                               int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
-    // Notification handling
+    // Notifications
     void setupNotificationButton();
     void updateNotificationButtonState();
     void showNextNotification();
 
 private slots:
-    // Backup actions
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
     void onChangeBackupDestinationClicked();
 
-    // File monitoring events
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
 
-    // Backup completion and errors
     void onBackupCompleted();
     void onBackupError(const QString& error);
 
-    // Notification events
     void onNotificationButtonClicked();
-
-    // Cooldown timer events
     void onCooldownFinished();
 
 private:
-    // UI elements
     Ui::MainWindow* ui = nullptr;
     CustomTitleBar* titleBar = nullptr;
     QToolBar* toolBar = nullptr;
     QPushButton* notificationButton = nullptr;
     QLabel* notificationBadge = nullptr;
 
-    // Data models
     QFileSystemModel* sourceModel = nullptr;
     StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
     DestinationProxyModel* destinationProxyModel = nullptr;
 
-    // Backup system
     BackupService* backupService = nullptr;
     BackupController* backupController = nullptr;
     FileWatcher* fileWatcher = nullptr;
 
-    // Toolbar and timer management
-    ToolbarManager* toolbarManager = nullptr;
+    ToolbarServiceManager* toolbarManager = nullptr;
     QTimer* createBackupCooldownTimer = nullptr;
     QElapsedTimer backupStartTimer;
 
-    // Notification system
-    QList<NotificationConfigStruct> notificationQueue;
+    QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
 };
 

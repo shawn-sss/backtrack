@@ -1,38 +1,38 @@
 // Project includes
-#include "../config/configdirector/configdirector.h"
-#include "../config/configsettings/app_settings.h"
-#include "../config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h"
+#include "../core/shared/uiutils.h"
+#include "../services/ServiceDirector/ServiceDirector.h"
+#include "../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../ui/mainwindow/mainwindow.h"
-#include "../core/utils/common_utils/utils.h"
+#include "../../../../constants/app_info.h"
+#include "../../../../constants/interface_config.h"
 
 // Qt includes
 #include <QApplication>
 
 // Entry point for application startup
 int main(int argc, char* argv[]) {
-    // Init Qt application
     QApplication app(argc, argv);
 
-    // Load global config
-    ConfigDirector::getInstance();
+    // Initialize global service layer
+    ServiceDirector::getInstance();
 
-    // Set basic app metadata
-    app.setApplicationName(AppInfo::k_APP_NAME);
-    app.setApplicationDisplayName(AppInfo::k_APP_NAME);
+    // Set application metadata
+    app.setApplicationName(App::Info::k_NAME);
+    app.setApplicationDisplayName(App::Info::k_NAME);
 
-    // Apply and monitor visual theme
-    ThemeConfigManager::applyTheme();
-    ThemeConfigManager::installEventFilter(&app);
+    // Apply theme and install global event filter
+    ThemeServiceManager::applyTheme();
+    ThemeServiceManager::installEventFilter(&app);
 
-    // Set up and show main window
+    // Initialize and display main window
     MainWindow mainWindow;
-    mainWindow.setWindowTitle(AppInfo::k_APP_NAME);
-    mainWindow.setWindowIcon(QIcon(Resources::Application::k_ICON_PATH));
+    mainWindow.setWindowTitle(App::Info::k_NAME);
+    mainWindow.setWindowIcon(QIcon(UI::Resources::k_ICON_PATH));
     mainWindow.show();
 
+    // Set tab cursor style
+    Shared::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
 
-    Utils::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
-
-    // Start event loop
+    // Run application event loop
     return app.exec();
 }

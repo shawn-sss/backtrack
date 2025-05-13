@@ -5,32 +5,72 @@ QWidget {
 }
 
 /* === Buttons === */
-QPushButton, QToolButton {
+QPushButton,
+QToolButton {
     background-color: #dcdcdc;
     color: #000;
 }
 
-QPushButton:hover, QToolButton:hover {
+QPushButton:hover,
+QToolButton:hover {
     background-color: #bbbbbb;
 }
 
-QPushButton:checked, QToolButton:checked {
+QPushButton:checked,
+QToolButton:checked {
     background-color: #007BFF;
     color: white;
     font-weight: bold;
 }
 
-/* === Input Fields === */
-QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
+/* === Inputs === */
+QLineEdit,
+QTextEdit,
+QPlainTextEdit,
+QComboBox,
+QListView,
+QTreeView {
     background-color: #fff;
     color: #000;
 }
 
-/* === Tabs === */
-QTabWidget::pane {
-    /* background-color: #fff; */
+/* === List Widget === */
+QListWidget {
+    background-color: #fff;
+    color: #000;
 }
 
+QListWidget::item:selected {
+    background-color: #cce5ff;
+    color: #007BFF;
+    font-weight: bold;
+}
+
+/* === Menus & Tooltips === */
+QMenu {
+    background-color: #f5f5f5;
+    color: #000;
+}
+
+QMenu::item:selected {
+    background-color: #cce5ff;
+    color: #007BFF;
+}
+
+QToolTip {
+    background-color: #fff;
+    color: #000;
+}
+
+/* === Selection Styling === */
+QComboBox QAbstractItemView::item:selected,
+QListView::item:selected,
+QTreeView::item:selected {
+    background-color: #cce5ff;
+    color: #007BFF;
+}
+
+/* === Tabs === */
 QTabBar {
     background-color: #f5f5f5;
 }
@@ -46,38 +86,6 @@ QTabBar::tab:selected {
     border-color: #007BFF;
 }
 
-/* === List Widget === */
-QListWidget {
-    background-color: #fff;
-    color: #000;
-}
-
-QListWidget::item:selected {
-    background-color: #cce5ff;
-    color: #007BFF;
-    font-weight: bold;
-}
-
-/* === Tooltips & Menus === */
-QToolTip {
-    background-color: #fff;
-    color: #000;
-}
-
-QMenu {
-    background-color: #f5f5f5;
-    color: #000;
-}
-
-QMenu::item:selected {
-    background-color: #cce5ff;
-    color: #007BFF;
-}
-
-/* === Drop-down Selection === */
-QTreeView::item:selected,
-QListView::item:selected,
-QComboBox QAbstractItemView::item:selected {
-    background-color: #cce5ff;
-    color: #007BFF;
+QTabWidget::pane {
+    /* background-color: #fff; */
 }

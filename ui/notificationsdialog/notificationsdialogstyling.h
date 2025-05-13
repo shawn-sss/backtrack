@@ -7,18 +7,19 @@
 namespace NotificationsDialogStyling {
 
 // Style for QListWidget items
-inline const QString LIST_WIDGET_STYLE = QStringLiteral(
-    "QListWidget::item {"
-    "  margin: 0px;"
-    "  padding: 2px 6px;"
-    "  border: none;"
-    "  font-size: 13px;"
-    "  font-family: 'Segoe UI', 'Arial', sans-serif;"
-    "  color: #dddddd;"
-    "}"
-    "QListWidget::item:selected {"
-    "  background-color: #2a3b4c;"
-    "}");
+inline constexpr auto LIST_WIDGET_STYLE = R"(
+    QListWidget::item {
+        margin: 0px;
+        padding: 2px 6px;
+        border: none;
+        font-size: 13px;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        color: #dddddd;
+    }
+    QListWidget::item:selected {
+        background-color: #2a3b4c;
+    }
+)";
 
 } // namespace NotificationsDialogStyling
 

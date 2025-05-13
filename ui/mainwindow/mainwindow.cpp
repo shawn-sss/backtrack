@@ -5,21 +5,26 @@
 #include "mainwindowlabels.h"
 #include "mainwindowmessages.h"
 
-#include "../../config/configsettings/app_settings.h"
-#include "../../config/configdirector/configdirector.h"
-#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h"
-#include "../../config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.h"
+#include "../../../../constants/interface_config.h"
+#include "../../../../constants/backup_config.h"
+#include "../../../../constants/system_constants.h"
+#include "../../../../constants/window_config.h"
 
-#include "../../core/backup_module/controller/backupcontroller.h"
-#include "../../core/backup_module/models/destinationproxymodel.h"
-#include "../../core/backup_module/models/stagingmodel.h"
-#include "../../core/backup_module/service/backupservice.h"
+#include "../../core/backup/controller/backupcontroller.h"
+#include "../../core/backup/models/destinationproxymodel.h"
+#include "../../core/backup/models/stagingmodel.h"
+#include "../../core/backup/service/backupservice.h"
+#include "../../core/shared/fileoperations.h"
+#include "../../core/shared/filewatcher.h"
+#include "../../core/shared/formatutils.h"
+#include "../../core/shared/stagingutils.h"
+#include "../../core/shared/uiutils.h"
 
-#include "../../core/utils/common_utils/utils.h"
-#include "../../core/utils/file_utils/fileoperations.h"
-#include "../../core/utils/file_utils/filewatcher.h"
+#include "../../services/ServiceDirector/ServiceDirector.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
+#include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 
-#include "../../ui/toolbarmanager/toolbarmanager.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 
 // Qt includes
@@ -43,22 +48,15 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
-
-    // File system models
     sourceModel(new QFileSystemModel(this)),
     destinationModel(new QFileSystemModel(this)),
     stagingModel(new StagingModel(this)),
-
-    // File monitoring and backup services
     fileWatcher(new FileWatcher(this)),
-    backupService(new BackupService(ConfigDirector::getInstance().getBackupDirectory())),
+    backupService(new BackupService(ServiceDirector::getInstance().getBackupDirectory())),
     backupController(new BackupController(backupService, this)),
-
-    // Toolbar and UI helpers
     toolBar(new QToolBar(this)),
-    toolbarManager(new ToolbarManager(this)),
-    createBackupCooldownTimer(new QTimer(this))
-{
+    toolbarManager(new ToolbarServiceManager(this)),
+    createBackupCooldownTimer(new QTimer(this)) {
     ui->setupUi(this);
 
     configureWindow();
@@ -124,14 +122,14 @@ QTabWidget* MainWindow::getDetailsTabWidget() {
 
 // Configure basic window properties
 void MainWindow::configureWindow() {
-    setMinimumSize(AppConfig::k_MINIMUM_WINDOW_SIZE);
-    resize(AppConfig::k_DEFAULT_WINDOW_SIZE);
-    setMaximumSize(AppConfig::k_MAXIMUM_WINDOW_SIZE);
+    setMinimumSize(App::Window::k_MINIMUM_WINDOW_SIZE);
+    resize(App::Window::k_DEFAULT_WINDOW_SIZE);
+    setMaximumSize(App::Window::k_MAXIMUM_WINDOW_SIZE);
 
     if (QScreen* screen = QGuiApplication::primaryScreen()) {
         const QRect screenGeometry = screen->availableGeometry();
-        const QPoint center = screenGeometry.center() - QPoint(AppConfig::k_DEFAULT_WINDOW_SIZE.width() / 2,
-                                                               AppConfig::k_DEFAULT_WINDOW_SIZE.height() / 2);
+        const QPoint center = screenGeometry.center() - QPoint(App::Window::k_DEFAULT_WINDOW_SIZE.width() / 2,
+                                                               App::Window::k_DEFAULT_WINDOW_SIZE.height() / 2);
         move(center);
     }
 }
@@ -152,18 +150,18 @@ void MainWindow::setupLayout() {
 
 // Initialize the UI
 void MainWindow::initializeUI() {
-    Utils::UI::setupProgressBar(
+    Shared::UI::setupProgressBar(
         ui->TransferProgressBar,
-        ProgressSettings::k_PROGRESS_BAR_MIN_VALUE,
-        ProgressSettings::k_PROGRESS_BAR_MAX_VALUE,
-        ProgressUI::k_PROGRESS_BAR_HEIGHT,
-        ProgressSettings::k_PROGRESS_BAR_TEXT_VISIBLE
+        UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
+        UI::Progress::k_PROGRESS_BAR_MAX_VALUE,
+        UI::ProgressDetails::k_PROGRESS_BAR_HEIGHT,
+        UI::Progress::k_PROGRESS_BAR_TEXT_VISIBLE
         );
 
     if (ui->TransferProgressBar->value() == 0) {
         ui->TransferProgressBar->setVisible(false);
         ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+        ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
     QMessageBox preloadBox(this);
@@ -233,7 +231,7 @@ void MainWindow::setupNotificationButton() {
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
 
     connect(ui->NotificationButton, &QPushButton::clicked, this, &MainWindow::onNotificationButtonClicked);
-    connect(&NotificationConfigManager::instance(), &NotificationConfigManager::notificationsUpdated,
+    connect(&NotificationServiceManager::instance(), &NotificationServiceManager::notificationsUpdated,
             this, &MainWindow::updateNotificationButtonState);
 
     notificationBadge = new QLabel(ui->NotificationButton);
@@ -250,7 +248,7 @@ void MainWindow::setupNotificationButton() {
 
 // Update UI for Notifications Button
 void MainWindow::updateNotificationButtonState() {
-    const bool hasUnread = !NotificationConfigManager::instance().unreadNotifications().isEmpty();
+    const bool hasUnread = !NotificationServiceManager::instance().unreadNotifications().isEmpty();
     if (notificationBadge) {
         notificationBadge->setVisible(hasUnread);
     }
@@ -260,7 +258,7 @@ void MainWindow::updateNotificationButtonState() {
 
 // Initialize the backup system
 void MainWindow::initializeBackupSystem() {
-    const QString backupDirectory = ConfigDirector::getInstance().getBackupDirectory();
+    const QString backupDirectory = ServiceDirector::getInstance().getBackupDirectory();
     if (!FileOperations::createDirectory(backupDirectory)) {
         QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
                               ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
@@ -310,12 +308,12 @@ void MainWindow::setupDestinationView() {
     if (!destinationProxyModel) {
         destinationProxyModel = new DestinationProxyModel(this);
         destinationProxyModel->setSourceModel(destinationModel);
-        destinationProxyModel->setExcludedFolderName(Backup::Infrastructure::k_BACKUP_SETUP_FOLDER);
+        destinationProxyModel->setExcludedFolderName(Backup::Storage::k_BACKUP_SETUP_FOLDER);
     }
 
     ui->BackupDestinationView->setModel(destinationProxyModel);
 
-    QString backupDir = ConfigDirector::getInstance().getBackupDirectory();
+    QString backupDir = ServiceDirector::getInstance().getBackupDirectory();
     QModelIndex sourceRootIndex = destinationModel->setRootPath(backupDir);
     QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
     ui->BackupDestinationView->setRootIndex(proxyRootIndex);
@@ -329,8 +327,8 @@ void MainWindow::setupDestinationView() {
 void MainWindow::removeAllColumnsFromTreeView(QTreeView* treeView) {
     if (!treeView) return;
     if (QAbstractItemModel* model = treeView->model(); model) {
-        for (int i = UISettings::TreeView::k_START_HIDDEN_COLUMN;
-             i < UISettings::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
+        for (int i = UI::TreeView::k_START_HIDDEN_COLUMN;
+             i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
             treeView->setColumnHidden(i, true);
         }
     }
@@ -375,7 +373,7 @@ void MainWindow::onAddToBackupClicked() {
         return;
     }
 
-    Utils::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
+    Shared::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
 
     ui->BackupStagingTreeView->clearSelection();
     ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
@@ -394,7 +392,7 @@ void MainWindow::onRemoveFromBackupClicked() {
         return;
     }
 
-    Utils::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
+    Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
     triggerButtonFeedback(ui->RemoveFromBackupButton,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_BUTTON_TEXT,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT);
@@ -421,9 +419,9 @@ void MainWindow::onCreateBackupClicked() {
     triggerButtonFeedback(ui->CreateBackupButton,
                           Labels::Backup::k_BACKING_UP_BUTTON_TEXT,
                           Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT,
-                          Timing::k_BUTTON_FEEDBACK_DURATION_MS);
+                          System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
-    ui->TransferProgressBar->setValue(ProgressSettings::k_PROGRESS_BAR_MIN_VALUE);
+    ui->TransferProgressBar->setValue(UI::Progress::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
     ui->TransferProgressText->setVisible(false);
 
@@ -471,17 +469,17 @@ void MainWindow::onDeleteBackupClicked() {
 
 // Display the Notifications
 void MainWindow::onNotificationButtonClicked() {
-    const QList<NotificationConfigStruct> all = NotificationConfigManager::instance().allNotifications();
+    const QList<NotificationServiceStruct> all = NotificationServiceManager::instance().allNotifications();
 
     triggerButtonFeedback(ui->NotificationButton,
                           Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
                           Labels::Backup::k_NOTIFICATION_BUTTON_TEXT,
-                          Timing::k_BUTTON_FEEDBACK_DURATION_MS);
+                          System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
     NotificationsDialog* dialog = new NotificationsDialog(all, this);
     dialog->exec();
 
-    NotificationConfigManager::instance().markAllAsRead();
+    NotificationServiceManager::instance().markAllAsRead();
     updateNotificationButtonState();
 }
 
@@ -489,17 +487,15 @@ void MainWindow::onNotificationButtonClicked() {
 void MainWindow::showNextNotification() {
     if (notificationQueue.isEmpty()) {
         isNotificationPopupVisible = false;
-        NotificationConfigManager::instance().markAllAsRead();
+        NotificationServiceManager::instance().markAllAsRead();
         updateNotificationButtonState();
         return;
     }
-
     isNotificationPopupVisible = true;
-    const NotificationConfigStruct notif = notificationQueue.takeFirst();
+    const NotificationServiceStruct notif = notificationQueue.takeFirst();
     QString message = QString("[%1]\n%2")
-                          .arg(notif.timestamp.toLocalTime().toString("yyyy-MM-dd HH:mm:ss"))
-                          .arg(notif.message);
-
+                          .arg(notif.timestamp.toLocalTime().toString("yyyy-MM-dd HH:mm:ss"),
+                               notif.message);
     QMessageBox* box = new QMessageBox(this);
     box->setWindowTitle("Notification");
     box->setText(message);
@@ -509,7 +505,6 @@ void MainWindow::showNextNotification() {
     });
     box->show();
 }
-
 
 // Change the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {
@@ -575,19 +570,19 @@ void MainWindow::onCooldownFinished() {
 
 // Handle backup completion
 void MainWindow::onBackupCompleted() {
-    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_COMPLETION_MESSAGE);
     ui->TransferProgressText->setVisible(true);
 
     const int elapsed = backupStartTimer.elapsed();
-    const int delay = qMax(0, Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
 
     QTimer::singleShot(delay, this, [this]() {
         ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
         ui->CreateBackupButton->setStyleSheet(QString());
         ui->CreateBackupButton->setEnabled(true);
 
-        QTimer::singleShot(Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
-            ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+        QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
+            ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
         });
     });
 }
@@ -595,11 +590,11 @@ void MainWindow::onBackupCompleted() {
 // Handle backup error
 void MainWindow::onBackupError(const QString& error) {
     Q_UNUSED(error);
-    ui->TransferProgressText->setText(ProgressSettings::k_PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     ui->TransferProgressText->setVisible(true);
 
     const int elapsed = backupStartTimer.elapsed();
-    const int delay = qMax(0, Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
 
     QTimer::singleShot(delay, this, [this]() {
         ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
@@ -637,26 +632,26 @@ void MainWindow::updateLastBackupInfo() {
     if (metadata.isEmpty()) {
         for (auto* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                             ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
-            label->setText(Utilities::k_DEFAULT_VALUE_NOT_AVAILABLE);
+            label->setText(System::Defaults::k_DEFAULT_VALUE_NOT_AVAILABLE);
         }
         return;
     }
 
     ui->LastBackupNameLabel->setText(Labels::LastBackup::k_NAME +
-                                     metadata.value(Backup::MetadataKeys::k_NAME).toString());
+                                     metadata.value(Backup::Metadata::k_NAME).toString());
     ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP +
-                                          Utils::Formatting::formatTimestamp(
-                                              QDateTime::fromString(metadata.value(Backup::MetadataKeys::k_TIMESTAMP).toString(), Qt::ISODate),
+                                          Shared::Formatting::formatTimestamp(
+                                              QDateTime::fromString(metadata.value(Backup::Metadata::k_TIMESTAMP).toString(), Qt::ISODate),
                                               Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT));
     ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION +
-                                         Utils::Formatting::formatDuration(metadata.value(Backup::MetadataKeys::k_DURATION).toInt()));
+                                         Shared::Formatting::formatDuration(metadata.value(Backup::Metadata::k_DURATION).toInt()));
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::k_SIZE +
-                                     metadata.value(Backup::MetadataKeys::k_SIZE_READABLE).toString());
+                                     metadata.value(Backup::Metadata::k_SIZE_READABLE).toString());
 }
 
 // Update backup status label
 void MainWindow::updateBackupStatusLabel(const QString& statusColor) {
-    const QPixmap pixmap = Utils::UI::createStatusLightPixmap(statusColor, ProgressUI::k_STATUS_LIGHT_SIZE);
+    const QPixmap pixmap = Shared::UI::createStatusLightPixmap(statusColor, UI::ProgressDetails::k_STATUS_LIGHT_SIZE);
     QByteArray ba;
     QBuffer buffer(&ba);
     buffer.open(QIODevice::WriteOnly);
@@ -689,7 +684,7 @@ void MainWindow::updateBackupTotalCountLabel() {
 // Update backup total size label
 void MainWindow::updateBackupTotalSizeLabel() {
     ui->BackupTotalSizeLabel->setText(Labels::Backup::k_TOTAL_SIZE +
-                                      Utils::Formatting::formatSize(backupService->getTotalBackupSize()));
+                                      Shared::Formatting::formatSize(backupService->getTotalBackupSize()));
 }
 
 // Update backup location status label

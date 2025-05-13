@@ -25,110 +25,168 @@ if(NOT DEFINED QT_VERSION_MAJOR)
 endif()
 
 # Entry Point
-set(APP_ENTRY_POINT
-    app/main.cpp
+set(APP_ENTRY
     app/app_manifest.rc
+    app/main.cpp
 )
 
 # Qt Resource Files
-set(QT_RESOURCES
+set(RESOURCES
     resources/icons_resource.qrc
     resources/themes_resource.qrc
 )
 
-# UI - Windows, Dialogs & Styling
-set(UI_SOURCES
+# UI Components
+set(UI_MAIN_WINDOW
     ui/mainwindow/mainwindow.cpp
     ui/mainwindow/mainwindow.h
     ui/mainwindow/mainwindow.ui
-    ui/mainwindow/mainwindowstyling.h
     ui/mainwindow/mainwindowlabels.h
     ui/mainwindow/mainwindowmessages.h
+    ui/mainwindow/mainwindowstyling.h
+)
 
-    ui/notificationsdialog/notificationsdialog.h
+set(UI_DIALOG_NOTIFICATIONS
     ui/notificationsdialog/notificationsdialog.cpp
+    ui/notificationsdialog/notificationsdialog.h
     ui/notificationsdialog/notificationsdialog.ui
     ui/notificationsdialog/notificationsdialogstyling.h
+)
 
+set(UI_DIALOG_SETTINGS
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
     ui/settingsdialog/settingsdialog.ui
-    ui/settingsdialog/settingsdialogstyling.h
     ui/settingsdialog/settingsdialogconstants.h
-
-    ui/toolbarmanager/toolbarmanager.h
-    ui/toolbarmanager/toolbarmanager.cpp
-    ui/toolbarmanager/toolbarmanagerstyling.h
-    ui/toolbarmanager/toolbarmanagerconstants.h
+    ui/settingsdialog/settingsdialogstyling.h
 )
 
-# Backup Core - Modules
-set(BACKUP_CORE
-    core/backup_module/controller/backupcontroller.cpp
-    core/backup_module/controller/backupcontroller.h
-
-    core/backup_module/service/backupservice.cpp
-    core/backup_module/service/backupservice.h
-
-    core/backup_module/worker/transferworker.cpp
-    core/backup_module/worker/transferworker.h
-
-    core/backup_module/models/stagingmodel.cpp
-    core/backup_module/models/stagingmodel.h
-    core/backup_module/models/destinationproxymodel.cpp
-    core/backup_module/models/destinationproxymodel.h
+set(UI_ALL
+    ${UI_MAIN_WINDOW}
+    ${UI_DIALOG_NOTIFICATIONS}
+    ${UI_DIALOG_SETTINGS}
 )
 
-# Config Modules
-set(CONFIG_MODULES
-    config/ConfigDirector/ConfigDirector.cpp
-    config/ConfigDirector/ConfigDirector.h
-    config/ConfigDirector/ConfigDirectorConstants.h
-
-    config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.cpp
-    config/ConfigManagers/ThemeConfigManager/ThemeConfigManager.h
-    config/ConfigManagers/ThemeConfigManager/ThemeConfigConstants.h
-
-    config/ConfigManagers/InstallConfigManager/InstallConfigManager.cpp
-    config/ConfigManagers/InstallConfigManager/InstallConfigManager.h
-    config/ConfigManagers/InstallConfigManager/InstallConfigConstants.h
-
-    config/ConfigManagers/BackupConfigManager/BackupConfigManager.cpp
-    config/ConfigManagers/BackupConfigManager/BackupConfigManager.h
-    config/ConfigManagers/BackupConfigManager/BackupConfigConstants.h
-
-    config/ConfigManagers/UserConfigManager/UserConfigManager.cpp
-    config/ConfigManagers/UserConfigManager/UserConfigManager.h
-    config/ConfigManagers/UserConfigManager/UserConfigConstants.h
-
-    config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.cpp
-    config/ConfigManagers/NotificationConfigManager/NotificationConfigManager.h
-    config/ConfigManagers/NotificationConfigManager/NotificationConfigStruct.h
-    config/ConfigManagers/NotificationConfigManager/NotificationConfigConstants.h
-
-    config/ConfigSettings/app_settings.h
+# Backup Core Modules
+set(CORE_BACKUP_CONTROLLERS
+    core/backup/controller/backupcontroller.cpp
+    core/backup/controller/backupcontroller.h
 )
 
-# Utilities
-set(UTILITY_SOURCES
-    core/utils/file_utils/filewatcher.cpp
-    core/utils/file_utils/filewatcher.h
-    core/utils/file_utils/fileoperations.cpp
-    core/utils/file_utils/fileoperations.h
-    core/utils/file_utils/jsonmanager.cpp
-    core/utils/file_utils/jsonmanager.h
-    core/utils/common_utils/utils.cpp
-    core/utils/common_utils/utils.h
+set(CORE_BACKUP_SERVICES
+    core/backup/service/backupservice.cpp
+    core/backup/service/backupservice.h
 )
 
-# Full Project Source List
+set(CORE_BACKUP_WORKERS
+    core/backup/worker/transferworker.cpp
+    core/backup/worker/transferworker.h
+)
+
+set(CORE_BACKUP_MODELS
+    core/backup/models/destinationproxymodel.cpp
+    core/backup/models/destinationproxymodel.h
+    core/backup/models/stagingmodel.cpp
+    core/backup/models/stagingmodel.h
+)
+
+set(CORE_BACKUP
+    ${CORE_BACKUP_CONTROLLERS}
+    ${CORE_BACKUP_SERVICES}
+    ${CORE_BACKUP_WORKERS}
+    ${CORE_BACKUP_MODELS}
+)
+
+# Service Managers
+set(SERVICE_MANAGER_DIRECTOR
+    services/ServiceDirector/ServiceDirector.cpp
+    services/ServiceDirector/ServiceDirector.h
+    services/ServiceDirector/ServiceDirectorConstants.h
+)
+
+set(SERVICE_MANAGER_THEME
+    services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.cpp
+    services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h
+    services/ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h
+)
+
+set(SERVICE_MANAGER_INSTALL
+    services/ServiceManagers/InstallServiceManager/InstallServiceManager.cpp
+    services/ServiceManagers/InstallServiceManager/InstallServiceManager.h
+    services/ServiceManagers/InstallServiceManager/InstallServiceConstants.h
+)
+
+set(SERVICE_MANAGER_BACKUP
+    services/ServiceManagers/BackupServiceManager/BackupServiceManager.cpp
+    services/ServiceManagers/BackupServiceManager/BackupServiceManager.h
+    services/ServiceManagers/BackupServiceManager/BackupServiceConstants.h
+)
+
+set(SERVICE_MANAGER_USER
+    services/ServiceManagers/UserServiceManager/UserServiceManager.cpp
+    services/ServiceManagers/UserServiceManager/UserServiceManager.h
+    services/ServiceManagers/UserServiceManager/UserServiceConstants.h
+)
+
+set(SERVICE_MANAGER_NOTIFICATION
+    services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.cpp
+    services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h
+    services/ServiceManagers/NotificationServiceManager/NotificationServiceConstants.h
+    services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h
+)
+
+set(SERVICE_MANAGER_TOOLBAR
+    services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.cpp
+    services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h
+    services/ServiceManagers/ToolbarServiceManager/ToolbarServiceConstants.h
+    services/ServiceManagers/ToolbarServiceManager/ToolbarServiceStyling.h
+)
+
+set(SERVICE_MANAGERS
+    ${SERVICE_MANAGER_DIRECTOR}
+    ${SERVICE_MANAGER_THEME}
+    ${SERVICE_MANAGER_INSTALL}
+    ${SERVICE_MANAGER_BACKUP}
+    ${SERVICE_MANAGER_USER}
+    ${SERVICE_MANAGER_NOTIFICATION}
+    ${SERVICE_MANAGER_TOOLBAR}
+)
+
+# Shared Utilities
+set(UTILS_SHARED
+    core/shared/fileoperations.cpp
+    core/shared/fileoperations.h
+    core/shared/filewatcher.cpp
+    core/shared/filewatcher.h
+    core/shared/jsonmanager.cpp
+    core/shared/jsonmanager.h
+    core/shared/uiutils.cpp
+    core/shared/uiutils.h
+    core/shared/formatutils.cpp
+    core/shared/formatutils.h
+    core/shared/stagingutils.cpp
+    core/shared/stagingutils.h
+)
+
+# Constants
+set(APP_CONSTANTS
+    constants/app_info.h
+    constants/window_config.h
+    constants/backup_config.h
+    constants/interface_config.h
+    constants/units_config.h
+    constants/system_constants.h
+)
+
+# Full Project Sources
 set(PROJECT_SOURCES
-    ${APP_ENTRY_POINT}
-    ${QT_RESOURCES}
-    ${UI_SOURCES}
-    ${BACKUP_CORE}
-    ${CONFIG_MODULES}
-    ${UTILITY_SOURCES}
+    ${APP_ENTRY}
+    ${RESOURCES}
+    ${UI_ALL}
+    ${CORE_BACKUP}
+    ${SERVICE_MANAGERS}
+    ${UTILS_SHARED}
+    ${APP_CONSTANTS}
 )
 
 # Target Definition

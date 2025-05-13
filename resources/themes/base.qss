@@ -1,4 +1,4 @@
-/* === Button Base === */
+/* === Buttons === */
 QPushButton {
     border: 1px solid black;
     border-radius: 6px;
@@ -7,11 +7,24 @@ QPushButton {
     font-size: 14px;
 }
 
-/* === Input Fields === */
-QLineEdit, QTextEdit, QPlainTextEdit, QComboBox, QListView, QTreeView {
+/* === Inputs === */
+QLineEdit,
+QTextEdit,
+QPlainTextEdit,
+QComboBox,
+QListView,
+QTreeView {
     border: 1px solid black;
     border-radius: 4px;
     padding: 4px 6px;
+    font-size: 14px;
+}
+
+/* === Lists === */
+QListWidget {
+    border: 1px solid black;
+    border-radius: 4px;
+    padding: 4px;
     font-size: 14px;
 }
 
@@ -30,14 +43,6 @@ QTabBar::tab {
     padding: 6px 12px;
     font-size: 14px;
     font-weight: bold;
-}
-
-/* === List Widget === */
-QListWidget {
-    border: 1px solid black;
-    border-radius: 4px;
-    padding: 4px;
-    font-size: 14px;
 }
 
 /* === Notification Badge === */
