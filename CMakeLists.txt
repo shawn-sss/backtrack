@@ -59,6 +59,16 @@ set(UI_DIALOG_SETTINGS
     ui/settingsdialog/settingsdialog.ui
     ui/settingsdialog/settingsdialogconstants.h
     ui/settingsdialog/settingsdialogstyling.h
+    ui/helpdialog/helpdialog.h
+    ui/helpdialog/helpdialog.cpp
+    ui/helpdialog/helpdialog.ui
+    ui/helpdialog/helpdialogconstants.h
+    ui/helpdialog/helpdialogstyling.h
+    ui/aboutdialog/aboutdialog.h
+    ui/aboutdialog/aboutdialog.cpp
+    ui/aboutdialog/aboutdialog.ui
+    ui/aboutdialog/aboutdialogconstants.h
+    ui/aboutdialog/aboutdialogstyling.h
 )
 
 set(UI_ALL

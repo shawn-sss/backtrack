@@ -2,11 +2,10 @@
 #include "ToolbarServiceManager.h"
 #include "ToolbarServiceConstants.h"
 #include "ToolbarServiceStyling.h"
-#include "../../../../constants/app_info.h"
-#include "../../../services/ServiceDirector/ServiceDirector.h"
-#include "../../../ui/settingsdialog/settingsdialog.h"
 #include "../../../ui/mainwindow/mainwindowlabels.h"
-#include "../../../ui/mainwindow/mainwindowmessages.h"
+#include "../../../ui/settingsdialog/settingsdialog.h"
+#include "../../../ui/helpdialog/helpdialog.h"
+#include "../../../ui/aboutdialog/aboutdialog.h"
 
 // Qt includes
 #include <QAction>
@@ -85,7 +84,6 @@ void ToolbarServiceManager::applyCursorStyle(QToolBar* toolBar) {
         QAction* action = actions[i];
         if (QWidget* w = toolBar->widgetForAction(action)) {
             w->setCursor(Qt::PointingHandCursor);
-
             if (QToolButton* btn = qobject_cast<QToolButton*>(w)) {
                 switch (i) {
                 case 0: btn->setObjectName("SettingsButton"); break;
@@ -106,28 +104,14 @@ void ToolbarServiceManager::showSettings() {
 
 // Shows help message with extended details
 void ToolbarServiceManager::showHelp() {
-    const QString extendedMessage = QString(HelpInfo::k_HELP_EXTENDED_MESSAGE)
-    .arg(ServiceDirector::getInstance().getAppInstallDirPublic());
-
-    QMessageBox::information(
-        qobject_cast<QWidget*>(parent()),
-        HelpInfo::k_HELP_WINDOW_TITLE,
-        HelpInfo::k_HELP_WINDOW_MESSAGE + extendedMessage
-        );
+    HelpDialog helpDialog(qobject_cast<QWidget*>(parent()));
+    helpDialog.exec();
 }
 
 // Shows about dialog with app info
 void ToolbarServiceManager::showAbout() {
-    const QString aboutText = QString(AboutInfo::k_ABOUT_WINDOW_MESSAGE)
-    .arg(App::Info::k_VERSION,
-         App::Info::k_NAME,
-         App::Info::k_AUTHOR_NAME);
-
-    QMessageBox::information(
-        qobject_cast<QWidget*>(parent()),
-        AboutInfo::k_ABOUT_WINDOW_TITLE,
-        aboutText
-        );
+    AboutDialog aboutDialog(qobject_cast<QWidget*>(parent()));
+    aboutDialog.exec();
 }
 
 // Action getters
