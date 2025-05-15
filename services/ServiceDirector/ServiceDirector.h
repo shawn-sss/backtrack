@@ -3,16 +3,20 @@
 
 // Project includes
 #include "../ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h"
+#include "../ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
+
 
 // Qt includes
 #include <QString>
 #include <memory>
+#include <QWidget>
 
 // Forward declarations (Custom class)
 class BackupServiceManager;
 class InstallServiceManager;
 class NotificationServiceManager;
 class UserServiceManager;
+class UninstallServiceManager;
 
 // Coordinates access to core service managers and configuration
 class ServiceDirector {
@@ -41,6 +45,8 @@ public:
     // Public alias for install directory
     inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
 
+    bool uninstallAppWithConfirmation(QWidget* parent);
+
 private:
     // Private constructor for singleton
     ServiceDirector();
@@ -58,6 +64,7 @@ private:
     std::unique_ptr<InstallServiceManager> installServiceManager;
     std::unique_ptr<UserServiceManager> userServiceManager;
     std::unique_ptr<BackupServiceManager> backupServiceManager;
+    std::unique_ptr<UninstallServiceManager> uninstallServiceManager;
 };
 
 #endif // SERVICEDIRECTOR_H

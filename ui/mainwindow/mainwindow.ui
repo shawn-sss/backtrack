@@ -352,6 +352,19 @@
       <string>Reset Destination</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="UninstallButton">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>119</y>
+       <width>277</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Uninstall Application</string>
+     </property>
+    </widget>
    </widget>
    <zorder>DashboardContainer</zorder>
    <zorder>BackupViewContainer</zorder>

@@ -183,7 +183,8 @@ void MainWindow::applyButtonCursors() {
         { ui->ChangeBackupDestinationButton, "Change the destination folder for backups" },
         { ui->DeleteBackupButton, "Delete the selected backup from the destination view" },
         { ui->ResetDestinationButton, "Delete ALL contents from the backup destination" },
-        { ui->NotificationButton, "View backup notifications" }
+        { ui->NotificationButton, "View backup notifications" },
+        { ui->UninstallButton, "Uninstall the application and delete all local data" }
     };
 
     for (const auto& pair : buttons) {
@@ -207,7 +208,8 @@ void MainWindow::setupConnections() {
         { ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked },
         { ui->CreateBackupButton, &MainWindow::onCreateBackupClicked },
         { ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked },
-        { ui->ResetDestinationButton, &MainWindow::onDeleteAllBackupsClicked }
+        { ui->ResetDestinationButton, &MainWindow::onDeleteAllBackupsClicked },
+        { ui->UninstallButton, &MainWindow::onUninstallClicked }
     };
 
     for (const auto& conn : buttonConnections) {
@@ -564,6 +566,15 @@ void MainWindow::showNextNotification() {
     });
     box->show();
 }
+
+// Display the warning and Uninstall App
+void MainWindow::onUninstallClicked() {
+    const bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
+    if (success) {
+        QApplication::quit();
+    }
+}
+
 
 // Change the backup destination
 void MainWindow::onChangeBackupDestinationClicked() {

@@ -152,6 +152,12 @@ set(SERVICE_MANAGER_TOOLBAR
     services/ServiceManagers/ToolbarServiceManager/ToolbarServiceStyling.h
 )
 
+set(SERVICE_MANAGER_UNINSTALL
+    services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.cpp
+    services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h
+    services/ServiceManagers/UninstallServiceManager/UninstallServiceConstants.h
+)
+
 set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_DIRECTOR}
     ${SERVICE_MANAGER_THEME}
@@ -160,6 +166,7 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_USER}
     ${SERVICE_MANAGER_NOTIFICATION}
     ${SERVICE_MANAGER_TOOLBAR}
+    ${SERVICE_MANAGER_UNINSTALL}
 )
 
 # Shared Utilities

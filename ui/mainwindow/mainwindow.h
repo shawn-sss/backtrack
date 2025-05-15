@@ -115,6 +115,9 @@ private slots:
     void onNotificationButtonClicked();
     void onCooldownFinished();
 
+    // Uninstall interaction
+    void onUninstallClicked();
+
 private:
     Ui::MainWindow* ui = nullptr;
     CustomTitleBar* titleBar = nullptr;

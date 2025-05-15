@@ -29,6 +29,8 @@ ServiceDirector::ServiceDirector() {
     installServiceManager = std::make_unique<InstallServiceManager>(appMetadataPath);
     userServiceManager = std::make_unique<UserServiceManager>(userServicePath);
     backupServiceManager = std::make_unique<BackupServiceManager>(*userServiceManager);
+    uninstallServiceManager = std::make_unique<UninstallServiceManager>();
+
 
     if (isFirstRun()) {
         setupDefaults();
@@ -111,4 +113,9 @@ void ServiceDirector::setupDefaults() {
     InstallServiceManager::initializeDefaults();
     userServiceManager->initializeDefaults();
     NotificationServiceManager::initializeDefaults();
+}
+
+bool ServiceDirector::uninstallAppWithConfirmation(QWidget* parent) {
+    if (!uninstallServiceManager) return false;
+    return uninstallServiceManager->promptAndUninstall(parent);
 }
