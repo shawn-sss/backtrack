@@ -727,11 +727,12 @@ void MainWindow::refreshBackupStatus() {
 // Update last backup information
 void MainWindow::updateLastBackupInfo() {
     const QJsonObject metadata = backupService->getLastBackupMetadata();
+
     if (metadata.isEmpty()) {
-        for (auto* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
-                            ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
-            label->setText(System::Defaults::k_DEFAULT_VALUE_NOT_AVAILABLE);
-        }
+        ui->LastBackupNameLabel->setText(System::Defaults::k_DEFAULT_VALUE_NOT_AVAILABLE);
+        ui->LastBackupTimestampLabel->clear();
+        ui->LastBackupDurationLabel->clear();
+        ui->LastBackupSizeLabel->clear();
         return;
     }
 
@@ -764,7 +765,7 @@ void MainWindow::updateBackupStatusLabel(const QString& statusColor) {
     const bool backupExists = (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND);
     for (QLabel* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                           ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
-        label->setVisible(backupExists);
+        label->setVisible(true);
     }
 }
 
