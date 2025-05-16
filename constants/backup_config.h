@@ -45,4 +45,7 @@ constexpr auto k_BACKUP_LOGS_FOLDER      = "logs";
 inline auto k_BACKUP_LOGS_FILE           = QStringLiteral("log.json");
 }
 
+
+
+
 #endif // BACKUP_CONFIG_H

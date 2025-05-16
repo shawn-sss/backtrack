@@ -9,7 +9,7 @@
 
 // Notification service values and keys
 namespace NotificationSettings {
-inline constexpr auto* k_NOTIFICATION_FILE_NAME   = "app_notifications.json";
+inline constexpr auto& kNotificationFileName   = App::ConfigFiles::k_APPDATA_SETUP_NOTIFICATIONS_FILE;
 inline constexpr auto* k_DEFAULT_WELCOME_MESSAGE  = "👋 Welcome! Thanks for using this app.";
 inline constexpr auto& kNotificationFolder        = App::ConfigFiles::k_APPDATA_SETUP_FOLDER;
 

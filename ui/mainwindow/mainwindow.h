@@ -52,6 +52,13 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    const QStringList requiredConfigFiles = {
+        "app_init.json",
+        "app_notifications.json",
+        "user_settings.json"
+    };
+    QString checkInstallIntegrityStatus();
+    void updateApplicationStatusLabel();
     // UI setup
     void configureWindow();
     void initializeUI();

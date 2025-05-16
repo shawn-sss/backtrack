@@ -44,8 +44,11 @@
 #include <QTimer>
 #include <QVBoxLayout>
 
+QStringList watchedRoots;
+
 // Constructs the main application window and initializes components
 MainWindow::MainWindow(QWidget* parent)
+
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     sourceModel(new QFileSystemModel(this)),
@@ -62,12 +65,14 @@ MainWindow::MainWindow(QWidget* parent)
     configureWindow();
     initializeUI();
     setupLayout();
+    updateApplicationStatusLabel();
 
     addToolBar(Qt::LeftToolBarArea, toolBar);
     toolbarManager->initialize(toolBar);
 
     applyButtonCursors();
     initializeBackupSystem();
+
     refreshBackupStatus();
     setupConnections();
     setupNotificationButton();
@@ -165,6 +170,7 @@ void MainWindow::initializeUI() {
         ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
+    // Preload a hidden QMessageBox (avoids Qt layout shift later)
     QMessageBox preloadBox(this);
     preloadBox.setWindowTitle(" ");
     preloadBox.setText(" ");
@@ -172,7 +178,46 @@ void MainWindow::initializeUI() {
     preloadBox.setAttribute(Qt::WA_DontShowOnScreen);
     preloadBox.show();
     preloadBox.hide();
+
+    // Set up file watching
+    QStringList watchedRoots;
+
+    const QString configDir = ServiceDirector::getInstance().getAppInstallDir() + "/app_config";
+    if (QDir(configDir).exists()) {
+        watchedRoots.append(configDir);
+    }
+
+    // Initialize backup system (which sets backup path)
+    initializeBackupSystem();
+
+    const QString backupDir = ServiceDirector::getInstance().getBackupDirectory();
+    if (QDir(backupDir).exists()) {
+        watchedRoots.append(backupDir);
+    }
+
+    // Watch all valid root paths
+    fileWatcher->startWatchingMultiple(watchedRoots);
+
+    // React to file changes
+    connect(fileWatcher, &FileWatcher::fileChanged, this, [this](const QString& path) {
+        if (QFile::exists(path)) {
+            fileWatcher->addPath(path);
+        }
+        updateApplicationStatusLabel();
+    });
+
+    // React to directory changes
+    connect(fileWatcher, &FileWatcher::directoryChanged, this, [this](const QString& /*path*/) {
+        QStringList updatedRoots;
+        updatedRoots << ServiceDirector::getInstance().getAppInstallDir() + "/app_config";
+        updatedRoots << ServiceDirector::getInstance().getBackupDirectory();
+        fileWatcher->startWatchingMultiple(updatedRoots);
+        updateApplicationStatusLabel();
+    });
 }
+
+
+
 
 // Set pointing hand cursors and tooltips for all main window buttons
 void MainWindow::applyButtonCursors() {
@@ -275,7 +320,7 @@ void MainWindow::initializeBackupSystem() {
     refreshBackupStatus();
 
     if (!fileWatcher->watchedDirectories().contains(backupDirectory)) {
-        startWatchingBackupDirectory(backupDirectory);
+        watchedRoots.append(backupDirectory);
     }
 }
 
@@ -343,14 +388,14 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView* treeView) {
 
 // Start watching a directory for changes
 void MainWindow::startWatchingBackupDirectory(const QString& path) {
-    fileWatcher->startWatching(path);
+    fileWatcher->startWatchingMultiple(QStringList() << path);
     connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
 }
 
 // Update file watcher
 void MainWindow::updateFileWatcher() {
     const QString watchPath = destinationModel->rootPath();
-    fileWatcher->startWatching(watchPath);
+    fileWatcher->startWatchingMultiple(QStringList() << watchPath);
 }
 
 // Handle backup directory change event
@@ -499,6 +544,9 @@ void MainWindow::onDeleteAllBackupsClicked() {
         return;
     }
 
+    // 🔒 SAFELY remove file watcher paths BEFORE deletion
+    fileWatcher->removeAllPaths();
+
     QDir dir(backupLocation);
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
@@ -525,8 +573,11 @@ void MainWindow::onDeleteAllBackupsClicked() {
                               tr("Some files or folders could not be deleted. Please check permissions or try again."));
     }
 
+    // 🔄 RESTART the watcher now that the folder is empty again
+    startWatchingBackupDirectory(backupLocation);
     refreshBackupStatus();
 }
+
 
 // Display the Notifications
 void MainWindow::onNotificationButtonClicked() {
@@ -569,11 +620,15 @@ void MainWindow::showNextNotification() {
 
 // Display the warning and Uninstall App
 void MainWindow::onUninstallClicked() {
+    fileWatcher->removeAllPaths();
+    fileWatcher->disconnect();  // Optional, but adds stability
+
     const bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
     if (success) {
         QApplication::quit();
     }
 }
+
 
 
 // Change the backup destination
@@ -750,24 +805,86 @@ void MainWindow::updateLastBackupInfo() {
 
 // Update backup status label
 void MainWindow::updateBackupStatusLabel(const QString& statusColor) {
-    const QPixmap pixmap = Shared::UI::createStatusLightPixmap(statusColor, UI::ProgressDetails::k_STATUS_LIGHT_SIZE);
-    QByteArray ba;
-    QBuffer buffer(&ba);
-    buffer.open(QIODevice::WriteOnly);
-    pixmap.save(&buffer, Labels::Backup::k_STATUS_LIGHT_IMAGE_FORMAT);
+    QString statusEmoji;
+    QString statusText;
 
-    const QString pixmapHtml = QString(MainWindowStyling::Styles::Visuals::STATUS_LIGHT_ICON).arg(QString::fromUtf8(ba.toBase64()));
-    QString combinedHtml = QString(MainWindowStyling::Styles::Visuals::STATUS_LABEL_HTML)
-                               .arg(Labels::Backup::k_FOUND, pixmapHtml);
+    if (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND) {
+        statusEmoji = "🟢";
+        statusText = tr("Ready");
+    } else if (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING) {
+        statusEmoji = "🟡";
+        statusText = tr("Warning");
+    } else {
+        statusEmoji = "🔴";
+        statusText = tr("Not Initialized");
+    }
+
+    ui->BackupStatusLabel->setText(
+        tr("<b>Backup Location Status:</b> %1 %2").arg(statusEmoji, statusText)
+        );
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
-    ui->BackupStatusLabel->setText(combinedHtml);
 
-    const bool backupExists = (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND);
     for (QLabel* label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
                           ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
         label->setVisible(true);
     }
 }
+
+QString MainWindow::checkInstallIntegrityStatus() {
+    const QString configDir = ServiceDirector::getInstance().getAppInstallDir() + "/" + App::ConfigFiles::k_APPDATA_SETUP_FOLDER;
+    //qDebug() << "[IntegrityCheck] configDir =" << configDir;
+
+    const QStringList expectedFiles = {
+        "app_init.json",
+        "app_notifications.json",
+        "user_settings.json"
+    };
+
+    int missingCount = 0;
+    for (const QString& file : expectedFiles) {
+        const QString fullPath = configDir + "/" + file;
+        if (!QFile::exists(fullPath)) {
+           // qDebug() << "[MissingFile]" << fullPath;
+            ++missingCount;
+        }
+    }
+
+    if (missingCount == 0) {
+        //qDebug() << "[IntegrityStatus] All files present.";
+        return "ok";  // 🟢
+    }
+    if (missingCount < expectedFiles.size()) {
+        //qDebug() << "[IntegrityStatus] Some files missing.";
+        return "partial";  // 🟡
+    }
+
+    //qDebug() << "[IntegrityStatus] All files missing.";
+    return "broken";  // 🔴
+}
+
+void MainWindow::updateApplicationStatusLabel() {
+    const QString status = checkInstallIntegrityStatus();
+    QString emoji, label;
+
+    if (status == "ok") {
+        emoji = "🟢";
+        label = tr("Ready");
+    } else if (status == "partial") {
+        emoji = "🟡";
+        label = tr("Warning");
+    } else {
+        emoji = "🔴";
+        label = tr("Corrupted");
+    }
+
+    ui->ApplicationStatusLabel->setText(
+        tr("<b>Application Files Status:</b> %1 %2").arg(emoji, label)
+        );
+    ui->ApplicationStatusLabel->setTextFormat(Qt::RichText);
+}
+
+
+
 
 // Update backup location label
 void MainWindow::updateBackupLocationLabel(const QString& location) {

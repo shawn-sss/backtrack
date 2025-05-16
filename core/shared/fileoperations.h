@@ -29,6 +29,7 @@ void collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& unique
 
 // Creates base folders and log folder for backup infrastructure
 bool createBackupInfrastructure(const QString& backupDir, QString& errorMessage);
+void watchAppConfigDirectory(const QString& configDir);
 
 } // namespace FileOperations
 

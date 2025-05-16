@@ -24,14 +24,14 @@ NotificationServiceManager& NotificationServiceManager::instance() {
 QString NotificationServiceManager::notificationFilePath() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/" +
            NotificationSettings::kNotificationFolder + "/" +
-           NotificationSettings::k_NOTIFICATION_FILE_NAME;
+           NotificationSettings::kNotificationFileName;
 }
 
 // Initializes file with default welcome message
 void NotificationServiceManager::initializeDefaults() {
     const QString path = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/" +
                          NotificationSettings::kNotificationFolder + "/" +
-                         NotificationSettings::k_NOTIFICATION_FILE_NAME;
+                         NotificationSettings::kNotificationFileName;
 
     QFile file(path);
     if (!file.exists()) {

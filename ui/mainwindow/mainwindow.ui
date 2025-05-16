@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>934</width>
-    <height>570</height>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>193</y>
+      <y>230</y>
       <width>911</width>
       <height>291</height>
      </rect>
@@ -137,7 +137,7 @@
     <property name="geometry">
      <rect>
       <x>696</x>
-      <y>522</y>
+      <y>559</y>
       <width>221</width>
       <height>26</height>
      </rect>
@@ -163,7 +163,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>500</y>
+      <y>537</y>
       <width>911</width>
       <height>20</height>
      </rect>
@@ -178,7 +178,7 @@
       <x>10</x>
       <y>9</y>
       <width>911</width>
-      <height>171</height>
+      <height>201</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -193,7 +193,7 @@
        <x>8</x>
        <y>4</y>
        <width>281</width>
-       <height>161</height>
+       <height>191</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="DashboardDetails">
@@ -210,6 +210,13 @@
          <widget class="Line" name="line_2">
           <property name="orientation">
            <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="ApplicationStatusLabel">
+          <property name="text">
+           <string>ApplicationStatus</string>
           </property>
          </widget>
         </item>

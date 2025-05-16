@@ -4,39 +4,34 @@
 // Qt includes
 #include <QObject>
 #include <QStringList>
-#include <QFileSystemWatcher>
 
-// Monitors files and directories for changes
+class QFileSystemWatcher;
+
 class FileWatcher : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor
     explicit FileWatcher(QObject* parent = nullptr);
 
-    // Replaces entire watch list
-    void updateWatchList(const QStringList& paths);
-
-    // Watch management
+    // Public interface for managing watched paths
     void addPath(const QString& path);
     void addPaths(const QStringList& paths);
     void removePath(const QString& path);
     void removeAllPaths();
+    void updateWatchList(const QStringList& paths);
 
-    // Access watched items
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 
-    // Begins watching structured backup directory
     void startWatching(const QString& rootPath);
+    void startWatchingMultiple(const QStringList& rootPaths);
 
 signals:
-    void directoryChanged(const QString& path);
     void fileChanged(const QString& path);
+    void directoryChanged(const QString& path);
 
 private:
     QFileSystemWatcher* watcher;
-    QStringList watchList;
 };
 
 #endif // FILEWATCHER_H
