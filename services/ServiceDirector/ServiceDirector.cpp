@@ -5,24 +5,23 @@
 #include "../ServiceManagers/InstallServiceManager/InstallServiceManager.h"
 #include "../ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../ServiceManagers/UserServiceManager/UserServiceManager.h"
-#include "../ServiceManagers/UserServiceManager/UserServiceConstants.h"
-#include "../ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h"
+#include "../ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
+#include "../../../../constants/kvp_info.h"
 
 // Qt includes
 #include <QFile>
 #include <QJsonObject>
 #include <QStandardPaths>
 
-using namespace UserServiceKeys;
 using namespace ThemeServiceConstants;
 
-// Get singleton instance of ServiceDirector
+// Singleton accessor
 ServiceDirector& ServiceDirector::getInstance() {
     static ServiceDirector instance;
     return instance;
 }
 
-// Constructor sets up service paths and managers
+// Constructor
 ServiceDirector::ServiceDirector() {
     setupFilePaths();
 
@@ -30,7 +29,6 @@ ServiceDirector::ServiceDirector() {
     userServiceManager = std::make_unique<UserServiceManager>(userServicePath);
     backupServiceManager = std::make_unique<BackupServiceManager>(*userServiceManager);
     uninstallServiceManager = std::make_unique<UninstallServiceManager>();
-
 
     if (isFirstRun()) {
         setupDefaults();
@@ -40,82 +38,74 @@ ServiceDirector::ServiceDirector() {
     userServiceManager->load();
 }
 
-// Returns backup directory path
+// Backup service operations
 QString ServiceDirector::getBackupDirectory() const {
     return backupServiceManager->getBackupDirectory();
 }
 
-// Sets backup directory path
 void ServiceDirector::setBackupDirectory(const QString& dir) {
     backupServiceManager->setBackupDirectory(dir);
 }
 
-// Returns backup filename prefix
 QString ServiceDirector::getBackupPrefix() const {
     return backupServiceManager->getBackupPrefix();
 }
 
-// Sets backup filename prefix
 void ServiceDirector::setBackupPrefix(const QString& prefix) {
     backupServiceManager->setBackupPrefix(prefix);
 }
 
-// Returns user theme preference from service
+// Theme preference operations
 UserThemePreference ServiceDirector::getThemePreference() const {
     const QJsonObject& settings = userServiceManager->settings();
-    if (settings.contains(k_THEME_PREFERENCE_KEY)) {
-        return stringToUserThemePreference(settings.value(k_THEME_PREFERENCE_KEY).toString());
-    }
-    return UserThemePreference::Auto;
+    const auto key = App::KVP::UserServiceKeys::k_THEME_PREFERENCE_KEY;
+    return settings.contains(key)
+               ? stringToUserThemePreference(settings.value(key).toString())
+               : UserThemePreference::Auto;
 }
 
-// Updates theme preference in user service
 void ServiceDirector::setThemePreference(UserThemePreference preference) {
     QJsonObject& settings = userServiceManager->settings();
-    settings[k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
+    settings[App::KVP::UserServiceKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
     userServiceManager->save();
 }
 
-// Loads install metadata from service
+// Install metadata operations
 void ServiceDirector::loadInstallMetadata() {
     installServiceManager->load();
 }
 
-// Saves install metadata to service
 void ServiceDirector::saveInstallMetadata() {
     installServiceManager->save();
 }
 
-// Returns app installation directory path
+// Filesystem path accessors
 QString ServiceDirector::getAppInstallDir() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
-// Returns full file path within app service directory
 QString ServiceDirector::getFilePath(const QString& fileName) const {
     return getAppInstallDir() + "/" + ServiceDirectorConstants::kAppDataFolder + "/" + fileName;
 }
 
-// Initializes file paths for metadata and user service
-void ServiceDirector::setupFilePaths() {
-    const QString baseDir = getAppInstallDir() + "/" + ServiceDirectorConstants::kAppDataFolder;
-    appMetadataPath = baseDir + "/" + ServiceDirectorConstants::kMetadataFile;
-    userServicePath = baseDir + "/" + ServiceDirectorConstants::kUserSettingsFile;
+// Uninstall operations
+bool ServiceDirector::uninstallAppWithConfirmation(QWidget* parent) {
+    return uninstallServiceManager ? uninstallServiceManager->promptAndUninstall(parent) : false;
 }
 
-// Checks if this is the first run (missing service files)
+// Internal helper methods
+void ServiceDirector::setupFilePaths() {
+    const QString baseDir = getFilePath("");
+    appMetadataPath = baseDir + ServiceDirectorConstants::kMetadataFile;
+    userServicePath = baseDir + ServiceDirectorConstants::kUserSettingsFile;
+}
+
 bool ServiceDirector::isFirstRun() const {
     return !QFile::exists(appMetadataPath) || !QFile::exists(userServicePath);
 }
 
-// Sets default configurations on first run
 void ServiceDirector::setupDefaults() {
     InstallServiceManager::initializeDefaults();
     userServiceManager->initializeDefaults();
     NotificationServiceManager::initializeDefaults();
-}
-
-bool ServiceDirector::uninstallAppWithConfirmation(QWidget* parent) {
-    if (!uninstallServiceManager) return false;
-    return uninstallServiceManager->promptAndUninstall(parent);
 }

@@ -4,9 +4,12 @@
 // Qt includes
 #include <QFileSystemModel>
 #include <QModelIndex>
-#include <QRegularExpression>
+#include <QStringView>
 
-// Initializes the proxy model
+// Static timestamp regex definition
+const QRegularExpression DestinationProxyModel::timestampRegex(R"((\d{8}_\d{6}))");
+
+// Constructor
 DestinationProxyModel::DestinationProxyModel(QObject* parent)
     : QSortFilterProxyModel(parent) {}
 
@@ -17,32 +20,32 @@ void DestinationProxyModel::setExcludedFolderName(const QString& folderName) {
 
 // Filters out rows that match the excluded folder name
 bool DestinationProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
-    QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
-    QString folderName = sourceModel()->data(index, Qt::DisplayRole).toString().toLower();
-
-    return folderName != excludedFolderName;
+    const QModelIndex index = sourceModel()->index(sourceRow, 0, sourceParent);
+    const QString folderName = sourceModel()->data(index, Qt::DisplayRole).toString();
+    return folderName.compare(excludedFolderName, Qt::CaseInsensitive) != 0;
 }
 
 // Sorts folders based on embedded timestamps (descending)
 bool DestinationProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const {
-    QFileSystemModel* model = qobject_cast<QFileSystemModel*>(sourceModel());
+    auto* model = qobject_cast<QFileSystemModel*>(sourceModel());
+    if (!model)
+        return false;
 
-    QString leftName = model->fileName(left);
-    QString rightName = model->fileName(right);
+    const QString leftName = model->fileName(left);
+    const QString rightName = model->fileName(right);
 
-    bool leftIsDir = model->isDir(left);
-    bool rightIsDir = model->isDir(right);
+    const bool leftIsDir = model->isDir(left);
+    const bool rightIsDir = model->isDir(right);
 
     if (leftIsDir != rightIsDir)
         return leftIsDir;
 
-    static const QRegularExpression re(R"((\d{8}_\d{6}))");
-    QRegularExpressionMatch leftMatch = re.match(leftName);
-    QRegularExpressionMatch rightMatch = re.match(rightName);
+    const QRegularExpressionMatch leftMatch = timestampRegex.match(leftName);
+    const QRegularExpressionMatch rightMatch = timestampRegex.match(rightName);
 
     if (leftMatch.hasMatch() && rightMatch.hasMatch()) {
-        QString leftTimestamp = leftMatch.captured(1);
-        QString rightTimestamp = rightMatch.captured(1);
+        const QStringView leftTimestamp = leftMatch.capturedView(1);
+        const QStringView rightTimestamp = rightMatch.capturedView(1);
         return leftTimestamp > rightTimestamp;
     }
 

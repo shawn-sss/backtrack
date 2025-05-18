@@ -138,6 +138,12 @@ set(SERVICE_MANAGER_USER
     services/ServiceManagers/UserServiceManager/UserServiceConstants.h
 )
 
+set(SERVICE_MANAGER_PATH
+    services/ServiceManagers/PathServiceManager/PathServiceConstants.h
+    services/ServiceManagers/PathServiceManager/PathServiceManager.h
+    services/ServiceManagers/PathServiceManager/PathServiceManager.cpp
+)
+
 set(SERVICE_MANAGER_NOTIFICATION
     services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.cpp
     services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h
@@ -167,6 +173,7 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_NOTIFICATION}
     ${SERVICE_MANAGER_TOOLBAR}
     ${SERVICE_MANAGER_UNINSTALL}
+    ${SERVICE_MANAGER_PATH}
 )
 
 # Shared Utilities
@@ -193,6 +200,7 @@ set(APP_CONSTANTS
     constants/interface_config.h
     constants/units_config.h
     constants/system_constants.h
+    constants/kvp_info.h
 )
 
 # Full Project Sources
@@ -211,9 +219,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME}
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        services/ServiceManagers/PathServiceManager/PathServiceConstants.h
-        services/ServiceManagers/PathServiceManager/PathServiceManager.h
-        services/ServiceManagers/PathServiceManager/PathServiceManager.cpp
     )
 else()
     if(ANDROID)

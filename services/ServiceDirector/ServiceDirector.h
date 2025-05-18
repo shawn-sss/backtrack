@@ -3,34 +3,32 @@
 
 // Project includes
 #include "../ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h"
-#include "../ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
-
 
 // Qt includes
 #include <QString>
-#include <memory>
 #include <QWidget>
 
-// Forward declarations (Custom class)
-class BackupServiceManager;
+// C++ includes
+#include <memory>
+
+// Forward declarations
 class InstallServiceManager;
-class NotificationServiceManager;
 class UserServiceManager;
+class BackupServiceManager;
 class UninstallServiceManager;
 
-// Coordinates access to core service managers and configuration
+// Manages centralized access to service layer
 class ServiceDirector {
 public:
-    // Singleton access
     static ServiceDirector& getInstance();
 
-    // Backup settings access
+    // Backup service
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // User theme preference
+    // Theme
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
     void setThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
@@ -38,29 +36,23 @@ public:
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // File system access
+    // Filesystem
     QString getAppInstallDir() const;
     QString getFilePath(const QString& fileName) const;
-
-    // Public alias for install directory
     inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
 
+    // Uninstall
     bool uninstallAppWithConfirmation(QWidget* parent);
 
 private:
-    // Private constructor for singleton
     ServiceDirector();
-
-    // Setup and internal helpers
     void setupFilePaths();
     bool isFirstRun() const;
     void setupDefaults();
 
-    // File paths
     QString appMetadataPath;
     QString userServicePath;
 
-    // Service managers
     std::unique_ptr<InstallServiceManager> installServiceManager;
     std::unique_ptr<UserServiceManager> userServiceManager;
     std::unique_ptr<BackupServiceManager> backupServiceManager;

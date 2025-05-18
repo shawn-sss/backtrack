@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
     ServiceDirector::getInstance();
 
     // Set application metadata
-    app.setApplicationName(App::Info::k_NAME);
-    app.setApplicationDisplayName(App::Info::k_NAME);
+    app.setApplicationName(App::Info::k_APP_NAME);
+    app.setApplicationDisplayName(App::Info::k_APP_NAME);
 
     // Apply theme and install global event filter
     ThemeServiceManager::applyTheme();
@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize and display main window
     MainWindow mainWindow;
-    mainWindow.setWindowTitle(App::Info::k_NAME);
+    mainWindow.setWindowTitle(App::Info::k_APP_NAME);
     mainWindow.setWindowIcon(QIcon(UI::Resources::k_ICON_PATH));
     mainWindow.show();
 

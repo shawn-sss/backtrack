@@ -7,23 +7,23 @@
 // Qt includes
 #include <QObject>
 
-// Manages application theme logic and synchronization with system preferences
+// Manages application theme selection and application
 class ThemeServiceManager {
 public:
-    // Checks OS theme setting
+    // Detects whether the system is using dark mode
     static bool isDarkTheme();
 
-    // Returns current app theme
+    // Returns the currently applied application theme
     static ThemeServiceConstants::AppTheme currentTheme();
 
-    // Gets and sets user theme preference
+    // Gets and sets the user's theme preference
     static ThemeServiceConstants::UserThemePreference getUserThemePreference();
     static void setUserThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
-    // Applies selected theme to application
+    // Applies the appropriate theme based on user/system preference
     static void applyTheme();
 
-    // Installs event filter to detect system theme changes
+    // Installs system theme change event filter (Windows only)
     static void installEventFilter(QObject* target);
 };
 

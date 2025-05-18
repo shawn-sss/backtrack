@@ -15,7 +15,29 @@
 // C++ includes
 #include <algorithm>
 
-// Constructs and displays the notifications dialog
+// Formats the text for each notification item
+namespace {
+QString formatNotificationText(const NotificationServiceStruct& notif) {
+    QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
+    QString badge = notif.read ? "" : "🔴 ";
+    return QString("%1%2\n%3").arg(badge, dateStr, notif.message);
+}
+
+// Creates a styled list widget item based on read state
+QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
+    QListWidgetItem* item = new QListWidgetItem(formatNotificationText(notif));
+    if (notif.read) {
+        item->setForeground(QBrush(Qt::gray));
+    } else {
+        QFont font;
+        font.setBold(true);
+        item->setFont(font);
+    }
+    return item;
+}
+}
+
+// Constructs the notifications dialog with populated notification items
 NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
     : QDialog(parent) {
     setWindowTitle("Notifications");
@@ -28,13 +50,13 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     listWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
-    closeButton = new QPushButton("Close", this);
-    closeButton->setToolTip("Close the notifications dialog");
-    closeButton->setCursor(Qt::PointingHandCursor);
-
     clearAllButton = new QPushButton("Clear All", this);
     clearAllButton->setToolTip("Delete all notifications");
     clearAllButton->setCursor(Qt::PointingHandCursor);
+
+    closeButton = new QPushButton("Close", this);
+    closeButton->setToolTip("Close the notifications dialog");
+    closeButton->setCursor(Qt::PointingHandCursor);
 
     QList<NotificationServiceStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
@@ -42,26 +64,12 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
                   return a.timestamp > b.timestamp;
               });
 
-    for (const auto& notif : sortedNotifications) {
-        const QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
-        const QString badge = notif.read ? "" : "🔴 ";
-        const QString text = QString("%1%2\n%3").arg(badge, dateStr, notif.message);
-
-        auto* item = new QListWidgetItem(text);
-        if (notif.read) {
-            item->setForeground(QBrush(Qt::gray));
-        } else {
-            QFont font;
-            font.setBold(true);
-            item->setFont(font);
-        }
-
-        listWidget->addItem(item);
-    }
-
     if (sortedNotifications.isEmpty()) {
         listWidget->addItem(new QListWidgetItem("No notifications."));
     } else {
+        for (const auto& notif : sortedNotifications) {
+            listWidget->addItem(createNotificationItem(notif));
+        }
         listWidget->setCurrentRow(0);
         listWidget->scrollToItem(listWidget->item(0), QAbstractItemView::PositionAtTop);
     }
@@ -73,12 +81,17 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
 
     connect(clearAllButton, &QPushButton::clicked, this, [this]() {
-        if (QMessageBox::question(this, "Confirm", "Clear all notifications?") == QMessageBox::Yes) {
+        const QMessageBox::StandardButton reply = QMessageBox::warning(
+            this,
+            "Confirm Deletion",
+            "This will delete all notifications permanently. Are you sure?",
+            QMessageBox::Yes | QMessageBox::Cancel
+            );
+
+        if (reply == QMessageBox::Yes) {
             NotificationServiceManager::instance().clearAllNotifications();
+            QMessageBox::information(this, "Cleared", "All notifications have been deleted.");
             accept();
         }
     });
 }
-
-// Destructor
-NotificationsDialog::~NotificationsDialog() = default;

@@ -1,19 +1,21 @@
 // Project includes
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
-#include "backupcontroller.h"
 #include "../../../ui/mainwindow/mainwindowmessages.h"
 #include "../../../services/ServiceDirector/ServiceDirector.h"
-#include "../../../../constants/backup_config.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../../../constants/interface_config.h"
+#include "../../../../constants/backup_config.h"
+#include "../../../../constants/app_info.h"
+#include "backupcontroller.h"
 
 // Qt includes
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QProgressBar>
-#include <QThread>
 #include <QStringList>
+#include <QThread>
 
 // Initializes the controller with service and parent
 BackupController::BackupController(BackupService* service, QObject* parent)
@@ -35,19 +37,12 @@ void BackupController::createBackup(const QString& destinationPath,
 
     cleanupAfterTransfer();
 
-    const QString configFilePath = QDir(destinationPath).filePath(
-        QStringLiteral("%1/%2")
-            .arg(Backup::Storage::k_BACKUP_SETUP_FOLDER,
-                 Backup::Storage::k_BACKUP_SETUP_INFO_FILE));
-
+    const QString configFilePath = PathServiceManager::backupInitMetadataFilePath();
     if (!QFile::exists(configFilePath)) {
         backupService->initializeBackupRootIfNeeded();
     }
 
-    const QString backupFolderPath = QDir(destinationPath).filePath(
-        ServiceDirector::getInstance().getBackupPrefix() +
-        QDateTime::currentDateTime().toString(Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
-
+    const QString backupFolderPath = generateBackupFolderPath(destinationPath);
     if (!createBackupFolder(backupFolderPath)) {
         emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
         return;
@@ -58,7 +53,7 @@ void BackupController::createBackup(const QString& destinationPath,
     progressBar->setValue(UI::Progress::k_PROGRESS_BAR_MIN_VALUE);
     progressBar->setVisible(true);
 
-    qint64 startTime = QDateTime::currentMSecsSinceEpoch();
+    const qint64 startTime = QDateTime::currentMSecsSinceEpoch();
 
     workerThread = new QThread(this);
     auto* worker = new TransferWorker(stagingList, backupFolderPath);
@@ -69,12 +64,18 @@ void BackupController::createBackup(const QString& destinationPath,
 
     connect(worker, &TransferWorker::transferComplete, this,
             [this, backupFolderPath, stagingList, startTime, progressBar]() {
-                qint64 backupDuration = QDateTime::currentMSecsSinceEpoch() - startTime;
+                const qint64 backupDuration =
+                    QDateTime::currentMSecsSinceEpoch() - startTime;
+
+                connect(backupService, &BackupService::backupSummaryWritten, this,
+                        [this, progressBar]() {
+                            emit backupCreated();
+                            progressBar->setValue(UI::Progress::k_PROGRESS_BAR_MAX_VALUE);
+                            progressBar->setVisible(false);
+                            cleanupAfterTransfer();
+                        });
+
                 backupService->createBackupSummary(backupFolderPath, stagingList, backupDuration);
-                progressBar->setValue(UI::Progress::k_PROGRESS_BAR_MAX_VALUE);
-                progressBar->setVisible(false);
-                emit backupCreated();
-                cleanupAfterTransfer();
             });
 
     connect(worker, &TransferWorker::errorOccurred, this,
@@ -92,12 +93,10 @@ void BackupController::createBackup(const QString& destinationPath,
 
 // Deletes a backup folder and its log file
 void BackupController::deleteBackup(const QString& backupPath) {
-    const QString logFilePath = QDir(backupService->getBackupRoot()).filePath(
-        QStringLiteral("%1/%2/%3_%4")
-            .arg(Backup::Storage::k_BACKUP_SETUP_FOLDER,
-                 Backup::Storage::k_BACKUP_LOGS_FOLDER,
-                 QFileInfo(backupPath).fileName(),
-                 Backup::Storage::k_BACKUP_LOGS_FILE));
+    const QString logFilePath =
+        QDir(PathServiceManager::backupLogsFolderPath())
+            .filePath(QFileInfo(backupPath).fileName() + "_" +
+                      App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE);
 
     if (!QFile::remove(logFilePath)) {
         emit errorOccurred(QFile::exists(logFilePath)
@@ -126,10 +125,19 @@ bool BackupController::createBackupFolder(const QString& path) {
 
 // Stops and cleans up the worker thread
 void BackupController::cleanupAfterTransfer() {
-    if (workerThread) {
-        workerThread->quit();
-        workerThread->wait();
-        workerThread->deleteLater();
-        workerThread = nullptr;
-    }
+    if (!workerThread)
+        return;
+
+    workerThread->quit();
+    workerThread->wait();
+    workerThread->deleteLater();
+    workerThread = nullptr;
+}
+
+// Generates a timestamped backup folder path
+QString BackupController::generateBackupFolderPath(const QString& destinationPath) const {
+    return QDir(destinationPath).filePath(
+        ServiceDirector::getInstance().getBackupPrefix() +
+        QDateTime::currentDateTime().toString(
+            Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
 }

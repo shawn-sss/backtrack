@@ -5,27 +5,34 @@
 #include <QJsonObject>
 #include <QString>
 
-// Forward declarations (Custom class)
+// Forward declaration (Custom class)
 class UserServiceManager;
 
-// Manages backup-related user settings
+// Manages user-configurable backup settings
 class BackupServiceManager {
 public:
     // Constructor
     explicit BackupServiceManager(UserServiceManager& serviceManager);
 
-    // Access to backup service settings
+    // Return the entire backup settings JSON object
     QJsonObject getBackupSettings() const;
+
+    // Get the configured backup directory
     QString getBackupDirectory() const;
+
+    // Set a new backup directory
     void setBackupDirectory(const QString& dir);
+
+    // Get the configured backup prefix
     QString getBackupPrefix() const;
+
+    // Set a new backup prefix
     void setBackupPrefix(const QString& prefix);
 
 private:
-    // Internal update helper
+    // Update a specific setting inside the backup group
     void updateBackupSetting(const QString& key, const QString& newValue, const QString& defaultValue);
 
-    // Reference to user service manager
     UserServiceManager& userServiceManager;
 };
 

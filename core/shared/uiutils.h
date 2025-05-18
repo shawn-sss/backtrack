@@ -12,21 +12,25 @@
 
 namespace Shared::UI {
 
-// Mouse event handlers for draggable windows
+// Handles mouse press for initiating window drag
 void handleMousePress(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition);
+
+// Handles mouse move to perform window drag
 void handleMouseMove(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition);
+
+// Handles mouse release to end window drag
 void handleMouseRelease(QMouseEvent* event, bool& dragging);
 
-// Tree view utility
+// Hides tree view columns starting at a specific index
 void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int columnCount);
 
-// Progress bar setup utility
+// Configures a progress bar with range, height, and text visibility
 void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int height, bool textVisible);
 
-// UI cursor customization
+// Sets cursor to pointing hand for a tab widget's tab bar
 void setTabWidgetCursorToPointer(QTabWidget* tabWidget);
 
-// Status light icon generator
+// Creates a circular colored pixmap for status indication
 QPixmap createStatusLightPixmap(const QString& color, int size);
 
 } // namespace Shared::UI

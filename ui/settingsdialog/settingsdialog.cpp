@@ -6,29 +6,22 @@
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 
 // Qt includes
-#include <QComboBox>
-#include <QDialogButtonBox>
-#include <QFontMetrics>
 #include <QFormLayout>
+#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QMessageBox>
-#include <QPushButton>
+#include <QSpacerItem>
 #include <QRegularExpressionValidator>
 #include <QSignalBlocker>
-#include <QSpacerItem>
-#include <QStackedWidget>
-#include <QTimer>
-#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QDialogButtonBox>
 
 using namespace SettingsDialogConstants;
 using namespace ThemeServiceConstants;
 using namespace ThemeServiceConstants::ThemeConstants;
 using namespace SettingsDialogStyling;
 
-// Initializes the settings dialog
+// Constructs and initializes the settings dialog layout
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -36,10 +29,9 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     setupLayout();
 }
 
-// Destroys the settings dialog
 SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the layout and structure of the dialog
+// Sets up the complete layout of the settings dialog
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -81,14 +73,14 @@ void SettingsDialog::setupLayout() {
     connect(saveCooldownTimer, &QTimer::timeout, this, [this]() {
         saveButton->setText(k_BUTTON_SAVE_TEXT);
         saveButton->setEnabled(true);
-        saveButton->setStyleSheet(QString());
+        saveButton->setStyleSheet({});
     });
 
     mainLayout->addWidget(centralWidget);
     mainLayout->addWidget(buttonBox);
 }
 
-// Creates the user settings page layout
+// Creates the user settings page
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -106,11 +98,8 @@ QWidget* SettingsDialog::createUserSettingsPage() {
 
     backupPrefixEdit = new QLineEdit(widget);
     backupPrefixEdit->setText(ServiceDirector::getInstance().getBackupPrefix());
-
-    QRegularExpression regex("^[A-Za-z0-9]{0,12}$");
-    backupPrefixEdit->setValidator(new QRegularExpressionValidator(regex, this));
+    backupPrefixEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[A-Za-z0-9]{0,12}$"), this));
     backupPrefixEdit->setMaxLength(12);
-
     layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
 
     auto* prefixInfoLabel = new QLabel("Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.");
@@ -121,7 +110,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Creates the system settings page layout
+// Creates the system settings page
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -145,7 +134,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles saving settings and applying configuration
+// Handles saving user and system settings
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
@@ -169,7 +158,7 @@ void SettingsDialog::onSaveClicked() {
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
 }
 
-// Applies pointer cursor and tooltip to the save button
+// Applies cursors and tooltips to the save button
 void SettingsDialog::applyButtonCursorsAndTooltips() {
     saveButton->setCursor(Qt::PointingHandCursor);
     saveButton->setToolTip("Save your settings and apply changes");

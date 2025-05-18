@@ -5,28 +5,24 @@
 #include <QJsonObject>
 #include <QString>
 
-// Manages application installation metadata
+// Handles persistent installation metadata
 class InstallServiceManager {
 public:
-    // Constructor
     explicit InstallServiceManager(const QString& metadataPath);
 
-    // File operations
+    // Load and save metadata
     void load();
     void save();
 
-    // Default initialization
+    // Initialize metadata with default values
     static void initializeDefaults();
 
-    // Metadata access
+    // Accessors
     const QJsonObject& getMetadata() const;
     void setMetadata(const QJsonObject& metadata);
 
 private:
-    // Path to metadata file
     QString metadataFilePath;
-
-    // Loaded metadata
     QJsonObject installMetadata;
 };
 

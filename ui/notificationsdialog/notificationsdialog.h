@@ -12,13 +12,12 @@
 class QListWidget;
 class QPushButton;
 
-// Dialog for displaying notifications
+// NotificationsDialog displays and manages a list of recent notifications
 class NotificationsDialog : public QDialog {
     Q_OBJECT
 
 public:
     explicit NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent = nullptr);
-    ~NotificationsDialog() override;
 
 private:
     QListWidget* listWidget;

@@ -2,43 +2,45 @@
 #include "BackupServiceManager.h"
 #include "BackupServiceConstants.h"
 #include "../UserServiceManager/UserServiceManager.h"
+#include "../PathServiceManager/PathServiceManager.h"
 
-// Constructor initializes reference to user service manager
+// Constructor
 BackupServiceManager::BackupServiceManager(UserServiceManager& serviceManager)
     : userServiceManager(serviceManager) {}
 
-// Returns backup service group object
+
+// Return the full backup settings group
 QJsonObject BackupServiceManager::getBackupSettings() const {
     const QJsonObject& settings = userServiceManager.settings();
-    const QJsonValue groupVal = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP);
-    return groupVal.isObject() ? groupVal.toObject() : QJsonObject{};
+    const QJsonValue groupValue = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP);
+    return groupValue.isObject() ? groupValue.toObject() : QJsonObject{};
 }
 
-// Returns stored or default backup directory
+// Return the configured backup directory
 QString BackupServiceManager::getBackupDirectory() const {
-    return getBackupSettings()
-    .value(ServiceKeys::BACKUP_DIRECTORY_KEY)
-        .toString(ServiceDefaults::BACKUP_DIRECTORY);
+    const QJsonObject backupSettings = getBackupSettings();
+    return backupSettings.value(ServiceKeys::BACKUP_DIRECTORY_KEY)
+        .toString(PathServiceManager::backupSetupFolderPath());
 }
 
-// Sets backup directory in settings
+// Set the backup directory
 void BackupServiceManager::setBackupDirectory(const QString& dir) {
-    updateBackupSetting(ServiceKeys::BACKUP_DIRECTORY_KEY, dir, ServiceDefaults::BACKUP_DIRECTORY);
+    updateBackupSetting(ServiceKeys::BACKUP_DIRECTORY_KEY, dir, PathServiceManager::backupSetupFolderPath());
 }
 
-// Returns stored or default backup prefix
+// Return the configured backup prefix
 QString BackupServiceManager::getBackupPrefix() const {
-    return getBackupSettings()
-    .value(ServiceKeys::BACKUP_PREFIX_KEY)
+    const QJsonObject backupSettings = getBackupSettings();
+    return backupSettings.value(ServiceKeys::BACKUP_PREFIX_KEY)
         .toString(ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Sets backup prefix in settings
+// Set the backup prefix
 void BackupServiceManager::setBackupPrefix(const QString& prefix) {
     updateBackupSetting(ServiceKeys::BACKUP_PREFIX_KEY, prefix, ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Updates a specific backup setting key with new value if different
+// Apply and persist a backup setting if it has changed
 void BackupServiceManager::updateBackupSetting(const QString& key, const QString& newValue, const QString& defaultValue) {
     QJsonObject& settings = userServiceManager.settings();
     QJsonObject backupSettings = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP).toObject();

@@ -1,4 +1,3 @@
-// Project includes
 #include "UninstallServiceManager.h"
 #include "UninstallServiceConstants.h"
 
@@ -8,59 +7,46 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 
-// C++ includes
+using namespace UninstallServiceConstants;
 
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
-
-// Constructor
+// Constructs the uninstall service manager
 UninstallServiceManager::UninstallServiceManager() = default;
 
-// Returns the installation directory path
+// Returns the app's local installation directory
 QString UninstallServiceManager::getInstallDirectory() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
-// Prompts user for confirmation and attempts to uninstall the application
+// Prompts the user to confirm and performs uninstall
 bool UninstallServiceManager::promptAndUninstall(QWidget* parent) const {
     const QString installDir = getInstallDirectory();
 
     if (installDir.isEmpty() || !QDir(installDir).exists()) {
-        QMessageBox::warning(parent,
-                             UninstallServiceConstants::TITLE_RESET_APP_INSTALLATION,
-                             UninstallServiceConstants::MSG_INVALID_DIR);
+        QMessageBox::warning(parent, titleResetAppInstallation(), msgInvalidDir());
         return false;
     }
-
-    const QString warningMsg = UninstallServiceConstants::MSG_CONFIRM_RESET.arg(installDir);
 
     const QMessageBox::StandardButton confirm = QMessageBox::warning(
         parent,
-        UninstallServiceConstants::TITLE_CONFIRM_APP_RESET,
-        warningMsg,
+        titleConfirmAppReset(),
+        msgConfirmReset(installDir),
         QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No);
+        QMessageBox::No
+        );
 
-    if (confirm != QMessageBox::Yes) {
+    if (confirm != QMessageBox::Yes)
         return false;
-    }
 
     if (deleteDirectory(installDir)) {
-        QMessageBox::information(parent,
-                                 UninstallServiceConstants::TITLE_APP_RESET,
-                                 UninstallServiceConstants::MSG_SUCCESS);
+        QMessageBox::information(parent, titleAppReset(), msgSuccess());
         return true;
     }
 
-    QMessageBox::critical(parent,
-                          UninstallServiceConstants::TITLE_RESET_FAILED,
-                          UninstallServiceConstants::MSG_FAILURE);
+    QMessageBox::critical(parent, titleResetFailed(), msgFailure());
     return false;
 }
 
-// Deletes the directory and all its contents recursively
+// Deletes the specified directory recursively
 bool UninstallServiceManager::deleteDirectory(const QString& path) const {
-    QDir dir(path);
-    return dir.removeRecursively();
+    return QDir(path).removeRecursively();
 }

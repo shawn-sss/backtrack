@@ -11,6 +11,10 @@
 #include <QPoint>
 #include <QTimer>
 #include <QString>
+#include <QPair>
+#include <QStringList>
+#include <QItemSelectionModel>
+#include <QAbstractItemView>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -31,6 +35,9 @@ class QPushButton;
 class QToolBar;
 class QTreeView;
 class QWidget;
+class QTabWidget;
+class QAbstractItemModel;
+class BackupScanResult;
 
 // Forward declaration (UI class)
 namespace Ui { class MainWindow; }
@@ -44,21 +51,12 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
-    // Accessors
     QTabWidget* getDetailsTabWidget();
 
 protected:
-    // Qt event overrides
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    const QStringList requiredConfigFiles = {
-        "app_init.json",
-        "app_notifications.json",
-        "user_settings.json"
-    };
-    QString checkInstallIntegrityStatus();
-    void updateApplicationStatusLabel();
     // UI setup
     void configureWindow();
     void initializeUI();
@@ -66,17 +64,32 @@ private:
     void setupConnections();
     void applyButtonCursors();
 
-    // Backup system
+    // Backup system setup
     void initializeBackupSystem();
     void connectBackupSignals();
 
-    // Tree views
+    // File system tree views
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
     void removeAllColumnsFromTreeView(QTreeView* treeView);
+    void configureTreeView(QTreeView* treeView,
+                           QAbstractItemModel* model,
+                           QAbstractItemView::SelectionMode selectionMode,
+                           bool stretchLastColumn,
+                           bool showHeader = true);
 
-    // Backup status display
+    // File system watcher logic
+    void updateFileWatcher();
+    void startWatchingBackupDirectory(const QString& path);
+    void resetFileWatcherAndDestinationView();
+    QStringList getWatchedRoots() const;
+
+    // Application status checks
+    QString checkInstallIntegrityStatus();
+    void updateApplicationStatusLabel();
+
+    // Backup display info
     void refreshBackupStatus();
     void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
@@ -84,25 +97,27 @@ private:
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
     void updateBackupLocationStatusLabel(const QString& location);
+    void updateBackupLabels(const BackupScanResult& scan);
+    void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
+    QPair<QString, QString> statusVisualsForColor(const QString& color) const;
 
-    // File system watching
-    void updateFileWatcher();
-    void startWatchingBackupDirectory(const QString& path);
+    // Notification system
+    void setupNotificationButton();
+    void updateNotificationButtonState();
+    void showNotificationDialog();
+    void feedbackNotificationButton();
+    void displayNotificationPopup(const NotificationServiceStruct& notif);
+    void finishNotificationQueue();
+    void showNextNotification();
 
-    // Backup button feedback
+    // Button feedback
     void resetCreateBackupButtonState();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
-    // Notifications
-    void setupNotificationButton();
-    void updateNotificationButtonState();
-    void showNextNotification();
-
 private slots:
-    // Backup actions
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
@@ -110,19 +125,14 @@ private slots:
     void onDeleteAllBackupsClicked();
     void onChangeBackupDestinationClicked();
 
-    // File system watchers
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
 
-    // Backup lifecycle
     void onBackupCompleted();
     void onBackupError(const QString& error);
-
-    // Notification interactions
-    void onNotificationButtonClicked();
     void onCooldownFinished();
 
-    // Uninstall interaction
+    void onNotificationButtonClicked();
     void onUninstallClicked();
 
 private:
@@ -148,6 +158,12 @@ private:
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
+
+    const QStringList requiredConfigFiles = {
+        "app_init.json",
+        "app_notifications.json",
+        "user_settings.json"
+    };
 };
 
 #endif // MAINWINDOW_H

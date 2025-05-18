@@ -1,120 +1,147 @@
+// Project includes
 #include "filewatcher.h"
-#include "../../../../constants/backup_config.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 
+// Qt includes
+#include <QSet>
 #include <QDir>
 #include <QFileInfo>
 #include <QFileSystemWatcher>
-#include <QSet>
-#include <QDebug>
 
+// C++ includes
+#include <algorithm>
+
+// Normalize and validate path
+namespace {
+QString normalizeAndCheckPath(const QString& path, bool allowNonexistentDir) {
+    QString normalized = QDir::fromNativeSeparators(path.trimmed());
+    QFileInfo info(normalized);
+
+    if (info.exists()) return normalized;
+    if (allowNonexistentDir && info.isDir()) return normalized;
+
+    return {};
+}
+}
+
+// Constructor and signals
 FileWatcher::FileWatcher(QObject* parent)
     : QObject(parent), watcher(new QFileSystemWatcher(this)) {
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcher::directoryChanged);
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::fileChanged);
 }
 
+// Update the entire watch list
 void FileWatcher::updateWatchList(const QStringList& paths) {
     removeAllPaths();
     addPaths(paths);
 }
 
-static QString normalizeAndCheckPath(const QString& path) {
-    QString normalized = QDir::fromNativeSeparators(path.trimmed());
-    return QFileInfo::exists(normalized) ? normalized : QString();
-}
-
+// Add a single path
 void FileWatcher::addPath(const QString& path) {
-    const QString normalizedPath = normalizeAndCheckPath(path);
-    if (!normalizedPath.isEmpty() &&
-        !watcher->directories().contains(normalizedPath) &&
-        !watcher->files().contains(normalizedPath)) {
-        watcher->addPath(normalizedPath);
-        qDebug() << "[FileWatcher] Watching path:" << normalizedPath;
+    const QString normalized = normalizeAndCheckPath(path, true);
+    if (normalized.isEmpty()) return;
+
+    if (!watcher->directories().contains(normalized) && !watcher->files().contains(normalized)) {
+        watcher->addPath(normalized);
     }
 }
 
+// Add multiple paths
 void FileWatcher::addPaths(const QStringList& paths) {
-    QStringList newPaths;
-    QSet<QString> currentWatched(watcher->directories().begin(), watcher->directories().end());
-    currentWatched.unite(QSet<QString>(watcher->files().begin(), watcher->files().end()));
+    QSet<QString> currentWatched;
+    for (const QString& dir : watcher->directories())
+        currentWatched.insert(dir);
+    for (const QString& file : watcher->files())
+        currentWatched.insert(file);
 
+    QStringList newPaths;
     for (const QString& path : paths) {
-        const QString normalizedPath = normalizeAndCheckPath(path);
-        if (!normalizedPath.isEmpty() && !currentWatched.contains(normalizedPath)) {
-            newPaths.append(normalizedPath);
+        QString normalized = QDir::fromNativeSeparators(path.trimmed());
+        if (!normalized.isEmpty() && !currentWatched.contains(normalized)) {
+            newPaths.append(normalized);
         }
     }
 
     if (!newPaths.isEmpty()) {
         watcher->addPaths(newPaths);
-        qDebug() << "[FileWatcher] Added paths:" << newPaths;
     }
 }
 
+// Remove a single path
 void FileWatcher::removePath(const QString& path) {
-    const QString normalizedPath = QDir::fromNativeSeparators(path.trimmed());
-    if (watcher->directories().contains(normalizedPath) || watcher->files().contains(normalizedPath)) {
-        watcher->removePath(normalizedPath);
-        qDebug() << "[FileWatcher] Removed path:" << normalizedPath;
+    const QString normalized = QDir::fromNativeSeparators(path.trimmed());
+    if (watcher->directories().contains(normalized) || watcher->files().contains(normalized)) {
+        watcher->removePath(normalized);
     }
 }
 
+// Remove all paths
 void FileWatcher::removeAllPaths() {
-    QStringList allPaths = watcher->directories() + watcher->files();
+    const QStringList allPaths = watcher->directories() + watcher->files();
     if (!allPaths.isEmpty()) {
         watcher->removePaths(allPaths);
-        qDebug() << "[FileWatcher] Removed all watched paths";
     }
 }
 
+// Return watched directories
 QStringList FileWatcher::watchedDirectories() const {
     return watcher->directories();
 }
 
+// Return watched files
 QStringList FileWatcher::watchedFiles() const {
     return watcher->files();
 }
 
-void FileWatcher::startWatchingMultiple(const QStringList&) {
+// Start watching special folders
+void FileWatcher::startWatchingMultiple(const QStringList& roots) {
+    static QStringList lastWatched;
+
+    QStringList sortedRoots = roots;
+    std::sort(sortedRoots.begin(), sortedRoots.end());
+    if (sortedRoots == lastWatched) return;
+
+    lastWatched = sortedRoots;
     removeAllPaths();
+
     QSet<QString> pathsToWatch;
+    const QString backupRoot = PathServiceManager::backupSetupFolderPath();
+    const QString backupConfigFolder = PathServiceManager::backupConfigFolderPath();
+    const QString backupInit = PathServiceManager::backupInitMetadataFilePath();
+    const QString logsFolder = PathServiceManager::backupLogsFolderPath();
 
-    // === AppInstall paths ===
-    QString appInstallRoot     = "C:/Users/shawn/AppData/Local/MyDataBackupApp";
-    QString appConfigFolder    = "C:/Users/shawn/AppData/Local/MyDataBackupApp/app_config";
-    QString appInit            = "C:/Users/shawn/AppData/Local/MyDataBackupApp/app_config/app_init.json";
-    QString appNotifications   = "C:/Users/shawn/AppData/Local/MyDataBackupApp/app_config/app_notifications.json";
-    QString userSettings       = "C:/Users/shawn/AppData/Local/MyDataBackupApp/app_config/user_settings.json";
+    for (const QString& root : sortedRoots) {
+        const QString normalizedRoot = QDir::cleanPath(root);
+        if (normalizedRoot.isEmpty()) continue;
 
-    // === BackupLocation paths ===
-    QString rootBackup         = "C:/temp";
-    QString backupFolder       = "C:/temp/_MyDataBackupApp";
-    QString backupInit         = "C:/temp/_MyDataBackupApp/backup_init.json";
-    QString logsFolder         = "C:/temp/_MyDataBackupApp/logs";
+        pathsToWatch.insert(normalizedRoot);
 
-    // Add all 9 important paths
-    QStringList criticalPaths = {
-        appInstallRoot,
-        appConfigFolder,
-        appInit,
-        appNotifications,
-        userSettings,
-        rootBackup,
-        backupFolder,
-        backupInit,
-        logsFolder
-    };
+        if (normalizedRoot.endsWith("app_config")) {
+            const QStringList appFiles = {
+                normalizedRoot + "/app_init.json",
+                normalizedRoot + "/app_notifications.json",
+                normalizedRoot + "/user_settings.json"
+            };
+            for (const QString& file : appFiles) {
+                pathsToWatch.insert(QDir::cleanPath(file));
+            }
+        }
 
-    for (const QString& path : criticalPaths) {
-        const QString valid = normalizeAndCheckPath(path);
-        if (!valid.isEmpty()) {
-            pathsToWatch.insert(valid);
-            qDebug() << "[FileWatcher] Added path:" << valid;
-        } else {
-            qDebug() << "[FileWatcher] Skipped missing path:" << path;
+        if (normalizedRoot == backupRoot) {
+            pathsToWatch.insert(QDir::cleanPath(backupInit));
+            pathsToWatch.insert(QDir::cleanPath(logsFolder));
+
+            QDir logDir(logsFolder);
+            const QFileInfoList logFiles = logDir.entryInfoList(QStringList() << "*.json", QDir::Files);
+            for (const QFileInfo& fileInfo : logFiles) {
+                const QString filePath = fileInfo.absoluteFilePath();
+                if (!filePath.isEmpty()) {
+                    pathsToWatch.insert(filePath);
+                }
+            }
         }
     }
 
     addPaths(pathsToWatch.values());
-    qDebug() << "[FileWatcher] Now watching" << pathsToWatch.size() << "paths.";
 }

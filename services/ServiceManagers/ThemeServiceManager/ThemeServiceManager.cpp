@@ -1,4 +1,3 @@
-// Project includes
 #include "ThemeServiceManager.h"
 #include "../../servicedirector/servicedirector.h"
 #include "ThemeServiceConstants.h"
@@ -43,9 +42,18 @@ public:
 ThemeChangeFilter* eventFilter = nullptr;
 #endif
 
+// Loads a QSS file and returns contents as QString
+QString loadQssFile(const QString& path) {
+    QFile file(path);
+    if (file.open(QFile::ReadOnly | QFile::Text)) {
+        return QString::fromUtf8(file.readAll());
+    }
+    return {};
+}
+
 } // namespace
 
-// Returns true if current system theme is dark
+// Returns true if the system is using a dark theme
 bool ThemeServiceManager::isDarkTheme() {
 #ifdef Q_OS_WIN
     QSettings settings(kThemeRegistryPath, QSettings::NativeFormat);
@@ -55,57 +63,43 @@ bool ThemeServiceManager::isDarkTheme() {
 #endif
 }
 
-// Returns cached theme value
+// Returns the currently applied app theme
 AppTheme ThemeServiceManager::currentTheme() {
     return _currentTheme;
 }
 
-// Gets stored user theme preference
+// Retrieves the user's theme preference from settings
 UserThemePreference ThemeServiceManager::getUserThemePreference() {
     return ServiceDirector::getInstance().getThemePreference();
 }
 
-// Sets and applies new user theme preference
+// Sets the user's theme preference and applies the theme
 void ThemeServiceManager::setUserThemePreference(UserThemePreference preference) {
     ServiceDirector::getInstance().setThemePreference(preference);
     applyTheme();
 }
 
-// Applies theme based on user or system setting
+// Applies the correct theme stylesheet based on system and user preference
 void ThemeServiceManager::applyTheme() {
     auto& service = ServiceDirector::getInstance();
     const UserThemePreference preference = service.getThemePreference();
 
-    const AppTheme newTheme = (preference == UserThemePreference::Auto)
-                                  ? (isDarkTheme() ? AppTheme::Dark : AppTheme::Light)
-                                  : (preference == UserThemePreference::Dark ? AppTheme::Dark : AppTheme::Light);
-
-    _currentTheme = newTheme;
-
-    const QString baseQssPath = QString::fromUtf8(k_BASE_THEME_PATH);
-    const QString themeQssPath = (_currentTheme == AppTheme::Dark)
-                                     ? QString::fromUtf8(k_DARK_THEME_PATH)
-                                     : QString::fromUtf8(k_LIGHT_THEME_PATH);
+    _currentTheme = (preference == UserThemePreference::Auto)
+                        ? (isDarkTheme() ? AppTheme::Dark : AppTheme::Light)
+                        : (preference == UserThemePreference::Dark ? AppTheme::Dark : AppTheme::Light);
 
     qApp->setStyle(QStyleFactory::create("Fusion"));
     qApp->setPalette(qApp->style()->standardPalette());
 
-    QString finalStyle;
-
-    QFile baseFile(baseQssPath);
-    if (baseFile.open(QFile::ReadOnly | QFile::Text)) {
-        finalStyle += QLatin1String(baseFile.readAll()) + QLatin1Char('\n');
-    }
-
-    QFile themeFile(themeQssPath);
-    if (themeFile.open(QFile::ReadOnly | QFile::Text)) {
-        finalStyle += QLatin1String(themeFile.readAll());
-    }
+    const QString finalStyle = loadQssFile(k_BASE_THEME_PATH) + "\n" +
+                               loadQssFile((_currentTheme == AppTheme::Dark)
+                                               ? k_DARK_THEME_PATH
+                                               : k_LIGHT_THEME_PATH);
 
     qApp->setStyleSheet(finalStyle);
 }
 
-// Installs Windows-specific theme event listener
+// Installs a Windows-specific event filter for system theme changes
 void ThemeServiceManager::installEventFilter(QObject*) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {

@@ -9,16 +9,35 @@
 #include <QFile>
 #include <QStorageInfo>
 
-// Initializes the transfer worker with source files and destination
+// C++ includes
+
+// Forward declaration (Custom class)
+
+// Forward declaration (Qt class)
+
+
+// Constructor
 TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// Requests the current transfer to stop early
+
+// Stop the transfer process externally
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
-// Starts transferring all files and folders
+
+// Check if a stop has been requested
+bool TransferWorker::shouldStop() {
+    if (stopRequested.load()) {
+        emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+        return true;
+    }
+    return false;
+}
+
+
+// Start the file or folder transfer process
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -30,32 +49,33 @@ void TransferWorker::startTransfer() {
     int completedFiles = 0;
 
     for (const QString& filePath : std::as_const(files)) {
-        if (stopRequested.load()) {
-            emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+        if (shouldStop()) {
             emit finished();
             return;
         }
 
         const QFileInfo fileInfo(filePath);
-        bool success = fileInfo.isDir() && filePath.endsWith(":/")
-                           ? processDriveRoot(filePath)
-                           : processFileOrFolder(filePath);
+        const bool isDriveRoot = fileInfo.isDir() && filePath.endsWith(":/");
+        const bool success = isDriveRoot
+                                 ? processDriveRoot(filePath)
+                                 : processFileOrFolder(filePath);
 
         if (!success) {
             emit finished();
             return;
         }
 
-        emit progressUpdated((++completedFiles * 100) / totalFiles);
+        emit progressUpdated(++completedFiles * 100 / totalFiles);
     }
 
     emit transferComplete();
     emit finished();
 }
 
-// Copies the contents of a drive root (e.g., C:/)
+
+// Handle copying when the source is a drive root
 bool TransferWorker::processDriveRoot(const QString& driveRoot) {
-    if (stopRequested.load()) return false;
+    if (shouldStop()) return false;
 
     const QFileInfo fileInfo(driveRoot);
     if (!fileInfo.isDir() || !fileInfo.exists()) {
@@ -93,9 +113,10 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     return true;
 }
 
-// Copies a single file or folder
+
+// Handle copying a single file or directory
 bool TransferWorker::processFileOrFolder(const QString& filePath) {
-    if (stopRequested.load()) return false;
+    if (shouldStop()) return false;
 
     const QFileInfo fileInfo(filePath);
     const QString destPath = QDir(destination).filePath(fileInfo.fileName());
@@ -103,15 +124,16 @@ bool TransferWorker::processFileOrFolder(const QString& filePath) {
     return copyItem(fileInfo, destPath);
 }
 
-// Copies an item to the destination path
+
+// Copy a file or directory to a destination
 bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
     if (!fileInfo.isReadable()) {
         emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
-    QFile destinationFile(destinationPath);
-    if (destinationFile.exists() && !destinationFile.remove()) {
+    QFile destFile(destinationPath);
+    if (destFile.exists() && !destFile.remove()) {
         emit errorOccurred(QString(ErrorMessages::k_ERROR_TRANSFER_FAILED).arg(destinationPath));
         return false;
     }

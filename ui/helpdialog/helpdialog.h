@@ -4,20 +4,18 @@
 // Qt includes
 #include <QDialog>
 
-// Forward declarations (Qt class)
+// Forward declaration (Qt class)
 class QTabWidget;
 class QTextBrowser;
 
-class HelpDialog : public QDialog
-{
+// HelpDialog provides a tabbed help window with instructions, features, and FAQs
+class HelpDialog : public QDialog {
     Q_OBJECT
 
 public:
     explicit HelpDialog(QWidget* parent = nullptr);
-    ~HelpDialog();
 
 private:
-    // UI elements
     QTabWidget* tabWidget;
     QTextBrowser* gettingStartedText;
     QTextBrowser* featuresText;

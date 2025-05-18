@@ -6,16 +6,16 @@
 
 namespace ThemeServiceConstants {
 
-// Default string for auto theme
+// Default string for automatic theme selection
 inline constexpr const char* k_DEFAULT_THEME_STRING = "auto";
 
-// Theme options for app appearance
+// App-wide theme styles
 enum class AppTheme {
     Light,
     Dark
 };
 
-// Theme options user can choose
+// User-selectable theme preferences
 enum class UserThemePreference {
     Light,
     Dark,
@@ -24,10 +24,9 @@ enum class UserThemePreference {
 
 // Converts string to UserThemePreference enum
 inline UserThemePreference stringToUserThemePreference(const QString& value) {
-    if (value.compare(QStringLiteral("light"), Qt::CaseInsensitive) == 0)
-        return UserThemePreference::Light;
-    if (value.compare(QStringLiteral("dark"), Qt::CaseInsensitive) == 0)
-        return UserThemePreference::Dark;
+    const QString v = value.trimmed().toLower();
+    if (v == "light") return UserThemePreference::Light;
+    if (v == "dark")  return UserThemePreference::Dark;
     return UserThemePreference::Auto;
 }
 
@@ -41,7 +40,7 @@ inline QString userThemePreferenceToString(UserThemePreference pref) {
     }
 }
 
-// QSS file paths
+// Paths to QSS theme files
 namespace ThemeConstants {
 inline constexpr const char* k_BASE_THEME_PATH  = ":/resources/themes/base.qss";
 inline constexpr const char* k_DARK_THEME_PATH  = ":/resources/themes/dark.qss";
@@ -51,7 +50,7 @@ inline constexpr const char* k_LIGHT_THEME_PATH = ":/resources/themes/light.qss"
 } // namespace ThemeServiceConstants
 
 #ifdef Q_OS_WIN
-// Windows registry keys for theme detection
+// Windows registry keys for system theme detection
 namespace WindowsThemeRegistry {
 inline constexpr auto kThemeRegistryPath    = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
 inline constexpr auto kAppsUseLightThemeKey = "AppsUseLightTheme";

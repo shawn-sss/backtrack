@@ -10,7 +10,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 
-// Dialog for managing user and system application settings
+// SettingsDialog provides an interface for modifying user and system preferences
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -19,26 +19,21 @@ public:
     ~SettingsDialog() override;
 
 private:
-    // Layout initialization
     void setupLayout();
-
-    // Page creation helpers
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
-
-    // Save button enhancements
     void applyButtonCursorsAndTooltips();
 
-    // UI components
+private slots:
+    void onSaveClicked();
+
+private:
     QListWidget* categoryList;
     QStackedWidget* settingsStack;
     QLineEdit* backupPrefixEdit;
     QComboBox* themeComboBox;
     QPushButton* saveButton;
     QTimer* saveCooldownTimer;
-
-private slots:
-    void onSaveClicked();
 };
 
 #endif // SETTINGSDIALOG_H

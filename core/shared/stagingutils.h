@@ -4,7 +4,7 @@
 // Qt includes
 #include <QTreeView>
 
-// Forward declarations (Custom class)
+// Forward declaration (Custom class)
 class StagingModel;
 
 namespace Shared::Backup {

@@ -9,27 +9,26 @@
 #include <QList>
 #include <QString>
 
-// Manages creation, loading, and storage of notifications
+// Manages notifications for the user
 class NotificationServiceManager : public QObject {
     Q_OBJECT
 
 public:
-    // Singleton access
     static NotificationServiceManager& instance();
 
     // Initializes default notification file
     static void initializeDefaults();
 
-    // Persistence
+    // Loads and saves notification data
     void load();
     void save();
 
-    // Notification management
+    // Adds, clears, and marks notifications
     void addNotification(const QString& message);
     void markAllAsRead();
     void clearAllNotifications();
 
-    // Notification queries
+    // Accessors
     QList<NotificationServiceStruct> unreadNotifications() const;
     const QList<NotificationServiceStruct>& allNotifications() const;
 
@@ -38,11 +37,8 @@ signals:
 
 private:
     NotificationServiceManager();
-
-    // Internal path resolution
     QString notificationFilePath() const;
 
-    // Internal storage
     QList<NotificationServiceStruct> notifications;
 };
 

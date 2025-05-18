@@ -9,12 +9,13 @@
 #include <QJsonObject>
 #include <QString>
 
-// Struct to hold a notification and convert to/from JSON
+// Represents a single notification with JSON conversion
 struct NotificationServiceStruct {
     QString message;
     QDateTime timestamp;
     bool read;
 
+    // Converts struct to JSON object
     QJsonObject toJson() const {
         return {
             { NotificationSettings::Fields::k_MESSAGE, message },
@@ -23,6 +24,7 @@ struct NotificationServiceStruct {
         };
     }
 
+    // Creates struct from JSON object
     static NotificationServiceStruct fromJson(const QJsonObject& obj) {
         return {
             obj.value(NotificationSettings::Fields::k_MESSAGE).toString(),

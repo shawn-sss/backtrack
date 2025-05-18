@@ -5,18 +5,22 @@
 // Qt includes
 #include <QFileSystemModel>
 #include <QSet>
+#include <QItemSelectionModel>
 
-// Adds selected file system paths from a QTreeView to the staging model
 namespace Shared::Backup {
 
+// Add selected file system paths from a tree view to the staging model
 void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
-    if (!treeView || !stagingModel || !treeView->selectionModel()) return;
+    if (!treeView || !stagingModel) return;
+
+    QItemSelectionModel* selectionModel = treeView->selectionModel();
+    if (!selectionModel) return;
 
     QSet<QString> uniquePaths;
-    const auto selectedIndexes = treeView->selectionModel()->selectedIndexes();
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
 
-    for (const auto& index : selectedIndexes) {
-        QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
+    for (const QModelIndex& index : selectedIndexes) {
+        const QString filePath = index.data(QFileSystemModel::FilePathRole).toString();
         if (!filePath.isEmpty() && !uniquePaths.contains(filePath)) {
             uniquePaths.insert(filePath);
             stagingModel->addPath(filePath);
@@ -24,22 +28,26 @@ void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) 
     }
 }
 
-// Removes selected staged paths from the staging model
+
+// Remove selected paths from the staging model
 void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
-    if (!treeView || !stagingModel || !treeView->selectionModel()) return;
+    if (!treeView || !stagingModel) return;
 
-    QSet<QString> uniquePathsToRemove;
-    const auto selectedIndexes = treeView->selectionModel()->selectedIndexes();
+    QItemSelectionModel* selectionModel = treeView->selectionModel();
+    if (!selectionModel) return;
 
-    for (const auto& index : selectedIndexes) {
-        QString filePath = stagingModel->data(index, Qt::ToolTipRole).toString();
-        if (!filePath.isEmpty()) {
-            uniquePathsToRemove.insert(filePath);
+    QSet<QString> pathsToRemove;
+    const QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
+
+    for (const QModelIndex& index : selectedIndexes) {
+        const QString path = stagingModel->data(index, Qt::ToolTipRole).toString();
+        if (!path.isEmpty()) {
+            pathsToRemove.insert(path);
         }
     }
 
-    for (const auto& filePath : uniquePathsToRemove) {
-        stagingModel->removePath(filePath);
+    for (const QString& path : pathsToRemove) {
+        stagingModel->removePath(path);
     }
 }
 

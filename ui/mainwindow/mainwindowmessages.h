@@ -7,6 +7,10 @@
 // General informational messages
 namespace InfoMessages {
 inline constexpr auto k_SELECT_BACKUP_DESTINATION_TITLE = "Select Backup Destination";
+inline const QString k_DELETE_ALL_SUCCESS_TITLE = QStringLiteral("Deletion Complete");
+inline const QString k_DELETE_ALL_SUCCESS_MESSAGE =
+    QStringLiteral("All contents in the backup location have been successfully deleted.");
+inline const QString k_NOTIFICATION_POPUP_TITLE = QStringLiteral("Notification");
 }
 
 // Warning prompts and confirmations
@@ -18,6 +22,14 @@ inline constexpr auto k_WARNING_OPERATION_STILL_RUNNING  =
     "A background operation is currently running.\nPlease wait for it to complete before proceeding.";
 inline constexpr auto k_WARNING_BACKUP_OPERATION_RUNNING =
     "A backup operation is currently in progress.\nPlease wait until it finishes before starting a new one.";
+
+inline const QString k_DELETE_ALL_BACKUPS_WARNING_TITLE = QStringLiteral("Confirm Deletion");
+inline const QString k_DELETE_ALL_BACKUPS_WARNING_MESSAGE =
+    QStringLiteral("⚠️ WARNING: This will permanently delete all files and folders inside:\n\n"
+                   "%1\n\n"
+                   "This action cannot be undone. All backups and data in this location "
+                   "will be lost forever.\n\n"
+                   "Are you sure you want to proceed?");
 }
 
 // Error messages related to backup operations
@@ -76,6 +88,29 @@ inline constexpr auto k_ERROR_MODEL_TYPE_INVALID                 =
     "An unexpected error occurred while accessing the backup list.\nPlease try again.";
 inline constexpr auto k_ERROR_SELECTED_PATH_INVALID              =
     "The selected backup path could not be determined.\nPlease try again.";
+
+inline const QString k_BACKUP_LOCATION_INVALID_TITLE = QStringLiteral("Delete All Backups");
+inline const QString k_BACKUP_LOCATION_INVALID_MESSAGE =
+    QStringLiteral("The backup location is invalid or not set.");
+inline const QString k_DELETE_ALL_FAILED_TITLE = QStringLiteral("Deletion Failed");
+inline const QString k_DELETE_ALL_FAILED_MESSAGE =
+    QStringLiteral("Some files or folders could not be deleted. Please check permissions or try again.");
+}
+
+// Notification and backup integrity-related messages
+namespace NotificationMessages {
+inline const QString k_ORPHANED_LOGS_MESSAGE =
+    QStringLiteral("Some backup logs exist without their corresponding backup folders. "
+                   "They may have been deleted outside the application.");
+
+inline const QString k_MISSING_LOGS_MESSAGE =
+    QStringLiteral("Some backup folders exist without corresponding log files. "
+                   "Log metadata may be missing or was deleted. This may affect size "
+                   "and count reporting.");
+
+inline const QString k_BROKEN_STRUCTURE_MESSAGE =
+    QStringLiteral("The backup structure is partially broken. Please review and "
+                   "consider cleaning or restoring backups.");
 }
 
 // About window labels and content

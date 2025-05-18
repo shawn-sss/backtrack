@@ -7,7 +7,7 @@
 namespace NotificationsDialogStyling {
 
 // Style for QListWidget items
-inline constexpr auto LIST_WIDGET_STYLE = R"(
+inline constexpr auto kListWidgetStyle = R"(
     QListWidget::item {
         margin: 0px;
         padding: 2px 6px;

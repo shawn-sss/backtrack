@@ -1,4 +1,3 @@
-// Project includes
 #include "InstallServiceManager.h"
 #include "InstallServiceConstants.h"
 #include "../../../../core/shared/jsonmanager.h"
@@ -8,7 +7,7 @@
 #include <QDir>
 #include <QStandardPaths>
 
-// Constructor sets metadata file path
+// Loads and manages install service metadata
 InstallServiceManager::InstallServiceManager(const QString& metadataPath)
     : metadataFilePath(metadataPath) {}
 
@@ -20,12 +19,12 @@ void InstallServiceManager::load() {
     }
 }
 
-// Saves metadata to file
+// Saves current metadata to file
 void InstallServiceManager::save() {
     JsonManager::saveJsonFile(metadataFilePath, installMetadata);
 }
 
-// Initializes default install metadata
+// Initializes metadata with default install values
 void InstallServiceManager::initializeDefaults() {
     const QString appDataPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
     const QString fullPath = appDataPath + "/" +
@@ -37,20 +36,20 @@ void InstallServiceManager::initializeDefaults() {
     installData[InstallMetadataKeys::kInstallTimeUtc] = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
 
     QJsonObject metadata;
-    metadata[InstallMetadataKeys::kAppAuthor] = InstallMetadataSettings::kAppAuthor;
     metadata[InstallMetadataKeys::kAppName] = InstallMetadataSettings::kAppName;
+    metadata[InstallMetadataKeys::kAppAuthor] = InstallMetadataSettings::kAppAuthor;
     metadata[InstallMetadataKeys::kAppVersion] = InstallMetadataSettings::kAppVersion;
     metadata[InstallMetadataKeys::kInstallSection] = installData;
 
     JsonManager::saveJsonFile(fullPath, metadata);
 }
 
-// Returns stored metadata object
+// Returns the current metadata
 const QJsonObject& InstallServiceManager::getMetadata() const {
     return installMetadata;
 }
 
-// Updates metadata with new object
+// Sets the metadata to a new object
 void InstallServiceManager::setMetadata(const QJsonObject& metadata) {
     installMetadata = metadata;
 }

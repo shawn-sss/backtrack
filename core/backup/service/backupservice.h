@@ -2,8 +2,10 @@
 #define BACKUPSERVICE_H
 
 // Qt includes
-#include <QJsonObject>
+#include <QFileInfoList>
 #include <QJsonArray>
+#include <QJsonObject>
+#include <QObject>
 #include <QSet>
 #include <QString>
 #include <QStringList>
@@ -28,35 +30,39 @@ struct BackupScanResult {
 };
 
 // Handles creation, scanning, and summary of backups
-class BackupService {
+class BackupService : public QObject {
+    Q_OBJECT
+
 public:
-    explicit BackupService(const QString& backupRoot);
+    explicit BackupService(const QString& backupRoot, QObject* parent = nullptr);
     Q_DISABLE_COPY(BackupService)
 
-    // Backup root management
+    // Configuration
     void setBackupRoot(const QString& path);
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
 
-    // Backup validation
+    // Backup structure and state
     BackupScanResult scanForBackupStatus() const;
 
-    // Metadata retrieval
+    // Backup metadata access
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
-    // Backup statistics
+    // Aggregate statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
+signals:
+    void backupSummaryWritten(const QString& logFilePath);
+
 private:
-    // Metadata construction
+    // Helpers
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
-
-    // Size calculation
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
+    QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;
 
-    // Root path
+    // Internal state
     QString backupRootPath;
 };
 

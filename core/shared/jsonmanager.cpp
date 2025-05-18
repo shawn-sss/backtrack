@@ -8,14 +8,14 @@
 #include <QJsonDocument>
 #include <QSaveFile>
 
-// Loads JSON into a QJsonObject from a file
+// Load JSON content from a file into a QJsonObject
 bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
         return false;
     }
 
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    const QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
     if (!doc.isObject()) {
         return false;
     }
@@ -24,22 +24,25 @@ bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     return true;
 }
 
-// Saves a QJsonObject to file as JSON
+
+// Save a QJsonObject to a file as JSON
 bool JsonManager::saveJsonFile(const QString& path, const QJsonObject& data) {
     return saveJsonFile(path, QJsonDocument(data));
 }
 
-// Loads JSON document (object or array) from file
+
+// Load JSON content from a file and return the QJsonDocument
 QJsonDocument JsonManager::loadJsonFile(const QString& path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        return QJsonDocument();
+        return {};
     }
 
     return QJsonDocument::fromJson(file.readAll());
 }
 
-// Saves a QJsonDocument to file with formatting
+
+// Save a QJsonDocument to a file with indentation
 bool JsonManager::saveJsonFile(const QString& path, const QJsonDocument& doc) {
     QDir().mkpath(QFileInfo(path).absolutePath());
 
@@ -48,7 +51,8 @@ bool JsonManager::saveJsonFile(const QString& path, const QJsonDocument& doc) {
         return false;
     }
 
-    if (file.write(doc.toJson(QJsonDocument::Indented)) == -1) {
+    const QByteArray json = doc.toJson(QJsonDocument::Indented);
+    if (file.write(json) == -1) {
         return false;
     }
 

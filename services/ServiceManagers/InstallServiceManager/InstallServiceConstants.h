@@ -7,11 +7,11 @@
 
 // References to application metadata from app settings
 namespace InstallMetadataSettings {
-constexpr auto& kAppName        = App::Info::k_NAME;
+constexpr auto& kAppName        = App::Info::k_APP_NAME;
 constexpr auto& kAppAuthor      = App::Info::k_AUTHOR_NAME;
-constexpr auto& kAppVersion     = App::Info::k_VERSION;
-constexpr auto& kMetadataFolder = App::ConfigFiles::k_APPDATA_SETUP_FOLDER;
-constexpr auto& kMetadataFile   = App::ConfigFiles::k_APPDATA_SETUP_INFO_FILE;
+constexpr auto& kAppVersion     = App::Info::k_APP_VERSION;
+constexpr auto& kMetadataFolder = App::Items::k_APPDATA_SETUP_FOLDER;
+constexpr auto& kMetadataFile   = App::Items::k_APPDATA_SETUP_INFO_FILE;
 }
 
 // Keys used within metadata JSON structure

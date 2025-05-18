@@ -7,8 +7,9 @@
 
 namespace Shared::Formatting {
 
+// Format byte size into human-readable form
 QString formatSize(qint64 size) {
-    constexpr std::array units = {
+    constexpr std::array<const char*, 4> units = {
         Units::Size::k_SIZE_UNIT_BYTES,
         Units::Size::k_SIZE_UNIT_KILOBYTES,
         Units::Size::k_SIZE_UNIT_MEGABYTES,
@@ -16,45 +17,48 @@ QString formatSize(qint64 size) {
     };
 
     int unitIndex = 0;
-    double sizeInUnits = size;
+    double value = static_cast<double>(size);
 
-    while (sizeInUnits >= Units::Size::k_SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
-        sizeInUnits /= Units::Size::k_SIZE_CONVERSION_FACTOR;
+    while (value >= Units::Size::k_SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+        value /= Units::Size::k_SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
 
-    return QString::number(sizeInUnits, 'f', 2) + " " + units[unitIndex];
+    return QString::number(value, 'f', 2) % " " % units[unitIndex];
 }
 
+// Format duration from milliseconds to a human-readable unit
 QString formatDuration(qint64 milliseconds) {
-    constexpr qint64 MS_IN_SECOND = 1000;
-    constexpr qint64 SECONDS_IN_MINUTE = 60;
-    constexpr qint64 MINUTES_IN_HOUR = 60;
-    constexpr qint64 HOURS_IN_DAY = 24;
+    constexpr qint64 MS_PER_SEC = 1000;
+    constexpr qint64 SEC_PER_MIN = 60;
+    constexpr qint64 MIN_PER_HOUR = 60;
+    constexpr qint64 HOUR_PER_DAY = 24;
 
-    if (milliseconds < MS_IN_SECOND)
-        return QString::number(milliseconds) + Units::Duration::k_UNIT_MILLISECONDS;
+    if (milliseconds < MS_PER_SEC)
+        return QString::number(milliseconds) % Units::Duration::k_UNIT_MILLISECONDS;
 
-    qint64 seconds = milliseconds / MS_IN_SECOND;
-    if (seconds < SECONDS_IN_MINUTE)
-        return QString::number(seconds) + Units::Duration::k_UNIT_SECONDS;
+    const qint64 seconds = milliseconds / MS_PER_SEC;
+    if (seconds < SEC_PER_MIN)
+        return QString::number(seconds) % Units::Duration::k_UNIT_SECONDS;
 
-    qint64 minutes = seconds / SECONDS_IN_MINUTE;
-    if (minutes < MINUTES_IN_HOUR)
-        return QString::number(minutes) + Units::Duration::k_UNIT_MINUTES;
+    const qint64 minutes = seconds / SEC_PER_MIN;
+    if (minutes < MIN_PER_HOUR)
+        return QString::number(minutes) % Units::Duration::k_UNIT_MINUTES;
 
-    qint64 hours = minutes / MINUTES_IN_HOUR;
-    if (hours < HOURS_IN_DAY)
-        return QString::number(hours) + Units::Duration::k_UNIT_HOURS;
+    const qint64 hours = minutes / MIN_PER_HOUR;
+    if (hours < HOUR_PER_DAY)
+        return QString::number(hours) % Units::Duration::k_UNIT_HOURS;
 
-    qint64 days = hours / HOURS_IN_DAY;
-    return QString::number(days) + Units::Duration::k_UNIT_DAYS;
+    const qint64 days = hours / HOUR_PER_DAY;
+    return QString::number(days) % Units::Duration::k_UNIT_DAYS;
 }
 
+// Format a timestamp using a custom string format
 QString formatTimestamp(const QDateTime& datetime, const QString& format) {
     return datetime.toString(format);
 }
 
+// Format a timestamp using a Qt::DateFormat enum
 QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }

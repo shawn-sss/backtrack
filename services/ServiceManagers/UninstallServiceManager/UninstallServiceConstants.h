@@ -1,26 +1,42 @@
 #ifndef UNINSTALLSERVICECONSTANTS_H
 #define UNINSTALLSERVICECONSTANTS_H
 
+// Qt includes
 #include <QString>
 #include <QObject>
 
+// Text used in uninstall confirmation dialogs
 namespace UninstallServiceConstants {
-// Dialog Titles
-const QString TITLE_RESET_APP_INSTALLATION = QObject::tr("Reset App Installation");
-const QString TITLE_CONFIRM_APP_RESET = QObject::tr("Confirm App Reset");
-const QString TITLE_APP_RESET = QObject::tr("App Reset");
-const QString TITLE_RESET_FAILED = QObject::tr("Reset Failed");
 
-// Dialog Messages
-const QString MSG_INVALID_DIR = QObject::tr("The application install directory is invalid or does not exist.");
-const QString MSG_CONFIRM_RESET = QObject::tr(
-    "⚠️ This will completely reset the app by deleting the following directory:\n\n"
-    "%1\n\n"
-    "This will erase all user settings and metadata stored locally.\n"
-    "This only targets the folder containing this applications runtime data.\n\n"
-    "Are you sure you want to proceed?");
-const QString MSG_SUCCESS = QObject::tr("The application data has been successfully deleted. Please restart the app.");
-const QString MSG_FAILURE = QObject::tr("Failed to delete the application install directory. Please check permissions.");
+// Dialog titles
+inline QString titleResetAppInstallation() { return QObject::tr("Reset App Installation"); }
+inline QString titleConfirmAppReset()      { return QObject::tr("Confirm App Reset"); }
+inline QString titleAppReset()             { return QObject::tr("App Reset"); }
+inline QString titleResetFailed()          { return QObject::tr("Reset Failed"); }
+
+// Dialog messages
+inline QString msgInvalidDir() {
+    return QObject::tr("The application install directory is invalid or does not exist.");
 }
+
+inline QString msgConfirmReset(const QString& path) {
+    return QObject::tr(
+               "⚠️ This will completely reset the app by deleting the following directory:\n\n"
+               "%1\n\n"
+               "This will erase all user settings and metadata stored locally.\n"
+               "This only targets the folder containing this application's runtime data.\n\n"
+               "Are you sure you want to proceed?"
+               ).arg(path);
+}
+
+inline QString msgSuccess() {
+    return QObject::tr("The application data has been successfully deleted. Please restart the app.");
+}
+
+inline QString msgFailure() {
+    return QObject::tr("Failed to delete the application install directory. Please check permissions.");
+}
+
+} // namespace UninstallServiceConstants
 
 #endif // UNINSTALLSERVICECONSTANTS_H
