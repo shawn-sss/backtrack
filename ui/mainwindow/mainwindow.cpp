@@ -160,14 +160,6 @@ void MainWindow::initializeUI() {
         ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
-    QMessageBox preloadBox(this);
-    preloadBox.setWindowTitle(" ");
-    preloadBox.setText(" ");
-    preloadBox.setStandardButtons(QMessageBox::NoButton);
-    preloadBox.setAttribute(Qt::WA_DontShowOnScreen);
-    preloadBox.show();
-    preloadBox.hide();
-
     const QString appConfigDir = PathServiceManager::appConfigFolderPath();
     const QString backupDir = PathServiceManager::backupDataRootDir();
 
