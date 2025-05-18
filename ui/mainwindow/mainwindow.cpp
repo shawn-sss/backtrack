@@ -594,6 +594,8 @@ void MainWindow::onChangeBackupDestinationClicked() {
     }
 
     backupService->setBackupRoot(selectedDir);
+    ServiceDirector::getInstance().setBackupDirectory(selectedDir);
+    PathServiceManager::setBackupDirectory(selectedDir);
 
     QModelIndex sourceRootIndex = destinationModel->setRootPath(selectedDir);
     QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
@@ -611,11 +613,13 @@ void MainWindow::onChangeBackupDestinationClicked() {
 
 // Notification handling
 
+// Handles the click event on the notification button.
 void MainWindow::onNotificationButtonClicked() {
     showNotificationDialog();
     feedbackNotificationButton();
 }
 
+// Sets up the notification button with text, connections, and badge.
 void MainWindow::setupNotificationButton() {
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
 
@@ -639,6 +643,7 @@ void MainWindow::setupNotificationButton() {
     updateNotificationButtonState();
 }
 
+// Updates the visibility of the notification badge based on unread notifications.
 void MainWindow::updateNotificationButtonState() {
     const bool hasUnread =
         !NotificationServiceManager::instance().unreadNotifications().isEmpty();
@@ -647,6 +652,7 @@ void MainWindow::updateNotificationButtonState() {
     }
 }
 
+// Displays the next notification in the queue, or finishes the queue if empty.
 void MainWindow::showNextNotification() {
     if (notificationQueue.isEmpty()) {
         finishNotificationQueue();
@@ -658,6 +664,7 @@ void MainWindow::showNextNotification() {
     displayNotificationPopup(notif);
 }
 
+// Shows a popup dialog for a single notification.
 void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
     const QString message =
         QString("[%1]\n%2")
@@ -673,12 +680,14 @@ void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif
     box->show();
 }
 
+// Marks all notifications as read and updates badge state.
 void MainWindow::finishNotificationQueue() {
     isNotificationPopupVisible = false;
     NotificationServiceManager::instance().markAllAsRead();
     updateNotificationButtonState();
 }
 
+// Opens the full notification dialog with a list of all notifications.
 void MainWindow::showNotificationDialog() {
     const QList<NotificationServiceStruct> notifications =
         NotificationServiceManager::instance().allNotifications();
@@ -690,6 +699,7 @@ void MainWindow::showNotificationDialog() {
     updateNotificationButtonState();
 }
 
+// Temporarily changes button text to show feedback after interaction.
 void MainWindow::feedbackNotificationButton() {
     triggerButtonFeedback(ui->NotificationButton,
                           Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
@@ -699,6 +709,7 @@ void MainWindow::feedbackNotificationButton() {
 
 // Backup Feedback
 
+// Temporarily changes a button’s text and state for feedback purposes.
 void MainWindow::triggerButtonFeedback(QPushButton *button,
                                        const QString &feedbackText,
                                        const QString &originalText,
@@ -718,10 +729,12 @@ void MainWindow::triggerButtonFeedback(QPushButton *button,
     });
 }
 
+// Re-enables the Create Backup button after cooldown period.
 void MainWindow::onCooldownFinished() {
     ui->CreateBackupButton->setEnabled(true);
 }
 
+// Handles actions to take when a backup completes successfully.
 void MainWindow::onBackupCompleted() {
     ui->TransferProgressText->setText(
         UI::Progress::k_PROGRESS_BAR_COMPLETION_MESSAGE);
@@ -749,6 +762,7 @@ void MainWindow::onBackupCompleted() {
     refreshBackupStatus();
 }
 
+// Handles UI state and messaging when a backup fails.
 void MainWindow::onBackupError(const QString &error) {
     Q_UNUSED(error);
     ui->TransferProgressText->setText(
@@ -769,6 +783,7 @@ void MainWindow::onBackupError(const QString &error) {
 
 // Backup Status & Labels
 
+// Refreshes the backup status and labels based on current data.
 void MainWindow::refreshBackupStatus() {
     if (backupController->isBackupInProgress()) {
         updateBackupStatusLabel(
@@ -786,6 +801,7 @@ void MainWindow::refreshBackupStatus() {
     }
 }
 
+// Updates all the UI labels related to backup metadata and structure.
 void MainWindow::updateBackupLabels(const BackupScanResult &scan) {
     updateBackupLocationLabel(backupService->getBackupRoot());
     updateBackupTotalCountLabel();
@@ -803,6 +819,7 @@ void MainWindow::updateBackupLabels(const BackupScanResult &scan) {
     updateBackupStatusLabel(statusColor);
 }
 
+// Adds notifications for any orphaned or broken backup structure issues.
 void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) {
     if (!scan.isBroken() || orphanLogNotified)
         return;
@@ -825,6 +842,7 @@ void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) 
     orphanLogNotified = true;
 }
 
+// Updates labels showing information about the last backup.
 void MainWindow::updateLastBackupInfo() {
     const QJsonObject metadata = backupService->getLastBackupMetadata();
 
@@ -861,6 +879,7 @@ void MainWindow::updateLastBackupInfo() {
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::k_SIZE + sizeStr);
 }
 
+// Returns an emoji and label string based on the backup status color.
 QPair<QString, QString>
 MainWindow::statusVisualsForColor(const QString &color) const {
     if (color == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND) {
@@ -873,6 +892,7 @@ MainWindow::statusVisualsForColor(const QString &color) const {
     }
 }
 
+// Updates the backup status label with appropriate emoji and text.
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     const auto [emoji, text] = statusVisualsForColor(statusColor);
 
@@ -886,22 +906,26 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     }
 }
 
+// Updates the label showing the backup directory location.
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     ui->BackupLocationLabel->setText(Labels::Backup::k_LOCATION + location);
 }
 
+// Updates the label showing the total number of backups.
 void MainWindow::updateBackupTotalCountLabel() {
     ui->BackupTotalCountLabel->setText(
         Labels::Backup::k_TOTAL_COUNT +
         QString::number(backupService->getBackupCount()));
 }
 
+// Updates the label showing the total size of backups.
 void MainWindow::updateBackupTotalSizeLabel() {
     ui->BackupTotalSizeLabel->setText(
         Labels::Backup::k_TOTAL_SIZE +
         Shared::Formatting::formatSize(backupService->getTotalBackupSize()));
 }
 
+// Updates the label indicating the write status of the backup location.
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
     const QString status =
@@ -915,6 +939,7 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 
 // Application Status
 
+// Updates the application files integrity status in the UI.
 void MainWindow::updateApplicationStatusLabel() {
     const QString status = checkInstallIntegrityStatus();
     QString emoji, label;
@@ -935,6 +960,7 @@ void MainWindow::updateApplicationStatusLabel() {
     ui->ApplicationStatusLabel->setTextFormat(Qt::RichText);
 }
 
+// Checks for the presence of expected app configuration files.
 QString MainWindow::checkInstallIntegrityStatus() {
     const QString configDir = PathServiceManager::appConfigFolderPath();
 
