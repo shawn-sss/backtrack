@@ -64,7 +64,7 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     const bool hasBackupInit = QFile::exists(backupInitPath);
     const bool hasLogsFolder = QDir(logsFolderPath).exists();
 
-    result.structureExists = hasAppInit || hasBackupInit || hasLogsFolder;
+    result.structureExists = hasBackupInit && hasLogsFolder;
 
     if (hasAppInit && !hasBackupInit && !hasLogsFolder) {
         result.validStructure = true;

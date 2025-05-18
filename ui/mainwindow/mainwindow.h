@@ -118,6 +118,7 @@ private:
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
 private slots:
+private slots:
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
@@ -134,6 +135,7 @@ private slots:
 
     void onNotificationButtonClicked();
     void onUninstallClicked();
+
 
 private:
     Ui::MainWindow* ui = nullptr;

@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
     destinationModel(new QFileSystemModel(this)),
     stagingModel(new StagingModel(this)),
     fileWatcher(new FileWatcher(this)),
-    backupService(new BackupService(ServiceDirector::getInstance().getBackupDirectory())),
+    backupService(new BackupService("")),
     backupController(new BackupController(backupService, this)),
     toolBar(new QToolBar(this)),
     toolbarManager(new ToolbarServiceManager(this)),
@@ -65,12 +65,23 @@ MainWindow::MainWindow(QWidget *parent)
     configureWindow();
     initializeUI();
     setupLayout();
+
     updateApplicationStatusLabel();
+
+
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
+    PathServiceManager::setBackupDirectory(savedBackupDir);
+
+
+    backupService = new BackupService(savedBackupDir);
+    backupController = new BackupController(backupService, this);
+
 
     addToolBar(Qt::LeftToolBarArea, toolBar);
     toolbarManager->initialize(toolBar);
 
     applyButtonCursors();
+
     initializeBackupSystem();
 
     refreshBackupStatus();
@@ -97,6 +108,7 @@ MainWindow::MainWindow(QWidget *parent)
         ui->CreateBackupButton->setEnabled(true);
     });
 }
+
 
 // Destroys the main window
 MainWindow::~MainWindow() {
@@ -307,15 +319,25 @@ void MainWindow::startWatchingBackupDirectory(const QString &path) {
 
 // Update the file watcher with the current destination path
 void MainWindow::updateFileWatcher() {
-    const QString watchPath = destinationModel->rootPath();
-    fileWatcher->startWatchingMultiple(QStringList() << watchPath);
+    const QStringList watchedRoots = getWatchedRoots();
+    fileWatcher->startWatchingMultiple(watchedRoots);
 }
 
 // Handle file change event
 void MainWindow::onFileChanged(const QString &path) {
-    Q_UNUSED(path);
-    refreshBackupStatus();
+    fileWatcher->addPath(path);
+
+    const QString appConfigDir = PathServiceManager::appConfigFolderPath();
+    const QString backupDir = PathServiceManager::backupDataRootDir();
+
+    if (path.startsWith(appConfigDir)) {
+        updateApplicationStatusLabel();
+    }
+    if (path.startsWith(backupDir)) {
+        refreshBackupStatus();
+    }
 }
+
 
 // Handle backup directory change event
 void MainWindow::onBackupDirectoryChanged() {
@@ -348,23 +370,33 @@ void MainWindow::resetFileWatcherAndDestinationView() {
 
 // Initialize the backup system
 void MainWindow::initializeBackupSystem() {
-    const QString backupDirectory = ServiceDirector::getInstance().getBackupDirectory();
-    if (!FileOperations::createDirectory(backupDirectory)) {
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
+
+    PathServiceManager::setBackupDirectory(savedBackupDir);
+    backupService->setBackupRoot(savedBackupDir);
+
+    if (!FileOperations::createDirectory(savedBackupDir)) {
         QMessageBox::critical(
             this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
             ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
     }
 
     setupDestinationView();
+
+    QModelIndex sourceRootIndex = destinationModel->setRootPath(savedBackupDir);
+    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
+    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+
     setupSourceTreeView();
     setupBackupStagingTreeView();
     refreshBackupStatus();
 
-    if (!fileWatcher->watchedDirectories().contains(backupDirectory)) {
-        startWatchingBackupDirectory(backupDirectory);
+    if (!fileWatcher->watchedDirectories().contains(savedBackupDir)) {
+        startWatchingBackupDirectory(savedBackupDir);
         updateFileWatcher();
     }
 }
+
 
 // Set up source tree view
 void MainWindow::setupSourceTreeView() {
@@ -531,7 +563,8 @@ void MainWindow::onDeleteAllBackupsClicked() {
         WarningMessages::k_DELETE_ALL_BACKUPS_WARNING_MESSAGE.arg(backupLocation),
         QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
-    if (confirm != QMessageBox::Yes) return;
+    if (confirm != QMessageBox::Yes)
+        return;
 
     fileWatcher->removeAllPaths();
 
@@ -539,15 +572,25 @@ void MainWindow::onDeleteAllBackupsClicked() {
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
 
     bool success = true;
+
     for (const QFileInfo &entry : entries) {
+        const QString entryPath = entry.absoluteFilePath();
         if (entry.isDir()) {
-            if (!QDir(entry.absoluteFilePath()).removeRecursively()) {
+            if (!QDir(entryPath).removeRecursively()) {
                 success = false;
             }
         } else {
-            if (!QFile::remove(entry.absoluteFilePath())) {
+            if (!QFile::remove(entryPath)) {
                 success = false;
             }
+        }
+    }
+
+    const QString configFolderName = App::Items::k_BACKUP_SETUP_CONFIG_FOLDER;
+    const QString configFolderPath = QDir(backupLocation).filePath(configFolderName);
+    if (QDir(configFolderPath).exists()) {
+        if (!QDir(configFolderPath).removeRecursively()) {
+            success = false;
         }
     }
 
@@ -560,8 +603,7 @@ void MainWindow::onDeleteAllBackupsClicked() {
     }
 
     resetFileWatcherAndDestinationView();
-    backupService->initializeBackupRootIfNeeded();
-    QTimer::singleShot(100, this, [this]() { refreshBackupStatus(); });
+    refreshBackupStatus();
 }
 
 // Display the warning and Uninstall App
@@ -941,6 +983,7 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 
 // Updates the application files integrity status in the UI.
 void MainWindow::updateApplicationStatusLabel() {
+
     const QString status = checkInstallIntegrityStatus();
     QString emoji, label;
 
@@ -959,6 +1002,7 @@ void MainWindow::updateApplicationStatusLabel() {
         tr("<b>Application Files Status:</b> %1 %2").arg(emoji, label));
     ui->ApplicationStatusLabel->setTextFormat(Qt::RichText);
 }
+
 
 // Checks for the presence of expected app configuration files.
 QString MainWindow::checkInstallIntegrityStatus() {

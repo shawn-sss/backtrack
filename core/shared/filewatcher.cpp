@@ -50,14 +50,18 @@ void FileWatcher::addPath(const QString& path) {
 // Add multiple paths
 void FileWatcher::addPaths(const QStringList& paths) {
     QSet<QString> currentWatched;
-    for (const QString& dir : watcher->directories())
-        currentWatched.insert(dir);
-    for (const QString& file : watcher->files())
-        currentWatched.insert(file);
+
+    const QStringList& dirs = watcher->directories();
+    for (int i = 0; i < dirs.size(); ++i)
+        currentWatched.insert(dirs.at(i));
+
+    const QStringList& files = watcher->files();
+    for (int i = 0; i < files.size(); ++i)
+        currentWatched.insert(files.at(i));
 
     QStringList newPaths;
-    for (const QString& path : paths) {
-        QString normalized = QDir::fromNativeSeparators(path.trimmed());
+    for (int i = 0; i < paths.size(); ++i) {
+        QString normalized = QDir::fromNativeSeparators(paths.at(i).trimmed());
         if (!normalized.isEmpty() && !currentWatched.contains(normalized)) {
             newPaths.append(normalized);
         }
@@ -106,25 +110,28 @@ void FileWatcher::startWatchingMultiple(const QStringList& roots) {
     removeAllPaths();
 
     QSet<QString> pathsToWatch;
+
+    const QString appConfigFolder = PathServiceManager::appConfigFolderPath();
     const QString backupRoot = PathServiceManager::backupSetupFolderPath();
     const QString backupConfigFolder = PathServiceManager::backupConfigFolderPath();
     const QString backupInit = PathServiceManager::backupInitMetadataFilePath();
     const QString logsFolder = PathServiceManager::backupLogsFolderPath();
 
-    for (const QString& root : sortedRoots) {
+    for (int i = 0; i < sortedRoots.size(); ++i) {
+        const QString& root = sortedRoots.at(i);
         const QString normalizedRoot = QDir::cleanPath(root);
         if (normalizedRoot.isEmpty()) continue;
 
         pathsToWatch.insert(normalizedRoot);
 
-        if (normalizedRoot.endsWith("app_config")) {
+        if (normalizedRoot == appConfigFolder) {
             const QStringList appFiles = {
-                normalizedRoot + "/app_init.json",
-                normalizedRoot + "/app_notifications.json",
-                normalizedRoot + "/user_settings.json"
+                QDir::cleanPath(appConfigFolder + "/app_init.json"),
+                QDir::cleanPath(appConfigFolder + "/app_notifications.json"),
+                QDir::cleanPath(appConfigFolder + "/user_settings.json")
             };
-            for (const QString& file : appFiles) {
-                pathsToWatch.insert(QDir::cleanPath(file));
+            for (int j = 0; j < appFiles.size(); ++j) {
+                pathsToWatch.insert(appFiles.at(j));
             }
         }
 
