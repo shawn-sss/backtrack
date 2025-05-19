@@ -27,6 +27,11 @@ inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "➕ Added!";
 inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "➖ Removed!";
 inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "🗑️ Deleted!";
 inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "📁 Changed!";
+
+inline constexpr auto k_READY_LABEL       = "Ready";
+inline constexpr auto k_WARNING_LABEL     = "Warning";
+inline constexpr auto k_NOT_INITIALIZED   = "Not Initialized";
+inline const QString k_STATUS_LABEL       = QStringLiteral("<b>Backup Location Status:</b> %1 %2");
 }
 
 // Last backup information labels
@@ -35,6 +40,7 @@ inline constexpr auto k_NAME      = "Last Backup Name: ";
 inline constexpr auto k_TIMESTAMP = "Last Backup Timestamp: ";
 inline constexpr auto k_DURATION  = "Last Backup Duration: ";
 inline constexpr auto k_SIZE      = "Last Backup Size: ";
+inline const QString k_NO_BACKUPS_MESSAGE = QStringLiteral("No backups yet. Create one to see details here.");
 }
 
 // Toolbar action labels
@@ -50,6 +56,21 @@ namespace Labels::DirectoryStatus {
 inline constexpr auto k_WRITABLE  = "Writable";
 inline constexpr auto k_READ_ONLY = "Read-Only";
 inline constexpr auto k_UNKNOWN   = "Unknown";
+}
+
+// Application status labels
+namespace Labels::ApplicationStatus {
+inline constexpr auto k_READY        = "Ready";
+inline constexpr auto k_WARNING      = "Warning";
+inline constexpr auto k_CORRUPT      = "Corrupted";
+inline const QString k_STATUS_LABEL = QStringLiteral("<b>Application Files Status:</b> %1 %2");
+}
+
+// Emoji symbols for status visuals
+namespace Labels::Emoji {
+inline constexpr auto k_GREEN  = "🟢";
+inline constexpr auto k_YELLOW = "🟡";
+inline constexpr auto k_RED    = "🔴";
 }
 
 #endif // MAINWINDOWLABELS_H

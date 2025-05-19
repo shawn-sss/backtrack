@@ -3,6 +3,7 @@
 
 // Qt includes
 #include <QString>
+#include <QList>
 
 // Application metadata
 namespace App::Info {
@@ -26,5 +27,14 @@ inline constexpr auto k_BACKUP_SETUP_CONFIG_LOGS_FOLDER = "logs";
 inline constexpr auto k_BACKUP_SETUP_CONFIG_INFO_FILE = "backup_init.json";
 inline const auto k_BACKUP_SETUP_CONFIG_LOGS_FILE = QStringLiteral("log.json");
 }
+
+namespace App::Files {
+inline const QStringList k_EXPECTED_CONFIG_FILES = {
+    "app_init.json",
+    "app_notifications.json",
+    "user_settings.json"
+};
+}
+
 
 #endif // APP_INFO_H

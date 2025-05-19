@@ -1,9 +1,9 @@
 // Project includes
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
 #include "mainwindowlabels.h"
 #include "mainwindowmessages.h"
 #include "mainwindowstyling.h"
-#include "ui_mainwindow.h"
 
 #include "../../../../constants/app_info.h"
 #include "../../../../constants/backup_config.h"
@@ -12,21 +12,23 @@
 #include "../../../../constants/system_constants.h"
 #include "../../../../constants/window_config.h"
 
-#include "../../core/backup/controller/backupcontroller.h"
-#include "../../core/backup/models/destinationproxymodel.h"
-#include "../../core/backup/models/stagingmodel.h"
-#include "../../core/backup/service/backupservice.h"
-#include "../../core/shared/fileoperations.h"
 #include "../../core/shared/filewatcher.h"
-#include "../../core/shared/formatutils.h"
 #include "../../core/shared/stagingutils.h"
+#include "../../core/shared/fileoperations.h"
+#include "../../core/shared/formatutils.h"
 #include "../../core/shared/uiutils.h"
 
+#include "../../core/backup/models/stagingmodel.h"
+#include "../../core/backup/models/destinationproxymodel.h"
+#include "../../core/backup/service/backupservice.h"
+#include "../../core/backup/controller/backupcontroller.h"
+
 #include "../../services/ServiceDirector/ServiceDirector.h"
+#include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
-#include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
-#include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 
 // Qt includes
@@ -65,25 +67,19 @@ MainWindow::MainWindow(QWidget *parent)
     configureWindow();
     initializeUI();
     setupLayout();
-
     updateApplicationStatusLabel();
-
 
     const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
     PathServiceManager::setBackupDirectory(savedBackupDir);
 
-
     backupService = new BackupService(savedBackupDir);
     backupController = new BackupController(backupService, this);
-
 
     addToolBar(Qt::LeftToolBarArea, toolBar);
     toolbarManager->initialize(toolBar);
 
     applyButtonCursors();
-
     initializeBackupSystem();
-
     refreshBackupStatus();
     setupConnections();
     setupNotificationButton();
@@ -108,7 +104,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->CreateBackupButton->setEnabled(true);
     });
 }
-
 
 // Destroys the main window
 MainWindow::~MainWindow() {
@@ -214,14 +209,14 @@ void MainWindow::setupLayout() {
 // Set pointing hand cursors and tooltips for all main window buttons
 void MainWindow::applyButtonCursors() {
     const QList<QPair<QPushButton *, QString>> buttons = {
-        {ui->AddToBackupButton, "Add selected items to the backup staging area"},
-        {ui->RemoveFromBackupButton, "Remove selected items from the backup staging area"},
-        {ui->CreateBackupButton, "Start the backup process"},
-        {ui->ChangeBackupDestinationButton, "Change the destination folder for backups"},
-        {ui->DeleteBackupButton, "Delete the selected backup from the destination view"},
-        {ui->ResetDestinationButton, "Delete ALL contents from the backup destination"},
-        {ui->NotificationButton, "View backup notifications"},
-        {ui->UninstallButton, "Uninstall the application and delete all local data"}
+        {ui->AddToBackupButton, MainWindowStyling::Styles::ToolTips::k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton, MainWindowStyling::Styles::ToolTips::k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
+        {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
+        {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
+        {ui->ResetDestinationButton, MainWindowStyling::Styles::ToolTips::k_RESET_DESTINATION},
+        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
+        {ui->UninstallButton, MainWindowStyling::Styles::ToolTips::k_UNINSTALL}
     };
 
     for (const auto &[button, tooltip] : buttons) {
@@ -330,7 +325,6 @@ void MainWindow::onFileChanged(const QString &path) {
     }
 }
 
-
 // Handle backup directory change event
 void MainWindow::onBackupDirectoryChanged() {
     updateFileWatcher();
@@ -388,7 +382,6 @@ void MainWindow::initializeBackupSystem() {
         updateFileWatcher();
     }
 }
-
 
 // Set up source tree view
 void MainWindow::setupSourceTreeView() {
@@ -702,7 +695,7 @@ void MainWindow::showNextNotification() {
 void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
     const QString message =
         QString("[%1]\n%2")
-            .arg(notif.timestamp.toLocalTime().toString("yyyy-MM-dd HH:mm:ss"),
+            .arg(notif.timestamp.toLocalTime().toString(Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT),
                  notif.message);
 
     QMessageBox *box = new QMessageBox(this);
@@ -881,8 +874,7 @@ void MainWindow::updateLastBackupInfo() {
     const QJsonObject metadata = backupService->getLastBackupMetadata();
 
     if (metadata.isEmpty()) {
-        ui->LastBackupNameLabel->setText(
-            tr("No backups yet. Create one to see details here."));
+        ui->LastBackupNameLabel->setText(Labels::LastBackup::k_NO_BACKUPS_MESSAGE);
         ui->LastBackupTimestampLabel->clear();
         ui->LastBackupDurationLabel->clear();
         ui->LastBackupSizeLabel->clear();
@@ -914,15 +906,13 @@ void MainWindow::updateLastBackupInfo() {
 }
 
 // Returns an emoji and label string based on the backup status color.
-QPair<QString, QString>
-MainWindow::statusVisualsForColor(const QString &color) const {
+QPair<QString, QString> MainWindow::statusVisualsForColor(const QString &color) const {
     if (color == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND) {
-        return {"🟢", tr("Ready")};
-    } else if (color ==
-               MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING) {
-        return {"🟡", tr("Warning")};
+        return {Labels::Emoji::k_GREEN, Labels::Backup::k_READY_LABEL};
+    } else if (color == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING) {
+        return {Labels::Emoji::k_YELLOW, Labels::Backup::k_WARNING_LABEL};
     } else {
-        return {"🔴", tr("Not Initialized")};
+        return {Labels::Emoji::k_RED, Labels::Backup::k_NOT_INITIALIZED};
     }
 }
 
@@ -930,12 +920,15 @@ MainWindow::statusVisualsForColor(const QString &color) const {
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     const auto [emoji, text] = statusVisualsForColor(statusColor);
 
-    ui->BackupStatusLabel->setText(
-        tr("<b>Backup Location Status:</b> %1 %2").arg(emoji, text));
+    ui->BackupStatusLabel->setText(Labels::Backup::k_STATUS_LABEL.arg(emoji, text));
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
 
-    for (QLabel *label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
-                          ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
+    for (QLabel *label : {
+             ui->LastBackupNameLabel,
+             ui->LastBackupTimestampLabel,
+             ui->LastBackupDurationLabel,
+             ui->LastBackupSizeLabel
+         }) {
         label->setVisible(true);
     }
 }
@@ -975,36 +968,31 @@ void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
 
 // Updates the application files integrity status in the UI.
 void MainWindow::updateApplicationStatusLabel() {
-
     const QString status = checkInstallIntegrityStatus();
-    QString emoji, label;
 
-    if (status == "ok") {
-        emoji = "🟢";
-        label = tr("Ready");
-    } else if (status == "partial") {
-        emoji = "🟡";
-        label = tr("Warning");
+    QString emoji, label;
+    if (status == InfoMessages::k_INSTALL_OK) {
+        emoji = Labels::Emoji::k_GREEN;
+        label = Labels::ApplicationStatus::k_READY;
+    } else if (status == InfoMessages::k_INSTALL_PARTIAL) {
+        emoji = Labels::Emoji::k_YELLOW;
+        label = Labels::ApplicationStatus::k_WARNING;
     } else {
-        emoji = "🔴";
-        label = tr("Corrupted");
+        emoji = Labels::Emoji::k_RED;
+        label = Labels::ApplicationStatus::k_CORRUPT;
     }
 
     ui->ApplicationStatusLabel->setText(
-        tr("<b>Application Files Status:</b> %1 %2").arg(emoji, label));
+        Labels::ApplicationStatus::k_STATUS_LABEL.arg(emoji, label));
     ui->ApplicationStatusLabel->setTextFormat(Qt::RichText);
 }
-
 
 // Checks for the presence of expected app configuration files.
 QString MainWindow::checkInstallIntegrityStatus() {
     const QString configDir = PathServiceManager::appConfigFolderPath();
 
-    const QStringList expectedFiles = {"app_init.json", "app_notifications.json",
-                                       "user_settings.json"};
-
     int missingCount = 0;
-    for (const QString &file : expectedFiles) {
+    for (const QString &file : App::Files::k_EXPECTED_CONFIG_FILES) {
         const QString fullPath = configDir + "/" + file;
         if (!QFile::exists(fullPath)) {
             ++missingCount;
@@ -1012,10 +1000,10 @@ QString MainWindow::checkInstallIntegrityStatus() {
     }
 
     if (missingCount == 0) {
-        return "ok";
+        return InfoMessages::k_INSTALL_OK;
     }
-    if (missingCount < expectedFiles.size()) {
-        return "partial";
+    if (missingCount < App::Files::k_EXPECTED_CONFIG_FILES.size()) {
+        return InfoMessages::k_INSTALL_PARTIAL;
     }
-    return "broken";
+    return InfoMessages::k_INSTALL_BROKEN;
 }

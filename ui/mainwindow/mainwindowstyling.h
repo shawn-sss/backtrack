@@ -6,7 +6,6 @@
 
 namespace MainWindowStyling {
 
-// Container styling for backup views
 namespace Styles {
 
 namespace BackupViewContainer {
@@ -65,7 +64,17 @@ inline constexpr auto STYLE = R"(
 )";
 }
 
-// Visual constants (colors and HTML templates)
+namespace ToolTips {
+inline constexpr auto k_ADD_TO_BACKUP      = "Add selected items to the backup staging area";
+inline constexpr auto k_REMOVE_FROM_BACKUP = "Remove selected items from the backup staging area";
+inline constexpr auto k_CREATE_BACKUP      = "Start the backup process";
+inline constexpr auto k_CHANGE_DESTINATION = "Change the destination folder for backups";
+inline constexpr auto k_DELETE_BACKUP      = "Delete the selected backup from the destination view";
+inline constexpr auto k_RESET_DESTINATION  = "Delete ALL contents from the backup destination";
+inline constexpr auto k_NOTIFICATIONS      = "View backup notifications";
+inline constexpr auto k_UNINSTALL          = "Uninstall the application and delete all local data";
+}
+
 namespace Visuals {
 inline constexpr auto COLOR_GREEN        = "green";
 inline constexpr auto COLOR_RED          = "red";

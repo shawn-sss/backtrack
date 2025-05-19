@@ -15,6 +15,7 @@ constexpr auto k_DRIVE_LABEL_SUFFIX = "Drive";
 namespace Backup::Timestamps {
 constexpr auto k_BACKUP_FOLDER_TIMESTAMP_FORMAT = "_yyyyMMdd_HHmmss";
 constexpr auto k_BACKUP_TIMESTAMP_DISPLAY_FORMAT = "MM/dd/yyyy hh:mm AP";
+constexpr auto k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT = "yyyy-MM-dd HH:mm:ss";
 }
 
 #endif // BACKUP_CONFIG_H
