@@ -7,24 +7,53 @@
 // Qt includes
 #include <QObject>
 
-// Manages application theme selection and application
-class ThemeServiceManager {
+#ifdef Q_OS_WIN
+#include <QAbstractNativeEventFilter>
+#endif
+
+// Forward declaration (Qt class)
+#ifdef Q_OS_WIN
+class ThemeChangeFilter;
+#endif
+
+class ThemeServiceManager : public QObject {
+    Q_OBJECT
+
 public:
-    // Detects whether the system is using dark mode
-    static bool isDarkTheme();
+    // Returns the singleton instance
+    static ThemeServiceManager& instance();
 
-    // Returns the currently applied application theme
-    static ThemeServiceConstants::AppTheme currentTheme();
+    // Returns true if the system is using dark mode
+    bool isDarkTheme() const;
 
-    // Gets and sets the user's theme preference
-    static ThemeServiceConstants::UserThemePreference getUserThemePreference();
-    static void setUserThemePreference(ThemeServiceConstants::UserThemePreference preference);
+    // Returns the currently applied theme
+    ThemeServiceConstants::AppTheme currentTheme() const;
 
-    // Applies the appropriate theme based on user/system preference
-    static void applyTheme();
+    // Returns the saved user theme preference
+    ThemeServiceConstants::UserThemePreference getUserThemePreference() const;
 
-    // Installs system theme change event filter (Windows only)
-    static void installEventFilter(QObject* target);
+    // Sets the user preference and applies it
+    void setUserThemePreference(ThemeServiceConstants::UserThemePreference preference);
+
+    // Applies the theme based on preference and system setting
+    void applyTheme();
+
+    // Installs a native event filter (Windows only)
+    void installEventFilter(QObject* target = nullptr);
+
+signals:
+    // Emitted after theme is applied
+    void themeChanged();
+
+private:
+    // Constructor
+    explicit ThemeServiceManager(QObject* parent = nullptr);
+
+#ifdef Q_OS_WIN
+    static ThemeChangeFilter* eventFilter;
+#endif
+
+    ThemeServiceConstants::AppTheme _currentTheme = ThemeServiceConstants::AppTheme::Dark;
 };
 
 #endif // THEMESERVICEMANAGER_H

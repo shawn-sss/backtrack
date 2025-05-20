@@ -12,22 +12,23 @@
 #include "../../../../constants/system_constants.h"
 #include "../../../../constants/window_config.h"
 
-#include "../../core/shared/filewatcher.h"
-#include "../../core/shared/stagingutils.h"
 #include "../../core/shared/fileoperations.h"
+#include "../../core/shared/filewatcher.h"
 #include "../../core/shared/formatutils.h"
+#include "../../core/shared/stagingutils.h"
 #include "../../core/shared/uiutils.h"
 
-#include "../../core/backup/models/stagingmodel.h"
 #include "../../core/backup/models/destinationproxymodel.h"
+#include "../../core/backup/models/stagingmodel.h"
 #include "../../core/backup/service/backupservice.h"
 #include "../../core/backup/controller/backupcontroller.h"
 
 #include "../../services/ServiceDirector/ServiceDirector.h"
-#include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
-#include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
+#include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 
@@ -99,12 +100,19 @@ MainWindow::MainWindow(QWidget* parent)
     ui->DashboardDetails->setStretch(2, 1);
     ui->DashboardLabel->setStyleSheet(MainWindowStyling::Styles::DashboardLabel::STYLE);
 
+    ui->DriveTreeView->setObjectName("DriveTreeView");
+    ui->BackupStagingTreeView->setObjectName("BackupStagingTreeView");
+    ui->BackupDestinationView->setObjectName("BackupDestinationView");
+
     createBackupCooldownTimer->setSingleShot(true);
     connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
         ui->CreateBackupButton->setEnabled(true);
     });
 
     initializeFileWatcher();
+
+    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
+            this, &MainWindow::onThemeChanged);
 }
 
 // Destructor: Cleans up UI resources
@@ -236,7 +244,42 @@ void MainWindow::connectBackupSignals() {
     });
 }
 
+// Applies updated theme styling to all tree views when the application theme changes
+void MainWindow::onThemeChanged() {
+    applyCustomTreePalette(ui->DriveTreeView);
+    applyCustomTreePalette(ui->BackupStagingTreeView);
+    applyCustomTreePalette(ui->BackupDestinationView);
+}
+
 // Backup system initialization
+
+// Applies theme-based highlight and text colors to the given tree view if not already set
+void MainWindow::applyCustomTreePalette(QTreeView* treeView) {
+    if (!treeView) return;
+
+    QPalette currentPalette = treeView->palette();
+    const ThemeServiceConstants::AppTheme theme = ThemeServiceManager::instance().currentTheme();
+
+    QColor expectedHighlightColor;
+    QColor expectedTextColor;
+
+    if (theme == ThemeServiceConstants::AppTheme::Dark) {
+        expectedHighlightColor = QColor(94, 61, 116);
+        expectedTextColor = QColor(212, 170, 255);
+    } else {
+        expectedHighlightColor = QColor(51, 153, 255);
+        expectedTextColor = QColor(0, 74, 153);
+    }
+
+    if (currentPalette.color(QPalette::Highlight) == expectedHighlightColor &&
+        currentPalette.color(QPalette::HighlightedText) == expectedTextColor) {
+        return;
+    }
+
+    currentPalette.setColor(QPalette::Highlight, expectedHighlightColor);
+    currentPalette.setColor(QPalette::HighlightedText, expectedTextColor);
+    treeView->setPalette(currentPalette);
+}
 
 // Sets up backup directory and tree views
 void MainWindow::initializeBackupSystem() {
@@ -260,6 +303,9 @@ void MainWindow::initializeBackupSystem() {
     setupSourceTreeView();
     setupBackupStagingTreeView();
     refreshBackupStatus();
+    applyCustomTreePalette(ui->DriveTreeView);
+    applyCustomTreePalette(ui->BackupStagingTreeView);
+    applyCustomTreePalette(ui->BackupDestinationView);
 }
 
 // Sets up the source file browser view
@@ -341,7 +387,7 @@ void MainWindow::initializeFileWatcher() {
     fileWatcher->startWatchingMultiple(roots);
 
     connect(fileWatcher, &FileWatcher::fileChanged, this, [this](const QString &path) {
-        fileWatcher->addPath(path);  // Re-add in case of overwrite
+        fileWatcher->addPath(path);
 
         const QString appConfigDir = PathServiceManager::appConfigFolderPath();
         const QString backupDir = PathServiceManager::backupDataRootDir();
@@ -650,7 +696,6 @@ void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) 
         notifiedAppStructure = true;
     }
 
-    // Reset if everything is OK
     if (scan.validAppStructure && scan.validBackupStructure &&
         !scan.hasOrphanedLogs && !scan.hasMissingLogs) {
         notifiedAppStructure = false;

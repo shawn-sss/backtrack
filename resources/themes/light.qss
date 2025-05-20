@@ -30,13 +30,13 @@ QPlainTextEdit,
 QComboBox,
 QListView,
 QTreeView {
-    background-color: #fff;
+    background-color: #ffffff;
     color: #000;
 }
 
 /* === List Widget === */
 QListWidget {
-    background-color: #fff;
+    background-color: #ffffff;
     color: #000;
 }
 
@@ -58,7 +58,7 @@ QMenu::item:selected {
 }
 
 QToolTip {
-    background-color: #fff;
+    background-color: #ffffff;
     color: #000;
 }
 
@@ -70,7 +70,21 @@ QTreeView::item:selected {
     color: #007BFF;
 }
 
+QTreeView::item:selected:!active,
+QTreeView::item:selected:!focus {
+    background-color: #b3d7ff;
+    color: #0056b3;
+}
+
+QTreeView::item:focus {
+    outline: none;
+}
+
 /* === Tabs === */
+QTabWidget::pane {
+    /* background-color: #ffffff; */
+}
+
 QTabBar {
     background-color: #f5f5f5;
 }
@@ -86,6 +100,8 @@ QTabBar::tab:selected {
     border-color: #007BFF;
 }
 
-QTabWidget::pane {
-    /* background-color: #fff; */
+/* === Dashboard Label === */
+#DashboardLabel {
+    color: #007BFF;
+    font-weight: bold;
 }

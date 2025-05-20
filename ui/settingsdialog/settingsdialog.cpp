@@ -149,7 +149,8 @@ void SettingsDialog::onSaveClicked() {
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ServiceDirector::getInstance().setThemePreference(selectedTheme);
-    ThemeServiceManager::applyTheme();
+
+    ThemeServiceManager::instance().applyTheme();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);

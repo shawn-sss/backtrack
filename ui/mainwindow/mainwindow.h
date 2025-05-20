@@ -42,33 +42,37 @@ class QWidget;
 class BackupScanResult;
 namespace Ui { class MainWindow; }
 
-// Main application window controller
 class MainWindow final : public QMainWindow {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
+    // Constructs the main window
     explicit MainWindow(QWidget* parent = nullptr);
+
+    // Destroys the main window
     ~MainWindow() override;
 
+    // Returns the details tab widget
     QTabWidget* getDetailsTabWidget();
 
 protected:
+    // Handles window close event
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    // UI and layout setup
+    // Sets up window configuration and layout
     void configureWindow();
     void initializeUI();
     void setupLayout();
     void setupConnections();
     void applyButtonCursors();
 
-    // Backup system setup
+    // Initializes the backup system
     void initializeBackupSystem();
     void connectBackupSignals();
 
-    // File system views
+    // Sets up file system views
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
@@ -79,14 +83,14 @@ private:
                            bool stretchLastColumn,
                            bool showHeader = true);
 
-    // File watcher handling
+    // Initializes and manages file watcher
     void initializeFileWatcher();
     void refreshFileWatcherRoots();
     void startWatchingBackupDirectory(const QString& path);
     void resetFileWatcherAndDestinationView();
     QStringList getWatchedRoots() const;
 
-    // Backup status and labels
+    // Updates backup status and UI labels
     QString checkInstallIntegrityStatus();
     void updateApplicationStatusLabel();
     void refreshBackupStatus();
@@ -100,7 +104,7 @@ private:
     void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
     QPair<QString, QString> statusVisualsForColor(const QString& color) const;
 
-    // Notification system
+    // Handles notification system logic
     void setupNotificationButton();
     void updateNotificationButtonState();
     void showNotificationDialog();
@@ -109,14 +113,18 @@ private:
     void finishNotificationQueue();
     void showNextNotification();
 
-    // Button feedback
+    // Applies feedback styles to buttons
     void resetCreateBackupButtonState();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
+    // Applies custom palette to tree views
+    void applyCustomTreePalette(QTreeView* treeView);
+
 private slots:
+    // Handles backup-related actions
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
@@ -127,10 +135,13 @@ private slots:
     void onFileChanged(const QString& path);
     void onBackupCompleted();
     void onBackupError(const QString& error);
+
+    // Handles UI updates and events
     void onCooldownFinished();
     void onNotificationButtonClicked();
     void onUninstallClicked();
     void refreshFileWatcher();
+    void onThemeChanged();
 
 private:
     Ui::MainWindow* ui = nullptr;

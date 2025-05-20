@@ -1,8 +1,8 @@
 // Project includes
-#include "../core/shared/uiutils.h"
-#include "../services/ServiceDirector/ServiceDirector.h"
-#include "../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../ui/mainwindow/mainwindow.h"
+#include "../core/shared/uiutils.h"
+#include "../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../constants/app_info.h"
 #include "../../../../constants/interface_config.h"
 
@@ -13,26 +13,26 @@
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
-    // Initialize global service layer
+    // Initialize core services
     ServiceDirector::getInstance();
 
-    // Set application metadata
+    // Set app name and display name
     app.setApplicationName(App::Info::k_APP_NAME);
     app.setApplicationDisplayName(App::Info::k_APP_NAME);
 
-    // Apply theme and install global event filter
-    ThemeServiceManager::applyTheme();
-    ThemeServiceManager::installEventFilter(&app);
+    // Apply theme and listen for system theme changes
+    ThemeServiceManager::instance().applyTheme();
+    ThemeServiceManager::instance().installEventFilter(&app);
 
-    // Initialize and display main window
+    // Create and show main window
     MainWindow mainWindow;
     mainWindow.setWindowTitle(App::Info::k_APP_NAME);
     mainWindow.setWindowIcon(QIcon(UI::Resources::k_ICON_PATH));
     mainWindow.show();
 
-    // Set tab cursor style
+    // Set pointer cursor for tab widget
     Shared::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
 
-    // Run application event loop
+    // Start event loop
     return app.exec();
 }
