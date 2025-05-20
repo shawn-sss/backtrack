@@ -465,7 +465,27 @@ void MainWindow::onBackupCompleted() {
 
         refreshBackupStatus();
         refreshFileWatcher();
+
+        const QString backupRoot = backupService->getBackupRoot();
+        QDir dir(backupRoot);
+        dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+        dir.setSorting(QDir::Time | QDir::Reversed);
+
+        const QFileInfoList entries = dir.entryInfoList();
+        if (!entries.isEmpty()) {
+            const QString newestFolderPath = entries.last().absoluteFilePath();
+            QModelIndex sourceIndex = destinationModel->index(newestFolderPath);
+            QModelIndex proxyIndex = destinationProxyModel->mapFromSource(sourceIndex);
+            if (proxyIndex.isValid()) {
+                ui->BackupDestinationView->setCurrentIndex(proxyIndex);
+                ui->BackupDestinationView->selectionModel()->select(
+                    proxyIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+                ui->BackupDestinationView->scrollTo(proxyIndex);
+            }
+        }
     });
+    ui->BackupDestinationView->clearSelection();
+    ui->BackupDestinationView->setCurrentIndex(QModelIndex());
 }
 
 // Re-enables backup button after cooldown
