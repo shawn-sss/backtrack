@@ -29,6 +29,12 @@ public:
     void removePath(const QString& path);
     QStringList getStagedPaths() const;
 
+    // Returns true if the given path is already in the staging list
+    bool containsPath(const QString& path) const;
+
+    // Adds multiple new paths to the staging list if they are not already present
+    void addPaths(const QStringList& paths);
+
 private:
     QVector<QString> stagedPaths;
     QSet<QString> stagedPathsSet;

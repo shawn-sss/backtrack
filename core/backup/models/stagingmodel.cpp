@@ -91,6 +91,13 @@ void StagingModel::addPath(const QString& path) {
     }
 }
 
+// Adds multiple new paths to the staging list if they are not already present
+void StagingModel::addPaths(const QStringList& paths) {
+    for (const QString& path : paths) {
+        addPath(path);
+    }
+}
+
 // Removes an existing path
 void StagingModel::removePath(const QString& path) {
     const int index = stagedPaths.indexOf(path);
@@ -105,4 +112,9 @@ void StagingModel::removePath(const QString& path) {
 // Returns the full staged list
 QStringList StagingModel::getStagedPaths() const {
     return QStringList(stagedPaths.begin(), stagedPaths.end());
+}
+
+// Returns true if the given path is already in the staging list
+bool StagingModel::containsPath(const QString& path) const {
+    return stagedPathsSet.contains(path);
 }

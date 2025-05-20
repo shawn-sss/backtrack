@@ -700,19 +700,44 @@ QString MainWindow::checkInstallIntegrityStatus() {
 void MainWindow::onAddToBackupClicked() {
     const QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
+        QMessageBox::warning(this,
+                             ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
         return;
     }
 
-    Shared::Backup::addSelectedPathsToStaging(ui->DriveTreeView, stagingModel);
+    QStringList alreadyStaged;
+    QStringList toStage;
 
-    ui->BackupStagingTreeView->clearSelection();
-    ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+    for (const QModelIndex &index : selectedIndexes) {
+        if (!index.isValid() || index.column() != 0)
+            continue;
 
-    triggerButtonFeedback(ui->AddToBackupButton,
-                          Labels::Backup::k_ADD_TO_BACKUP_BUTTON_TEXT,
-                          Labels::Backup::k_ADD_TO_BACKUP_ORIGINAL_TEXT);
+        const QString path = sourceModel->filePath(index);
+
+        if (stagingModel->containsPath(path)) {
+            alreadyStaged << path;
+        } else {
+            toStage << path;
+        }
+    }
+
+    if (!alreadyStaged.isEmpty()) {
+        QMessageBox::warning(this,
+                             ErrorMessages::k_ALREADY_STAGED_TITLE,
+                             ErrorMessages::k_ERROR_ALREADY_IN_STAGING.arg(alreadyStaged.join("\n")));
+    }
+
+    if (!toStage.isEmpty()) {
+        stagingModel->addPaths(toStage);
+
+        ui->BackupStagingTreeView->clearSelection();
+        ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+        triggerButtonFeedback(ui->AddToBackupButton,
+                              Labels::Backup::k_ADD_TO_BACKUP_BUTTON_TEXT,
+                              Labels::Backup::k_ADD_TO_BACKUP_ORIGINAL_TEXT);
+    }
 }
 
 // Removes selected items from staging

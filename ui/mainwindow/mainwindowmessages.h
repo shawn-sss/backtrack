@@ -102,6 +102,11 @@ inline constexpr auto k_ERROR_MODEL_TYPE_INVALID =
 inline constexpr auto k_ERROR_SELECTED_PATH_INVALID =
     "The selected backup path could not be determined.\nPlease try again.";
 
+inline constexpr auto k_ALREADY_STAGED_TITLE = "Item(s) Already Staged";
+inline const QString k_ERROR_ALREADY_IN_STAGING =
+    QStringLiteral("Some items are already in the staging list:\n\n%1\n\n"
+                   "Please select different items that are not yet staged.");
+
 inline const QString k_BACKUP_LOCATION_INVALID_TITLE = QStringLiteral("Delete All Backups");
 inline const QString k_BACKUP_LOCATION_INVALID_MESSAGE =
     QStringLiteral("The backup location is invalid or not set.");
