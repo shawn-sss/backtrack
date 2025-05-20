@@ -19,13 +19,14 @@ enum class BackupStatus {
 
 // Describes results of a backup structure scan
 struct BackupScanResult {
+    bool validAppStructure = false;
+    bool validBackupStructure = false;
+    bool structureExists = false;
     bool hasOrphanedLogs = false;
     bool hasMissingLogs = false;
-    bool validStructure = true;
-    bool structureExists = false;
 
     bool isBroken() const {
-        return structureExists && (!validStructure || hasOrphanedLogs || hasMissingLogs);
+        return !validBackupStructure || hasOrphanedLogs || hasMissingLogs;
     }
 };
 
@@ -42,14 +43,14 @@ public:
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
 
-    // Backup structure and state
+    // Backup state and structure
     BackupScanResult scanForBackupStatus() const;
 
-    // Backup metadata access
+    // Backup metadata
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
-    // Aggregate statistics
+    // Backup statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
 
@@ -57,12 +58,11 @@ signals:
     void backupSummaryWritten(const QString& logFilePath);
 
 private:
-    // Helpers
+    // Metadata creation and file utilities
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
     QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;
 
-    // Internal state
     QString backupRootPath;
 };
 

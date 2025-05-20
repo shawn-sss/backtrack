@@ -28,7 +28,7 @@ QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-// Ensures backup infrastructure exists
+// Ensures backup infrastructure exists if it doesn't already
 void BackupService::initializeBackupRootIfNeeded() {
     const QString configFilePath = PathServiceManager::backupInitMetadataFilePath();
     if (QFile::exists(configFilePath)) return;
@@ -51,7 +51,7 @@ void BackupService::initializeBackupRootIfNeeded() {
     JsonManager::saveJsonFile(configFilePath, backupConfig);
 }
 
-// Scans and evaluates backup state
+// Scans and evaluates current backup structure and logs
 BackupScanResult BackupService::scanForBackupStatus() const {
     BackupScanResult result;
     const QDir rootDir(backupRootPath);
@@ -64,22 +64,18 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     const bool hasBackupInit = QFile::exists(backupInitPath);
     const bool hasLogsFolder = QDir(logsFolderPath).exists();
 
+    result.validAppStructure = hasAppInit;
+    result.validBackupStructure = hasBackupInit && hasLogsFolder;
     result.structureExists = hasBackupInit && hasLogsFolder;
 
     if (hasAppInit && !hasBackupInit && !hasLogsFolder) {
-        result.validStructure = true;
+        result.validBackupStructure = true;
         return result;
     }
-
-    if ((hasLogsFolder && !hasBackupInit) || (hasBackupInit && !hasLogsFolder)) {
-        result.validStructure = false;
-        return result;
-    }
-
-    result.validStructure = hasBackupInit && hasLogsFolder;
 
     QSet<QString> logsSeen;
     const QFileInfoList logFiles = getBackupLogFiles();
+
     for (const QFileInfo& logFile : logFiles) {
         const QString backupName = logFile.fileName().section("_" + App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE, 0, 0);
         logsSeen.insert(backupName);
@@ -94,7 +90,14 @@ BackupScanResult BackupService::scanForBackupStatus() const {
 
     for (const QFileInfo& dirInfo : backupFolders) {
         const QString name = dirInfo.fileName();
-        if (name.startsWith(prefix) && !logsSeen.contains(name)) {
+
+        if (!name.startsWith(prefix)) continue;
+
+        const QDateTime folderCreated = dirInfo.lastModified();
+        const qint64 ageSecs = folderCreated.secsTo(QDateTime::currentDateTime());
+        if (ageSecs < 5) continue;
+
+        if (!logsSeen.contains(name)) {
             result.hasMissingLogs = true;
         }
     }
@@ -102,7 +105,7 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     return result;
 }
 
-// Returns backup log files, optionally sorted by time
+// Returns list of backup log files, optionally sorted by time
 QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
     const QDir logsDir(PathServiceManager::backupLogsFolderPath());
 
@@ -113,7 +116,7 @@ QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
         );
 }
 
-// Returns the most recent backup metadata
+// Returns metadata from the most recent backup log file
 QJsonObject BackupService::getLastBackupMetadata() const {
     const QFileInfoList logFiles = getBackupLogFiles(true);
     if (logFiles.isEmpty()) return {};
@@ -126,12 +129,12 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return {};
 }
 
-// Returns the number of existing backups
+// Returns total count of existing backup logs
 int BackupService::getBackupCount() const {
     return getBackupLogFiles().size();
 }
 
-// Calculates total size of all backups
+// Computes total size of all recorded backups
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
     const QFileInfoList& logFiles = getBackupLogFiles();
@@ -145,7 +148,7 @@ quint64 BackupService::getTotalBackupSize() const {
     return totalSize;
 }
 
-// Calculates total size of given items (files and directories)
+// Computes total size of a given set of paths
 qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     qint64 totalSize = 0;
 
@@ -159,7 +162,7 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     return totalSize;
 }
 
-// Generates and writes backup summary metadata
+// Creates and writes backup summary log file
 void BackupService::createBackupSummary(const QString& backupFolderPath,
                                         const QStringList& selectedItems,
                                         qint64 backupDuration) {
@@ -177,7 +180,7 @@ void BackupService::createBackupSummary(const QString& backupFolderPath,
     emit backupSummaryWritten(logFilePath);
 }
 
-// Constructs a backup summary JSON object
+// Constructs JSON metadata object for backup summary
 QJsonObject BackupService::createBackupMetadata(const QString& backupFolderPath,
                                                 const QStringList& selectedItems,
                                                 qint64 backupDuration) const {

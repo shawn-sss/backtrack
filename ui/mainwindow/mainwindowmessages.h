@@ -122,9 +122,13 @@ inline const QString k_MISSING_LOGS_MESSAGE =
                    "Log metadata may be missing or was deleted. This may affect size "
                    "and count reporting.");
 
-inline const QString k_BROKEN_STRUCTURE_MESSAGE =
+inline const QString k_BROKEN_BACKUP_STRUCTURE_MESSAGE =
     QStringLiteral("The backup structure is partially broken. Please review and "
                    "consider cleaning or restoring backups.");
+
+inline const QString k_BROKEN_APP_STRUCTURE_MESSAGE =
+    QStringLiteral("The application structure appears to be incomplete or damaged. "
+                   "Consider restarting the app or resetting its data to resolve the issue.");
 }
 
 // About window labels and content
