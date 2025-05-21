@@ -14,10 +14,26 @@ inline constexpr auto k_LABEL_THEME_SYSTEM_DEFAULT    = "System Default";
 inline constexpr auto k_LABEL_THEME_LIGHT_MODE        = "Light Mode";
 inline constexpr auto k_LABEL_THEME_DARK_MODE         = "Dark Mode";
 
-// Save button
+// Descriptions
+inline constexpr auto k_DESC_BACKUP_PREFIX = "Backup Prefix Description:";
+inline constexpr auto k_DESC_BACKUP_SUBTITLE = "This is the first part of each backup name to help group and identify them.";
+inline constexpr auto k_DESC_BACKUP_INFO = "Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.";
+
+// Button labels
 inline constexpr auto k_BUTTON_SAVE_TEXT              = "Save";
 inline constexpr auto k_BUTTON_SAVED_TEXT             = "✔️ Saved";
 inline constexpr auto k_BUTTON_SAVE_WIDTH_TEXT        = "✔️ Saved";
+inline constexpr auto k_BUTTON_CLEAR_APP              = "🗑️ Clear App Data";
+inline constexpr auto k_BUTTON_RESET_BACKUP           = "📁 Reset Backup Archive";
+
+// Tooltips
+inline constexpr auto k_TOOLTIP_SAVE_BUTTON           = "Save your settings and apply changes";
+inline constexpr auto k_TOOLTIP_RESET_BACKUP          = "Delete all backups and logs from the backup directory";
+inline constexpr auto k_TOOLTIP_CLEAR_APP             = "Remove all data created by this app from your system";
+
+// Input validation warning
+inline constexpr auto k_WARNING_INVALID_PREFIX_TITLE   = "Invalid Prefix";
+inline constexpr auto k_WARNING_INVALID_PREFIX_MESSAGE = "Only letters (A–Z, a–z) and digits (0–9) are allowed.";
 
 // Dialog titles and messages
 inline const QString k_CONFIRM_RESET_TITLE            = QStringLiteral("Delete Backup Archive");

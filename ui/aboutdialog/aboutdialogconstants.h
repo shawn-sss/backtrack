@@ -2,9 +2,11 @@
 #define ABOUTDIALOGCONSTANTS_H
 
 namespace AboutDialogConstants {
-    constexpr int kLogoSize = 150;
-    constexpr int kDialogWidth = 500;
-    constexpr int kDialogHeight = 400;
+constexpr int kLogoSize = 150;
+constexpr int kDialogWidth = 500;
+constexpr int kDialogHeight = 400;
+constexpr int kTopMargin = 15;
+constexpr int kTextSpacing = 10;
 } // namespace AboutDialogConstants
 
 #endif // ABOUTDIALOGCONSTANTS_H

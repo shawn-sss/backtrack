@@ -1,6 +1,10 @@
 #ifndef SETTINGSDIALOGSTYLING_H
 #define SETTINGSDIALOGSTYLING_H
 
+// Qt includes
+#include <QLabel>
+#include <QFont>
+
 namespace SettingsDialogStyling {
 
 // Style for Save button when in cooldown state
@@ -32,6 +36,23 @@ inline constexpr auto k_RESET_BACKUP_BUTTON_STYLE = R"(
     border-radius: 6px;
     font-weight: bold;
 )";
+
+// Helper to create bold labels
+inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
+    auto* label = new QLabel(text, parent);
+    QFont font = label->font();
+    font.setBold(true);
+    label->setFont(font);
+    return label;
+}
+
+// Helper to create gray, small, word-wrapped labels
+inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
+    auto* label = new QLabel(text, parent);
+    label->setStyleSheet("color: gray; font-size: 11px;");
+    label->setWordWrap(true);
+    return label;
+}
 
 } // namespace SettingsDialogStyling
 

@@ -27,9 +27,6 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-// C++ includes
-#include <memory>
-
 using namespace SettingsDialogConstants;
 using namespace SettingsDialogStyling;
 using ThemeServiceConstants::UserThemePreference;
@@ -43,7 +40,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 SettingsDialog::~SettingsDialog() = default;
 
-// Constructs and lays out the full settings dialog
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -71,8 +67,8 @@ void SettingsDialog::setupLayout() {
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
     saveButton->setText(k_BUTTON_SAVE_TEXT);
-
-    applyButtonCursorsAndTooltips();
+    saveButton->setToolTip(k_TOOLTIP_SAVE_BUTTON);
+    saveButton->setCursor(Qt::PointingHandCursor);
 
     QFontMetrics fm(saveButton->font());
     int saveWidth = fm.horizontalAdvance(k_BUTTON_SAVE_WIDTH_TEXT) + 40;
@@ -92,21 +88,12 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Constructs the user settings form
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
 
-    auto* descriptionLabel = new QLabel("Backup Prefix Description:");
-    QFont labelFont = descriptionLabel->font();
-    labelFont.setBold(true);
-    descriptionLabel->setFont(labelFont);
-    layout->addRow(descriptionLabel);
-
-    auto* subtitleLabel = new QLabel("This is the first part of each backup name to help group and identify them.");
-    subtitleLabel->setStyleSheet("color: gray; font-size: 11px;");
-    subtitleLabel->setWordWrap(true);
-    layout->addRow(subtitleLabel);
+    layout->addRow(createBoldLabel(k_DESC_BACKUP_PREFIX));
+    layout->addRow(createGraySmallLabel(k_DESC_BACKUP_SUBTITLE));
 
     backupPrefixEdit = new QLineEdit(widget);
     backupPrefixEdit->setText(ServiceDirector::getInstance().getBackupPrefix());
@@ -114,15 +101,12 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     backupPrefixEdit->setMaxLength(12);
     layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
 
-    auto* prefixInfoLabel = new QLabel("Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.");
-    prefixInfoLabel->setStyleSheet("color: gray; font-size: 11px;");
-    layout->addRow(prefixInfoLabel);
-
+    layout->addRow(createGraySmallLabel(k_DESC_BACKUP_INFO));
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+
     return widget;
 }
 
-// Constructs the system settings form
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -148,16 +132,16 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     rowLayout->setSpacing(12);
     rowLayout->setContentsMargins(0, 24, 0, 0);
 
-    resetBackupArchiveButton = new QPushButton("📁 Reset Backup Archive", buttonRow);
+    resetBackupArchiveButton = new QPushButton(k_BUTTON_RESET_BACKUP, buttonRow);
     resetBackupArchiveButton->setCursor(Qt::PointingHandCursor);
-    resetBackupArchiveButton->setToolTip("Delete all backups and logs from the backup directory");
+    resetBackupArchiveButton->setToolTip(k_TOOLTIP_RESET_BACKUP);
     resetBackupArchiveButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     resetBackupArchiveButton->setStyleSheet(k_RESET_BACKUP_BUTTON_STYLE);
     rowLayout->addWidget(resetBackupArchiveButton);
 
-    clearAppDataButton = new QPushButton("🗑️ Clear App Data", buttonRow);
+    clearAppDataButton = new QPushButton(k_BUTTON_CLEAR_APP, buttonRow);
     clearAppDataButton->setCursor(Qt::PointingHandCursor);
-    clearAppDataButton->setToolTip("Remove all data created by this app from your system");
+    clearAppDataButton->setToolTip(k_TOOLTIP_CLEAR_APP);
     clearAppDataButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     clearAppDataButton->setStyleSheet(k_CLEAR_APP_BUTTON_STYLE);
     rowLayout->addWidget(clearAppDataButton);
@@ -212,14 +196,13 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Saves user input and applies system settings
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
 
     static const QRegularExpression prefixRegex("^[A-Za-z0-9]+$");
     if (!prefixRegex.match(newPrefix).hasMatch()) {
-        QMessageBox::warning(this, "Invalid Prefix", "Only letters (A–Z, a–z) and digits (0–9) are allowed.");
+        QMessageBox::warning(this, k_WARNING_INVALID_PREFIX_TITLE, k_WARNING_INVALID_PREFIX_MESSAGE);
         return;
     }
 
@@ -234,10 +217,4 @@ void SettingsDialog::onSaveClicked() {
     saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
 
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
-}
-
-// Configures save button interactivity
-void SettingsDialog::applyButtonCursorsAndTooltips() {
-    saveButton->setCursor(Qt::PointingHandCursor);
-    saveButton->setToolTip("Save your settings and apply changes");
 }

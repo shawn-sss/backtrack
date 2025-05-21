@@ -50,6 +50,7 @@ set(UI_DIALOG_NOTIFICATIONS
     ui/notificationsdialog/notificationsdialog.cpp
     ui/notificationsdialog/notificationsdialog.h
     ui/notificationsdialog/notificationsdialog.ui
+    ui/notificationsdialog/notificationsdialogconstants.h
     ui/notificationsdialog/notificationsdialogstyling.h
 )
 
