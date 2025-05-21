@@ -638,7 +638,15 @@ QPair<QString, QString> MainWindow::statusVisualsForColor(const QString &color) 
 
 // Updates label with current backup directory path
 void MainWindow::updateBackupLocationLabel(const QString &location) {
-    ui->BackupLocationLabel->setText(Labels::Backup::k_LOCATION + location);
+    const int maxLength = 32;
+    QString displayLocation = location;
+
+    if (location.length() > maxLength) {
+        displayLocation = location.left(maxLength / 2) + "..." + location.right(maxLength / 2);
+    }
+
+    ui->BackupLocationLabel->setText(Labels::Backup::k_LOCATION + displayLocation);
+    ui->BackupLocationLabel->setToolTip(location);
 }
 
 // Updates label showing total number of backups
