@@ -249,34 +249,6 @@ void MainWindow::onThemeChanged() {
 
 // Backup system initialization
 
-// Applies theme-based highlight and text colors to the given tree view if not already set
-void MainWindow::applyCustomTreePalette(QTreeView* treeView) {
-    if (!treeView) return;
-
-    QPalette currentPalette = treeView->palette();
-    const ThemeServiceConstants::AppTheme theme = ThemeServiceManager::instance().currentTheme();
-
-    QColor expectedHighlightColor;
-    QColor expectedTextColor;
-
-    if (theme == ThemeServiceConstants::AppTheme::Dark) {
-        expectedHighlightColor = QColor(94, 61, 116);
-        expectedTextColor = QColor(212, 170, 255);
-    } else {
-        expectedHighlightColor = QColor(51, 153, 255);
-        expectedTextColor = QColor(0, 74, 153);
-    }
-
-    if (currentPalette.color(QPalette::Highlight) == expectedHighlightColor &&
-        currentPalette.color(QPalette::HighlightedText) == expectedTextColor) {
-        return;
-    }
-
-    currentPalette.setColor(QPalette::Highlight, expectedHighlightColor);
-    currentPalette.setColor(QPalette::HighlightedText, expectedTextColor);
-    treeView->setPalette(currentPalette);
-}
-
 // Sets up backup directory and tree views
 void MainWindow::initializeBackupSystem() {
     const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
@@ -373,6 +345,34 @@ void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
             treeView->setColumnHidden(i, true);
         }
     }
+}
+
+// Applies theme-based highlight and text colors to the given tree view if not already set
+void MainWindow::applyCustomTreePalette(QTreeView* treeView) {
+    if (!treeView) return;
+
+    QPalette currentPalette = treeView->palette();
+    const ThemeServiceConstants::AppTheme theme = ThemeServiceManager::instance().currentTheme();
+
+    QColor expectedHighlightColor;
+    QColor expectedTextColor;
+
+    if (theme == ThemeServiceConstants::AppTheme::Dark) {
+        expectedHighlightColor = QColor(94, 61, 116);
+        expectedTextColor = QColor(212, 170, 255);
+    } else {
+        expectedHighlightColor = QColor(51, 153, 255);
+        expectedTextColor = QColor(0, 74, 153);
+    }
+
+    if (currentPalette.color(QPalette::Highlight) == expectedHighlightColor &&
+        currentPalette.color(QPalette::HighlightedText) == expectedTextColor) {
+        return;
+    }
+
+    currentPalette.setColor(QPalette::Highlight, expectedHighlightColor);
+    currentPalette.setColor(QPalette::HighlightedText, expectedTextColor);
+    treeView->setPalette(currentPalette);
 }
 
 // File watcher and directory monitoring
@@ -537,38 +537,38 @@ void MainWindow::onCooldownFinished() {
 
 // Backup status and UI label updates
 
-// Refreshes backup state and related UI
+// Refreshes backup state and updates all related UI elements
 void MainWindow::refreshBackupStatus() {
-    const BackupScanResult scan = backupService->scanForBackupStatus();
+    latestBackupScan = backupService->scanForBackupStatus();
+    updateBackupLabels();
 
-    updateBackupLabels(scan);
-
-    if (!scan.isBroken() && orphanLogNotified) {
+    if (!latestBackupScan.isBroken() && orphanLogNotified) {
         orphanLogNotified = false;
     }
 
-    notifyOrphanOrBrokenBackupIssues(scan);
+    notifyOrphanOrBrokenBackupIssues(latestBackupScan);
 }
 
-// Updates all backup-related UI labels
-void MainWindow::updateBackupLabels(const BackupScanResult &scan) {
+// Updates backup-related labels including location, size, and status
+void MainWindow::updateBackupLabels() {
     updateBackupLocationLabel(backupService->getBackupRoot());
     updateBackupTotalCountLabel();
     updateBackupTotalSizeLabel();
     updateBackupLocationStatusLabel(backupService->getBackupRoot());
     updateLastBackupInfo();
+    handleSpecialBackupLabelStates(latestBackupScan);
 
     const QString statusColor =
-        !scan.structureExists
+        !latestBackupScan.structureExists
             ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND
-            : scan.isBroken()
+            : latestBackupScan.isBroken()
                   ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING
                   : MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;
 
     updateBackupStatusLabel(statusColor);
 }
 
-// Updates metadata display for the last backup
+// Updates metadata labels for the last backup
 void MainWindow::updateLastBackupInfo() {
     const QJsonObject metadata = backupService->getLastBackupMetadata();
 
@@ -580,38 +580,31 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    const QString name =
-        metadata.value(App::KVP::BackupMetadata::k_NAME).toString();
-    const QString timestampRaw =
-        metadata.value(App::KVP::BackupMetadata::k_TIMESTAMP).toString();
-    const int durationSec =
-        metadata.value(App::KVP::BackupMetadata::k_DURATION).toInt();
-    const QString sizeStr =
-        metadata.value(App::KVP::BackupMetadata::k_SIZE_READABLE).toString();
+    const QString name = metadata.value(App::KVP::BackupMetadata::k_NAME).toString();
+    const QString timestampRaw = metadata.value(App::KVP::BackupMetadata::k_TIMESTAMP).toString();
+    const int durationSec = metadata.value(App::KVP::BackupMetadata::k_DURATION).toInt();
+    const QString sizeStr = metadata.value(App::KVP::BackupMetadata::k_SIZE_READABLE).toString();
 
     const QString formattedTimestamp = Shared::Formatting::formatTimestamp(
         QDateTime::fromString(timestampRaw, Qt::ISODate),
         Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT);
 
-    const QString formattedDuration =
-        Shared::Formatting::formatDuration(durationSec);
+    const QString formattedDuration = Shared::Formatting::formatDuration(durationSec);
 
     ui->LastBackupNameLabel->setText(Labels::LastBackup::k_NAME + name);
-    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP +
-                                          formattedTimestamp);
-    ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION +
-                                         formattedDuration);
+    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP + formattedTimestamp);
+    ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION + formattedDuration);
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::k_SIZE + sizeStr);
 }
 
-// Updates status label with color-coded emoji/text
-void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
+// Updates the backup status label with emoji and color-coded text
+void MainWindow::updateBackupStatusLabel(const QString& statusColor) {
     const auto [emoji, text] = statusVisualsForColor(statusColor);
 
     ui->BackupStatusLabel->setText(Labels::Backup::k_STATUS_LABEL.arg(emoji, text));
     ui->BackupStatusLabel->setTextFormat(Qt::RichText);
 
-    for (QLabel *label : {
+    for (QLabel* label : {
              ui->LastBackupNameLabel,
              ui->LastBackupTimestampLabel,
              ui->LastBackupDurationLabel,
@@ -707,6 +700,94 @@ void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) 
     }
 }
 
+// Adjusts backup summary labels for no backups, uninitialized location, or warnings
+void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult& scan) {
+    const int backupCount = backupService->getBackupCount();
+    const QString rootPath = backupService->getBackupRoot();
+    const QFileInfo rootInfo(rootPath);
+    const QDir backupDir(rootPath);
+
+    const bool locationInitialized = rootInfo.exists();
+    const bool backupDirEmpty = locationInitialized &&
+                                backupDir.entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot).isEmpty();
+
+    const bool hasAppIssue = !scan.validAppStructure;
+
+    const bool isUninitialized =
+        !scan.structureExists &&
+        !scan.validBackupStructure &&
+        !scan.hasMissingLogs &&
+        !scan.hasOrphanedLogs &&
+        backupCount == 0;
+
+    const bool hasBackupIssue =
+        !isUninitialized && (
+            !scan.validBackupStructure ||
+            scan.hasMissingLogs ||
+            scan.hasOrphanedLogs
+            );
+
+    const QString redStyle = MainWindowStyling::Styles::GeneralText::k_RED_BOLD_STYLE;
+    const QString infoLine = Labels::Backup::k_SEE_NOTIFICATIONS_LABEL;
+
+    if (hasAppIssue && hasBackupIssue) {
+        ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
+        ui->BackupTotalSizeLabel->setText(Labels::Backup::k_APP_AND_BACKUP_ISSUE_LABEL);
+        ui->BackupLocationStatusLabel->setText(infoLine);
+    }
+    else if (hasBackupIssue) {
+        ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
+        ui->BackupTotalSizeLabel->setText(Labels::Backup::k_BACKUP_ISSUE_LABEL);
+        ui->BackupLocationStatusLabel->setText(infoLine);
+    }
+    else if (hasAppIssue) {
+        ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
+        ui->BackupTotalSizeLabel->setText(Labels::Backup::k_APP_ISSUE_LABEL);
+        ui->BackupLocationStatusLabel->setText(infoLine);
+    }
+    else if (isUninitialized || (backupCount == 0 && (backupDirEmpty || !locationInitialized))) {
+        ui->BackupTotalCountLabel->setText(Labels::Backup::k_NO_BACKUPS_COUNT_LABEL);
+        ui->BackupTotalCountLabel->setStyleSheet(redStyle);
+        ui->BackupTotalSizeLabel->setText("");
+        ui->BackupLocationStatusLabel->setText("");
+
+        ui->BackupTotalSizeLabel->hide();
+        ui->BackupLocationStatusLabel->hide();
+        return;
+    }
+    else {
+        ui->BackupTotalCountLabel->setStyleSheet("");
+        ui->BackupTotalSizeLabel->setStyleSheet("");
+        ui->BackupLocationStatusLabel->setStyleSheet("");
+
+        updateBackupTotalCountLabel();
+        updateBackupTotalSizeLabel();
+        updateBackupLocationStatusLabel(backupService->getBackupRoot());
+
+        ui->BackupTotalSizeLabel->show();
+        ui->BackupLocationStatusLabel->show();
+        return;
+    }
+
+    ui->BackupTotalCountLabel->setStyleSheet(redStyle);
+    ui->BackupTotalSizeLabel->setStyleSheet(redStyle);
+    ui->BackupLocationStatusLabel->setStyleSheet(redStyle);
+
+    ui->BackupTotalCountLabel->show();
+    ui->BackupTotalSizeLabel->show();
+    ui->BackupLocationStatusLabel->show();
+}
+
+// Re-scans backup and app structure, updates UI, and queues notifications if needed
+void MainWindow::revalidateBackupAndAppStatus() {
+    latestBackupScan = backupService->scanForBackupStatus();
+    const QString appStatus = checkInstallIntegrityStatus();
+    const bool validApp = appStatus == InfoMessages::k_INSTALL_OK;
+    latestBackupScan.validAppStructure = validApp;
+    updateBackupLabels();
+    notifyOrphanOrBrokenBackupIssues(latestBackupScan);
+}
+
 // Application status and integrity
 
 // Checks and updates the app installation status label
@@ -740,6 +821,8 @@ void MainWindow::updateApplicationStatusLabel() {
     if (status == InfoMessages::k_INSTALL_OK) {
         appIntegrityNotified = false;
     }
+
+    revalidateBackupAndAppStatus();
 }
 
 // Checks for missing expected configuration files

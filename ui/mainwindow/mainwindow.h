@@ -3,6 +3,7 @@
 
 // Project includes
 #include "../../../../constants/system_constants.h"
+#include "../../core/backup/service/backupservice.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
 
 // Qt includes
@@ -15,6 +16,8 @@
 #include <QString>
 #include <QStringList>
 #include <QTimer>
+
+// C++ includes
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -38,8 +41,6 @@ class QToolBar;
 class QTreeView;
 class QWidget;
 
-// Forward declaration (UI class)
-class BackupScanResult;
 namespace Ui { class MainWindow; }
 
 class MainWindow final : public QMainWindow {
@@ -47,65 +48,58 @@ class MainWindow final : public QMainWindow {
     Q_DISABLE_COPY_MOVE(MainWindow)
 
 public:
-    // Constructs the main window
     explicit MainWindow(QWidget* parent = nullptr);
-
-    // Destroys the main window
     ~MainWindow() override;
-
-    // Returns the details tab widget
     QTabWidget* getDetailsTabWidget();
 
 protected:
-    // Handles window close event
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    // Sets up window configuration and layout
+    // Initialization
     void configureWindow();
     void initializeUI();
     void setupLayout();
     void setupConnections();
-    void applyButtonCursors();
-
-    // Initializes the backup system
     void initializeBackupSystem();
     void connectBackupSignals();
+    void initializeFileWatcher();
+    void setupNotificationButton();
 
-    // Sets up file system views
+    // Tree View setup
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
-    void removeAllColumnsFromTreeView(QTreeView* treeView);
     void configureTreeView(QTreeView* treeView,
                            QAbstractItemModel* model,
                            QAbstractItemView::SelectionMode selectionMode,
                            bool stretchLastColumn,
                            bool showHeader = true);
+    void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // Initializes and manages file watcher
-    void initializeFileWatcher();
+    // File watcher
     void refreshFileWatcherRoots();
     void startWatchingBackupDirectory(const QString& path);
     void resetFileWatcherAndDestinationView();
     QStringList getWatchedRoots() const;
 
-    // Updates backup status and UI labels
-    QString checkInstallIntegrityStatus();
+    // Backup status and labels
     void updateApplicationStatusLabel();
-    void refreshBackupStatus();
-    void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
     void updateBackupLocationLabel(const QString& location);
+    void updateBackupLocationStatusLabel(const QString& location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
-    void updateBackupLocationStatusLabel(const QString& location);
-    void updateBackupLabels(const BackupScanResult& scan);
+    void updateBackupLabels();
+    void refreshBackupStatus();
+    void updateLastBackupInfo();
+    void handleSpecialBackupLabelStates(const BackupScanResult& scan);
     void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
     QPair<QString, QString> statusVisualsForColor(const QString& color) const;
+    QString checkInstallIntegrityStatus();
+    void revalidateBackupAndAppStatus();
 
-    // Handles notification system logic
-    void setupNotificationButton();
+    // Notifications
     void updateNotificationButtonState();
     void showNotificationDialog();
     void feedbackNotificationButton();
@@ -113,18 +107,16 @@ private:
     void finishNotificationQueue();
     void showNextNotification();
 
-    // Applies feedback styles to buttons
+    // UI interactions and styling
+    void applyButtonCursors();
     void resetCreateBackupButtonState();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
-
-    // Applies custom palette to tree views
     void applyCustomTreePalette(QTreeView* treeView);
 
 private slots:
-    // Handles backup-related actions
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
@@ -134,36 +126,40 @@ private slots:
     void onFileChanged(const QString& path);
     void onBackupCompleted();
     void onBackupError(const QString& error);
-
-    // Handles UI updates and events
     void onCooldownFinished();
     void onNotificationButtonClicked();
     void refreshFileWatcher();
     void onThemeChanged();
 
 private:
+    // Core UI
     Ui::MainWindow* ui = nullptr;
     CustomTitleBar* titleBar = nullptr;
     QToolBar* toolBar = nullptr;
     QPushButton* notificationButton = nullptr;
     QLabel* notificationBadge = nullptr;
 
+    // Models and services
     QFileSystemModel* sourceModel = nullptr;
     StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
     DestinationProxyModel* destinationProxyModel = nullptr;
-
     BackupService* backupService = nullptr;
     BackupController* backupController = nullptr;
     FileWatcher* fileWatcher = nullptr;
-
     ToolbarServiceManager* toolbarManager = nullptr;
+
+    // Timers
     QTimer* createBackupCooldownTimer = nullptr;
     QElapsedTimer backupStartTimer;
 
+    // Notifications
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
+
+    // Cache
+    BackupScanResult latestBackupScan;
 };
 
 #endif // MAINWINDOW_H

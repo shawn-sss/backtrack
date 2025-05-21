@@ -43,10 +43,10 @@ public:
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
 
-    // Backup state and structure
+    // Structure scanning
     BackupScanResult scanForBackupStatus() const;
 
-    // Backup metadata
+    // Backup metadata access
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
@@ -58,7 +58,7 @@ signals:
     void backupSummaryWritten(const QString& logFilePath);
 
 private:
-    // Metadata creation and file utilities
+    // Internal helpers for metadata and file analysis
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
     QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;

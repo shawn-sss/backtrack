@@ -1,29 +1,39 @@
+// Project includes
 #include "settingsdialog.h"
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
-#include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
+#include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 
 // Qt includes
-#include <QFormLayout>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QSpacerItem>
-#include <QRegularExpressionValidator>
-#include <QSignalBlocker>
-#include <QMessageBox>
-#include <QDialogButtonBox>
 #include <QApplication>
+#include <QComboBox>
+#include <QDialogButtonBox>
 #include <QDir>
 #include <QFileInfo>
+#include <QFormLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRegularExpressionValidator>
+#include <QSignalBlocker>
+#include <QSpacerItem>
+#include <QStackedWidget>
+#include <QTimer>
+#include <QVBoxLayout>
+#include <QWidget>
+
+// C++ includes
+#include <memory>
 
 using namespace SettingsDialogConstants;
 using namespace SettingsDialogStyling;
 using ThemeServiceConstants::UserThemePreference;
 
-// Constructs and initializes the settings dialog layout
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -33,7 +43,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 SettingsDialog::~SettingsDialog() = default;
 
-// Sets up the complete layout of the settings dialog
+// Constructs and lays out the full settings dialog
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -82,7 +92,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Creates the user settings page
+// Constructs the user settings form
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -112,7 +122,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Creates the system settings page
+// Constructs the system settings form
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -202,7 +212,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles saving user and system settings
+// Saves user input and applies system settings
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
@@ -226,7 +236,7 @@ void SettingsDialog::onSaveClicked() {
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
 }
 
-// Applies cursors and tooltips to the save button
+// Configures save button interactivity
 void SettingsDialog::applyButtonCursorsAndTooltips() {
     saveButton->setCursor(Qt::PointingHandCursor);
     saveButton->setToolTip("Save your settings and apply changes");

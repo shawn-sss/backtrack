@@ -3,10 +3,10 @@
 #include "../../../core/shared/fileoperations.h"
 #include "../../../core/shared/jsonmanager.h"
 #include "../../../core/shared/formatutils.h"
-#include "../../../../services/ServiceDirector/ServiceDirector.h"
-#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../../../constants/kvp_info.h"
 #include "../../../../constants/app_info.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../../../services/ServiceDirector/ServiceDirector.h"
 
 // Qt includes
 #include <QDateTime>
@@ -20,10 +20,12 @@
 BackupService::BackupService(const QString& backupRoot, QObject* parent)
     : QObject(parent), backupRootPath(backupRoot) {}
 
+// Sets the backup root path
 void BackupService::setBackupRoot(const QString& path) {
     backupRootPath = path;
 }
 
+// Returns the backup root path
 QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
@@ -108,7 +110,6 @@ BackupScanResult BackupService::scanForBackupStatus() const {
 // Returns list of backup log files, optionally sorted by time
 QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
     const QDir logsDir(PathServiceManager::backupLogsFolderPath());
-
     return logsDir.entryInfoList(
         {"*_" + App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE},
         QDir::Files,
@@ -151,14 +152,12 @@ quint64 BackupService::getTotalBackupSize() const {
 // Computes total size of a given set of paths
 qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     qint64 totalSize = 0;
-
     for (const QString& item : items) {
         const QFileInfo fileInfo(item);
         totalSize += fileInfo.isDir()
                          ? FileOperations::calculateDirectorySize(QDir(item))
                          : fileInfo.size();
     }
-
     return totalSize;
 }
 

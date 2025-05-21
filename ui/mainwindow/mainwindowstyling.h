@@ -64,6 +64,10 @@ inline constexpr auto STYLE = R"(
 )";
 }
 
+namespace GeneralText {
+inline constexpr auto k_RED_BOLD_STYLE = "color: red; font-weight: bold;";
+}
+
 namespace ToolTips {
 inline constexpr auto k_ADD_TO_BACKUP      = "Add selected items to the backup staging area";
 inline constexpr auto k_REMOVE_FROM_BACKUP = "Remove selected items from the backup staging area";

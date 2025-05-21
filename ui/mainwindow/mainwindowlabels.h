@@ -28,10 +28,18 @@ inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "➖ Removed!";
 inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "🗑️ Deleted!";
 inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "📁 Changed!";
 
-inline constexpr auto k_READY_LABEL       = "Ready";
-inline constexpr auto k_WARNING_LABEL     = "Warning";
-inline constexpr auto k_NOT_INITIALIZED   = "Not Initialized";
-inline const QString k_STATUS_LABEL       = QStringLiteral("<b>Backup Location Status:</b> %1 %2");
+inline constexpr auto k_READY_LABEL                      = "Ready";
+inline constexpr auto k_WARNING_LABEL                    = "Warning";
+inline constexpr auto k_NOT_INITIALIZED                  = "Not Initialized";
+
+inline constexpr auto k_WARNING_SUMMARY_LABEL            = "WARNING!";
+inline constexpr auto k_APP_AND_BACKUP_ISSUE_LABEL       = "App and Backup issues detected.";
+inline constexpr auto k_BACKUP_ISSUE_LABEL               = "Backup issue detected.";
+inline constexpr auto k_APP_ISSUE_LABEL                  = "App issue detected.";
+inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "No backups to count!";
+inline constexpr auto k_SEE_NOTIFICATIONS_LABEL          = "See Notifications for more details.";
+
+inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Location Status:</b> %1 %2");
 }
 
 // Last backup information labels
