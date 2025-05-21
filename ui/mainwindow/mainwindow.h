@@ -129,7 +129,6 @@ private slots:
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
-    void onDeleteAllBackupsClicked();
     void onChangeBackupDestinationClicked();
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
@@ -139,7 +138,6 @@ private slots:
     // Handles UI updates and events
     void onCooldownFinished();
     void onNotificationButtonClicked();
-    void onUninstallClicked();
     void refreshFileWatcher();
     void onThemeChanged();
 

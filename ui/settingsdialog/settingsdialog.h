@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 
+// Settings dialog for user and system configuration
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -44,6 +45,10 @@ private:
     QComboBox* themeComboBox;
     QPushButton* saveButton;
     QTimer* saveCooldownTimer;
+
+    // Buttons for data cleanup features
+    QPushButton* clearAppDataButton = nullptr;
+    QPushButton* resetBackupArchiveButton = nullptr;
 };
 
 #endif // SETTINGSDIALOG_H

@@ -189,9 +189,7 @@ void MainWindow::applyButtonCursors() {
         {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
         {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
         {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
-        {ui->ResetDestinationButton, MainWindowStyling::Styles::ToolTips::k_RESET_DESTINATION},
-        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
-        {ui->UninstallButton, MainWindowStyling::Styles::ToolTips::k_UNINSTALL}
+        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS}
     };
 
     for (const auto &[button, tooltip] : buttons) {
@@ -210,9 +208,7 @@ void MainWindow::setupConnections() {
         {ui->ChangeBackupDestinationButton, &MainWindow::onChangeBackupDestinationClicked},
         {ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked},
         {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
-        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
-        {ui->ResetDestinationButton, &MainWindow::onDeleteAllBackupsClicked},
-        {ui->UninstallButton, &MainWindow::onUninstallClicked}
+        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked}
     };
 
     for (const auto &[button, slot] : connections) {
@@ -936,76 +932,6 @@ void MainWindow::onDeleteBackupClicked() {
         triggerButtonFeedback(ui->DeleteBackupButton,
                               Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
                               Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
-    }
-}
-
-// Deletes all backups in the current destination
-void MainWindow::onDeleteAllBackupsClicked() {
-    const QString backupLocation = destinationModel->rootPath();
-
-    if (backupLocation.isEmpty() || !QDir(backupLocation).exists()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_LOCATION_INVALID_TITLE,
-                             ErrorMessages::k_BACKUP_LOCATION_INVALID_MESSAGE);
-        return;
-    }
-
-    const QMessageBox::StandardButton confirm = QMessageBox::warning(
-        this, WarningMessages::k_DELETE_ALL_BACKUPS_WARNING_TITLE,
-        WarningMessages::k_DELETE_ALL_BACKUPS_WARNING_MESSAGE.arg(backupLocation),
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-
-    if (confirm != QMessageBox::Yes)
-        return;
-
-    fileWatcher->removeAllPaths();
-
-    QDir dir(backupLocation);
-    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-
-    bool success = true;
-
-    for (const QFileInfo &entry : entries) {
-        const QString entryPath = entry.absoluteFilePath();
-        if (entry.isDir()) {
-            if (!QDir(entryPath).removeRecursively()) {
-                success = false;
-            }
-        } else {
-            if (!QFile::remove(entryPath)) {
-                success = false;
-            }
-        }
-    }
-
-    const QString configFolderName = App::Items::k_BACKUP_SETUP_CONFIG_FOLDER;
-    const QString configFolderPath = QDir(backupLocation).filePath(configFolderName);
-    if (QDir(configFolderPath).exists()) {
-        if (!QDir(configFolderPath).removeRecursively()) {
-            success = false;
-        }
-    }
-
-    if (success) {
-        QMessageBox::information(this, InfoMessages::k_DELETE_ALL_SUCCESS_TITLE,
-                                 InfoMessages::k_DELETE_ALL_SUCCESS_MESSAGE);
-    } else {
-        QMessageBox::critical(this, ErrorMessages::k_DELETE_ALL_FAILED_TITLE,
-                              ErrorMessages::k_DELETE_ALL_FAILED_MESSAGE);
-    }
-
-    resetFileWatcherAndDestinationView();
-    refreshFileWatcher();
-    refreshBackupStatus();
-}
-
-// Initiates the uninstall process
-void MainWindow::onUninstallClicked() {
-    fileWatcher->removeAllPaths();
-    fileWatcher->disconnect();
-
-    const bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
-    if (success) {
-        QApplication::quit();
     }
 }
 

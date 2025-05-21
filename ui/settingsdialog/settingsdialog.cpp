@@ -1,9 +1,9 @@
-// Project includes
 #include "settingsdialog.h"
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 
 // Qt includes
 #include <QFormLayout>
@@ -15,11 +15,13 @@
 #include <QSignalBlocker>
 #include <QMessageBox>
 #include <QDialogButtonBox>
+#include <QApplication>
+#include <QDir>
+#include <QFileInfo>
 
 using namespace SettingsDialogConstants;
-using namespace ThemeServiceConstants;
-using namespace ThemeServiceConstants::ThemeConstants;
 using namespace SettingsDialogStyling;
+using ThemeServiceConstants::UserThemePreference;
 
 // Constructs and initializes the settings dialog layout
 SettingsDialog::SettingsDialog(QWidget* parent)
@@ -123,14 +125,80 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     themeComboBox->addItem(k_LABEL_THEME_DARK_MODE, static_cast<int>(UserThemePreference::Dark));
     layout->addWidget(themeComboBox);
 
-    UserThemePreference savedPref = ServiceDirector::getInstance().getThemePreference();
-    int index = themeComboBox->findData(static_cast<int>(savedPref));
+    int index = themeComboBox->findData(static_cast<int>(ServiceDirector::getInstance().getThemePreference()));
     if (index != -1) {
         QSignalBlocker blocker(themeComboBox);
         themeComboBox->setCurrentIndex(index);
     }
 
-    layout->addStretch();
+    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+
+    auto* buttonRow = new QWidget(widget);
+    auto* rowLayout = new QHBoxLayout(buttonRow);
+    rowLayout->setSpacing(12);
+    rowLayout->setContentsMargins(0, 24, 0, 0);
+
+    resetBackupArchiveButton = new QPushButton("📁 Reset Backup Archive", buttonRow);
+    resetBackupArchiveButton->setCursor(Qt::PointingHandCursor);
+    resetBackupArchiveButton->setToolTip("Delete all backups and logs from the backup directory");
+    resetBackupArchiveButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    resetBackupArchiveButton->setStyleSheet(k_RESET_BACKUP_BUTTON_STYLE);
+    rowLayout->addWidget(resetBackupArchiveButton);
+
+    clearAppDataButton = new QPushButton("🗑️ Clear App Data", buttonRow);
+    clearAppDataButton->setCursor(Qt::PointingHandCursor);
+    clearAppDataButton->setToolTip("Remove all data created by this app from your system");
+    clearAppDataButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    clearAppDataButton->setStyleSheet(k_CLEAR_APP_BUTTON_STYLE);
+    rowLayout->addWidget(clearAppDataButton);
+
+    layout->addWidget(buttonRow);
+
+    connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
+        NotificationServiceManager::instance().suspendNotifications(true);
+        const bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
+        NotificationServiceManager::instance().suspendNotifications(false);
+        if (success) {
+            QApplication::quit();
+        }
+    });
+
+    connect(resetBackupArchiveButton, &QPushButton::clicked, this, [this]() {
+        const QString backupLocation = ServiceDirector::getInstance().getBackupDirectory();
+        if (backupLocation.isEmpty() || !QDir(backupLocation).exists()) {
+            QMessageBox::warning(this, k_WARNING_INVALID_PATH_TITLE, k_WARNING_INVALID_PATH_MESSAGE);
+            return;
+        }
+
+        const QMessageBox::StandardButton confirm = QMessageBox::warning(
+            this,
+            k_CONFIRM_RESET_TITLE,
+            k_CONFIRM_RESET_MESSAGE.arg(backupLocation),
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (confirm != QMessageBox::Yes) return;
+
+        QDir dir(backupLocation);
+        const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+        bool success = true;
+        for (const QFileInfo& entry : entries) {
+            const QString path = entry.absoluteFilePath();
+            if (entry.isDir()) {
+                if (!QDir(path).removeRecursively()) success = false;
+            } else {
+                if (!QFile::remove(path)) success = false;
+            }
+        }
+
+        if (success) {
+            QMessageBox::information(this, k_RESET_SUCCESS_TITLE, k_RESET_SUCCESS_MESSAGE);
+        } else {
+            QMessageBox::critical(this, k_RESET_FAILURE_TITLE, k_RESET_FAILURE_MESSAGE);
+        }
+    });
+
     return widget;
 }
 
@@ -149,7 +217,6 @@ void SettingsDialog::onSaveClicked() {
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ServiceDirector::getInstance().setThemePreference(selectedTheme);
-
     ThemeServiceManager::instance().applyTheme();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);

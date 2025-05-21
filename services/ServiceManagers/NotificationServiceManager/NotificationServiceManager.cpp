@@ -72,6 +72,8 @@ void NotificationServiceManager::load() {
 
 // Saves all notifications to disk
 void NotificationServiceManager::save() {
+    if (notificationsSuspended) return;
+
     QJsonArray array;
     const auto& list = notifications;
 
@@ -80,11 +82,13 @@ void NotificationServiceManager::save() {
     }
 
     QJsonDocument doc(array);
-    if (!JsonManager::saveJsonFile(notificationFilePath(), doc)) {}
+    JsonManager::saveJsonFile(notificationFilePath(), doc);
 }
 
 // Adds a new unread notification
 void NotificationServiceManager::addNotification(const QString& message) {
+    if (notificationsSuspended) return;
+
     notifications.prepend({ message, QDateTime::currentDateTimeUtc(), false });
     save();
     emit notificationsUpdated();
@@ -92,6 +96,8 @@ void NotificationServiceManager::addNotification(const QString& message) {
 
 // Marks all notifications as read
 void NotificationServiceManager::markAllAsRead() {
+    if (notificationsSuspended) return;
+
     for (auto& n : notifications) {
         n.read = true;
     }
@@ -116,6 +122,8 @@ const QList<NotificationServiceStruct>& NotificationServiceManager::allNotificat
 
 // Clears all notifications and resets with welcome message
 void NotificationServiceManager::clearAllNotifications() {
+    if (notificationsSuspended) return;
+
     notifications.clear();
     notifications.append({
         NotificationSettings::k_DEFAULT_WELCOME_MESSAGE,
@@ -124,4 +132,9 @@ void NotificationServiceManager::clearAllNotifications() {
     });
     save();
     emit notificationsUpdated();
+}
+
+// Suspends or resumes all notifications and file writes
+void NotificationServiceManager::suspendNotifications(bool suspend) {
+    notificationsSuspended = suspend;
 }

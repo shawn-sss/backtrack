@@ -19,6 +19,19 @@ inline constexpr auto k_BUTTON_SAVE_TEXT              = "Save";
 inline constexpr auto k_BUTTON_SAVED_TEXT             = "✔️ Saved";
 inline constexpr auto k_BUTTON_SAVE_WIDTH_TEXT        = "✔️ Saved";
 
+// Dialog titles and messages
+inline const QString k_CONFIRM_RESET_TITLE            = QStringLiteral("Delete Backup Archive");
+inline const QString k_CONFIRM_RESET_MESSAGE          = QStringLiteral("Are you sure you want to delete all backups in:\n%1");
+
+inline constexpr auto k_RESET_SUCCESS_TITLE           = "Reset Complete";
+inline constexpr auto k_RESET_SUCCESS_MESSAGE         = "All backup data and logs have been deleted.";
+
+inline constexpr auto k_RESET_FAILURE_TITLE           = "Reset Failed";
+inline constexpr auto k_RESET_FAILURE_MESSAGE         = "Some items could not be deleted.";
+
+inline constexpr auto k_WARNING_INVALID_PATH_TITLE    = "Invalid Location";
+inline constexpr auto k_WARNING_INVALID_PATH_MESSAGE  = "Backup location is invalid or does not exist.";
+
 // Timing
 inline constexpr int k_SAVE_FEEDBACK_COOLDOWN_MS      = 3000;
 

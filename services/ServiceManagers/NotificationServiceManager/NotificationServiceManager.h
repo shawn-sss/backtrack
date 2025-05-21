@@ -31,11 +31,14 @@ public:
     // Accessors
     QList<NotificationServiceStruct> unreadNotifications() const;
     const QList<NotificationServiceStruct>& allNotifications() const;
+    void suspendNotifications(bool suspend);
+
 
 signals:
     void notificationsUpdated();
 
 private:
+    bool notificationsSuspended = false;
     NotificationServiceManager();
     QString notificationFilePath() const;
 
