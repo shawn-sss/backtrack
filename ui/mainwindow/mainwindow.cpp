@@ -262,11 +262,7 @@ void MainWindow::initializeBackupSystem() {
                               ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
     }
 
-    setupDestinationView();
-
-    QModelIndex sourceRootIndex = destinationModel->setRootPath(savedBackupDir);
-    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
-    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+    setupDestinationView(savedBackupDir);
 
     setupSourceTreeView();
     setupBackupStagingTreeView();
@@ -296,24 +292,32 @@ void MainWindow::setupBackupStagingTreeView() {
 
 // Sets up the destination backup view
 void MainWindow::setupDestinationView() {
+    setupDestinationView(backupService->getBackupRoot());
+}
+
+// Sets up the destination backup view (with location)
+void MainWindow::setupDestinationView(const QString& backupDir) {
     destinationModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
     destinationModel->setNameFilters(QStringList() << "*");
     destinationModel->setNameFilterDisables(false);
 
-    if (!destinationProxyModel) {
-        destinationProxyModel = new DestinationProxyModel(this);
-        destinationProxyModel->setSourceModel(destinationModel);
-        destinationProxyModel->setExcludedFolderName(
-            App::Items::k_BACKUP_SETUP_CONFIG_FOLDER);
+    if (destinationProxyModel) {
+        delete destinationProxyModel;
     }
 
-    QString backupDir = PathServiceManager::backupSetupFolderPath();
+    destinationProxyModel = new DestinationProxyModel(this);
+    destinationProxyModel->setSourceModel(destinationModel);
+    destinationProxyModel->setExcludedFolderName(App::Items::k_BACKUP_SETUP_CONFIG_FOLDER);
+
     QModelIndex sourceRootIndex = destinationModel->setRootPath(backupDir);
     QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
 
     configureTreeView(ui->BackupDestinationView, destinationProxyModel,
                       QAbstractItemView::SingleSelection, true);
+    ui->BackupDestinationView->setModel(destinationProxyModel);
     ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+
+    applyCustomTreePalette(ui->BackupDestinationView);
     destinationProxyModel->sort(0);
 }
 
@@ -413,10 +417,7 @@ void MainWindow::resetFileWatcherAndDestinationView() {
     const QStringList watchedRoots = getWatchedRoots();
     fileWatcher->startWatchingMultiple(watchedRoots);
 
-    QString backupViewDir = PathServiceManager::backupSetupFolderPath();
-    QModelIndex sourceRootIndex = destinationModel->setRootPath(backupViewDir);
-    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
-    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+    setupDestinationView(PathServiceManager::backupSetupFolderPath());
 }
 
 // Starts watching a specific backup directory
@@ -926,17 +927,15 @@ void MainWindow::onChangeBackupDestinationClicked() {
         return;
     }
 
+    // Update services and paths
     backupService->setBackupRoot(selectedDir);
     ServiceDirector::getInstance().setBackupDirectory(selectedDir);
     PathServiceManager::setBackupDirectory(selectedDir);
 
-    QModelIndex sourceRootIndex = destinationModel->setRootPath(selectedDir);
-    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
-    ui->BackupDestinationView->setModel(destinationProxyModel);
-    ui->BackupDestinationView->setRootIndex(proxyRootIndex);
+    // Use the DRY method
+    setupDestinationView(selectedDir);
 
     refreshBackupStatus();
-
     refreshFileWatcher();
 
     triggerButtonFeedback(ui->ChangeBackupDestinationButton,
@@ -1010,12 +1009,30 @@ void MainWindow::onDeleteBackupClicked() {
     if (QMessageBox::question(
             this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
             QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
-            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-        backupController->deleteBackup(selectedPath);
-        triggerButtonFeedback(ui->DeleteBackupButton,
-                              Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
-                              Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
+            QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+        return;
     }
+
+    const QString correctBackupDir = backupService->getBackupRoot();
+
+    ui->BackupDestinationView->setModel(nullptr);
+
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+
+    delete destinationProxyModel;
+    destinationProxyModel = nullptr;
+
+    backupController->deleteBackup(selectedPath);
+
+    setupDestinationView(correctBackupDir);
+
+    refreshFileWatcher();
+    refreshBackupStatus();
+
+    triggerButtonFeedback(ui->DeleteBackupButton,
+                          Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
+                          Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
 }
 
 // Notification handling

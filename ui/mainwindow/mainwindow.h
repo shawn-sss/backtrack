@@ -70,6 +70,7 @@ private:
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
+    void setupDestinationView(const QString& backupDir);
     void configureTreeView(QTreeView* treeView,
                            QAbstractItemModel* model,
                            QAbstractItemView::SelectionMode selectionMode,
