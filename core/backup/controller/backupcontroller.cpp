@@ -1,4 +1,5 @@
 // Project includes
+#include "backupcontroller.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
 #include "../../../ui/mainwindow/mainwindowmessages.h"
@@ -7,7 +8,6 @@
 #include "../../../../constants/interface_config.h"
 #include "../../../../constants/backup_config.h"
 #include "../../../../constants/app_info.h"
-#include "backupcontroller.h"
 
 // Qt includes
 #include <QDateTime>
@@ -24,6 +24,50 @@ BackupController::BackupController(BackupService* service, QObject* parent)
 // Cleans up when controller is destroyed
 BackupController::~BackupController() {
     cleanupAfterTransfer();
+}
+
+// Returns whether a backup operation is running
+bool BackupController::isBackupInProgress() const {
+    return workerThread && workerThread->isRunning();
+}
+
+// Creates a new folder for backup
+bool BackupController::createBackupFolder(const QString& path) {
+    return QDir().mkpath(path);
+}
+
+// Generates a timestamped backup folder path
+QString BackupController::generateBackupFolderPath(const QString& destinationPath) const {
+    return QDir(destinationPath).filePath(
+        ServiceDirector::getInstance().getBackupPrefix() +
+        QDateTime::currentDateTime().toString(
+            Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
+}
+
+// Stops and cleans up the worker thread
+void BackupController::cleanupAfterTransfer() {
+    if (!workerThread)
+        return;
+
+    workerThread->quit();
+    workerThread->wait();
+    workerThread->deleteLater();
+    workerThread = nullptr;
+}
+
+// Clears contents of the backup archive directory
+void BackupController::resetBackupArchive(const QString& directoryPath) {
+    QDir dir(directoryPath);
+    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+    for (const QFileInfo& entry : entries) {
+        const QString path = entry.absoluteFilePath();
+        if (entry.isDir()) {
+            QDir(path).removeRecursively();
+        } else {
+            QFile::remove(path);
+        }
+    }
 }
 
 // Starts a new backup operation in a worker thread
@@ -111,33 +155,4 @@ void BackupController::deleteBackup(const QString& backupPath) {
     }
 
     emit backupDeleted();
-}
-
-// Returns whether a backup operation is running
-bool BackupController::isBackupInProgress() const {
-    return workerThread && workerThread->isRunning();
-}
-
-// Creates a new folder for backup
-bool BackupController::createBackupFolder(const QString& path) {
-    return QDir().mkpath(path);
-}
-
-// Stops and cleans up the worker thread
-void BackupController::cleanupAfterTransfer() {
-    if (!workerThread)
-        return;
-
-    workerThread->quit();
-    workerThread->wait();
-    workerThread->deleteLater();
-    workerThread = nullptr;
-}
-
-// Generates a timestamped backup folder path
-QString BackupController::generateBackupFolderPath(const QString& destinationPath) const {
-    return QDir(destinationPath).filePath(
-        ServiceDirector::getInstance().getBackupPrefix() +
-        QDateTime::currentDateTime().toString(
-            Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
 }

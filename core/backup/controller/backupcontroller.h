@@ -21,26 +21,27 @@ public:
     explicit BackupController(BackupService* service, QObject* parent = nullptr);
     ~BackupController();
 
-    // Backup interface methods
+    // Public interface
     void createBackup(const QString& destinationPath,
                       const QStringList& stagingList,
                       QProgressBar* progressBar);
     void deleteBackup(const QString& backupPath);
     bool isBackupInProgress() const;
+    void resetBackupArchive(const QString& directoryPath);
 
 signals:
-    // Events for backup lifecycle
+    // Backup operation events
     void backupCreated();
     void backupDeleted();
     void errorOccurred(const QString& error);
 
 private:
-    // Internal utilities
+    // Internal helpers
     void cleanupAfterTransfer();
     bool createBackupFolder(const QString& path);
     QString generateBackupFolderPath(const QString& destinationPath) const;
 
-    // Member variables
+    // Members
     BackupService* backupService;
     QThread* workerThread;
 };

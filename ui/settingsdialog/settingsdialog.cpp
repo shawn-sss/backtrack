@@ -27,10 +27,14 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+// C++ includes
+#include <QString>
+
 using namespace SettingsDialogConstants;
 using namespace SettingsDialogStyling;
 using ThemeServiceConstants::UserThemePreference;
 
+// Constructor and destructor
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -40,6 +44,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 SettingsDialog::~SettingsDialog() = default;
 
+// Initializes the overall layout and UI structure
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -88,6 +93,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
+// Creates and returns the user settings page widget
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -107,6 +113,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
+// Creates and returns the system settings page widget
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -149,12 +156,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     layout->addWidget(buttonRow);
 
     connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
-        NotificationServiceManager::instance().suspendNotifications(true);
-        const bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
-        NotificationServiceManager::instance().suspendNotifications(false);
-        if (success) {
-            QApplication::quit();
-        }
+            emit requestAppDataClear();
     });
 
     connect(resetBackupArchiveButton, &QPushButton::clicked, this, [this]() {
@@ -173,29 +175,13 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
 
         if (confirm != QMessageBox::Yes) return;
 
-        QDir dir(backupLocation);
-        const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-
-        bool success = true;
-        for (const QFileInfo& entry : entries) {
-            const QString path = entry.absoluteFilePath();
-            if (entry.isDir()) {
-                if (!QDir(path).removeRecursively()) success = false;
-            } else {
-                if (!QFile::remove(path)) success = false;
-            }
-        }
-
-        if (success) {
-            QMessageBox::information(this, k_RESET_SUCCESS_TITLE, k_RESET_SUCCESS_MESSAGE);
-        } else {
-            QMessageBox::critical(this, k_RESET_FAILURE_TITLE, k_RESET_FAILURE_MESSAGE);
-        }
+        emit requestBackupReset(backupLocation, "reset");
     });
 
     return widget;
 }
 
+// Handles logic when the Save button is clicked
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();

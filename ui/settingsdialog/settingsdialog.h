@@ -1,8 +1,6 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-// Project includes
-
 // Qt includes
 #include <QComboBox>
 #include <QDialog>
@@ -12,18 +10,20 @@
 #include <QStackedWidget>
 #include <QTimer>
 
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
-
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
     explicit SettingsDialog(QWidget* parent = nullptr);
     ~SettingsDialog() override;
+
+signals:
+    void requestBackupReset(const QString& path, const QString& deleteType);
+    void requestAppDataClear();
+
+private slots:
+    // Event handling
+    void onSaveClicked();
 
 private:
     // Layout and UI construction
@@ -32,18 +32,13 @@ private:
     QWidget* createSystemSettingsPage();
     void applyButtonCursorsAndTooltips();
 
-private slots:
-    // Event handling
-    void onSaveClicked();
-
-private:
     // Core UI elements
-    QListWidget* categoryList;
-    QStackedWidget* settingsStack;
-    QLineEdit* backupPrefixEdit;
-    QComboBox* themeComboBox;
-    QPushButton* saveButton;
-    QTimer* saveCooldownTimer;
+    QListWidget* categoryList = nullptr;
+    QStackedWidget* settingsStack = nullptr;
+    QLineEdit* backupPrefixEdit = nullptr;
+    QComboBox* themeComboBox = nullptr;
+    QPushButton* saveButton = nullptr;
+    QTimer* saveCooldownTimer = nullptr;
 
     // Action buttons
     QPushButton* clearAppDataButton = nullptr;

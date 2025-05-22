@@ -3,6 +3,7 @@
 #include "ToolbarServiceStyling.h"
 
 #include "../../../ui/mainwindow/mainwindowlabels.h"
+#include "../../../ui/mainwindow/mainwindow.h"
 #include "../../../ui/settingsdialog/settingsdialog.h"
 #include "../../../ui/helpdialog/helpdialog.h"
 #include "../../../ui/aboutdialog/aboutdialog.h"
@@ -14,6 +15,7 @@
 #include <QToolButton>
 #include <QSizePolicy>
 #include <QWidget>
+#include <QMessageBox>
 
 using namespace Resources::ToolbarService;
 
@@ -95,7 +97,19 @@ void ToolbarServiceManager::applyCursorStyle(QToolBar* toolBar) {
 
 // Displays the Settings dialog
 void ToolbarServiceManager::showSettings() {
-    SettingsDialog dialog(qobject_cast<QWidget*>(parent()));
+    auto* parentWidget = qobject_cast<QWidget*>(parent());
+    SettingsDialog dialog(parentWidget);
+
+    if (MainWindow* mainWindow = qobject_cast<MainWindow*>(parentWidget)) {
+        QObject::connect(&dialog, &SettingsDialog::requestBackupReset, mainWindow, [mainWindow](const QString& path, const QString& type) {
+            mainWindow->handleBackupDeletion(path, type);
+        });
+
+        QObject::connect(&dialog, &SettingsDialog::requestAppDataClear, mainWindow, [mainWindow]() {
+            mainWindow->handleAppDataClear();
+        });
+    }
+
     dialog.exec();
 }
 

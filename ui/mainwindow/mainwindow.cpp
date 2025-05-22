@@ -1013,6 +1013,15 @@ void MainWindow::onDeleteBackupClicked() {
         return;
     }
 
+    handleBackupDeletion(selectedPath, "single");
+
+    triggerButtonFeedback(ui->DeleteBackupButton,
+                          Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
+                          Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
+}
+
+// Handles backup deletion/reset based on the provided delete type
+void MainWindow::handleBackupDeletion(const QString& path, const QString& deleteType) {
     const QString correctBackupDir = backupService->getBackupRoot();
 
     ui->BackupDestinationView->setModel(nullptr);
@@ -1023,16 +1032,47 @@ void MainWindow::onDeleteBackupClicked() {
     delete destinationProxyModel;
     destinationProxyModel = nullptr;
 
-    backupController->deleteBackup(selectedPath);
+    if (deleteType == "reset") {
+        if (fileWatcher) {
+            fileWatcher->removeAllPaths();
+        }
+
+        backupController->resetBackupArchive(path);
+
+        if (fileWatcher) {
+            fileWatcher->startWatchingMultiple({ correctBackupDir });
+        }
+
+    } else if (deleteType == "single") {
+        backupController->deleteBackup(path);
+    }
 
     setupDestinationView(correctBackupDir);
-
     refreshFileWatcher();
     refreshBackupStatus();
+}
 
-    triggerButtonFeedback(ui->DeleteBackupButton,
-                          Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
-                          Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
+// Handles app data clearing and shutdown process
+void MainWindow::handleAppDataClear() {
+    if (fileWatcher) {
+        fileWatcher->removeAllPaths();
+    }
+
+    ui->BackupDestinationView->setModel(nullptr);
+
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+
+    delete destinationProxyModel;
+    destinationProxyModel = nullptr;
+
+    NotificationServiceManager::instance().suspendNotifications(true);
+    bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
+    NotificationServiceManager::instance().suspendNotifications(false);
+
+    if (success) {
+        QApplication::quit();
+    }
 }
 
 // Notification handling

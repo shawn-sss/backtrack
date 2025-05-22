@@ -17,8 +17,6 @@
 #include <QStringList>
 #include <QTimer>
 
-// C++ includes
-
 // Forward declaration (Custom class)
 class BackupController;
 class BackupService;
@@ -51,6 +49,10 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
     QTabWidget* getDetailsTabWidget();
+
+    // Public utility methods
+    void handleBackupDeletion(const QString& path, const QString& deleteType);
+    void handleAppDataClear();
 
 protected:
     void closeEvent(QCloseEvent* event) override;
