@@ -11,7 +11,6 @@
 #include <QElapsedTimer>
 #include <QItemSelectionModel>
 #include <QMainWindow>
-#include <QPair>
 #include <QPoint>
 #include <QString>
 #include <QStringList>
@@ -20,7 +19,6 @@
 // Forward declaration (Custom class)
 class BackupController;
 class BackupService;
-class CustomTitleBar;
 class DestinationProxyModel;
 class FileWatcher;
 class NotificationServiceManager;
@@ -81,7 +79,6 @@ private:
     void removeAllColumnsFromTreeView(QTreeView* treeView);
 
     // File watcher
-    void refreshFileWatcherRoots();
     void startWatchingBackupDirectory(const QString& path);
     void resetFileWatcherAndDestinationView();
     QStringList getWatchedRoots() const;
@@ -112,12 +109,15 @@ private:
 
     // UI interactions and styling
     void applyButtonCursors();
-    void resetCreateBackupButtonState();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
     void applyCustomTreePalette(QTreeView* treeView);
+
+    // Encryption test
+    QString getSelectedDriveLetter() const;
+    void onDriveSelectionChanged();
 
 private slots:
     void onAddToBackupClicked();
@@ -134,12 +134,13 @@ private slots:
     void refreshFileWatcher();
     void onThemeChanged();
 
+    // Encryption test
+    void onUnlockDriveClicked();
+
 private:
     // Core UI
     Ui::MainWindow* ui = nullptr;
-    CustomTitleBar* titleBar = nullptr;
     QToolBar* toolBar = nullptr;
-    QPushButton* notificationButton = nullptr;
     QLabel* notificationBadge = nullptr;
 
     // Models and services

@@ -25,6 +25,13 @@ inline constexpr auto STYLE = R"(
     #BackupDestinationView {
         border: 1px solid;
     }
+    #BackupLocationLabel,
+    #SourceListLabel,
+    #StagingListLabel {
+        font-size: 10pt;
+        font-style: italic;
+        color: #ccc;
+    }
 )";
 }
 
@@ -78,6 +85,7 @@ inline constexpr auto k_RESET_DESTINATION  = "Delete ALL contents from the backu
 inline constexpr auto k_NOTIFICATIONS      = "View backup notifications";
 inline constexpr auto k_UNINSTALL          = "Uninstall the application and delete all local data";
 }
+inline constexpr auto k_UNLOCK_DRIVE = "Prompt to unlock a BitLocker-protected drive";
 
 namespace Visuals {
 inline constexpr auto COLOR_GREEN        = "green";

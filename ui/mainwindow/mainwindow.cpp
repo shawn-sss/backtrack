@@ -33,7 +33,6 @@
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 
 // Qt includes
-#include <QBuffer>
 #include <QElapsedTimer>
 #include <QFileDialog>
 #include <QFileSystemModel>
@@ -43,11 +42,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QScreen>
-#include <QSizePolicy>
-#include <QStandardPaths>
-#include <QStyleFactory>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QProcess>
 
 // Constructor: Sets up main window, UI, and all services
 MainWindow::MainWindow(QWidget* parent)
@@ -189,7 +186,8 @@ void MainWindow::applyButtonCursors() {
         {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
         {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
         {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
-        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS}
+        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
+        {ui->UnlockDriveButton, MainWindowStyling::Styles::k_UNLOCK_DRIVE}
     };
 
     for (const auto &[button, tooltip] : buttons) {
@@ -208,7 +206,8 @@ void MainWindow::setupConnections() {
         {ui->ChangeBackupDestinationButton, &MainWindow::onChangeBackupDestinationClicked},
         {ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked},
         {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
-        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked}
+        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
+        {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked}
     };
 
     for (const auto &[button, slot] : connections) {
@@ -216,6 +215,9 @@ void MainWindow::setupConnections() {
             connect(button, &QPushButton::clicked, this, slot);
         }
     }
+
+    connect(ui->DriveTreeView->selectionModel(), &QItemSelectionModel::currentChanged,
+            this, &MainWindow::onDriveSelectionChanged);
 }
 
 // Connects backup signals to response handlers
@@ -238,13 +240,6 @@ void MainWindow::connectBackupSignals() {
     connect(backupController, &BackupController::backupCreated, this, [this]() {
         QTimer::singleShot(100, this, [this]() { refreshBackupStatus(); });
     });
-}
-
-// Applies updated theme styling to all tree views when the application theme changes
-void MainWindow::onThemeChanged() {
-    applyCustomTreePalette(ui->DriveTreeView);
-    applyCustomTreePalette(ui->BackupStagingTreeView);
-    applyCustomTreePalette(ui->BackupDestinationView);
 }
 
 // Backup system initialization
@@ -377,6 +372,15 @@ void MainWindow::applyCustomTreePalette(QTreeView* treeView) {
     currentPalette.setColor(QPalette::Highlight, expectedHighlightColor);
     currentPalette.setColor(QPalette::HighlightedText, expectedTextColor);
     treeView->setPalette(currentPalette);
+}
+
+// Theme and Appearance Handling
+
+// Applies updated theme styling to all tree views when the application theme changes
+void MainWindow::onThemeChanged() {
+    applyCustomTreePalette(ui->DriveTreeView);
+    applyCustomTreePalette(ui->BackupStagingTreeView);
+    applyCustomTreePalette(ui->BackupDestinationView);
 }
 
 // File watcher and directory monitoring
@@ -628,14 +632,15 @@ QPair<QString, QString> MainWindow::statusVisualsForColor(const QString &color) 
 
 // Updates label with current backup directory path
 void MainWindow::updateBackupLocationLabel(const QString &location) {
-    const int maxLength = 32;
-    QString displayLocation = location;
+    const int maxChars = 45;
 
-    if (location.length() > maxLength) {
-        displayLocation = location.left(maxLength / 2) + "..." + location.right(maxLength / 2);
+    QString displayText = location;
+    if (location.length() > maxChars) {
+        int half = maxChars / 2;
+        displayText = location.left(half) + "..." + location.right(half);
     }
 
-    ui->BackupLocationLabel->setText(Labels::Backup::k_LOCATION + displayLocation);
+    ui->BackupLocationLabel->setText(displayText);
     ui->BackupLocationLabel->setToolTip(location);
 }
 
@@ -798,13 +803,10 @@ void MainWindow::updateApplicationStatusLabel() {
     QString emoji, label;
     if (status == InfoMessages::k_INSTALL_OK) {
         emoji = Labels::Emoji::k_GREEN;
-        label = Labels::ApplicationStatus::k_READY;
-    } else if (status == InfoMessages::k_INSTALL_PARTIAL) {
-        emoji = Labels::Emoji::k_YELLOW;
-        label = Labels::ApplicationStatus::k_WARNING;
+        label = Labels::ApplicationStatus::k_HEALTHY;
     } else {
         emoji = Labels::Emoji::k_RED;
-        label = Labels::ApplicationStatus::k_CORRUPT;
+        label = Labels::ApplicationStatus::k_INVALID;
     }
 
     ui->ApplicationStatusLabel->setText(
@@ -812,8 +814,7 @@ void MainWindow::updateApplicationStatusLabel() {
     ui->ApplicationStatusLabel->setTextFormat(Qt::RichText);
 
     static bool appIntegrityNotified = false;
-    if ((status == InfoMessages::k_INSTALL_PARTIAL || status == InfoMessages::k_INSTALL_BROKEN)
-        && !appIntegrityNotified) {
+    if (status != InfoMessages::k_INSTALL_OK && !appIntegrityNotified) {
         NotificationServiceManager::instance().addNotification(
             NotificationMessages::k_BROKEN_APP_STRUCTURE_MESSAGE);
         appIntegrityNotified = true;
@@ -825,6 +826,7 @@ void MainWindow::updateApplicationStatusLabel() {
 
     revalidateBackupAndAppStatus();
 }
+
 
 // Checks for missing expected configuration files
 QString MainWindow::checkInstallIntegrityStatus() {
@@ -861,6 +863,7 @@ void MainWindow::onAddToBackupClicked() {
 
     QStringList alreadyStaged;
     QStringList toStage;
+    QStringList notReadable;
 
     for (const QModelIndex &index : selectedIndexes) {
         if (!index.isValid() || index.column() != 0)
@@ -868,11 +871,24 @@ void MainWindow::onAddToBackupClicked() {
 
         const QString path = sourceModel->filePath(index);
 
+        QFileInfo fileInfo(path);
+        if (!fileInfo.isReadable()) {
+            notReadable << path;
+            qDebug() << "Read access denied for:" << path;
+            continue;
+        }
+
         if (stagingModel->containsPath(path)) {
             alreadyStaged << path;
         } else {
             toStage << path;
         }
+    }
+
+    if (!notReadable.isEmpty()) {
+        QMessageBox::warning(this,
+                             ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
+                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(notReadable.join("\n")));
     }
 
     if (!alreadyStaged.isEmpty()) {
@@ -927,12 +943,10 @@ void MainWindow::onChangeBackupDestinationClicked() {
         return;
     }
 
-    // Update services and paths
     backupService->setBackupRoot(selectedDir);
     ServiceDirector::getInstance().setBackupDirectory(selectedDir);
     PathServiceManager::setBackupDirectory(selectedDir);
 
-    // Use the DRY method
     setupDestinationView(selectedDir);
 
     refreshBackupStatus();
@@ -1020,59 +1034,55 @@ void MainWindow::onDeleteBackupClicked() {
                           Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
 }
 
-// Handles backup deletion/reset based on the provided delete type
-void MainWindow::handleBackupDeletion(const QString& path, const QString& deleteType) {
-    const QString correctBackupDir = backupService->getBackupRoot();
-
-    ui->BackupDestinationView->setModel(nullptr);
-
-    delete destinationModel;
-    destinationModel = new QFileSystemModel(this);
-
-    delete destinationProxyModel;
-    destinationProxyModel = nullptr;
-
-    if (deleteType == "reset") {
-        if (fileWatcher) {
-            fileWatcher->removeAllPaths();
-        }
-
-        backupController->resetBackupArchive(path);
-
-        if (fileWatcher) {
-            fileWatcher->startWatchingMultiple({ correctBackupDir });
-        }
-
-    } else if (deleteType == "single") {
-        backupController->deleteBackup(path);
-    }
-
-    setupDestinationView(correctBackupDir);
-    refreshFileWatcher();
-    refreshBackupStatus();
+// Enables the unlock button when drive selection changes
+void MainWindow::onDriveSelectionChanged() {
+    ui->UnlockDriveButton->setEnabled(true);
 }
 
-// Handles app data clearing and shutdown process
-void MainWindow::handleAppDataClear() {
-    if (fileWatcher) {
-        fileWatcher->removeAllPaths();
+// Unlocks the selected drive
+void MainWindow::onUnlockDriveClicked() {
+    QString driveLetter = getSelectedDriveLetter();
+    if (driveLetter.isEmpty()) {
+        QMessageBox::warning(this,
+                             BitLockerMessages::k_NO_DRIVE_SELECTED_TITLE,
+                             BitLockerMessages::k_NO_DRIVE_SELECTED_MESSAGE);
+        return;
     }
 
-    ui->BackupDestinationView->setModel(nullptr);
+    QString drivePath = driveLetter + ":/";
+    QDir driveDir(drivePath);
 
-    delete destinationModel;
-    destinationModel = new QFileSystemModel(this);
-
-    delete destinationProxyModel;
-    destinationProxyModel = nullptr;
-
-    NotificationServiceManager::instance().suspendNotifications(true);
-    bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
-    NotificationServiceManager::instance().suspendNotifications(false);
-
-    if (success) {
-        QApplication::quit();
+    if (driveDir.exists() && driveDir.isReadable()) {
+        return;
     }
+
+    triggerButtonFeedback(ui->UnlockDriveButton,
+                          Labels::Backup::k_UNLOCKING_FEEDBACK_TEXT,
+                          Labels::Backup::k_UNLOCK_DRIVE_ORIGINAL_TEXT);
+
+    QProcess taskKill;
+    taskKill.start("taskkill", QStringList() << "/IM" << "manage-bde.exe" << "/F");
+    taskKill.waitForFinished(2000);
+
+    const QString script =
+        QStringLiteral("Start-Process manage-bde -ArgumentList '-unlock %1: -password' -Verb runAs")
+            .arg(driveLetter.toUpper());
+
+    bool started = QProcess::startDetached("powershell", QStringList() << "-Command" << script);
+
+    if (!started) {
+        QMessageBox::critical(this,
+                              BitLockerMessages::k_UNLOCK_FAILED_TITLE,
+                              BitLockerMessages::k_UNLOCK_FAILED_MESSAGE);
+        return;
+    }
+
+    QTimer::singleShot(10000, this, [this]() {
+        refreshBackupStatus();
+        refreshFileWatcher();
+        ui->DriveTreeView->setModel(sourceModel);
+        setupSourceTreeView();
+    });
 }
 
 // Notification handling
@@ -1193,9 +1203,93 @@ void MainWindow::triggerButtonFeedback(QPushButton *button,
     });
 }
 
-// Public accessors
+// Accessors
 
 // Returns the main details tab widget
-QTabWidget *MainWindow::getDetailsTabWidget() {
+QTabWidget* MainWindow::getDetailsTabWidget() {
     return ui->DetailsTabWidget;
+}
+
+// Returns the selected drive letter from the drive tree view
+QString MainWindow::getSelectedDriveLetter() const {
+    QModelIndex selectedIndex = ui->DriveTreeView->currentIndex();
+    if (!selectedIndex.isValid()) {
+        return "";
+    }
+
+    QString fullPath = sourceModel->filePath(selectedIndex);
+    if (fullPath.length() < 2 || fullPath[1] != ':') {
+        return "";
+    }
+
+    return fullPath.left(1).toUpper();
+}
+
+// Backup Maintenance and Cleanup
+
+// Handles backup deletion/reset based on the provided delete type
+void MainWindow::handleBackupDeletion(const QString& path, const QString& deleteType) {
+    const QString correctBackupDir = backupService->getBackupRoot();
+
+    ui->BackupDestinationView->setModel(nullptr);
+
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+
+    delete destinationProxyModel;
+    destinationProxyModel = nullptr;
+
+    if (deleteType == "reset") {
+        if (fileWatcher) {
+            fileWatcher->removeAllPaths();
+        }
+
+        backupController->resetBackupArchive(path);
+
+        if (fileWatcher) {
+            fileWatcher->startWatchingMultiple({ correctBackupDir });
+        }
+
+    } else if (deleteType == "single") {
+        backupController->deleteBackup(path);
+    }
+
+    setupDestinationView(correctBackupDir);
+    refreshFileWatcher();
+    refreshBackupStatus();
+}
+
+// Handles app data clearing and shutdown process
+void MainWindow::handleAppDataClear() {
+    if (fileWatcher) {
+        fileWatcher->removeAllPaths();
+    }
+
+    ui->BackupDestinationView->setModel(nullptr);
+
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+
+    delete destinationProxyModel;
+    destinationProxyModel = nullptr;
+
+    NotificationServiceManager::instance().suspendNotifications(true);
+    bool success = ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
+    NotificationServiceManager::instance().suspendNotifications(false);
+
+    if (success) {
+        QApplication::quit();
+    }
+}
+
+// Utility Methods
+
+// Checks if the specified directory is writable by attempting to create and delete a temporary file
+bool canWriteToDir(const QString& path) {
+    QFile testFile(path + "/.writeTest");
+    if (testFile.open(QIODevice::WriteOnly)) {
+        testFile.remove();
+        return true;
+    }
+    return false;
 }

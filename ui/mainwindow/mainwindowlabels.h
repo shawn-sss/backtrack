@@ -6,12 +6,16 @@
 
 // Backup-related labels and buttons
 namespace Labels::Backup {
-inline constexpr auto k_STATUS_LIGHT_IMAGE_FORMAT        = "PNG";
+//inline constexpr auto k_STATUS_LIGHT_IMAGE_FORMAT        = "PNG";
 inline constexpr auto k_FOUND                            = "Backup Found: ";
-inline constexpr auto k_LOCATION                         = "Backup Location: ";
+inline constexpr auto k_LOCATION                         = "";
 inline constexpr auto k_TOTAL_COUNT                      = "Backup Total Count: ";
 inline constexpr auto k_TOTAL_SIZE                       = "Backup Total Size: ";
 inline constexpr auto k_LOCATION_ACCESS                  = "Backup Location Access: ";
+
+inline constexpr auto k_UNLOCK_DRIVE_BUTTON              = "Unlock Drive";
+inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "Unlock Drive";
+inline constexpr auto k_UNLOCKING_FEEDBACK_TEXT          = "🔒 Unlocking...";
 
 inline constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "Notifications";
 inline constexpr auto k_NOTIFICATION_FEEDBACK_TEXT       = "🔔 Opened!";
@@ -28,18 +32,18 @@ inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "➖ Removed!";
 inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "🗑️ Deleted!";
 inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "📁 Changed!";
 
-inline constexpr auto k_READY_LABEL                      = "Ready";
+inline constexpr auto k_READY_LABEL                      = "OK";
 inline constexpr auto k_WARNING_LABEL                    = "Warning";
-inline constexpr auto k_NOT_INITIALIZED                  = "Not Initialized";
+inline constexpr auto k_NOT_INITIALIZED                  = "Uninitialized";
 
 inline constexpr auto k_WARNING_SUMMARY_LABEL            = "WARNING!";
 inline constexpr auto k_APP_AND_BACKUP_ISSUE_LABEL       = "App and Backup issues detected.";
 inline constexpr auto k_BACKUP_ISSUE_LABEL               = "Backup issue detected.";
 inline constexpr auto k_APP_ISSUE_LABEL                  = "App issue detected.";
-inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "No backups to count!";
+inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "Backup archive location uninitialized.";
 inline constexpr auto k_SEE_NOTIFICATIONS_LABEL          = "See Notifications for more details.";
 
-inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Location Status:</b> %1 %2");
+inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Archive Status:</b> %1 %2");
 }
 
 // Last backup information labels
@@ -52,12 +56,7 @@ inline const QString k_NO_BACKUPS_MESSAGE = QStringLiteral("No backups yet. Crea
 }
 
 // Toolbar action labels
-namespace Labels::Toolbar {
-inline constexpr auto k_SETTINGS = "Settings";
-inline constexpr auto k_HELP     = "Help";
-inline constexpr auto k_ABOUT    = "About";
-inline constexpr auto k_EXIT     = "Exit";
-}
+
 
 // Directory status labels
 namespace Labels::DirectoryStatus {
@@ -68,10 +67,9 @@ inline constexpr auto k_UNKNOWN   = "Unknown";
 
 // Application status labels
 namespace Labels::ApplicationStatus {
-inline constexpr auto k_READY        = "Ready";
-inline constexpr auto k_WARNING      = "Warning";
-inline constexpr auto k_CORRUPT      = "Corrupted";
-inline const QString k_STATUS_LABEL = QStringLiteral("<b>Application Files Status:</b> %1 %2");
+inline constexpr auto k_HEALTHY      = "Healthy";
+inline constexpr auto k_INVALID      = "Invalid";
+inline const QString k_STATUS_LABEL = QStringLiteral("<b>App Config Status:</b> %1 %2");
 }
 
 // Emoji symbols for status visuals

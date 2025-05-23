@@ -6,15 +6,12 @@
 
 // General informational messages
 namespace InfoMessages {
+// Titles and status labels
 inline constexpr auto k_SELECT_BACKUP_DESTINATION_TITLE = "Select Backup Destination";
-inline const QString k_DELETE_ALL_SUCCESS_TITLE = QStringLiteral("Deletion Complete");
-inline const QString k_DELETE_ALL_SUCCESS_MESSAGE =
-    QStringLiteral("All contents in the backup location have been successfully deleted.");
 inline const QString k_NOTIFICATION_POPUP_TITLE = QStringLiteral("Notification");
-
-inline constexpr auto k_INSTALL_OK      = "ok";
+inline constexpr auto k_INSTALL_OK = "ok";
 inline constexpr auto k_INSTALL_PARTIAL = "partial";
-inline constexpr auto k_INSTALL_BROKEN  = "broken";
+inline constexpr auto k_INSTALL_BROKEN = "broken";
 }
 
 // Warning prompts and confirmations
@@ -28,14 +25,6 @@ inline constexpr auto k_WARNING_OPERATION_STILL_RUNNING =
 
 inline constexpr auto k_WARNING_BACKUP_OPERATION_RUNNING =
     "A backup operation is currently in progress.\nPlease wait until it finishes before starting a new one.";
-
-inline const QString k_DELETE_ALL_BACKUPS_WARNING_TITLE = QStringLiteral("Confirm Deletion");
-inline const QString k_DELETE_ALL_BACKUPS_WARNING_MESSAGE =
-    QStringLiteral("⚠️ WARNING: This will permanently delete all files and folders inside:\n\n"
-                   "%1\n\n"
-                   "This action cannot be undone. All backups and data in this location "
-                   "will be lost forever.\n\n"
-                   "Are you sure you want to proceed?");
 }
 
 // Error messages related to backup operations
@@ -55,10 +44,6 @@ inline constexpr auto k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL =
 inline constexpr auto k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE = "No Items Ready for Backup";
 inline constexpr auto k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP =
     "No items are currently staged for backup.\nPlease add files or folders before proceeding.";
-
-inline constexpr auto k_BACKUP_VALIDATION_FAILED_TITLE = "Backup Validation Failed";
-inline constexpr auto k_ERROR_INVALID_BACKUP_DIRECTORY =
-    "The selected folder does not contain a valid backup.\nPlease verify the location and try again.";
 
 inline constexpr auto k_BACKUP_DIRECTORY_ERROR_TITLE = "Backup Directory Error";
 inline constexpr auto k_ERROR_CREATING_BACKUP_DIRECTORY =
@@ -86,12 +71,7 @@ inline constexpr auto k_ERROR_OPERATION_IN_PROGRESS = "Ongoing Operation";
 
 inline constexpr auto k_ERROR_TRANSFER_FAILED = "Unable to transfer the following item: %1";
 inline constexpr auto k_ERROR_FILE_ACCESS_DENIED = "File access was denied.";
-inline constexpr auto k_ERROR_CREATE_BACKUP_DIRECTORY = "Failed to create '%1' directory.";
-inline constexpr auto k_ERROR_CREATE_BACKUP_FILE = "Failed to create '%1' file.";
 inline constexpr auto k_ERROR_CREATE_BACKUP_FOLDER = "Failed to create '%1' folder.";
-
-inline constexpr auto k_BACKUP_ERROR_FOLDER_NOT_FOUND =
-    "The backup initialization folder could not be found.\nPlease try again.";
 
 inline constexpr auto k_ERROR_DESTINATION_MODEL_NULL =
     "The backup list could not be loaded due to an internal error.\nPlease try again.";
@@ -107,13 +87,9 @@ inline const QString k_ERROR_ALREADY_IN_STAGING =
     QStringLiteral("Some items are already in the staging list:\n\n%1\n\n"
                    "Please select different items that are not yet staged.");
 
-inline const QString k_BACKUP_LOCATION_INVALID_TITLE = QStringLiteral("Delete All Backups");
-inline const QString k_BACKUP_LOCATION_INVALID_MESSAGE =
-    QStringLiteral("The backup location is invalid or not set.");
-
-inline const QString k_DELETE_ALL_FAILED_TITLE = QStringLiteral("Deletion Failed");
-inline const QString k_DELETE_ALL_FAILED_MESSAGE =
-    QStringLiteral("Some files or folders could not be deleted. Please check permissions or try again.");
+inline constexpr auto k_READ_ACCESS_DENIED_TITLE = "Read Access Denied";
+inline const QString k_READ_ACCESS_DENIED_BODY =
+    QStringLiteral("The following items could not be added due to lack of read access:\n%1");
 }
 
 // Notification and backup integrity-related messages
@@ -154,6 +130,18 @@ inline constexpr auto k_HELP_WINDOW_MESSAGE =
     "4. Click the create backup button.";
 
 inline constexpr auto k_HELP_EXTENDED_MESSAGE = "\n\nYour settings are stored at:\n%1";
+}
+
+// BitLocker unlock messages
+namespace BitLockerMessages {
+inline constexpr auto k_NO_DRIVE_SELECTED_TITLE = "No Drive Selected";
+inline const QString k_NO_DRIVE_SELECTED_MESSAGE =
+    QStringLiteral("Please select a drive from the list first.");
+
+inline constexpr auto k_UNLOCK_FAILED_TITLE = "Unlock Failed";
+inline const QString k_UNLOCK_FAILED_MESSAGE =
+    QStringLiteral("Could not launch BitLocker password prompt.\n"
+                   "Ensure PowerShell is available and you have permission to elevate.");
 }
 
 #endif // MAINWINDOWMESSAGES_H
