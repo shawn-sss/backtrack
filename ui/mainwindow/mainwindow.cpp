@@ -40,11 +40,11 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QMessageBox>
+#include <QProcess>
 #include <QPushButton>
 #include <QScreen>
 #include <QTimer>
 #include <QVBoxLayout>
-#include <QProcess>
 
 // Constructor: Sets up main window, UI, and all services
 MainWindow::MainWindow(QWidget* parent)
@@ -147,6 +147,20 @@ void MainWindow::configureWindow() {
     }
 }
 
+// Defines main window layout
+void MainWindow::setupLayout() {
+    auto *container = new QWidget(this);
+    auto *mainLayout = new QHBoxLayout(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    QWidget *contentContainer = centralWidget();
+    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addWidget(contentContainer, 1);
+
+    setCentralWidget(container);
+}
+
 // Initializes progress bar and backup system UI
 void MainWindow::initializeUI() {
     Shared::UI::setupProgressBar(ui->TransferProgressBar,
@@ -162,20 +176,6 @@ void MainWindow::initializeUI() {
     }
 
     initializeBackupSystem();
-}
-
-// Defines main window layout
-void MainWindow::setupLayout() {
-    auto *container = new QWidget(this);
-    auto *mainLayout = new QHBoxLayout(container);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-
-    QWidget *contentContainer = centralWidget();
-    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mainLayout->addWidget(contentContainer, 1);
-
-    setCentralWidget(container);
 }
 
 // Applies tooltips and cursors to main window buttons
@@ -239,6 +239,26 @@ void MainWindow::connectBackupSignals() {
 
     connect(backupController, &BackupController::backupCreated, this, [this]() {
         QTimer::singleShot(100, this, [this]() { refreshBackupStatus(); });
+    });
+}
+
+// Provides temporary visual feedback on button interaction
+void MainWindow::triggerButtonFeedback(QPushButton *button,
+                                       const QString &feedbackText,
+                                       const QString &originalText,
+                                       int durationMs) {
+    if (!button)
+        return;
+
+    button->setCheckable(true);
+    button->setChecked(true);
+    button->setText(feedbackText);
+    button->setEnabled(false);
+
+    QTimer::singleShot(durationMs, this, [button, originalText]() {
+        button->setChecked(false);
+        button->setText(originalText);
+        button->setEnabled(true);
     });
 }
 
@@ -401,6 +421,8 @@ void MainWindow::initializeFileWatcher() {
         } else if (path.startsWith(backupDir)) {
             refreshBackupStatus();
         }
+
+        checkStagingForReadAccessLoss();
     });
 
     connect(fileWatcher, &FileWatcher::directoryChanged, this, [this](const QString &path) {
@@ -413,7 +435,35 @@ void MainWindow::initializeFileWatcher() {
             refreshBackupStatus();
         }
 
+        checkStagingForReadAccessLoss();
     });
+}
+
+// Checks for files in staging that have lost read access and removes them from the model
+void MainWindow::checkStagingForReadAccessLoss() {
+    QStringList lostAccess;
+
+    const QStringList& stagedPaths = stagingModel->getStagedPaths();
+    for (const QString &path : stagedPaths) {
+        QFileInfo info(path);
+        if (!info.exists() || !info.isReadable()) {
+            lostAccess << path;
+        }
+    }
+
+    if (!lostAccess.isEmpty()) {
+        const QStringList& lostCopy = lostAccess;
+        for (const QString &path : lostCopy) {
+            stagingModel->removePath(path);
+        }
+
+        NotificationServiceManager::instance().addNotification(
+            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE).arg(lostAccess.join("\n"))
+            );
+
+        ui->BackupStagingTreeView->clearSelection();
+        ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+    }
 }
 
 // Restarts file watcher and updates destination tree view
@@ -959,11 +1009,39 @@ void MainWindow::onChangeBackupDestinationClicked() {
 
 // Initiates the backup process
 void MainWindow::onCreateBackupClicked() {
-    const QStringList pathsToBackup = stagingModel->getStagedPaths();
+    QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
         QMessageBox::warning(this,
                              ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
+        return;
+    }
+
+    QStringList unreadablePaths;
+    const QStringList& backupListRef = pathsToBackup;
+    for (const QString& path : backupListRef) {
+        QFileInfo fileInfo(path);
+        if (!fileInfo.exists() || !fileInfo.isReadable()) {
+            unreadablePaths << path;
+        }
+    }
+
+    if (!unreadablePaths.isEmpty()) {
+        const QStringList& unreadableRef = unreadablePaths;
+        for (const QString& path : unreadableRef) {
+            stagingModel->removePath(path);
+        }
+
+        NotificationServiceManager::instance().addNotification(
+            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE).arg(unreadablePaths.join("\n")));
+
+        ui->BackupStagingTreeView->clearSelection();
+        ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+        QMessageBox::warning(this,
+                             ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
+                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(unreadablePaths.join("\n")));
+
         return;
     }
 
@@ -1077,7 +1155,7 @@ void MainWindow::onUnlockDriveClicked() {
         return;
     }
 
-    QTimer::singleShot(10000, this, [this]() {
+    QTimer::singleShot(7500, this, [this]() {
         refreshBackupStatus();
         refreshFileWatcher();
         ui->DriveTreeView->setModel(sourceModel);
@@ -1179,28 +1257,6 @@ void MainWindow::feedbackNotificationButton() {
                           Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
                           Labels::Backup::k_NOTIFICATION_BUTTON_TEXT,
                           System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
-}
-
-// General UI feedback
-
-// Provides temporary visual feedback on button interaction
-void MainWindow::triggerButtonFeedback(QPushButton *button,
-                                       const QString &feedbackText,
-                                       const QString &originalText,
-                                       int durationMs) {
-    if (!button)
-        return;
-
-    button->setCheckable(true);
-    button->setChecked(true);
-    button->setText(feedbackText);
-    button->setEnabled(false);
-
-    QTimer::singleShot(durationMs, this, [button, originalText]() {
-        button->setChecked(false);
-        button->setText(originalText);
-        button->setEnabled(true);
-    });
 }
 
 // Accessors

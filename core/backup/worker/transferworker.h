@@ -16,7 +16,6 @@ class TransferWorker : public QObject {
 public:
     // Constructor
     explicit TransferWorker(const QStringList& files, const QString& destination, QObject* parent = nullptr);
-
     Q_DISABLE_COPY(TransferWorker)
 
 public slots:
@@ -36,10 +35,16 @@ signals:
     // Emitted when an error occurs
     void errorOccurred(const QString& error);
 
-    // Emitted when processing has finished (regardless of success or failure)
+    // Emitted when processing has finished
     void finished();
 
+    // Emitted to remove unreadable file from staging
+    void removeFromStaging(const QString& path);
+
 private:
+    // Check whether stop was requested
+    bool shouldStop();
+
     // Handle root-level drive copy
     bool processDriveRoot(const QString& driveRoot);
 
@@ -48,9 +53,6 @@ private:
 
     // Core logic for copying an item
     bool copyItem(const QFileInfo& fileInfo, const QString& destinationPath);
-
-    // Check whether stop was requested
-    bool shouldStop();
 
     // List of files to transfer
     QStringList files;

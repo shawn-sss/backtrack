@@ -16,6 +16,8 @@
 #include <QStringList>
 #include <QTimer>
 
+// C++ includes
+
 // Forward declaration (Custom class)
 class BackupController;
 class BackupService;
@@ -46,6 +48,7 @@ class MainWindow final : public QMainWindow {
 public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
+
     QTabWidget* getDetailsTabWidget();
 
     // Public utility methods
@@ -56,7 +59,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    // Initialization
+    // Initialization methods
     void configureWindow();
     void initializeUI();
     void setupLayout();
@@ -66,7 +69,7 @@ private:
     void initializeFileWatcher();
     void setupNotificationButton();
 
-    // Tree View setup
+    // Tree view configuration
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
@@ -82,8 +85,9 @@ private:
     void startWatchingBackupDirectory(const QString& path);
     void resetFileWatcherAndDestinationView();
     QStringList getWatchedRoots() const;
+    void checkStagingForReadAccessLoss();
 
-    // Backup status and labels
+    // Backup label and status updates
     void updateApplicationStatusLabel();
     void updateBackupStatusLabel(const QString& statusColor);
     void updateBackupLocationLabel(const QString& location);
@@ -107,7 +111,7 @@ private:
     void finishNotificationQueue();
     void showNextNotification();
 
-    // UI interactions and styling
+    // UI interaction and styling
     void applyButtonCursors();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
@@ -133,12 +137,10 @@ private slots:
     void onNotificationButtonClicked();
     void refreshFileWatcher();
     void onThemeChanged();
-
-    // Encryption test
     void onUnlockDriveClicked();
 
 private:
-    // Core UI
+    // Core UI components
     Ui::MainWindow* ui = nullptr;
     QToolBar* toolBar = nullptr;
     QLabel* notificationBadge = nullptr;
@@ -162,7 +164,7 @@ private:
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // Cache
+    // Cached scan result
     BackupScanResult latestBackupScan;
 };
 

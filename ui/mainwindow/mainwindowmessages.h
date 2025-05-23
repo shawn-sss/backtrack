@@ -6,7 +6,6 @@
 
 // General informational messages
 namespace InfoMessages {
-// Titles and status labels
 inline constexpr auto k_SELECT_BACKUP_DESTINATION_TITLE = "Select Backup Destination";
 inline const QString k_NOTIFICATION_POPUP_TITLE = QStringLiteral("Notification");
 inline constexpr auto k_INSTALL_OK = "ok";
@@ -110,6 +109,8 @@ inline const QString k_BROKEN_BACKUP_STRUCTURE_MESSAGE =
 inline const QString k_BROKEN_APP_STRUCTURE_MESSAGE =
     QStringLiteral("The application structure appears to be incomplete or damaged. "
                    "Consider restarting the app or resetting its data to resolve the issue.");
+
+constexpr auto k_READ_ACCESS_LOST_MESSAGE = "The following items lost read access and were removed from staging:\n%1";
 }
 
 // About window labels and content

@@ -9,23 +9,13 @@
 #include <QFile>
 #include <QStorageInfo>
 
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
-
-
-// Constructor
 TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
-
 
 // Stop the transfer process externally
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
-
 
 // Check if a stop has been requested
 bool TransferWorker::shouldStop() {
@@ -35,7 +25,6 @@ bool TransferWorker::shouldStop() {
     }
     return false;
 }
-
 
 // Start the file or folder transfer process
 void TransferWorker::startTransfer() {
@@ -55,6 +44,13 @@ void TransferWorker::startTransfer() {
         }
 
         const QFileInfo fileInfo(filePath);
+        if (!fileInfo.exists() || !fileInfo.isReadable()) {
+            emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(filePath));
+            emit removeFromStaging(filePath);
+            emit finished();
+            return;
+        }
+
         const bool isDriveRoot = fileInfo.isDir() && filePath.endsWith(":/");
         const bool success = isDriveRoot
                                  ? processDriveRoot(filePath)
@@ -71,7 +67,6 @@ void TransferWorker::startTransfer() {
     emit transferComplete();
     emit finished();
 }
-
 
 // Handle copying when the source is a drive root
 bool TransferWorker::processDriveRoot(const QString& driveRoot) {
@@ -113,7 +108,6 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     return true;
 }
 
-
 // Handle copying a single file or directory
 bool TransferWorker::processFileOrFolder(const QString& filePath) {
     if (shouldStop()) return false;
@@ -123,7 +117,6 @@ bool TransferWorker::processFileOrFolder(const QString& filePath) {
 
     return copyItem(fileInfo, destPath);
 }
-
 
 // Copy a file or directory to a destination
 bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
