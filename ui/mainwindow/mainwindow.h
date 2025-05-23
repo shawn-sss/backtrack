@@ -4,19 +4,26 @@
 // Project includes
 #include "../../../../constants/system_constants.h"
 #include "../../core/backup/service/backupservice.h"
-#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
 
 // Qt includes
+#include <QAbstractItemModel>
 #include <QAbstractItemView>
+#include <QCloseEvent>
 #include <QElapsedTimer>
-#include <QItemSelectionModel>
+#include <QFileSystemModel>
+#include <QLabel>
 #include <QMainWindow>
-#include <QPoint>
-#include <QString>
-#include <QStringList>
+#include <QPushButton>
+#include <QTabWidget>
 #include <QTimer>
+#include <QToolBar>
+#include <QTreeView>
 
 // C++ includes
+#include <QString>
+#include <QStringList>
+#include <QList>
+#include <QPair>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -26,20 +33,14 @@ class FileWatcher;
 class NotificationServiceManager;
 class StagingModel;
 class ToolbarServiceManager;
+class NotificationServiceStruct;
 
 // Forward declaration (Qt class)
-class QAbstractItemModel;
-class QCloseEvent;
-class QFileSystemModel;
-class QLabel;
-class QMouseEvent;
-class QPushButton;
-class QTabWidget;
-class QToolBar;
-class QTreeView;
 class QWidget;
 
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 
 class MainWindow final : public QMainWindow {
     Q_OBJECT
@@ -50,8 +51,6 @@ public:
     ~MainWindow() override;
 
     QTabWidget* getDetailsTabWidget();
-
-    // Public utility methods
     void handleBackupDeletion(const QString& path, const QString& deleteType);
     void handleAppDataClear();
 
@@ -74,20 +73,18 @@ private:
     void setupBackupStagingTreeView();
     void setupDestinationView();
     void setupDestinationView(const QString& backupDir);
-    void configureTreeView(QTreeView* treeView,
-                           QAbstractItemModel* model,
+    void configureTreeView(QTreeView* treeView, QAbstractItemModel* model,
                            QAbstractItemView::SelectionMode selectionMode,
-                           bool stretchLastColumn,
-                           bool showHeader = true);
+                           bool stretchLastColumn, bool showHeader = true);
     void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // File watcher
+    // File watcher operations
     void startWatchingBackupDirectory(const QString& path);
     void resetFileWatcherAndDestinationView();
     QStringList getWatchedRoots() const;
     void checkStagingForReadAccessLoss();
 
-    // Backup label and status updates
+    // Backup label updates
     void updateApplicationStatusLabel();
     void updateBackupStatusLabel(const QString& statusColor);
     void updateBackupLocationLabel(const QString& location);
@@ -103,7 +100,7 @@ private:
     QString checkInstallIntegrityStatus();
     void revalidateBackupAndAppStatus();
 
-    // Notifications
+    // Notification handling
     void updateNotificationButtonState();
     void showNotificationDialog();
     void feedbackNotificationButton();
@@ -111,15 +108,21 @@ private:
     void finishNotificationQueue();
     void showNextNotification();
 
-    // UI interaction and styling
+    // UI styling and interaction
     void applyButtonCursors();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
     void applyCustomTreePalette(QTreeView* treeView);
+    void applyCustomPalettesToAllTreeViews();
+    void updateBackupMetadataLabels();
+    void handleWatchedPathChanged(const QString& path);
+    void resetDestinationModel();
+    void resetDestinationViews();
+    void resetDestinationModels();
 
-    // Encryption test
+    // Drive selection
     QString getSelectedDriveLetter() const;
     void onDriveSelectionChanged();
 
@@ -140,12 +143,12 @@ private slots:
     void onUnlockDriveClicked();
 
 private:
-    // Core UI components
+    // UI components
     Ui::MainWindow* ui = nullptr;
     QToolBar* toolBar = nullptr;
     QLabel* notificationBadge = nullptr;
 
-    // Models and services
+    // Services and models
     QFileSystemModel* sourceModel = nullptr;
     StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
@@ -159,12 +162,12 @@ private:
     QTimer* createBackupCooldownTimer = nullptr;
     QElapsedTimer backupStartTimer;
 
-    // Notifications
+    // Notification data
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // Cached scan result
+    // Backup scan cache
     BackupScanResult latestBackupScan;
 };
 
