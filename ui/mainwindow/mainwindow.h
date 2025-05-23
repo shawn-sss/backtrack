@@ -18,8 +18,7 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
-
-// C++ includes
+#include <QLayout>
 #include <QString>
 #include <QStringList>
 #include <QList>
@@ -58,6 +57,14 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    // Top-level constructor helpers
+    void initializeModels();
+    void initializeServices();
+    void initializeUiAndLayout();
+    void initializeToolbar();
+    void initializeBackupUi();
+    void initializeThemeHandling();
+
     // Initialization methods
     void configureWindow();
     void initializeUI();
@@ -121,6 +128,7 @@ private:
     void resetDestinationModel();
     void resetDestinationViews();
     void resetDestinationModels();
+    void styleThreeColumnLayout(QLayout* layout);
 
     // Drive selection
     QString getSelectedDriveLetter() const;
@@ -141,6 +149,7 @@ private slots:
     void refreshFileWatcher();
     void onThemeChanged();
     void onUnlockDriveClicked();
+    void setStatusLabel(QLabel* label, const QString& emoji, const QString& text, const QString& style = "");
 
 private:
     // UI components
