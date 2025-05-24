@@ -1,6 +1,6 @@
 #include "InstallServiceManager.h"
 #include "InstallServiceConstants.h"
-#include "../../../../core/shared/jsonmanager.h"
+#include "../JsonServiceManager/JsonServiceManager.h"
 
 // Qt includes
 #include <QDateTime>

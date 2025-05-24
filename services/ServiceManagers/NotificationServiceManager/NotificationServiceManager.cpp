@@ -1,6 +1,6 @@
 #include "NotificationServiceManager.h"
 #include "NotificationServiceConstants.h"
-#include "../../../../core/shared/jsonmanager.h"
+#include "../JsonServiceManager/JsonServiceManager.h"
 
 // Qt includes
 #include <QFile>

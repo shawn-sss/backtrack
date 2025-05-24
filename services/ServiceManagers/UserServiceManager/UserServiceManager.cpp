@@ -2,7 +2,7 @@
 #include "UserServiceConstants.h"
 
 // Project includes
-#include "../../../../core/shared/jsonmanager.h"
+#include "../JsonServiceManager/JsonServiceManager.h"
 #include "../../../../constants/kvp_info.h"
 #include "../PathServiceManager/PathServiceManager.h"
 #include "../ThemeServiceManager/ThemeServiceConstants.h"

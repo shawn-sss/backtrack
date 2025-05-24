@@ -171,6 +171,12 @@ set(SERVICE_MANAGER_FILEWATCHER
     services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceConstants.h
 )
 
+set(SERVICE_MANAGER_JSON
+    services/ServiceManagers/JsonServiceManager/JsonServiceManager.cpp
+    services/ServiceManagers/JsonServiceManager/JsonServiceManager.h
+    services/ServiceManagers/JsonServiceManager/JsonServiceConstants.h
+)
+
 set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_DIRECTOR}
     ${SERVICE_MANAGER_THEME}
@@ -182,14 +188,13 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_UNINSTALL}
     ${SERVICE_MANAGER_PATH}
     ${SERVICE_MANAGER_FILEWATCHER}
+    ${SERVICE_MANAGER_JSON}
 )
 
 # Shared Utilities
 set(UTILS_SHARED
     core/shared/fileoperations.cpp
     core/shared/fileoperations.h
-    core/shared/jsonmanager.cpp
-    core/shared/jsonmanager.h
     core/shared/uiutils.cpp
     core/shared/uiutils.h
     core/shared/formatutils.cpp

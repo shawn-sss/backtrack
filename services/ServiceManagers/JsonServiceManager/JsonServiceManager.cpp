@@ -1,5 +1,5 @@
 // Project includes
-#include "jsonmanager.h"
+#include "JsonServiceManager.h"
 
 // Qt includes
 #include <QDir>

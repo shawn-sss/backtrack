@@ -1,7 +1,7 @@
 // Project includes
 #include "backupservice.h"
 #include "../../../core/shared/fileoperations.h"
-#include "../../../core/shared/jsonmanager.h"
+#include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
 #include "../../../core/shared/formatutils.h"
 #include "../../../../constants/kvp_info.h"
 #include "../../../../constants/app_info.h"
