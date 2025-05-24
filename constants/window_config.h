@@ -6,9 +6,9 @@
 
 // Window size constraints
 namespace App::Window {
-constexpr QSize k_MINIMUM_WINDOW_SIZE(500, 250);
-constexpr QSize k_DEFAULT_WINDOW_SIZE(1000, 590);
-constexpr QSize k_MAXIMUM_WINDOW_SIZE(2000, 800);
+inline constexpr QSize k_MINIMUM_WINDOW_SIZE(500, 250);
+inline constexpr QSize k_DEFAULT_WINDOW_SIZE(1000, 590);
+inline constexpr QSize k_MAXIMUM_WINDOW_SIZE(2000, 800);
 }
 
 #endif // WINDOW_CONFIG_H
