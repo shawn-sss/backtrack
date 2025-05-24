@@ -2,7 +2,7 @@
 #include "backupservice.h"
 #include "../../../core/shared/fileoperations.h"
 #include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
-#include "../../../core/shared/formatutils.h"
+#include "../../../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
 #include "../../../../constants/kvp_info.h"
 #include "../../../../constants/app_info.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"

@@ -177,6 +177,11 @@ set(SERVICE_MANAGER_JSON
     services/ServiceManagers/JsonServiceManager/JsonServiceConstants.h
 )
 
+set(SERVICE_MANAGER_FORMATUTILS
+    services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.cpp
+    services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h
+)
+
 set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_DIRECTOR}
     ${SERVICE_MANAGER_THEME}
@@ -189,6 +194,7 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_PATH}
     ${SERVICE_MANAGER_FILEWATCHER}
     ${SERVICE_MANAGER_JSON}
+    ${SERVICE_MANAGER_FORMATUTILS}
 )
 
 # Shared Utilities
@@ -197,8 +203,6 @@ set(UTILS_SHARED
     core/shared/fileoperations.h
     core/shared/uiutils.cpp
     core/shared/uiutils.h
-    core/shared/formatutils.cpp
-    core/shared/formatutils.h
     core/shared/stagingutils.cpp
     core/shared/stagingutils.h
 )

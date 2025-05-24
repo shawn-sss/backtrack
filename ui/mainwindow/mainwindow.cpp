@@ -13,7 +13,7 @@
 #include "../../core/backup/models/stagingmodel.h"
 #include "../../core/shared/fileoperations.h"
 #include "../../services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h"
-#include "../../core/shared/formatutils.h"
+#include "../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
 #include "../../core/shared/stagingutils.h"
 #include "../../core/shared/uiutils.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"

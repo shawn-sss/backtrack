@@ -1,5 +1,5 @@
 // Project includes
-#include "formatutils.h"
+#include "FormatUtilsServiceManager.h"
 #include "../../../../constants/units_config.h"
 
 // C++ includes
