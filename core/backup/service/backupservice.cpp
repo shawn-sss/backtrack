@@ -79,7 +79,8 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     const QFileInfoList logFiles = getBackupLogFiles();
 
     for (const QFileInfo& logFile : logFiles) {
-        const QString backupName = logFile.fileName().section("_" + App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE, 0, 0);
+        const QString backupName = logFile.fileName().section(
+            "_" + QString::fromUtf8(App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE), 0, 0);
         logsSeen.insert(backupName);
 
         if (!QDir(rootDir.filePath(backupName)).exists()) {
@@ -110,8 +111,9 @@ BackupScanResult BackupService::scanForBackupStatus() const {
 // Returns list of backup log files, optionally sorted by time
 QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
     const QDir logsDir(PathServiceManager::backupLogsFolderPath());
+    const QString pattern = "*_" + QString::fromUtf8(App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE);
     return logsDir.entryInfoList(
-        {"*_" + App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE},
+        QStringList{pattern},
         QDir::Files,
         sortedByTime ? QDir::Time : QDir::NoSort
         );

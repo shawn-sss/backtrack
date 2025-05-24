@@ -708,9 +708,19 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
     ui->BackupLocationStatusLabel->show();
 }
 
+// Displays backup integrity notifications only if the structure is partially broken and not uninitialized.
 void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) {
-    static bool notifiedAppStructure = false;
     static bool notifiedBackupStructure = false;
+
+    const int backupCount = backupService->getBackupCount();
+    const bool isUninitialized =
+        !scan.structureExists && !scan.validBackupStructure &&
+        !scan.hasMissingLogs && !scan.hasOrphanedLogs && backupCount == 0;
+
+    if (isUninitialized) {
+        notifiedBackupStructure = false;
+        return;
+    }
 
     if (scan.hasOrphanedLogs && !notifiedBackupStructure) {
         NotificationServiceManager::instance().addNotification(NotificationMessages::k_ORPHANED_LOGS_MESSAGE);
@@ -727,14 +737,7 @@ void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) 
         notifiedBackupStructure = true;
     }
 
-    if (!scan.validAppStructure && !notifiedAppStructure) {
-        NotificationServiceManager::instance().addNotification(NotificationMessages::k_BROKEN_APP_STRUCTURE_MESSAGE);
-        notifiedAppStructure = true;
-    }
-
-    if (scan.validAppStructure && scan.validBackupStructure &&
-        !scan.hasOrphanedLogs && !scan.hasMissingLogs) {
-        notifiedAppStructure = false;
+    if (scan.validBackupStructure && !scan.hasOrphanedLogs && !scan.hasMissingLogs) {
         notifiedBackupStructure = false;
     }
 }
@@ -790,17 +793,23 @@ void MainWindow::updateApplicationStatusLabel() {
 
 // Checks for missing expected configuration files
 QString MainWindow::checkInstallIntegrityStatus() {
+    static const QStringList expectedConfigFiles = {
+        App::Items::k_APPDATA_SETUP_INFO_FILE,
+        App::Items::k_APPDATA_SETUP_NOTIFICATIONS_FILE,
+        App::Items::k_APPDATA_SETUP_USER_SETTINGS_FILE
+    };
+
     const QString configDir = PathServiceManager::appConfigFolderPath();
     int missingCount = 0;
 
-    for (const QString &file : App::Files::k_EXPECTED_CONFIG_FILES) {
+    for (const QString &file : expectedConfigFiles) {
         if (!QFile::exists(configDir + "/" + file)) {
             ++missingCount;
         }
     }
 
     if (missingCount == 0) return InfoMessages::k_INSTALL_OK;
-    if (missingCount < App::Files::k_EXPECTED_CONFIG_FILES.size()) return InfoMessages::k_INSTALL_PARTIAL;
+    if (missingCount < expectedConfigFiles.size()) return InfoMessages::k_INSTALL_PARTIAL;
     return InfoMessages::k_INSTALL_BROKEN;
 }
 
