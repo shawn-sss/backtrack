@@ -12,7 +12,7 @@
 #include "../../core/backup/models/destinationproxymodel.h"
 #include "../../core/backup/models/stagingmodel.h"
 #include "../../core/shared/fileoperations.h"
-#include "../../core/shared/filewatcher.h"
+#include "../../services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h"
 #include "../../core/shared/formatutils.h"
 #include "../../core/shared/stagingutils.h"
 #include "../../core/shared/uiutils.h"

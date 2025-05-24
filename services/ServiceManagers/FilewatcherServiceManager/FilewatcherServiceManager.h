@@ -1,5 +1,5 @@
-#ifndef FILEWATCHER_H
-#define FILEWATCHER_H
+#ifndef FILEWATCHERSERVICEMANAGER_H
+#define FILEWATCHERSERVICEMANAGER_H
 
 // Qt includes
 #include <QObject>
@@ -39,4 +39,4 @@ private:
     QFileSystemWatcher* watcher;
 };
 
-#endif // FILEWATCHER_H
+#endif // FILEWATCHERSERVICEMANAGER_H

@@ -165,6 +165,12 @@ set(SERVICE_MANAGER_UNINSTALL
     services/ServiceManagers/UninstallServiceManager/UninstallServiceConstants.h
 )
 
+set(SERVICE_MANAGER_FILEWATCHER
+    services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.cpp
+    services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h
+    services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceConstants.h
+)
+
 set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_DIRECTOR}
     ${SERVICE_MANAGER_THEME}
@@ -175,14 +181,13 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_TOOLBAR}
     ${SERVICE_MANAGER_UNINSTALL}
     ${SERVICE_MANAGER_PATH}
+    ${SERVICE_MANAGER_FILEWATCHER}
 )
 
 # Shared Utilities
 set(UTILS_SHARED
     core/shared/fileoperations.cpp
     core/shared/fileoperations.h
-    core/shared/filewatcher.cpp
-    core/shared/filewatcher.h
     core/shared/jsonmanager.cpp
     core/shared/jsonmanager.h
     core/shared/uiutils.cpp
