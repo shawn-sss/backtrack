@@ -11,7 +11,7 @@
 // C++ includes
 #include <memory>
 
-// Forward declarations
+// Forward declaration (Custom class)
 class InstallServiceManager;
 class UserServiceManager;
 class BackupServiceManager;
@@ -28,27 +28,30 @@ public:
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // Theme
+    // Theme management
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
     void setThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
-    // Install metadata
+    // Install metadata management
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // Filesystem
+    // Filesystem access
     QString getAppInstallDir() const;
     QString getFilePath(const QString& fileName) const;
     inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
 
-    // Uninstall
+    // Uninstallation
     bool uninstallAppWithConfirmation(QWidget* parent);
+    UninstallServiceManager* getUninstallServiceManager();
+    const UninstallServiceManager* getUninstallServiceManager() const;
 
 private:
     ServiceDirector();
+
     void setupFilePaths();
-    bool isFirstRun() const;
     void setupDefaults();
+    bool isFirstRun() const;
 
     QString appMetadataPath;
     QString userServicePath;

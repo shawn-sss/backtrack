@@ -1,5 +1,9 @@
 // Project includes
 #include "mainwindow.h"
+#include "mainwindowlabels.h"
+#include "mainwindowmessages.h"
+#include "mainwindowstyling.h"
+#include "ui_mainwindow.h"
 #include "../../../../constants/backup_config.h"
 #include "../../../../constants/interface_config.h"
 #include "../../../../constants/kvp_info.h"
@@ -17,11 +21,8 @@
 #include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
+#include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
-#include "mainwindowlabels.h"
-#include "mainwindowmessages.h"
-#include "mainwindowstyling.h"
-#include "ui_mainwindow.h"
 
 // Qt includes
 #include <QElapsedTimer>
@@ -40,9 +41,7 @@
 // Constructor: Sets up main window, UI, and all services
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
-
     ui->setupUi(this);
-
     initializeModels();
     initializeServices();
     initializeUiAndLayout();
@@ -52,27 +51,54 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 // Destructor: Cleans up UI resources
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+    delete ui;
+}
 
+// Core Setup
+
+// Initializes models used for source, destination, and staging
 void MainWindow::initializeModels() {
     sourceModel = new QFileSystemModel(this);
     destinationModel = new QFileSystemModel(this);
     stagingModel = new StagingModel(this);
 }
 
+// Initializes required service managers and backup controller
 void MainWindow::initializeServices() {
     fileWatcher = new FileWatcher(this);
     createBackupCooldownTimer = new QTimer(this);
     toolBar = new QToolBar(this);
     toolbarManager = new ToolbarServiceManager(this);
 
-    const QString savedBackupDir =
-        ServiceDirector::getInstance().getBackupDirectory();
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
     PathServiceManager::setBackupDirectory(savedBackupDir);
     backupService = new BackupService(savedBackupDir);
     backupController = new BackupController(backupService, this);
 }
 
+// Sets up backup directory, models, tree views, and UI state
+void MainWindow::initializeBackupSystem() {
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
+    PathServiceManager::setBackupDirectory(savedBackupDir);
+    backupService->setBackupRoot(savedBackupDir);
+
+    if (!FileOperations::createDirectory(savedBackupDir)) {
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
+                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
+    }
+
+    setupDestinationView(savedBackupDir);
+    setupSourceTreeView();
+    setupBackupStagingTreeView();
+    ensureBackupStatusUpdated();
+    applyCustomPalettesToAllTreeViews();
+    ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
+}
+
+// UI Setup
+
+// Initializes window settings and main layout
 void MainWindow::initializeUiAndLayout() {
     configureWindow();
     setupLayout();
@@ -81,74 +107,7 @@ void MainWindow::initializeUiAndLayout() {
     updateApplicationStatusLabel();
 }
 
-void MainWindow::initializeToolbar() {
-    addToolBar(Qt::LeftToolBarArea, toolBar);
-    toolbarManager->initialize(toolBar);
-}
-
-void MainWindow::initializeBackupUi() {
-    initializeBackupSystem();
-    refreshBackupStatus();
-    setupConnections();
-    setupNotificationButton();
-
-    createBackupCooldownTimer->setSingleShot(true);
-    connect(createBackupCooldownTimer, &QTimer::timeout, this,
-            [this]() { ui->CreateBackupButton->setEnabled(true); });
-}
-
-void MainWindow::initializeThemeHandling() {
-    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
-            this, &MainWindow::onThemeChanged);
-}
-
-// Qt event overrides
-
-//  Intercepts close event; prevents closing if backup is in progress
-void MainWindow::closeEvent(QCloseEvent *event) {
-    if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
-                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
-        event->ignore();
-        return;
-    }
-    QMainWindow::closeEvent(event);
-}
-
-// Window and UI setup
-
-// Sets initial window size and position
-void MainWindow::configureWindow() {
-    setMinimumSize(App::Window::k_MINIMUM_WINDOW_SIZE);
-    resize(App::Window::k_DEFAULT_WINDOW_SIZE);
-    setMaximumSize(App::Window::k_MAXIMUM_WINDOW_SIZE);
-
-    if (QScreen *screen = QGuiApplication::primaryScreen()) {
-        const QRect screenGeometry = screen->availableGeometry();
-        const QPoint center =
-            screenGeometry.center() -
-                              QPoint(App::Window::k_DEFAULT_WINDOW_SIZE.width() / 2,
-                                                               App::Window::k_DEFAULT_WINDOW_SIZE.height() / 2);
-        move(center);
-    }
-}
-
-// Defines main window layout
-void MainWindow::setupLayout() {
-    auto *container = new QWidget(this);
-    auto *mainLayout = new QHBoxLayout(container);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-
-    QWidget *contentContainer = centralWidget();
-    contentContainer->setSizePolicy(QSizePolicy::Expanding,
-                                    QSizePolicy::Expanding);
-    mainLayout->addWidget(contentContainer, 1);
-
-    setCentralWidget(container);
-}
-
-// Initializes progress bar and backup system UI
+// Configures progress bar and backup status UI
 void MainWindow::initializeUI() {
     Shared::UI::setupProgressBar(ui->TransferProgressBar,
                                  UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
@@ -159,29 +118,43 @@ void MainWindow::initializeUI() {
     if (ui->TransferProgressBar->value() == 0) {
         ui->TransferProgressBar->setVisible(false);
         ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->TransferProgressText->setText(
-            UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
+        ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
     initializeBackupSystem();
 }
 
-// Applies tooltips and cursors to main window buttons
+// Defines layout container and central widget
+void MainWindow::setupLayout() {
+    auto *container = new QWidget(this);
+    auto *mainLayout = new QHBoxLayout(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    QWidget *contentContainer = centralWidget();
+    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addWidget(contentContainer, 1);
+
+    setCentralWidget(container);
+}
+
+// Adds and configures main window toolbar
+void MainWindow::initializeToolbar() {
+    addToolBar(Qt::LeftToolBarArea, toolBar);
+    toolbarManager->initialize(toolBar);
+}
+
+// Sets tooltips and cursors for window buttons
 void MainWindow::applyButtonCursors() {
     const QList<QPair<QPushButton *, QString>> buttons = {
-                                                          {ui->AddToBackupButton,
-         MainWindowStyling::Styles::ToolTips::k_ADD_TO_BACKUP},
-        {ui->RemoveFromBackupButton,
-         MainWindowStyling::Styles::ToolTips::k_REMOVE_FROM_BACKUP},
-        {ui->CreateBackupButton,
-         MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
-        {ui->ChangeBackupDestinationButton,
-         MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
-        {ui->DeleteBackupButton,
-         MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
-        {ui->NotificationButton,
-         MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
-        {ui->UnlockDriveButton, MainWindowStyling::Styles::k_UNLOCK_DRIVE}};
+        {ui->AddToBackupButton, MainWindowStyling::Styles::ToolTips::k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton, MainWindowStyling::Styles::ToolTips::k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
+        {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
+        {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
+        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
+        {ui->UnlockDriveButton, MainWindowStyling::Styles::k_UNLOCK_DRIVE}
+    };
 
     std::for_each(buttons.begin(), buttons.end(), [](const auto &pair) {
         if (auto *button = pair.first) {
@@ -191,183 +164,135 @@ void MainWindow::applyButtonCursors() {
     });
 }
 
-// Connects UI buttons to their corresponding slots
-void MainWindow::setupConnections() {
-    connectBackupSignals();
+// Service and Feature Setup
 
-    const QList<QPair<QPushButton *, void (MainWindow::*)()>> connections = {
-                                                                             {ui->AddToBackupButton, &MainWindow::onAddToBackupClicked},
-        {ui->ChangeBackupDestinationButton,
-         &MainWindow::onChangeBackupDestinationClicked},
-        {ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked},
-        {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
-        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
-        {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked}};
+// Initializes backup system and connects related components
+void MainWindow::initializeBackupUi() {
+    initializeBackupSystem();
+    setupConnections();
+    setupNotificationButton();
+    initializeFileWatcher();
 
-    for (const auto &[button, slot] : connections) {
-        if (button) {
-            connect(button, &QPushButton::clicked, this, slot);
-        }
-    }
-
-    connect(ui->DriveTreeView->selectionModel(),
-            &QItemSelectionModel::currentChanged, this,
-            &MainWindow::onDriveSelectionChanged);
-}
-
-// Connects backup signals to response handlers
-void MainWindow::connectBackupSignals() {
-    connect(backupController, &BackupController::backupCreated, this, [this]() {
-        refreshBackupStatus();
-        onBackupCompleted();
-        QTimer::singleShot(100, this, [this]() { refreshBackupStatus(); });
-    });
-
-    connect(backupController, &BackupController::backupDeleted, this,
-            &MainWindow::refreshBackupStatus);
-
-    connect(backupController, &BackupController::errorOccurred, this,
-            [this](const QString &error) {
-                onBackupError(error);
-        QMessageBox::critical(
-                    this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE, error);
+    createBackupCooldownTimer->setSingleShot(true);
+    connect(createBackupCooldownTimer, &QTimer::timeout, this, [this]() {
+        ui->CreateBackupButton->setEnabled(true);
     });
 }
 
-// Provides temporary visual feedback on button interaction
-void MainWindow::triggerButtonFeedback(QPushButton *button,
-                                       const QString &feedbackText,
-                                       const QString &originalText,
-                                       int durationMs) {
-    if (!button)
+// Connects theme change signal to update handler
+void MainWindow::initializeThemeHandling() {
+    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
+            this, &MainWindow::onThemeChanged);
+}
+
+// Event Handling
+
+// Intercepts close event to prevent closing during active backup
+void MainWindow::closeEvent(QCloseEvent *event) {
+    if (backupController->isBackupInProgress()) {
+        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
+                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+        event->ignore();
         return;
-
-    button->setCheckable(true);
-    button->setChecked(true);
-    button->setText(feedbackText);
-    button->setEnabled(false);
-
-    QTimer::singleShot(durationMs, this, [button, originalText]() {
-        button->setChecked(false);
-        button->setText(originalText);
-        button->setEnabled(true);
-    });
+    }
+    QMainWindow::closeEvent(event);
 }
 
-// Backup system initialization
-
-// Sets up backup directory and tree views
-void MainWindow::initializeBackupSystem() {
-    const QString savedBackupDir =
-        ServiceDirector::getInstance().getBackupDirectory();
-
-    PathServiceManager::setBackupDirectory(savedBackupDir);
-    backupService->setBackupRoot(savedBackupDir);
-
-    if (!FileOperations::createDirectory(savedBackupDir)) {
-        QMessageBox::critical(
-            this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
-            ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
-    }
-
-    setupDestinationView(savedBackupDir);
-
-    setupSourceTreeView();
-    setupBackupStagingTreeView();
-    refreshBackupStatus();
+// Refreshes all views when theme changes
+void MainWindow::onThemeChanged() {
     applyCustomPalettesToAllTreeViews();
 }
 
-// Sets up the source file browser view
+// Window and Tree View Layout
+
+// Sets initial window size and position
+void MainWindow::configureWindow() {
+    setMinimumSize(App::Window::k_MINIMUM_WINDOW_SIZE);
+    resize(App::Window::k_DEFAULT_WINDOW_SIZE);
+    setMaximumSize(App::Window::k_MAXIMUM_WINDOW_SIZE);
+
+    if (QScreen *screen = QGuiApplication::primaryScreen()) {
+        const QRect screenGeometry = screen->availableGeometry();
+        const QPoint center = screenGeometry.center() -
+                              QPoint(App::Window::k_DEFAULT_WINDOW_SIZE.width() / 2,
+                                     App::Window::k_DEFAULT_WINDOW_SIZE.height() / 2);
+        move(center);
+    }
+}
+
+// Sets up the source directory view
 void MainWindow::setupSourceTreeView() {
     sourceModel->setRootPath("");
     sourceModel->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files);
-
-    configureTreeView(ui->DriveTreeView, sourceModel,
-                      QAbstractItemView::ExtendedSelection, true);
+    configureTreeView(ui->DriveTreeView, sourceModel, QAbstractItemView::ExtendedSelection, true);
     ui->DriveTreeView->setRootIndex(sourceModel->index(""));
     ui->DriveTreeView->clearSelection();
     ui->DriveTreeView->setCurrentIndex(QModelIndex());
 }
 
-// Sets up the staging area tree view
+// Sets up the staging view for files queued for backup
 void MainWindow::setupBackupStagingTreeView() {
-    configureTreeView(ui->BackupStagingTreeView, stagingModel,
-                      QAbstractItemView::ExtendedSelection, true);
+    configureTreeView(ui->BackupStagingTreeView, stagingModel, QAbstractItemView::ExtendedSelection, true);
 }
 
-// Sets up the destination backup view
+// Sets up destination backup view with current root path
 void MainWindow::setupDestinationView() {
     setupDestinationView(backupService->getBackupRoot());
 }
 
-// Sets up the destination backup view (with location)
+// Sets up destination backup view with given directory
 void MainWindow::setupDestinationView(const QString &backupDir) {
     destinationModel->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
     destinationModel->setNameFilters(QStringList() << "*");
     destinationModel->setNameFilterDisables(false);
 
-    if (destinationProxyModel) {
-        delete destinationProxyModel;
-    }
-
+    delete destinationProxyModel;
     destinationProxyModel = new DestinationProxyModel(this);
     destinationProxyModel->setSourceModel(destinationModel);
-    destinationProxyModel->setExcludedFolderName(
-        App::Items::k_BACKUP_SETUP_CONFIG_FOLDER);
+    destinationProxyModel->setExcludedFolderName(App::Items::k_BACKUP_SETUP_CONFIG_FOLDER);
 
     QModelIndex sourceRootIndex = destinationModel->setRootPath(backupDir);
-    QModelIndex proxyRootIndex =
-        destinationProxyModel->mapFromSource(sourceRootIndex);
+    QModelIndex proxyRootIndex = destinationProxyModel->mapFromSource(sourceRootIndex);
 
-    configureTreeView(ui->BackupDestinationView, destinationProxyModel,
-                      QAbstractItemView::SingleSelection, true);
+    configureTreeView(ui->BackupDestinationView, destinationProxyModel, QAbstractItemView::SingleSelection, true);
     ui->BackupDestinationView->setModel(destinationProxyModel);
     ui->BackupDestinationView->setRootIndex(proxyRootIndex);
-
     applyCustomTreePalette(ui->BackupDestinationView);
     destinationProxyModel->sort(0);
 }
 
-// Tree view utilities
+// Tree View Utilities
 
-// Configures tree view with model, selection mode, and layout
-void MainWindow::configureTreeView(
-    QTreeView *treeView, QAbstractItemModel *model,
-    QAbstractItemView::SelectionMode selectionMode, bool stretchLastColumn,
-    bool showHeader) {
+// Configures a tree view for consistent layout and behavior
+void MainWindow::configureTreeView(QTreeView *treeView, QAbstractItemModel *model,
+                                   QAbstractItemView::SelectionMode selectionMode,
+                                   bool stretchLastColumn, bool showHeader) {
     Q_ASSERT(treeView && model);
-    if (!treeView || !model)
-        return;
+    if (!treeView || !model) return;
 
     treeView->setModel(model);
     treeView->setSelectionMode(selectionMode);
     treeView->header()->setVisible(showHeader);
     treeView->header()->setStretchLastSection(stretchLastColumn);
 
-    for (int i = UI::TreeView::k_START_HIDDEN_COLUMN;
-         i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
+    for (int i = UI::TreeView::k_START_HIDDEN_COLUMN; i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
         treeView->setColumnHidden(i, true);
     }
 }
 
-// Hides all additional columns in a tree view
+// Hides all extra columns from a given tree view
 void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
-    if (!treeView)
-        return;
+    if (!treeView) return;
     if (QAbstractItemModel *model = treeView->model(); model) {
-        for (int i = UI::TreeView::k_START_HIDDEN_COLUMN;
-             i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
+        for (int i = UI::TreeView::k_START_HIDDEN_COLUMN; i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
             treeView->setColumnHidden(i, true);
         }
     }
 }
 
-// Applies theme-based highlight and text colors to the given tree view if not
-// already set
+// Applies theme-specific palette to a tree view
 void MainWindow::applyCustomTreePalette(QTreeView *treeView) {
-    if (!treeView)
-        return;
+    if (!treeView) return;
 
     QPalette palette = treeView->palette();
     const auto theme = ThemeServiceManager::instance().currentTheme();
@@ -375,7 +300,6 @@ void MainWindow::applyCustomTreePalette(QTreeView *treeView) {
     QColor highlight = (theme == ThemeServiceConstants::AppTheme::Dark)
                            ? QColor(94, 61, 116)
                            : QColor(51, 153, 255);
-
     QColor text = (theme == ThemeServiceConstants::AppTheme::Dark)
                       ? QColor(212, 170, 255)
                       : QColor(0, 74, 153);
@@ -385,51 +309,49 @@ void MainWindow::applyCustomTreePalette(QTreeView *treeView) {
     treeView->setPalette(palette);
 }
 
-void MainWindow::setStatusLabel(QLabel *label, const QString &emoji,
-                                const QString &text, const QString &style) {
-    if (!label)
-        return;
-
-    label->setText(Labels::Backup::k_STATUS_LABEL.arg(emoji, text));
-    label->setTextFormat(Qt::RichText);
-    label->setStyleSheet(style);
-}
-
-// Apply custom palettes to all tree views
+// Applies theme palettes to all tree views in the UI
 void MainWindow::applyCustomPalettesToAllTreeViews() {
     std::array<QTreeView *, 3> trees = {
-                                        ui->DriveTreeView, ui->BackupStagingTreeView, ui->BackupDestinationView};
+        ui->DriveTreeView,
+        ui->BackupStagingTreeView,
+        ui->BackupDestinationView
+    };
     for (QTreeView *tree : trees) {
         applyCustomTreePalette(tree);
     }
 }
 
-// Theme and Appearance Handling
+// File Watcher and Path Monitoring
 
-// Applies updated theme styling to all tree views when the application theme
-// changes
-void MainWindow::onThemeChanged() { applyCustomPalettesToAllTreeViews(); }
-
-// File watcher and directory monitoring
-
-// Starts file watcher on key app directories
 void MainWindow::initializeFileWatcher() {
     const QStringList roots = getWatchedRoots();
     fileWatcher->startWatchingMultiple(roots);
 
-    connect(fileWatcher, &FileWatcher::fileChanged, this,
-            &MainWindow::handleWatchedPathChanged);
-    connect(fileWatcher, &FileWatcher::directoryChanged, this,
-            &MainWindow::handleWatchedPathChanged);
+    connect(fileWatcher, &FileWatcher::fileChanged, this, &MainWindow::handleWatchedPathChanged);
+    connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::handleWatchedPathChanged);
 }
 
-// Checks for files in staging that have lost read access and removes them from
-// the model
+// Handles path change events and updates backup state
+void MainWindow::handleWatchedPathChanged(const QString &path) {
+    fileWatcher->addPath(path);
+
+    const QString appConfigDir = PathServiceManager::appConfigFolderPath();
+    const QString backupDir = PathServiceManager::backupDataRootDir();
+
+    if (path.startsWith(appConfigDir)) updateApplicationStatusLabel();
+    if (path.startsWith(backupDir)) ensureBackupStatusUpdated();
+
+    checkStagingForReadAccessLoss();
+}
+
+// Checks for unreadable staged files and removes them
 void MainWindow::checkStagingForReadAccessLoss() {
     QStringList lostAccess;
-
     const QStringList &stagedPaths = stagingModel->getStagedPaths();
-    for (const QString &path : stagedPaths) {
+    const int pathCount = stagedPaths.size();
+
+    for (int i = 0; i < pathCount; ++i) {
+        const QString &path = stagedPaths.at(i);
         QFileInfo info(path);
         if (!info.exists() || !info.isReadable()) {
             lostAccess << path;
@@ -437,36 +359,33 @@ void MainWindow::checkStagingForReadAccessLoss() {
     }
 
     if (!lostAccess.isEmpty()) {
-        const QStringList &lostCopy = lostAccess;
-        for (const QString &path : lostCopy) {
+        const int lostCount = lostAccess.size();
+        for (int i = 0; i < lostCount; ++i) {
+            const QString &path = lostAccess.at(i);
             stagingModel->removePath(path);
         }
 
         NotificationServiceManager::instance().addNotification(
-            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE)
-                .arg(lostAccess.join("\n")));
+            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE).arg(lostAccess.join("\n")));
 
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
     }
 }
 
-// Restarts file watcher and updates destination tree view
+// Resets file watcher and reloads destination view
 void MainWindow::resetFileWatcherAndDestinationView() {
-    const QStringList watchedRoots = getWatchedRoots();
-    fileWatcher->startWatchingMultiple(watchedRoots);
-
+    fileWatcher->startWatchingMultiple(getWatchedRoots());
     setupDestinationView(PathServiceManager::backupSetupFolderPath());
 }
 
-// Starts watching a specific backup directory
+// Starts file watcher on specified path
 void MainWindow::startWatchingBackupDirectory(const QString &path) {
     fileWatcher->startWatchingMultiple(QStringList() << path);
-    connect(fileWatcher, &FileWatcher::directoryChanged, this,
-            &MainWindow::onBackupDirectoryChanged);
+    connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
 }
 
-// Returns list of all directories to watch for changes
+// Returns key directories to monitor for file system changes
 QStringList MainWindow::getWatchedRoots() const {
     QStringList watchedRoots;
 
@@ -474,86 +393,71 @@ QStringList MainWindow::getWatchedRoots() const {
     const QString backupDataRoot = PathServiceManager::backupDataRootDir();
     const QString backupConfigDir = PathServiceManager::backupConfigFolderPath();
 
-    if (QDir(appConfigDir).exists())
-        watchedRoots << appConfigDir;
-    if (QDir(backupDataRoot).exists())
-        watchedRoots << backupDataRoot;
-    if (QDir(backupConfigDir).exists())
-        watchedRoots << backupConfigDir;
+    if (QDir(appConfigDir).exists()) watchedRoots << appConfigDir;
+    if (QDir(backupDataRoot).exists()) watchedRoots << backupDataRoot;
+    if (QDir(backupConfigDir).exists()) watchedRoots << backupConfigDir;
 
     return watchedRoots;
 }
 
-// Responds to file changes by updating UI
+// Responds to file change notifications
 void MainWindow::onFileChanged(const QString &path) {
     fileWatcher->addPath(path);
 
     const QString appConfigDir = PathServiceManager::appConfigFolderPath();
     const QString backupDir = PathServiceManager::backupDataRootDir();
 
-    if (path.startsWith(appConfigDir)) {
-        updateApplicationStatusLabel();
-    }
-    if (path.startsWith(backupDir)) {
-        refreshBackupStatus();
-    }
+    if (path.startsWith(appConfigDir)) updateApplicationStatusLabel();
+    if (path.startsWith(backupDir)) ensureBackupStatusUpdated();
 }
 
-// Responds to directory changes in the backup directory
+// Responds to directory changes within the backup directory
 void MainWindow::onBackupDirectoryChanged() {
-    initializeFileWatcher();
-    refreshBackupStatus();
+    refreshFileWatcher();
+    ensureBackupStatusUpdated();
 }
 
-// Restarts the file watcher with current root paths
+// Refreshes file watcher to rewatch necessary paths
 void MainWindow::refreshFileWatcher() {
     fileWatcher->startWatchingMultiple(getWatchedRoots());
 }
 
-// Backup validation and error handling
+// Error and Completion Handling
 
-// Handles backup error: resets UI and button state
+// Handles backup error: resets progress text and re-enables the backup button
 void MainWindow::onBackupError(const QString &error) {
     Q_UNUSED(error);
-    ui->TransferProgressText->setText(
-        UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
+    ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     ui->TransferProgressText->setVisible(true);
 
     const int elapsed = backupStartTimer.elapsed();
-    const int delay =
-        qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
 
     QTimer::singleShot(delay, this, [this]() {
-        ui->CreateBackupButton->setText(
-            Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
         ui->CreateBackupButton->setStyleSheet(QString());
         ui->CreateBackupButton->setEnabled(true);
     });
 }
 
-// Handles successful backup completion
+// Handles backup completion: resets UI, updates view, and highlights latest backup
 void MainWindow::onBackupCompleted() {
-    ui->TransferProgressText->setText(
-        UI::Progress::k_PROGRESS_BAR_COMPLETION_MESSAGE);
+    ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_COMPLETION_MESSAGE);
     ui->TransferProgressText->setVisible(true);
 
     const int elapsed = backupStartTimer.elapsed();
-    const int delay =
-        qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
+    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
 
     QTimer::singleShot(delay, this, [this]() {
-        ui->CreateBackupButton->setText(
-            Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
+        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
         ui->CreateBackupButton->setStyleSheet(QString());
         ui->CreateBackupButton->setEnabled(true);
 
-        QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this,
-                           [this]() {
-                               ui->TransferProgressText->setText(
-                UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
+        QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
+            ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
         });
 
-        refreshBackupStatus();
+        ensureBackupStatusUpdated();
         refreshFileWatcher();
 
         const QString backupRoot = backupService->getBackupRoot();
@@ -565,60 +469,38 @@ void MainWindow::onBackupCompleted() {
         if (!entries.isEmpty()) {
             const QString newestFolderPath = entries.last().absoluteFilePath();
             QModelIndex sourceIndex = destinationModel->index(newestFolderPath);
-            QModelIndex proxyIndex =
-                destinationProxyModel->mapFromSource(sourceIndex);
+            QModelIndex proxyIndex = destinationProxyModel->mapFromSource(sourceIndex);
+
             if (proxyIndex.isValid()) {
                 ui->BackupDestinationView->setCurrentIndex(proxyIndex);
                 ui->BackupDestinationView->selectionModel()->select(
-                    proxyIndex,
-                    QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+                    proxyIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
                 ui->BackupDestinationView->scrollTo(proxyIndex);
             }
         }
     });
+
     ui->BackupDestinationView->clearSelection();
     ui->BackupDestinationView->setCurrentIndex(QModelIndex());
 }
 
-// Re-enables backup button after cooldown
+// Re-enables backup button after cooldown timer
 void MainWindow::onCooldownFinished() {
     ui->CreateBackupButton->setEnabled(true);
 }
 
-void MainWindow::resetDestinationModel() {
-    delete destinationModel;
-    destinationModel = new QFileSystemModel(this);
+// Refreshing and Updating Status
+
+// Refreshes backup status if not already in progress
+void MainWindow::ensureBackupStatusUpdated() {
+    static bool isRefreshing = false;
+    if (isRefreshing) return;
+    isRefreshing = true;
+    refreshBackupStatus();
+    isRefreshing = false;
 }
 
-// Backup status and UI label updates
-
-void MainWindow::handleWatchedPathChanged(const QString &path) {
-    fileWatcher->addPath(path);
-
-    const QString appConfigDir = PathServiceManager::appConfigFolderPath();
-    const QString backupDir = PathServiceManager::backupDataRootDir();
-
-    if (path.startsWith(appConfigDir)) {
-        updateApplicationStatusLabel();
-    }
-    if (path.startsWith(backupDir)) {
-        refreshBackupStatus();
-    }
-
-    checkStagingForReadAccessLoss();
-}
-
-void MainWindow::resetDestinationViews() { resetDestinationModels(); }
-
-/////////////////////////////////////////////////////////////////////////
-void MainWindow::updateBackupMetadataLabels() {
-    updateBackupLocationLabel(backupService->getBackupRoot());
-    updateBackupTotalCountLabel();
-    updateBackupTotalSizeLabel();
-    updateBackupLocationStatusLabel(backupService->getBackupRoot());
-}
-
-// Refreshes backup state and updates all related UI elements
+// Refreshes overall backup status and updates associated UI
 void MainWindow::refreshBackupStatus() {
     latestBackupScan = backupService->scanForBackupStatus();
     updateBackupLabels();
@@ -630,23 +512,40 @@ void MainWindow::refreshBackupStatus() {
     notifyOrphanOrBrokenBackupIssues(latestBackupScan);
 }
 
-// Updates backup-related labels including location, size, and status
+// Updates labels for backup status, count, size, and last backup info
 void MainWindow::updateBackupLabels() {
     updateBackupMetadataLabels();
     updateLastBackupInfo();
     handleSpecialBackupLabelStates(latestBackupScan);
 
-    const QString statusColor =
-        !latestBackupScan.structureExists
+    const QString statusColor = !latestBackupScan.structureExists
                                     ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND
-                                : latestBackupScan.isBroken()
-                                    ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING
-                                    : MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;
+                                    : latestBackupScan.isBroken()
+                                          ? MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING
+                                          : MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND;
 
     updateBackupStatusLabel(statusColor);
 }
 
-// Updates metadata labels for the last backup
+// Updates backup status label with styled message
+void MainWindow::setStatusLabel(QLabel *label, const QString &emoji,
+                                const QString &text, const QString &style) {
+    if (!label) return;
+
+    label->setText(Labels::Backup::k_STATUS_LABEL.arg(emoji, text));
+    label->setTextFormat(Qt::RichText);
+    label->setStyleSheet(style);
+}
+
+// Updates all metadata labels related to the current backup state
+void MainWindow::updateBackupMetadataLabels() {
+    updateBackupLocationLabel(backupService->getBackupRoot());
+    updateBackupTotalCountLabel();
+    updateBackupTotalSizeLabel();
+    updateBackupLocationStatusLabel(backupService->getBackupRoot());
+}
+
+// Displays last backup metadata in the UI
 void MainWindow::updateLastBackupInfo() {
     const QJsonObject metadata = backupService->getLastBackupMetadata();
 
@@ -658,39 +557,30 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    const QString name =
-        metadata.value(App::KVP::BackupMetadata::k_NAME).toString();
-    const QString timestampRaw =
-        metadata.value(App::KVP::BackupMetadata::k_TIMESTAMP).toString();
-    const int durationSec =
-        metadata.value(App::KVP::BackupMetadata::k_DURATION).toInt();
-    const QString sizeStr =
-        metadata.value(App::KVP::BackupMetadata::k_SIZE_READABLE).toString();
+    const QString name = metadata.value(App::KVP::BackupMetadata::k_NAME).toString();
+    const QString timestampRaw = metadata.value(App::KVP::BackupMetadata::k_TIMESTAMP).toString();
+    const int durationSec = metadata.value(App::KVP::BackupMetadata::k_DURATION).toInt();
+    const QString sizeStr = metadata.value(App::KVP::BackupMetadata::k_SIZE_READABLE).toString();
 
     const QString formattedTimestamp = Shared::Formatting::formatTimestamp(
         QDateTime::fromString(timestampRaw, Qt::ISODate),
         Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT);
 
-    const QString formattedDuration =
-        Shared::Formatting::formatDuration(durationSec);
+    const QString formattedDuration = Shared::Formatting::formatDuration(durationSec);
 
     ui->LastBackupNameLabel->setText(Labels::LastBackup::k_NAME + name);
-    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP +
-                                          formattedTimestamp);
-    ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION +
-                                         formattedDuration);
+    ui->LastBackupTimestampLabel->setText(Labels::LastBackup::k_TIMESTAMP + formattedTimestamp);
+    ui->LastBackupDurationLabel->setText(Labels::LastBackup::k_DURATION + formattedDuration);
     ui->LastBackupSizeLabel->setText(Labels::LastBackup::k_SIZE + sizeStr);
 }
 
-// Updates the backup status label with emoji and color-coded text
+// Updates backup status label with emoji and message
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     const auto [emoji, text] = statusVisualsForColor(statusColor);
     QString style;
 
-    if (statusColor ==
-            MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING ||
-        statusColor ==
-                                                                                              MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND) {
+    if (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING ||
+        statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND) {
         style = MainWindowStyling::Styles::GeneralText::k_RED_BOLD_STYLE;
     }
 
@@ -702,26 +592,25 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     }
 }
 
-// Maps status color to emoji and label text
-QPair<QString, QString>
-MainWindow::statusVisualsForColor(const QString &color) const {
+// Returns emoji and label message based on backup status color
+QPair<QString, QString> MainWindow::statusVisualsForColor(const QString &color) const {
     static const QMap<QString, QPair<QString, QString>> statusMap = {
-                                                                     {MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND,
+        {MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_FOUND,
          {Labels::Emoji::k_GREEN, Labels::Backup::k_READY_LABEL}},
         {MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING,
          {Labels::Emoji::k_YELLOW, Labels::Backup::k_WARNING_LABEL}},
         {MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND,
-         {Labels::Emoji::k_RED, Labels::Backup::k_NOT_INITIALIZED}}};
+         {Labels::Emoji::k_RED, Labels::Backup::k_NOT_INITIALIZED}}
+    };
 
-    return statusMap.value(
-        color, {Labels::Emoji::k_RED, Labels::Backup::k_NOT_INITIALIZED});
+    return statusMap.value(color, {Labels::Emoji::k_RED, Labels::Backup::k_NOT_INITIALIZED});
 }
 
-// Updates label with current backup directory path
+// Updates backup location label and tooltip
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     const int maxChars = 45;
-
     QString displayText = location;
+
     if (location.length() > maxChars) {
         int half = maxChars / 2;
         displayText = location.left(half) + "..." + location.right(half);
@@ -731,101 +620,53 @@ void MainWindow::updateBackupLocationLabel(const QString &location) {
     ui->BackupLocationLabel->setToolTip(location);
 }
 
-// Updates label showing total number of backups
+// Updates label with total backup count
 void MainWindow::updateBackupTotalCountLabel() {
     ui->BackupTotalCountLabel->setText(
-        Labels::Backup::k_TOTAL_COUNT +
-        QString::number(backupService->getBackupCount()));
+        Labels::Backup::k_TOTAL_COUNT + QString::number(backupService->getBackupCount()));
 }
 
-// Updates label showing total backup size
+// Updates label with total backup size
 void MainWindow::updateBackupTotalSizeLabel() {
     ui->BackupTotalSizeLabel->setText(
-        Labels::Backup::k_TOTAL_SIZE +
-        Shared::Formatting::formatSize(backupService->getTotalBackupSize()));
+        Labels::Backup::k_TOTAL_SIZE + Shared::Formatting::formatSize(backupService->getTotalBackupSize()));
 }
 
-// Updates label showing write status of backup folder
+// Updates label with backup directory accessibility
 void MainWindow::updateBackupLocationStatusLabel(const QString &location) {
     QFileInfo dirInfo(location);
-    const QString status =
-        dirInfo.exists()
+    const QString status = dirInfo.exists()
                                ? (dirInfo.isWritable() ? Labels::DirectoryStatus::k_WRITABLE
                                                        : Labels::DirectoryStatus::k_READ_ONLY)
                                : Labels::DirectoryStatus::k_UNKNOWN;
-    ui->BackupLocationStatusLabel->setText(Labels::Backup::k_LOCATION_ACCESS +
-                                           status);
+
+    ui->BackupLocationStatusLabel->setText(Labels::Backup::k_LOCATION_ACCESS + status);
 }
 
-// Notifies user of orphaned or broken backup issues
-void MainWindow::notifyOrphanOrBrokenBackupIssues(
-    const BackupScanResult &scan) {
-    static bool notifiedAppStructure = false;
-    static bool notifiedBackupStructure = false;
-
-    if (scan.hasOrphanedLogs && !notifiedBackupStructure) {
-        NotificationServiceManager::instance().addNotification(
-            NotificationMessages::k_ORPHANED_LOGS_MESSAGE);
-        notifiedBackupStructure = true;
-    }
-
-    if (scan.hasMissingLogs && !notifiedBackupStructure) {
-        NotificationServiceManager::instance().addNotification(
-            NotificationMessages::k_MISSING_LOGS_MESSAGE);
-        notifiedBackupStructure = true;
-    }
-
-    if (!scan.validBackupStructure && !notifiedBackupStructure) {
-        NotificationServiceManager::instance().addNotification(
-            NotificationMessages::k_BROKEN_BACKUP_STRUCTURE_MESSAGE);
-        notifiedBackupStructure = true;
-    }
-
-    if (!scan.validAppStructure && !notifiedAppStructure) {
-        NotificationServiceManager::instance().addNotification(
-            NotificationMessages::k_BROKEN_APP_STRUCTURE_MESSAGE);
-        notifiedAppStructure = true;
-    }
-
-    if (scan.validAppStructure && scan.validBackupStructure &&
-        !scan.hasOrphanedLogs && !scan.hasMissingLogs) {
-        notifiedAppStructure = false;
-        notifiedBackupStructure = false;
-    }
-}
-
-// Adjusts backup summary labels for no backups, uninitialized location, or
-// warnings
+// Updates UI to reflect special cases like no backups or errors
 void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
     const int backupCount = backupService->getBackupCount();
     const QString rootPath = backupService->getBackupRoot();
     const QFileInfo rootInfo(rootPath);
     const QDir backupDir(rootPath);
-
     const bool locationInitialized = rootInfo.exists();
-    const bool backupDirEmpty =
-        locationInitialized &&
-                                backupDir.entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)
-                                                           .isEmpty();
-
+    const bool backupDirEmpty = locationInitialized &&
+                                backupDir.entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot).isEmpty();
     const bool hasAppIssue = !scan.validAppStructure;
 
     const bool isUninitialized =
         !scan.structureExists && !scan.validBackupStructure &&
-                                 !scan.hasMissingLogs && !scan.hasOrphanedLogs && backupCount == 0;
+        !scan.hasMissingLogs && !scan.hasOrphanedLogs && backupCount == 0;
 
     const bool hasBackupIssue =
-        !isUninitialized && (!scan.validBackupStructure || scan.hasMissingLogs ||
-                                                     scan.hasOrphanedLogs);
+        !isUninitialized && (!scan.validBackupStructure || scan.hasMissingLogs || scan.hasOrphanedLogs);
 
-    const QString redStyle =
-        MainWindowStyling::Styles::GeneralText::k_RED_BOLD_STYLE;
+    const QString redStyle = MainWindowStyling::Styles::GeneralText::k_RED_BOLD_STYLE;
     const QString infoLine = Labels::Backup::k_SEE_NOTIFICATIONS_LABEL;
 
     if (hasAppIssue && hasBackupIssue) {
         ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
-        ui->BackupTotalSizeLabel->setText(
-            Labels::Backup::k_APP_AND_BACKUP_ISSUE_LABEL);
+        ui->BackupTotalSizeLabel->setText(Labels::Backup::k_APP_AND_BACKUP_ISSUE_LABEL);
         ui->BackupLocationStatusLabel->setText(infoLine);
     } else if (hasBackupIssue) {
         ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
@@ -835,10 +676,8 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
         ui->BackupTotalCountLabel->setText(Labels::Backup::k_WARNING_SUMMARY_LABEL);
         ui->BackupTotalSizeLabel->setText(Labels::Backup::k_APP_ISSUE_LABEL);
         ui->BackupLocationStatusLabel->setText(infoLine);
-    } else if (isUninitialized ||
-               (backupCount == 0 && (backupDirEmpty || !locationInitialized))) {
-        ui->BackupTotalCountLabel->setText(
-            Labels::Backup::k_NO_BACKUPS_COUNT_LABEL);
+    } else if (isUninitialized || (backupCount == 0 && (backupDirEmpty || !locationInitialized))) {
+        ui->BackupTotalCountLabel->setText(Labels::Backup::k_NO_BACKUPS_COUNT_LABEL);
         ui->BackupTotalCountLabel->setStyleSheet(redStyle);
         ui->BackupTotalSizeLabel->setText("");
         ui->BackupLocationStatusLabel->setText("");
@@ -869,31 +708,69 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
     ui->BackupLocationStatusLabel->show();
 }
 
-// Re-scans backup and app structure, updates UI, and queues notifications if
-// needed
+void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) {
+    static bool notifiedAppStructure = false;
+    static bool notifiedBackupStructure = false;
+
+    if (scan.hasOrphanedLogs && !notifiedBackupStructure) {
+        NotificationServiceManager::instance().addNotification(NotificationMessages::k_ORPHANED_LOGS_MESSAGE);
+        notifiedBackupStructure = true;
+    }
+
+    if (scan.hasMissingLogs && !notifiedBackupStructure) {
+        NotificationServiceManager::instance().addNotification(NotificationMessages::k_MISSING_LOGS_MESSAGE);
+        notifiedBackupStructure = true;
+    }
+
+    if (!scan.validBackupStructure && !notifiedBackupStructure) {
+        NotificationServiceManager::instance().addNotification(NotificationMessages::k_BROKEN_BACKUP_STRUCTURE_MESSAGE);
+        notifiedBackupStructure = true;
+    }
+
+    if (!scan.validAppStructure && !notifiedAppStructure) {
+        NotificationServiceManager::instance().addNotification(NotificationMessages::k_BROKEN_APP_STRUCTURE_MESSAGE);
+        notifiedAppStructure = true;
+    }
+
+    if (scan.validAppStructure && scan.validBackupStructure &&
+        !scan.hasOrphanedLogs && !scan.hasMissingLogs) {
+        notifiedAppStructure = false;
+        notifiedBackupStructure = false;
+    }
+}
+
+// Revalidates backup and app structures, updates UI, and triggers notifications
 void MainWindow::revalidateBackupAndAppStatus() {
     latestBackupScan = backupService->scanForBackupStatus();
     const QString appStatus = checkInstallIntegrityStatus();
     const bool validApp = appStatus == InfoMessages::k_INSTALL_OK;
     latestBackupScan.validAppStructure = validApp;
+
     updateBackupLabels();
     notifyOrphanOrBrokenBackupIssues(latestBackupScan);
 }
 
-// Application status and integrity
+// Revalidates backup and app structures using installation status
+void MainWindow::revalidateBackupAndAppStatus(const QString &appStatus) {
+    latestBackupScan = backupService->scanForBackupStatus();
+    latestBackupScan.validAppStructure = (appStatus == InfoMessages::k_INSTALL_OK);
+    updateBackupLabels();
+    notifyOrphanOrBrokenBackupIssues(latestBackupScan);
+}
 
-// Checks and updates the app installation status label
+// Application Integrity
+
+// Updates the application installation status label and notifies on failure
 void MainWindow::updateApplicationStatusLabel() {
     const QString status = checkInstallIntegrityStatus();
 
-    QString emoji, label;
-    if (status == InfoMessages::k_INSTALL_OK) {
-        emoji = Labels::Emoji::k_GREEN;
-        label = Labels::ApplicationStatus::k_HEALTHY;
-    } else {
-        emoji = Labels::Emoji::k_RED;
-        label = Labels::ApplicationStatus::k_INVALID;
-    }
+    QString emoji = (status == InfoMessages::k_INSTALL_OK)
+                        ? Labels::Emoji::k_GREEN
+                        : Labels::Emoji::k_RED;
+
+    QString label = (status == InfoMessages::k_INSTALL_OK)
+                        ? Labels::ApplicationStatus::k_HEALTHY
+                        : Labels::ApplicationStatus::k_INVALID;
 
     ui->ApplicationStatusLabel->setText(
         Labels::ApplicationStatus::k_STATUS_LABEL.arg(emoji, label));
@@ -904,66 +781,112 @@ void MainWindow::updateApplicationStatusLabel() {
         NotificationServiceManager::instance().addNotification(
             NotificationMessages::k_BROKEN_APP_STRUCTURE_MESSAGE);
         appIntegrityNotified = true;
-    }
-
-    if (status == InfoMessages::k_INSTALL_OK) {
+    } else if (status == InfoMessages::k_INSTALL_OK) {
         appIntegrityNotified = false;
     }
 
-    revalidateBackupAndAppStatus();
+    revalidateBackupAndAppStatus(status);
 }
 
 // Checks for missing expected configuration files
 QString MainWindow::checkInstallIntegrityStatus() {
     const QString configDir = PathServiceManager::appConfigFolderPath();
-
     int missingCount = 0;
+
     for (const QString &file : App::Files::k_EXPECTED_CONFIG_FILES) {
-        const QString fullPath = configDir + "/" + file;
-        if (!QFile::exists(fullPath)) {
+        if (!QFile::exists(configDir + "/" + file)) {
             ++missingCount;
         }
     }
 
-    if (missingCount == 0) {
-        return InfoMessages::k_INSTALL_OK;
-    }
-    if (missingCount < App::Files::k_EXPECTED_CONFIG_FILES.size()) {
-        return InfoMessages::k_INSTALL_PARTIAL;
-    }
+    if (missingCount == 0) return InfoMessages::k_INSTALL_OK;
+    if (missingCount < App::Files::k_EXPECTED_CONFIG_FILES.size()) return InfoMessages::k_INSTALL_PARTIAL;
     return InfoMessages::k_INSTALL_BROKEN;
 }
 
-// UI button slot handlers
+// UI Interactions and Connections
 
-// Adds selected files to staging area
+// Connects buttons and tree view selection to their respective handlers
+void MainWindow::setupConnections() {
+    connectBackupSignals();
+
+    const QList<QPair<QPushButton *, void (MainWindow::*)()>> connections = {
+        {ui->AddToBackupButton, &MainWindow::onAddToBackupClicked},
+        {ui->ChangeBackupDestinationButton, &MainWindow::onChangeBackupDestinationClicked},
+        {ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked},
+        {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
+        {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
+        {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked}
+    };
+
+    for (const auto &[button, slot] : connections) {
+        if (button) {
+            connect(button, &QPushButton::clicked, this, slot);
+        }
+    }
+
+    connect(ui->DriveTreeView->selectionModel(),
+            &QItemSelectionModel::currentChanged, this,
+            &MainWindow::onDriveSelectionChanged);
+}
+
+// Binds backup-related signals to appropriate actions
+void MainWindow::connectBackupSignals() {
+    connect(backupController, &BackupController::backupCreated, this, [this]() {
+        onBackupCompleted();
+    });
+
+    connect(backupController, &BackupController::backupDeleted, this,
+            &MainWindow::ensureBackupStatusUpdated);
+
+    connect(backupController, &BackupController::errorOccurred, this,
+            [this](const QString &error) {
+                onBackupError(error);
+                QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE, error);
+            });
+}
+
+// Provides visual feedback on button action for limited time
+void MainWindow::triggerButtonFeedback(QPushButton *button,
+                                       const QString &feedbackText,
+                                       const QString &originalText,
+                                       int durationMs) {
+    if (!button) return;
+
+    button->setCheckable(true);
+    button->setChecked(true);
+    button->setText(feedbackText);
+    button->setEnabled(false);
+
+    QTimer::singleShot(durationMs, this, [button, originalText]() {
+        button->setChecked(false);
+        button->setText(originalText);
+        button->setEnabled(true);
+    });
+}
+
+// UI Slot Handlers
+
+// Adds selected files from source view to staging
 void MainWindow::onAddToBackupClicked() {
-    const QModelIndexList selectedIndexes =
-        ui->DriveTreeView->selectionModel()->selectedIndexes();
+    const QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
         return;
     }
 
-    QStringList alreadyStaged;
-    QStringList toStage;
-    QStringList notReadable;
+    QStringList alreadyStaged, toStage, notReadable;
 
     for (const QModelIndex &index : selectedIndexes) {
-        if (!index.isValid() || index.column() != 0)
-            continue;
+        if (!index.isValid() || index.column() != 0) continue;
 
         const QString path = sourceModel->filePath(index);
-
         QFileInfo fileInfo(path);
+
         if (!fileInfo.isReadable()) {
             notReadable << path;
-            qDebug() << "Read access denied for:" << path;
-            continue;
-        }
-
-        if (stagingModel->containsPath(path)) {
+        } else if (stagingModel->containsPath(path)) {
             alreadyStaged << path;
         } else {
             toStage << path;
@@ -971,20 +894,17 @@ void MainWindow::onAddToBackupClicked() {
     }
 
     if (!notReadable.isEmpty()) {
-        QMessageBox::warning(
-            this, ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
-            ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(notReadable.join("\n")));
+        QMessageBox::warning(this, ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
+                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(notReadable.join("\n")));
     }
 
     if (!alreadyStaged.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::k_ALREADY_STAGED_TITLE,
-                             ErrorMessages::k_ERROR_ALREADY_IN_STAGING.arg(
-                                 alreadyStaged.join("\n")));
+                             ErrorMessages::k_ERROR_ALREADY_IN_STAGING.arg(alreadyStaged.join("\n")));
     }
 
     if (!toStage.isEmpty()) {
         stagingModel->addPaths(toStage);
-
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
 
@@ -994,32 +914,29 @@ void MainWindow::onAddToBackupClicked() {
     }
 }
 
-// Removes selected items from staging
+// Removes selected files from the staging view
 void MainWindow::onRemoveFromBackupClicked() {
-    const QModelIndexList selectedIndexes =
-        ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
+    const QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::k_REMOVE_SELECTION_REQUIRED_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL);
         return;
     }
 
-    Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView,
-                                                   stagingModel);
+    Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
     triggerButtonFeedback(ui->RemoveFromBackupButton,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_BUTTON_TEXT,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT);
 }
 
-// Opens directory picker to change backup destination
+// Opens dialog to change backup destination directory
 void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
         this, InfoMessages::k_SELECT_BACKUP_DESTINATION_TITLE, QDir::rootPath());
 
     if (selectedDir.isEmpty()) {
-        QMessageBox::warning(
-            this, ErrorMessages::k_BACKUP_LOCATION_REQUIRED_TITLE,
-            ErrorMessages::k_ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
+        QMessageBox::warning(this, ErrorMessages::k_BACKUP_LOCATION_REQUIRED_TITLE,
+                             ErrorMessages::k_ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
         return;
     }
 
@@ -1034,8 +951,7 @@ void MainWindow::onChangeBackupDestinationClicked() {
     PathServiceManager::setBackupDirectory(selectedDir);
 
     setupDestinationView(selectedDir);
-
-    refreshBackupStatus();
+    ensureBackupStatusUpdated();
     refreshFileWatcher();
 
     triggerButtonFeedback(ui->ChangeBackupDestinationButton,
@@ -1043,19 +959,19 @@ void MainWindow::onChangeBackupDestinationClicked() {
                           Labels::Backup::k_CHANGE_DESTINATION_ORIGINAL_TEXT);
 }
 
-// Initiates the backup process
+// Creates backup using staged files
 void MainWindow::onCreateBackupClicked() {
     QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
-        QMessageBox::warning(this,
-                             ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
+        QMessageBox::warning(this, ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
         return;
     }
 
     QStringList unreadablePaths;
-    const QStringList &backupListRef = pathsToBackup;
-    for (const QString &path : backupListRef) {
+    const int pathCount = pathsToBackup.size();
+    for (int i = 0; i < pathCount; ++i) {
+        const QString &path = pathsToBackup.at(i);
         QFileInfo fileInfo(path);
         if (!fileInfo.exists() || !fileInfo.isReadable()) {
             unreadablePaths << path;
@@ -1063,30 +979,27 @@ void MainWindow::onCreateBackupClicked() {
     }
 
     if (!unreadablePaths.isEmpty()) {
-        const QStringList &unreadableRef = unreadablePaths;
-        for (const QString &path : unreadableRef) {
+        const int unreadableCount = unreadablePaths.size();
+        for (int i = 0; i < unreadableCount; ++i) {
+            const QString &path = unreadablePaths.at(i);
             stagingModel->removePath(path);
         }
 
         NotificationServiceManager::instance().addNotification(
-            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE)
-                .arg(unreadablePaths.join("\n")));
+            QString(NotificationMessages::k_READ_ACCESS_LOST_MESSAGE).arg(unreadablePaths.join("\n")));
 
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
 
         QMessageBox::warning(this, ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
-                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(
-                                 unreadablePaths.join("\n")));
-
+                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(unreadablePaths.join("\n")));
         return;
     }
 
     const QString backupRoot = destinationModel->rootPath();
     QString errorMessage;
     if (!FileOperations::createBackupInfrastructure(backupRoot, errorMessage)) {
-        QMessageBox::critical(
-            this, ErrorMessages::k_ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
+        QMessageBox::critical(this, ErrorMessages::k_ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
         return;
     }
 
@@ -1101,11 +1014,10 @@ void MainWindow::onCreateBackupClicked() {
     ui->TransferProgressBar->setVisible(true);
     ui->TransferProgressText->setVisible(false);
 
-    backupController->createBackup(backupRoot, pathsToBackup,
-                                   ui->TransferProgressBar);
+    backupController->createBackup(backupRoot, pathsToBackup, ui->TransferProgressBar);
 }
 
-// Deletes selected backup
+// Deletes selected backup from destination view
 void MainWindow::onDeleteBackupClicked() {
     if (!destinationModel) {
         QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
@@ -1129,17 +1041,17 @@ void MainWindow::onDeleteBackupClicked() {
 
     const QString selectedPath =
         fsModel->filePath(destinationProxyModel->mapToSource(selectedIndex));
+
     if (selectedPath.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
                              ErrorMessages::k_ERROR_SELECTED_PATH_INVALID);
         return;
     }
 
-    if (QMessageBox::question(
-            this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
-            QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION)
-                .arg(selectedPath),
-            QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+    if (QMessageBox::question(this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
+                              QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION)
+                                  .arg(selectedPath),
+                              QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
         return;
     }
 
@@ -1150,12 +1062,14 @@ void MainWindow::onDeleteBackupClicked() {
                           Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
 }
 
-// Enables the unlock button when drive selection changes
+// Drive Selection and Unlocking
+
+// Enables the unlock button when a drive is selected
 void MainWindow::onDriveSelectionChanged() {
     ui->UnlockDriveButton->setEnabled(true);
 }
 
-// Unlocks the selected drive
+// Unlocks the selected BitLocker-protected drive
 void MainWindow::onUnlockDriveClicked() {
     QString driveLetter = getSelectedDriveLetter();
     if (driveLetter.isEmpty()) {
@@ -1166,45 +1080,37 @@ void MainWindow::onUnlockDriveClicked() {
 
     QString drivePath = driveLetter + ":/";
     QDir driveDir(drivePath);
-
-    if (driveDir.exists() && driveDir.isReadable()) {
-        return;
-    }
+    if (driveDir.exists() && driveDir.isReadable()) return;
 
     triggerButtonFeedback(ui->UnlockDriveButton,
                           Labels::Backup::k_UNLOCKING_FEEDBACK_TEXT,
                           Labels::Backup::k_UNLOCK_DRIVE_ORIGINAL_TEXT);
 
     QProcess taskKill;
-    taskKill.start("taskkill", QStringList()
-                                   << "/IM" << "manage-bde.exe" << "/F");
+    taskKill.start("taskkill", QStringList() << "/IM" << "manage-bde.exe" << "/F");
     taskKill.waitForFinished(2000);
 
-    const QString script =
-        QStringLiteral("Start-Process manage-bde -ArgumentList '-unlock %1: "
-                       "-password' -Verb runAs")
-                               .arg(driveLetter.toUpper());
+    QString script = QStringLiteral(
+                         "Start-Process manage-bde -ArgumentList '-unlock %1: -password' -Verb runAs")
+                         .arg(driveLetter.toUpper());
 
-    bool started = QProcess::startDetached("powershell",
-                                           QStringList() << "-Command" << script);
-
-    if (!started) {
+    if (!QProcess::startDetached("powershell", QStringList() << "-Command" << script)) {
         QMessageBox::critical(this, BitLockerMessages::k_UNLOCK_FAILED_TITLE,
                               BitLockerMessages::k_UNLOCK_FAILED_MESSAGE);
         return;
     }
 
     QTimer::singleShot(7500, this, [this]() {
-        refreshBackupStatus();
+        ensureBackupStatusUpdated();
         refreshFileWatcher();
         ui->DriveTreeView->setModel(sourceModel);
         setupSourceTreeView();
     });
 }
 
-// Notification handling
+// Notifications
 
-// Initializes notification button and its badge
+// Sets up the notification button and badge
 void MainWindow::setupNotificationButton() {
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_BUTTON_TEXT);
 
@@ -1217,33 +1123,28 @@ void MainWindow::setupNotificationButton() {
     notificationBadge = new QLabel(ui->NotificationButton);
     notificationBadge->setObjectName("NotificationBadge");
     notificationBadge->setFixedSize(10, 10);
-
-    int offset = 2;
-    notificationBadge->move(ui->NotificationButton->width() -
-                                notificationBadge->width() - offset,
-                            offset);
+    notificationBadge->move(ui->NotificationButton->width() - 12, 2);
     notificationBadge->hide();
     notificationBadge->raise();
 
     updateNotificationButtonState();
 }
 
-// Handles click on notification button
+// Opens the full notification dialog
 void MainWindow::onNotificationButtonClicked() {
     showNotificationDialog();
     feedbackNotificationButton();
 }
 
-// Updates badge based on unread notifications
+// Updates the badge visibility based on unread notifications
 void MainWindow::updateNotificationButtonState() {
-    const bool hasUnread =
-        !NotificationServiceManager::instance().unreadNotifications().isEmpty();
+    bool hasUnread = !NotificationServiceManager::instance().unreadNotifications().isEmpty();
     if (notificationBadge) {
         notificationBadge->setVisible(hasUnread);
     }
 }
 
-// Shows the next queued popup notification
+// Shows the next popup notification from the queue
 void MainWindow::showNextNotification() {
     if (notificationQueue.isEmpty()) {
         finishNotificationQueue();
@@ -1251,38 +1152,35 @@ void MainWindow::showNextNotification() {
     }
 
     isNotificationPopupVisible = true;
-    const NotificationServiceStruct notif = notificationQueue.takeFirst();
-    displayNotificationPopup(notif);
+    displayNotificationPopup(notificationQueue.takeFirst());
 }
 
 // Displays a single notification popup
-void MainWindow::displayNotificationPopup(
-    const NotificationServiceStruct &notif) {
-    const QString message =
-        QString("[%1]\n%2")
-                                .arg(notif.timestamp.toLocalTime().toString(
-                                         Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT),
-                                     notif.message);
+void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
+    QString message = QString("[%1]\n%2")
+    .arg(notif.timestamp.toLocalTime().toString(Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT),
+         notif.message);
 
-    QMessageBox *box = new QMessageBox(this);
+    auto *box = new QMessageBox(this);
     box->setWindowTitle(InfoMessages::k_NOTIFICATION_POPUP_TITLE);
     box->setText(message);
     box->setAttribute(Qt::WA_DeleteOnClose);
-    connect(box, &QMessageBox::finished, this,
-            [this](int) { showNextNotification(); });
+    connect(box, &QMessageBox::finished, this, [this](int) {
+        showNextNotification();
+    });
     box->show();
 }
 
-// Marks notifications as read and hides badge
+// Marks notifications as read and resets state
 void MainWindow::finishNotificationQueue() {
     isNotificationPopupVisible = false;
     NotificationServiceManager::instance().markAllAsRead();
     updateNotificationButtonState();
 }
 
-// Opens full notification dialog
+// Opens full-screen notification dialog
 void MainWindow::showNotificationDialog() {
-    const QList<NotificationServiceStruct> notifications =
+    QList<NotificationServiceStruct> notifications =
         NotificationServiceManager::instance().allNotifications();
 
     NotificationsDialog dialog(notifications, this);
@@ -1292,7 +1190,7 @@ void MainWindow::showNotificationDialog() {
     updateNotificationButtonState();
 }
 
-// Provides feedback when notification button is clicked
+// Provides visual feedback when notification button is clicked
 void MainWindow::feedbackNotificationButton() {
     triggerButtonFeedback(ui->NotificationButton,
                           Labels::Backup::k_NOTIFICATION_FEEDBACK_TEXT,
@@ -1300,90 +1198,25 @@ void MainWindow::feedbackNotificationButton() {
                           System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 }
 
-// Accessors
+// Utility and Accessor Methods
 
-// Returns the main details tab widget
-QTabWidget *MainWindow::getDetailsTabWidget() { return ui->DetailsTabWidget; }
+// Returns the tab widget displaying backup details
+QTabWidget *MainWindow::getDetailsTabWidget() {
+    return ui->DetailsTabWidget;
+}
 
-// Returns the selected drive letter from the drive tree view
+// Extracts selected drive letter from tree view path
 QString MainWindow::getSelectedDriveLetter() const {
     QModelIndex selectedIndex = ui->DriveTreeView->currentIndex();
-    if (!selectedIndex.isValid()) {
-        return "";
-    }
+    if (!selectedIndex.isValid()) return "";
 
     QString fullPath = sourceModel->filePath(selectedIndex);
-    if (fullPath.length() < 2 || fullPath[1] != ':') {
-        return "";
-    }
+    if (fullPath.length() < 2 || fullPath[1] != ':') return "";
 
     return fullPath.left(1).toUpper();
 }
 
-// Backup Maintenance and Cleanup
-
-// Handles backup deletion/reset based on the provided delete type
-void MainWindow::handleBackupDeletion(const QString &path,
-                                      const QString &deleteType) {
-    constexpr const char *DELETE_TYPE_RESET = "reset";
-    constexpr const char *DELETE_TYPE_SINGLE = "single";
-
-    const QString correctBackupDir = backupService->getBackupRoot();
-
-    ui->BackupDestinationView->setModel(nullptr);
-    resetDestinationModels();
-
-    if (deleteType == DELETE_TYPE_RESET) {
-        if (fileWatcher) {
-            fileWatcher->removeAllPaths();
-        }
-
-        backupController->resetBackupArchive(path);
-
-        if (fileWatcher) {
-            fileWatcher->startWatchingMultiple({correctBackupDir});
-        }
-
-    } else if (deleteType == DELETE_TYPE_SINGLE) {
-        backupController->deleteBackup(path);
-    }
-
-    setupDestinationView(correctBackupDir);
-    refreshFileWatcher();
-    refreshBackupStatus();
-}
-
-// Handles app data clearing and shutdown process
-void MainWindow::handleAppDataClear() {
-    if (fileWatcher) {
-        fileWatcher->removeAllPaths();
-    }
-
-    ui->BackupDestinationView->setModel(nullptr);
-    resetDestinationModels();
-
-    NotificationServiceManager::instance().suspendNotifications(true);
-    bool success =
-        ServiceDirector::getInstance().uninstallAppWithConfirmation(this);
-    NotificationServiceManager::instance().suspendNotifications(false);
-
-    if (success) {
-        QApplication::quit();
-    }
-}
-
-// Utility Methods
-
-void MainWindow::resetDestinationModels() {
-    delete destinationModel;
-    destinationModel = new QFileSystemModel(this);
-
-    delete destinationProxyModel;
-    destinationProxyModel = nullptr;
-}
-
-// Checks if the specified directory is writable by attempting to create and
-// delete a temporary file
+// Checks if a directory is writable by testing a temporary file
 bool canWriteToDir(const QString &path) {
     QFile testFile(path + "/.writeTest");
     if (testFile.open(QIODevice::WriteOnly)) {
@@ -1393,6 +1226,7 @@ bool canWriteToDir(const QString &path) {
     return false;
 }
 
+// Styles layout for a three-column appearance
 void MainWindow::styleThreeColumnLayout(QLayout *layout) {
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(3);
@@ -1402,4 +1236,65 @@ void MainWindow::styleThreeColumnLayout(QLayout *layout) {
             boxLayout->setStretch(i, 1);
         }
     }
+}
+
+// Backup Maintenance
+
+// Handles backup deletion or archive reset
+void MainWindow::handleBackupDeletion(const QString &path, const QString &deleteType) {
+    const QString correctBackupDir = backupService->getBackupRoot();
+    ui->BackupDestinationView->setModel(nullptr);
+    resetDestinationModels();
+
+    if (deleteType == "reset") {
+        if (fileWatcher) fileWatcher->removeAllPaths();
+        backupController->resetBackupArchive(path);
+        if (fileWatcher) fileWatcher->startWatchingMultiple({correctBackupDir});
+    } else if (deleteType == "single") {
+        backupController->deleteBackup(path);
+    }
+
+    setupDestinationView(correctBackupDir);
+    refreshFileWatcher();
+    ensureBackupStatusUpdated();
+}
+
+// Clears app data and performs uninstall sequence
+void MainWindow::handleAppDataClear() {
+    NotificationServiceManager::instance().suspendNotifications(true);
+
+    UninstallServiceManager *uninstallService = ServiceDirector::getInstance().getUninstallServiceManager();
+    if (!uninstallService || !uninstallService->confirmUninstall(this)) {
+        NotificationServiceManager::instance().suspendNotifications(false);
+        return;
+    }
+
+    if (fileWatcher) fileWatcher->removeAllPaths();
+    ui->BackupDestinationView->setModel(nullptr);
+    resetDestinationModels();
+
+    bool success = uninstallService->performUninstall();
+    NotificationServiceManager::instance().suspendNotifications(false);
+
+    if (success) QApplication::quit();
+}
+
+// Resets and reinitializes destination model
+void MainWindow::resetDestinationModel() {
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+}
+
+// Resets and reinitializes destination models
+void MainWindow::resetDestinationModels() {
+    delete destinationModel;
+    destinationModel = new QFileSystemModel(this);
+
+    delete destinationProxyModel;
+    destinationProxyModel = nullptr;
+}
+
+// Resets and updates destination views
+void MainWindow::resetDestinationViews() {
+    resetDestinationModels();
 }

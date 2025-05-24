@@ -1,11 +1,11 @@
 // Project includes
 #include "ServiceDirector.h"
-#include "ServiceDirectorConstants.h"
 #include "../ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../ServiceManagers/InstallServiceManager/InstallServiceManager.h"
 #include "../ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
-#include "../ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
+#include "../ServiceManagers/UserServiceManager/UserServiceManager.h"
+#include "ServiceDirectorConstants.h"
 #include "../../../../constants/kvp_info.h"
 
 // Qt includes
@@ -24,16 +24,11 @@ ServiceDirector& ServiceDirector::getInstance() {
 // Constructor
 ServiceDirector::ServiceDirector() {
     setupFilePaths();
-
     installServiceManager = std::make_unique<InstallServiceManager>(appMetadataPath);
     userServiceManager = std::make_unique<UserServiceManager>(userServicePath);
     backupServiceManager = std::make_unique<BackupServiceManager>(*userServiceManager);
     uninstallServiceManager = std::make_unique<UninstallServiceManager>();
-
-    if (isFirstRun()) {
-        setupDefaults();
-    }
-
+    if (isFirstRun()) setupDefaults();
     installServiceManager->load();
     userServiceManager->load();
 }
@@ -90,7 +85,17 @@ QString ServiceDirector::getFilePath(const QString& fileName) const {
 
 // Uninstall operations
 bool ServiceDirector::uninstallAppWithConfirmation(QWidget* parent) {
-    return uninstallServiceManager ? uninstallServiceManager->promptAndUninstall(parent) : false;
+    if (!uninstallServiceManager || !uninstallServiceManager->confirmUninstall(parent))
+        return false;
+    return uninstallServiceManager->performUninstall();
+}
+
+UninstallServiceManager* ServiceDirector::getUninstallServiceManager() {
+    return uninstallServiceManager.get();
+}
+
+const UninstallServiceManager* ServiceDirector::getUninstallServiceManager() const {
+    return uninstallServiceManager.get();
 }
 
 // Internal helper methods

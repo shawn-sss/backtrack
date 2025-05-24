@@ -17,8 +17,8 @@ QString UninstallServiceManager::getInstallDirectory() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
-// Prompts the user to confirm and performs uninstall
-bool UninstallServiceManager::promptAndUninstall(QWidget* parent) const {
+// Prompts the user to confirm uninstall
+bool UninstallServiceManager::confirmUninstall(QWidget* parent) const {
     const QString installDir = getInstallDirectory();
 
     if (installDir.isEmpty() || !QDir(installDir).exists()) {
@@ -34,15 +34,19 @@ bool UninstallServiceManager::promptAndUninstall(QWidget* parent) const {
         QMessageBox::No
         );
 
-    if (confirm != QMessageBox::Yes)
-        return false;
+    return (confirm == QMessageBox::Yes);
+}
+
+// Performs the uninstall and notifies the user
+bool UninstallServiceManager::performUninstall() const {
+    const QString installDir = getInstallDirectory();
 
     if (deleteDirectory(installDir)) {
-        QMessageBox::information(parent, titleAppReset(), msgSuccess());
+        QMessageBox::information(nullptr, titleAppReset(), msgSuccess());
         return true;
     }
 
-    QMessageBox::critical(parent, titleResetFailed(), msgFailure());
+    QMessageBox::critical(nullptr, titleResetFailed(), msgFailure());
     return false;
 }
 

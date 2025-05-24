@@ -21,7 +21,7 @@ inline QString msgInvalidDir() {
 
 inline QString msgConfirmReset(const QString& path) {
     return QObject::tr(
-               "⚠️ This will completely reset the app by deleting the following directory:\n\n"
+               "This will completely reset the app by deleting the following directory:\n\n"
                "%1\n\n"
                "This will erase all user settings and metadata stored locally.\n"
                "This only targets the folder containing this application's runtime data.\n\n"

@@ -12,15 +12,15 @@
 #include <QElapsedTimer>
 #include <QFileSystemModel>
 #include <QLabel>
+#include <QLayout>
 #include <QMainWindow>
 #include <QPushButton>
+#include <QString>
+#include <QStringList>
 #include <QTabWidget>
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
-#include <QLayout>
-#include <QString>
-#include <QStringList>
 #include <QList>
 #include <QPair>
 
@@ -49,7 +49,10 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+    // UI accessors
     QTabWidget* getDetailsTabWidget();
+
+    // User actions
     void handleBackupDeletion(const QString& path, const QString& deleteType);
     void handleAppDataClear();
 
@@ -57,25 +60,23 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    // Top-level constructor helpers
-    void initializeModels();
-    void initializeServices();
-    void initializeUiAndLayout();
-    void initializeToolbar();
-    void initializeBackupUi();
-    void initializeThemeHandling();
-
-    // Initialization methods
+    // Initialization
     void configureWindow();
     void initializeUI();
     void setupLayout();
     void setupConnections();
+    void initializeUiAndLayout();
+    void initializeThemeHandling();
+
+    // Model and service setup
+    void initializeModels();
+    void initializeServices();
     void initializeBackupSystem();
     void connectBackupSignals();
-    void initializeFileWatcher();
-    void setupNotificationButton();
 
-    // Tree view configuration
+    // Toolbar and views
+    void initializeToolbar();
+    void setupNotificationButton();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
@@ -85,29 +86,24 @@ private:
                            bool stretchLastColumn, bool showHeader = true);
     void removeAllColumnsFromTreeView(QTreeView* treeView);
 
-    // File watcher operations
-    void startWatchingBackupDirectory(const QString& path);
-    void resetFileWatcherAndDestinationView();
-    QStringList getWatchedRoots() const;
-    void checkStagingForReadAccessLoss();
-
-    // Backup label updates
-    void updateApplicationStatusLabel();
+    // Backup UI and status updates
+    void initializeBackupUi();
+    void updateBackupLabels();
+    void refreshBackupStatus();
+    void updateBackupMetadataLabels();
+    void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
     void updateBackupLocationLabel(const QString& location);
     void updateBackupLocationStatusLabel(const QString& location);
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
-    void updateBackupLabels();
-    void refreshBackupStatus();
-    void updateLastBackupInfo();
     void handleSpecialBackupLabelStates(const BackupScanResult& scan);
     void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
-    QPair<QString, QString> statusVisualsForColor(const QString& color) const;
-    QString checkInstallIntegrityStatus();
+    void ensureBackupStatusUpdated();
     void revalidateBackupAndAppStatus();
+    void revalidateBackupAndAppStatus(const QString& appStatus);
 
-    // Notification handling
+    // Notifications
     void updateNotificationButtonState();
     void showNotificationDialog();
     void feedbackNotificationButton();
@@ -115,7 +111,16 @@ private:
     void finishNotificationQueue();
     void showNextNotification();
 
-    // UI styling and interaction
+    // File watcher
+    void initializeFileWatcher();
+    void startWatchingBackupDirectory(const QString& path);
+    void resetFileWatcherAndDestinationView();
+    QStringList getWatchedRoots() const;
+    void checkStagingForReadAccessLoss();
+    void refreshFileWatcher();
+    void handleWatchedPathChanged(const QString& path);
+
+    // UI utilities
     void applyButtonCursors();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
@@ -123,18 +128,20 @@ private:
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
     void applyCustomTreePalette(QTreeView* treeView);
     void applyCustomPalettesToAllTreeViews();
-    void updateBackupMetadataLabels();
-    void handleWatchedPathChanged(const QString& path);
+    void styleThreeColumnLayout(QLayout* layout);
+    QPair<QString, QString> statusVisualsForColor(const QString& color) const;
+    QString checkInstallIntegrityStatus();
+
+    // Drive and reset handling
+    QString getSelectedDriveLetter() const;
+    void onDriveSelectionChanged();
     void resetDestinationModel();
     void resetDestinationViews();
     void resetDestinationModels();
-    void styleThreeColumnLayout(QLayout* layout);
-
-    // Drive selection
-    QString getSelectedDriveLetter() const;
-    void onDriveSelectionChanged();
+    void updateApplicationStatusLabel();
 
 private slots:
+    // User interaction slots
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
@@ -146,7 +153,6 @@ private slots:
     void onBackupError(const QString& error);
     void onCooldownFinished();
     void onNotificationButtonClicked();
-    void refreshFileWatcher();
     void onThemeChanged();
     void onUnlockDriveClicked();
     void setStatusLabel(QLabel* label, const QString& emoji, const QString& text, const QString& style = "");
@@ -157,7 +163,7 @@ private:
     QToolBar* toolBar = nullptr;
     QLabel* notificationBadge = nullptr;
 
-    // Services and models
+    // Models and services
     QFileSystemModel* sourceModel = nullptr;
     StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
@@ -171,7 +177,7 @@ private:
     QTimer* createBackupCooldownTimer = nullptr;
     QElapsedTimer backupStartTimer;
 
-    // Notification data
+    // Notification state
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;

@@ -10,11 +10,14 @@ class UninstallServiceManager {
 public:
     UninstallServiceManager();
 
-    // Prompts the user and deletes the install directory if confirmed
-    bool promptAndUninstall(QWidget* parent) const;
+    // Directory management
+    QString getInstallDirectory() const;
+
+    // Uninstall operations
+    bool confirmUninstall(QWidget* parent) const;
+    bool performUninstall() const;
 
 private:
-    QString getInstallDirectory() const;
     bool deleteDirectory(const QString& path) const;
 };
 
