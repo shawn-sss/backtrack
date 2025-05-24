@@ -1,6 +1,6 @@
 // Project includes
 #include "stagingutils.h"
-#include "../backup/models/stagingmodel.h"
+#include "../models/stagingmodel.h"
 
 // Qt includes
 #include <QFileSystemModel>

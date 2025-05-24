@@ -87,6 +87,10 @@ set(CORE_BACKUP_CONTROLLERS
 set(CORE_BACKUP_SERVICES
     core/backup/service/backupservice.cpp
     core/backup/service/backupservice.h
+    core/backup/service/fileoperations.cpp
+    core/backup/service/fileoperations.h
+    core/backup/service/stagingutils.cpp
+    core/backup/service/stagingutils.h
 )
 
 set(CORE_BACKUP_WORKERS
@@ -182,6 +186,11 @@ set(SERVICE_MANAGER_FORMATUTILS
     services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h
 )
 
+set(SERVICE_MANAGER_UIUTILS
+    services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.cpp
+    services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h
+)
+
 set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_DIRECTOR}
     ${SERVICE_MANAGER_THEME}
@@ -195,16 +204,12 @@ set(SERVICE_MANAGERS
     ${SERVICE_MANAGER_FILEWATCHER}
     ${SERVICE_MANAGER_JSON}
     ${SERVICE_MANAGER_FORMATUTILS}
+    ${SERVICE_MANAGER_UIUTILS}
 )
 
 # Shared Utilities
 set(UTILS_SHARED
-    core/shared/fileoperations.cpp
-    core/shared/fileoperations.h
-    core/shared/uiutils.cpp
-    core/shared/uiutils.h
-    core/shared/stagingutils.cpp
-    core/shared/stagingutils.h
+
 )
 
 # Constants

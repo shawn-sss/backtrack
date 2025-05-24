@@ -1,5 +1,5 @@
 // Project includes
-#include "uiutils.h"
+#include "UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QCursor>

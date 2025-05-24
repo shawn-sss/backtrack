@@ -1,6 +1,6 @@
 // Project includes
 #include "transferworker.h"
-#include "../../shared/fileoperations.h"
+#include "../service/fileoperations.h"
 #include "../../../ui/mainwindow/mainwindowmessages.h"
 #include "../../../constants/backup_config.h"
 
