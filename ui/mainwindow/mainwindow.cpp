@@ -1062,6 +1062,9 @@ void MainWindow::onDeleteBackupClicked() {
         return;
     }
 
+    ui->BackupDestinationView->setModel(nullptr);
+    resetDestinationModels();
+
     handleBackupDeletion(selectedPath, "single");
 
     triggerButtonFeedback(ui->DeleteBackupButton,
@@ -1253,10 +1256,14 @@ void MainWindow::handleBackupDeletion(const QString &path, const QString &delete
 
     if (deleteType == "reset") {
         if (fileWatcher) fileWatcher->removeAllPaths();
+
+        ui->BackupDestinationView->setModel(nullptr);
+        resetDestinationModels();
+
         backupController->resetBackupArchive(path);
+
         if (fileWatcher) fileWatcher->startWatchingMultiple({correctBackupDir});
 
-        resetDestinationModels();
         setupDestinationView(correctBackupDir);
         refreshFileWatcher();
         ensureBackupStatusUpdated();
