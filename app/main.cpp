@@ -21,8 +21,8 @@ int main(int argc, char* argv[]) {
     app.setApplicationDisplayName(App::Info::k_APP_NAME);
 
     // Apply theme and listen for system theme changes
-    ThemeServiceManager::instance().applyTheme();
-    ThemeServiceManager::instance().installEventFilter(&app);
+    ServiceDirector::getInstance().applyTheme();
+    ServiceDirector::getInstance().installThemeEventFilter(&app);
 
     // Create and show main window
     MainWindow mainWindow;

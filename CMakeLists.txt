@@ -139,7 +139,6 @@ set(SRC_CORE_BACKUP
 set(SRC_SERVICE_MANAGERS
     services/ServiceDirector/ServiceDirector.cpp
     services/ServiceDirector/ServiceDirector.h
-    services/ServiceDirector/ServiceDirectorConstants.h
 
     services/ServiceManagers/BackupServiceManager/BackupServiceConstants.h
     services/ServiceManagers/BackupServiceManager/BackupServiceManager.cpp

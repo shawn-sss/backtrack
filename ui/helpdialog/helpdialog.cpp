@@ -2,7 +2,7 @@
 #include "helpdialog.h"
 #include "HelpDialogConstants.h"
 #include "HelpDialogStyling.h"
-#include "../../../../services/ServiceDirector/ServiceDirector.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 
 // Qt includes
 #include <QDialogButtonBox>
@@ -26,7 +26,7 @@ HelpDialog::HelpDialog(QWidget* parent)
 
     tabWidget = new QTabWidget(this);
 
-    QString appDataPath = ServiceDirector::getInstance().getAppInstallDir();
+    QString appDataPath = PathServiceManager::appDataRootDir();
     gettingStartedText = createTextBrowser(this, HelpDialogStyling::buildGettingStartedHtml());
     featuresText = createTextBrowser(this, HelpDialogStyling::buildFeaturesHtml());
     faqText = createTextBrowser(this, HelpDialogStyling::buildFaqHtml(appDataPath));

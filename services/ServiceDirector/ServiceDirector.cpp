@@ -1,23 +1,17 @@
 // Project includes
 #include "ServiceDirector.h"
-#include "ServiceDirectorConstants.h"
 #include "../ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../ServiceManagers/InstallServiceManager/InstallServiceManager.h"
-#include "../ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
-#include "../ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../ServiceManagers/UserServiceManager/UserServiceConstants.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
+#include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 
 // Qt includes
 #include <QFile>
+#include <QDir>
 #include <QJsonObject>
-#include <QStandardPaths>
-
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
 
 using namespace ThemeServiceConstants;
 
@@ -27,51 +21,49 @@ ServiceDirector& ServiceDirector::getInstance() {
     return instance;
 }
 
-// Constructor
+// Constructor initializes services and loads configuration
 ServiceDirector::ServiceDirector() {
-    setupFilePaths();
+    QDir().mkpath(PathServiceManager::appConfigFolderPath());
+
+    const QString appMetadataPath = PathServiceManager::appInitMetadataFilePath();
+    const QString userServicePath = PathServiceManager::userSettingsFilePath();
+
     installServiceManager = std::make_unique<InstallServiceManager>(appMetadataPath);
     userServiceManager = std::make_unique<UserServiceManager>(userServicePath);
     backupServiceManager = std::make_unique<BackupServiceManager>(*userServiceManager);
-    uninstallServiceManager = std::make_unique<UninstallServiceManager>();
-    if (isFirstRun()) setupDefaults();
+
+    if (!QFile::exists(appMetadataPath) || !QFile::exists(userServicePath)) {
+        setupDefaults();
+    }
+
     installServiceManager->load();
     userServiceManager->load();
 }
 
-// Theme preference operations
+// Sets up default configuration values
+void ServiceDirector::setupDefaults() {
+    InstallServiceManager::initializeDefaults();
+    userServiceManager->initializeDefaults();
+    NotificationServiceManager::initializeDefaults();
+}
+
+// User theme preference access
 UserThemePreference ServiceDirector::getThemePreference() const {
-    const QJsonObject& settings = userServiceManager->settings();
-    const auto key = UserServiceKeys::k_THEME_PREFERENCE_KEY;
+    const auto& settings = userServiceManager->settings();
+    const auto& key = UserServiceKeys::k_THEME_PREFERENCE_KEY;
+
     return settings.contains(key)
                ? stringToUserThemePreference(settings.value(key).toString())
                : UserThemePreference::Auto;
 }
 
 void ServiceDirector::setThemePreference(UserThemePreference preference) {
-    QJsonObject& settings = userServiceManager->settings();
+    auto& settings = userServiceManager->settings();
     settings[UserServiceKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
     userServiceManager->save();
 }
 
-// Backup service operations
-QString ServiceDirector::getBackupDirectory() const {
-    return backupServiceManager->getBackupDirectory();
-}
-
-void ServiceDirector::setBackupDirectory(const QString& dir) {
-    backupServiceManager->setBackupDirectory(dir);
-}
-
-QString ServiceDirector::getBackupPrefix() const {
-    return backupServiceManager->getBackupPrefix();
-}
-
-void ServiceDirector::setBackupPrefix(const QString& prefix) {
-    backupServiceManager->setBackupPrefix(prefix);
-}
-
-// Install metadata operations
+// Install metadata load/save
 void ServiceDirector::loadInstallMetadata() {
     installServiceManager->load();
 }
@@ -80,43 +72,28 @@ void ServiceDirector::saveInstallMetadata() {
     installServiceManager->save();
 }
 
-// Uninstall operations
-bool ServiceDirector::uninstallAppWithConfirmation(QWidget* parent) {
-    if (!uninstallServiceManager || !uninstallServiceManager->confirmUninstall(parent))
-        return false;
-    return uninstallServiceManager->performUninstall();
+// Service manager accessors
+UserServiceManager* ServiceDirector::getUserServiceManager() {
+    return userServiceManager.get();
 }
 
-UninstallServiceManager* ServiceDirector::getUninstallServiceManager() {
-    return uninstallServiceManager.get();
+BackupServiceManager* ServiceDirector::getBackupServiceManager() {
+    return backupServiceManager.get();
 }
 
-const UninstallServiceManager* ServiceDirector::getUninstallServiceManager() const {
-    return uninstallServiceManager.get();
+InstallServiceManager* ServiceDirector::getInstallServiceManager() {
+    return installServiceManager.get();
 }
 
-// Filesystem path accessors
-QString ServiceDirector::getAppInstallDir() const {
-    return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+ThemeServiceManager* ServiceDirector::getThemeServiceManager() {
+    return &ThemeServiceManager::instance();
 }
 
-QString ServiceDirector::getFilePath(const QString& fileName) const {
-    return getAppInstallDir() + "/" + ServiceDirectorConstants::kAppDataFolder + "/" + fileName;
+// Theme handling methods
+void ServiceDirector::applyTheme() {
+    getThemeServiceManager()->applyTheme();
 }
 
-// Internal helper methods
-void ServiceDirector::setupFilePaths() {
-    const QString baseDir = getFilePath("");
-    appMetadataPath = baseDir + ServiceDirectorConstants::kMetadataFile;
-    userServicePath = baseDir + ServiceDirectorConstants::kUserSettingsFile;
-}
-
-bool ServiceDirector::isFirstRun() const {
-    return !QFile::exists(appMetadataPath) || !QFile::exists(userServicePath);
-}
-
-void ServiceDirector::setupDefaults() {
-    InstallServiceManager::initializeDefaults();
-    userServiceManager->initializeDefaults();
-    NotificationServiceManager::initializeDefaults();
+void ServiceDirector::installThemeEventFilter(QObject* target) {
+    getThemeServiceManager()->installEventFilter(target);
 }

@@ -7,8 +7,8 @@
 #include <QApplication>
 #include <QFile>
 #include <QSettings>
-#include <QStyleFactory>
 #include <QStyle>
+#include <QStyleFactory>
 
 // OS includes
 #ifdef Q_OS_WIN

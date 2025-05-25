@@ -6,7 +6,6 @@
 
 namespace ThemeServiceConstants {
 
-// Default theme string
 inline constexpr const char* k_DEFAULT_THEME_STRING = "auto";
 
 // App-wide theme styles
@@ -22,7 +21,7 @@ enum class UserThemePreference {
     Auto
 };
 
-// Converts a string to UserThemePreference
+// String conversion methods for theme preferences
 inline UserThemePreference stringToUserThemePreference(const QString& value) {
     const QString v = value.trimmed().toLower();
     if (v == "light") return UserThemePreference::Light;
@@ -30,7 +29,6 @@ inline UserThemePreference stringToUserThemePreference(const QString& value) {
     return UserThemePreference::Auto;
 }
 
-// Converts UserThemePreference to a string
 inline QString userThemePreferenceToString(UserThemePreference pref) {
     switch (pref) {
     case UserThemePreference::Light: return QStringLiteral("light");

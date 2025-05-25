@@ -8,6 +8,7 @@
 #include "../../../../constants/interface_config.h"
 #include "../../../../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 
 // Qt includes
 #include <QDateTime>
@@ -39,35 +40,9 @@ bool BackupController::createBackupFolder(const QString& path) {
 // Generates a timestamped backup folder path
 QString BackupController::generateBackupFolderPath(const QString& destinationPath) const {
     return QDir(destinationPath).filePath(
-        ServiceDirector::getInstance().getBackupPrefix() +
+        ServiceDirector::getInstance().getBackupServiceManager()->getBackupPrefix() +
         QDateTime::currentDateTime().toString(
             Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
-}
-
-// Stops and cleans up the worker thread
-void BackupController::cleanupAfterTransfer() {
-    if (!workerThread)
-        return;
-
-    workerThread->quit();
-    workerThread->wait();
-    workerThread->deleteLater();
-    workerThread = nullptr;
-}
-
-// Clears contents of the backup archive directory
-void BackupController::resetBackupArchive(const QString& directoryPath) {
-    QDir dir(directoryPath);
-    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
-
-    for (const QFileInfo& entry : entries) {
-        const QString path = entry.absoluteFilePath();
-        if (entry.isDir()) {
-            QDir(path).removeRecursively();
-        } else {
-            QFile::remove(path);
-        }
-    }
 }
 
 // Starts a new backup operation in a worker thread
@@ -155,4 +130,30 @@ void BackupController::deleteBackup(const QString& backupPath) {
     }
 
     emit backupDeleted();
+}
+
+// Stops and cleans up the worker thread
+void BackupController::cleanupAfterTransfer() {
+    if (!workerThread)
+        return;
+
+    workerThread->quit();
+    workerThread->wait();
+    workerThread->deleteLater();
+    workerThread = nullptr;
+}
+
+// Clears contents of the backup archive directory
+void BackupController::resetBackupArchive(const QString& directoryPath) {
+    QDir dir(directoryPath);
+    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
+    for (const QFileInfo& entry : entries) {
+        const QString path = entry.absoluteFilePath();
+        if (entry.isDir()) {
+            QDir(path).removeRecursively();
+        } else {
+            QFile::remove(path);
+        }
+    }
 }

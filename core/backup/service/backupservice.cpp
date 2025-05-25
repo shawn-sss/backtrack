@@ -7,6 +7,7 @@
 #include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
 #include "../../../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 
 // Qt includes
 #include <QDateTime>
@@ -88,7 +89,10 @@ BackupScanResult BackupService::scanForBackupStatus() const {
         }
     }
 
-    const QString prefix = ServiceDirector::getInstance().getBackupPrefix();
+    UserServiceManager* userManager = ServiceDirector::getInstance().getUserServiceManager();
+    BackupServiceManager backupManager(*userManager);
+    QString prefix = backupManager.getBackupPrefix();
+
     const QFileInfoList backupFolders = rootDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
     for (const QFileInfo& dirInfo : backupFolders) {

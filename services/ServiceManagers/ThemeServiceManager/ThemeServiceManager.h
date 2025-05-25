@@ -17,25 +17,17 @@ class ThemeServiceManager : public QObject {
     Q_OBJECT
 
 public:
-    // Returns the singleton instance
+    // Singleton access
     static ThemeServiceManager& instance();
 
-    // Returns true if the system is using dark mode
+    // Theme status
     bool isDarkTheme() const;
-
-    // Returns the currently applied theme
     ThemeServiceConstants::AppTheme currentTheme() const;
-
-    // Returns the saved user theme preference
     ThemeServiceConstants::UserThemePreference getUserThemePreference() const;
 
-    // Sets the user preference and applies it
+    // Theme control
     void setUserThemePreference(ThemeServiceConstants::UserThemePreference preference);
-
-    // Applies the theme based on preference and system setting
     void applyTheme();
-
-    // Installs a native event filter (Windows only)
     void installEventFilter(QObject* target = nullptr);
 
 signals:

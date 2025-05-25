@@ -4,12 +4,13 @@
 #include "mainwindowmessages.h"
 #include "mainwindowstyling.h"
 #include "ui_mainwindow.h"
+#include "../../ui/notificationsdialog/notificationsdialog.h"
+#include "../../core/backup/constants/backupconstants.h"
+#include "../../core/backup/models/destinationproxymodel.h"
 #include "../../core/backup/models/stagingmodel.h"
 #include "../../core/backup/controller/backupcontroller.h"
 #include "../../core/backup/service/fileoperations.h"
 #include "../../core/backup/service/stagingutils.h"
-#include "../../core/backup/models/destinationproxymodel.h"
-#include "../../core/backup/constants/backupconstants.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h"
 #include "../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
@@ -19,7 +20,7 @@
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
-#include "../../ui/notificationsdialog/notificationsdialog.h"
+#include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../../../../constants/interface_config.h"
 #include "../../../../constants/window_config.h"
 
@@ -68,7 +69,7 @@ void MainWindow::initializeServices() {
     toolBar = new QToolBar(this);
     toolbarManager = new ToolbarServiceManager(this);
 
-    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
     PathServiceManager::setBackupDirectory(savedBackupDir);
     backupService = new BackupService(savedBackupDir);
     backupController = new BackupController(backupService, this);
@@ -76,7 +77,7 @@ void MainWindow::initializeServices() {
 
 // Sets up backup directory, models, tree views, and UI state
 void MainWindow::initializeBackupSystem() {
-    const QString savedBackupDir = ServiceDirector::getInstance().getBackupDirectory();
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
     PathServiceManager::setBackupDirectory(savedBackupDir);
     backupService->setBackupRoot(savedBackupDir);
 
@@ -953,7 +954,7 @@ void MainWindow::onChangeBackupDestinationClicked() {
     }
 
     backupService->setBackupRoot(selectedDir);
-    ServiceDirector::getInstance().setBackupDirectory(selectedDir);
+    ServiceDirector::getInstance().getBackupServiceManager()->setBackupDirectory(selectedDir);
     PathServiceManager::setBackupDirectory(selectedDir);
 
     setupDestinationView(selectedDir);
@@ -1275,8 +1276,8 @@ void MainWindow::handleBackupDeletion(const QString &path, const QString &delete
 void MainWindow::handleAppDataClear() {
     NotificationServiceManager::instance().suspendNotifications(true);
 
-    UninstallServiceManager *uninstallService = ServiceDirector::getInstance().getUninstallServiceManager();
-    if (!uninstallService || !uninstallService->confirmUninstall(this)) {
+    UninstallServiceManager uninstallService;
+    if (!uninstallService.confirmUninstall(this)) {
         NotificationServiceManager::instance().suspendNotifications(false);
         return;
     }
@@ -1285,7 +1286,7 @@ void MainWindow::handleAppDataClear() {
     ui->BackupDestinationView->setModel(nullptr);
     resetDestinationModels();
 
-    bool success = uninstallService->performUninstall();
+    bool success = uninstallService.performUninstall();
     NotificationServiceManager::instance().suspendNotifications(false);
 
     if (success) QApplication::quit();

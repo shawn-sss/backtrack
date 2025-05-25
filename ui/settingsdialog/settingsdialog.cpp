@@ -3,7 +3,7 @@
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
-#include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 
 // Qt includes
 #include <QApplication>
@@ -92,7 +92,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Creates and returns the user settings page widget
+// Constructs and returns the user settings page
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -101,7 +101,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     layout->addRow(createGraySmallLabel(k_DESC_BACKUP_SUBTITLE));
 
     backupPrefixEdit = new QLineEdit(widget);
-    backupPrefixEdit->setText(ServiceDirector::getInstance().getBackupPrefix());
+    backupPrefixEdit->setText(ServiceDirector::getInstance().getBackupServiceManager()->getBackupPrefix());
     backupPrefixEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[A-Za-z0-9]{0,12}$"), this));
     backupPrefixEdit->setMaxLength(12);
     layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
@@ -112,7 +112,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Creates and returns the system settings page widget
+// Constructs and returns the system settings page
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -159,7 +159,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     });
 
     connect(resetBackupArchiveButton, &QPushButton::clicked, this, [this]() {
-        const QString backupLocation = ServiceDirector::getInstance().getBackupDirectory();
+        const QString backupLocation = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
         if (backupLocation.isEmpty() || !QDir(backupLocation).exists()) {
             QMessageBox::warning(this, k_WARNING_INVALID_PATH_TITLE, k_WARNING_INVALID_PATH_MESSAGE);
             return;
@@ -191,11 +191,11 @@ void SettingsDialog::onSaveClicked() {
         return;
     }
 
-    ServiceDirector::getInstance().setBackupPrefix(newPrefix);
+    ServiceDirector::getInstance().getBackupServiceManager()->setBackupPrefix(newPrefix);
 
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ServiceDirector::getInstance().setThemePreference(selectedTheme);
-    ThemeServiceManager::instance().applyTheme();
+    ServiceDirector::getInstance().applyTheme();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);

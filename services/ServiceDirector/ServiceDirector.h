@@ -15,18 +15,12 @@
 class InstallServiceManager;
 class UserServiceManager;
 class BackupServiceManager;
-class UninstallServiceManager;
+class ThemeServiceManager;
 
 // Manages centralized access to service layer
 class ServiceDirector {
 public:
     static ServiceDirector& getInstance();
-
-    // Backup service access
-    QString getBackupDirectory() const;
-    void setBackupDirectory(const QString& dir);
-    QString getBackupPrefix() const;
-    void setBackupPrefix(const QString& prefix);
 
     // Theme preference access
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
@@ -36,31 +30,23 @@ public:
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // Filesystem path access
-    QString getAppInstallDir() const;
-    QString getFilePath(const QString& fileName) const;
-    inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
+    // Service manager accessors
+    UserServiceManager* getUserServiceManager();
+    BackupServiceManager* getBackupServiceManager();
+    InstallServiceManager* getInstallServiceManager();
+    ThemeServiceManager* getThemeServiceManager();
 
-    // Uninstallation interface
-    bool uninstallAppWithConfirmation(QWidget* parent);
-    UninstallServiceManager* getUninstallServiceManager();
-    const UninstallServiceManager* getUninstallServiceManager() const;
+    // Theme operations
+    void applyTheme();
+    void installThemeEventFilter(QObject* target);
 
 private:
     ServiceDirector();
-
-    // Internal helpers
-    void setupFilePaths();
     void setupDefaults();
-    bool isFirstRun() const;
-
-    QString appMetadataPath;
-    QString userServicePath;
 
     std::unique_ptr<InstallServiceManager> installServiceManager;
     std::unique_ptr<UserServiceManager> userServiceManager;
     std::unique_ptr<BackupServiceManager> backupServiceManager;
-    std::unique_ptr<UninstallServiceManager> uninstallServiceManager;
 };
 
 #endif // SERVICEDIRECTOR_H
