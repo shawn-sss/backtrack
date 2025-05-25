@@ -1,6 +1,5 @@
 // Project includes
 #include "../ui/mainwindow/mainwindow.h"
-#include "../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../constants/app_info.h"
@@ -13,14 +12,12 @@
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
 
-    // Initialize core services
-    ServiceDirector::getInstance();
-
     // Set app name and display name
     app.setApplicationName(App::Info::k_APP_NAME);
     app.setApplicationDisplayName(App::Info::k_APP_NAME);
 
-    // Apply theme and listen for system theme changes
+    // Initialize core services and theme
+    ServiceDirector::getInstance();
     ServiceDirector::getInstance().applyTheme();
     ServiceDirector::getInstance().installThemeEventFilter(&app);
 

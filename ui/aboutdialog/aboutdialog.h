@@ -8,7 +8,6 @@
 class QLabel;
 class QDialogButtonBox;
 
-// About dialog displaying application information
 class AboutDialog : public QDialog {
     Q_OBJECT
 
@@ -16,7 +15,7 @@ public:
     explicit AboutDialog(QWidget* parent = nullptr);
 
 private:
-    // UI elements
+    // UI elements for logo, text, and close button
     QLabel* logoLabel;
     QLabel* textLabel;
     QDialogButtonBox* buttonBox;

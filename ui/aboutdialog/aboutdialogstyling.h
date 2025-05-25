@@ -1,48 +1,44 @@
 #ifndef ABOUTDIALOGSTYLING_H
 #define ABOUTDIALOGSTYLING_H
 
-// Project includes
-#include "../../../../constants/app_info.h"
-#include "aboutdialogconstants.h"
-
 // Qt includes
-#include <QAbstractButton>
-#include <QDialogButtonBox>
-#include <QCursor>
-#include <QLabel>
 #include <QString>
 
-// Styling utilities for the About dialog
 namespace AboutDialogStyling {
+namespace Styles {
 
-// Applies pointing hand cursor to dialog buttons
-inline void applyCursors(QDialogButtonBox* buttonBox) {
-    const QList<QAbstractButton*>& buttons = buttonBox->buttons();
-    for (QAbstractButton* button : buttons)
-        button->setCursor(Qt::PointingHandCursor);
-}
+// Style for the descriptive text label
+inline constexpr auto TEXT_LABEL_STYLE = R"(
+    QLabel {
+        font-size: 12pt;
+        color: #DDD;
+    }
+)";
 
-// Builds the HTML content for the About dialog text
-inline QString buildAboutHtmlText() {
-    return QString(
-               "<h2>%1</h2>"
-               "<p>Version: <b>%2</b></p>"
-               "<p>Author: <b>%3</b></p>"
-               "<p style='margin-top:%4px;'>A simple, efficient backup utility focused on transparency, control, and clarity.</p>")
-        .arg(App::Info::k_APP_NAME,
-             App::Info::k_APP_VERSION,
-             App::Info::k_AUTHOR_NAME)
-        .arg(AboutDialogConstants::kTopMargin);
-}
+// Style for the logo label
+inline constexpr auto LOGO_LABEL_STYLE = R"(
+    QLabel {
+        margin-bottom: 10px;
+    }
+)";
 
-// Styles a QLabel for centered, wrapped rich/plain text
-inline void styleLabel(QLabel* label, bool richText = false) {
-    label->setAlignment(Qt::AlignCenter);
-    label->setWordWrap(true);
-    if (richText)
-        label->setTextFormat(Qt::RichText);
-}
+// Style for the dialog buttons
+inline constexpr auto BUTTON_STYLE = R"(
+    QPushButton {
+        background-color: #444;
+        color: white;
+        border-radius: 5px;
+        padding: 4px 10px;
+    }
+    QPushButton:hover {
+        background-color: #666;
+    }
+    QPushButton:pressed {
+        background-color: #222;
+    }
+)";
 
-}
+} // namespace Styles
+} // namespace AboutDialogStyling
 
 #endif // ABOUTDIALOGSTYLING_H
