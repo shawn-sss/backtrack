@@ -8,19 +8,21 @@
 class QTabWidget;
 class QTextBrowser;
 
-// HelpDialog provides a tabbed help window with Getting Started, Features, and FAQ sections
 class HelpDialog : public QDialog {
     Q_OBJECT
 
 public:
+    // Constructs the help dialog
     explicit HelpDialog(QWidget* parent = nullptr);
 
 private:
-    // Widgets for tabbed layout and content display
-    QTabWidget* tabWidget;
-    QTextBrowser* gettingStartedText;
-    QTextBrowser* featuresText;
-    QTextBrowser* faqText;
+    // Creates and returns a styled QTextBrowser with given HTML
+    QTextBrowser* createTextBrowser(const QString& html);
+
+    QTabWidget* tabWidget = nullptr;
+    QTextBrowser* gettingStartedText = nullptr;
+    QTextBrowser* featuresText = nullptr;
+    QTextBrowser* faqText = nullptr;
 };
 
 #endif // HELPDIALOG_H
