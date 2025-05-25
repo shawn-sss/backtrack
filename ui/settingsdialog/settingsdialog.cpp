@@ -43,7 +43,24 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 SettingsDialog::~SettingsDialog() = default;
 
-// Initializes the overall layout and UI structure
+// Creates a bold QLabel with optional parent
+inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
+    auto* label = new QLabel(text, parent);
+    QFont font = label->font();
+    font.setBold(true);
+    label->setFont(font);
+    return label;
+}
+
+// Creates a small gray QLabel with word wrap and optional parent
+inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
+    auto* label = new QLabel(text, parent);
+    label->setStyleSheet("color: gray; font-size: 11px;");
+    label->setWordWrap(true);
+    return label;
+}
+
+// Sets up dialog layout, category selector, and button box
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -92,7 +109,7 @@ void SettingsDialog::setupLayout() {
     mainLayout->addWidget(buttonBox);
 }
 
-// Constructs and returns the user settings page
+// Constructs the user settings page
 QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
@@ -112,7 +129,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     return widget;
 }
 
-// Constructs and returns the system settings page
+// Constructs the system settings page with theme and management buttons
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -180,7 +197,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Handles logic when the Save button is clicked
+// Applies user-entered settings and triggers save feedback
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();

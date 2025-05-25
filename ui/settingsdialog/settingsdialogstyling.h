@@ -37,23 +37,6 @@ inline constexpr auto k_RESET_BACKUP_BUTTON_STYLE = R"(
     font-weight: bold;
 )";
 
-// Creates bold-styled QLabel
-inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
-    auto* label = new QLabel(text, parent);
-    QFont font = label->font();
-    font.setBold(true);
-    label->setFont(font);
-    return label;
-}
-
-// Creates gray, small, word-wrapped QLabel
-inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
-    auto* label = new QLabel(text, parent);
-    label->setStyleSheet("color: gray; font-size: 11px;");
-    label->setWordWrap(true);
-    return label;
-}
-
 } // namespace SettingsDialogStyling
 
 #endif // SETTINGSDIALOGSTYLING_H
