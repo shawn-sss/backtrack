@@ -10,7 +10,7 @@ namespace App::Info {
 inline constexpr auto k_AUTHOR_NAME = "Shawn SSS";
 inline constexpr auto k_APP_NAME    = "MyDataBackupApp";
 inline constexpr auto k_APP_ABOUT   = "A simple, efficient backup utility focused on transparency, control, and clarity.";
-inline constexpr auto k_APP_VERSION = "0.5";
+inline constexpr auto k_APP_VERSION = "0.6";
 }
 
 // Application configuration and paths
