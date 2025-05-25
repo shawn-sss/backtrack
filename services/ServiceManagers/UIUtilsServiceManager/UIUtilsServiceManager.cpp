@@ -44,9 +44,8 @@ void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int colu
     if (!treeView || !treeView->model())
         return;
 
-    for (int i = startColumn; i < columnCount; ++i) {
+    for (int i = startColumn; i < columnCount; ++i)
         treeView->setColumnHidden(i, true);
-    }
 }
 
 // Configures a QProgressBar with range, height, and text visibility
@@ -62,9 +61,8 @@ void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int
 
 // Changes the cursor on QTabWidget to a pointing hand
 void setTabWidgetCursorToPointer(QTabWidget* tabWidget) {
-    if (tabWidget && tabWidget->tabBar()) {
+    if (tabWidget && tabWidget->tabBar())
         tabWidget->tabBar()->setCursor(Qt::PointingHandCursor);
-    }
 }
 
 // Creates a circular colored pixmap (status light)

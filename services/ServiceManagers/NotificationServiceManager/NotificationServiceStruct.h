@@ -15,7 +15,7 @@ struct NotificationServiceStruct {
     QDateTime timestamp;
     bool read;
 
-    // Converts struct to JSON object
+    // Convert struct to JSON object
     QJsonObject toJson() const {
         return {
             { NotificationSettings::Fields::k_MESSAGE, message },
@@ -24,7 +24,7 @@ struct NotificationServiceStruct {
         };
     }
 
-    // Creates struct from JSON object
+    // Create struct from JSON object
     static NotificationServiceStruct fromJson(const QJsonObject& obj) {
         return {
             obj.value(NotificationSettings::Fields::k_MESSAGE).toString(),

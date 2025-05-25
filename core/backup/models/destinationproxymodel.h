@@ -13,14 +13,14 @@ class DestinationProxyModel : public QSortFilterProxyModel {
 public:
     explicit DestinationProxyModel(QObject* parent = nullptr);
 
-    // Sets the name of the folder to exclude from filtering
+    // Set the name of the folder to exclude from filtering
     void setExcludedFolderName(const QString& folderName);
 
 protected:
-    // Filters out rows matching the excluded folder name
+    // Filter out rows matching the excluded folder name
     bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override;
 
-    // Sorts items by timestamp embedded in folder names (descending)
+    // Sort items by timestamp embedded in folder names (descending)
     bool lessThan(const QModelIndex& left, const QModelIndex& right) const override;
 
 private:

@@ -20,6 +20,7 @@ public:
     explicit NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent = nullptr);
 
 private:
+    // UI elements
     QListWidget* listWidget;
     QPushButton* closeButton;
     QPushButton* clearAllButton;

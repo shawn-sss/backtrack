@@ -10,6 +10,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 
+// SettingsDialog manages user and system settings configuration
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -22,17 +23,17 @@ signals:
     void requestAppDataClear();
 
 private slots:
-    // Event handling
+    // Save button click handler
     void onSaveClicked();
 
 private:
-    // Layout and UI construction
+    // UI layout and page creation
     void setupLayout();
     QWidget* createUserSettingsPage();
     QWidget* createSystemSettingsPage();
     void applyButtonCursorsAndTooltips();
 
-    // Core UI elements
+    // UI elements
     QListWidget* categoryList = nullptr;
     QStackedWidget* settingsStack = nullptr;
     QLineEdit* backupPrefixEdit = nullptr;
@@ -40,7 +41,7 @@ private:
     QPushButton* saveButton = nullptr;
     QTimer* saveCooldownTimer = nullptr;
 
-    // Action buttons
+    // System settings action buttons
     QPushButton* clearAppDataButton = nullptr;
     QPushButton* resetBackupArchiveButton = nullptr;
 };

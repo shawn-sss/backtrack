@@ -8,7 +8,7 @@
 class QTabWidget;
 class QTextBrowser;
 
-// HelpDialog provides a tabbed help window with instructions, features, and FAQs
+// HelpDialog provides a tabbed help window with Getting Started, Features, and FAQ sections
 class HelpDialog : public QDialog {
     Q_OBJECT
 
@@ -16,6 +16,7 @@ public:
     explicit HelpDialog(QWidget* parent = nullptr);
 
 private:
+    // Widgets for tabbed layout and content display
     QTabWidget* tabWidget;
     QTextBrowser* gettingStartedText;
     QTextBrowser* featuresText;

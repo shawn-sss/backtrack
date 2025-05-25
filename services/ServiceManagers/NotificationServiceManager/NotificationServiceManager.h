@@ -16,32 +16,31 @@ class NotificationServiceManager : public QObject {
 public:
     static NotificationServiceManager& instance();
 
-    // Initializes default notification file
+    // Initialize default notification file
     static void initializeDefaults();
 
-    // Loads and saves notification data
+    // Load and save notification data
     void load();
     void save();
 
-    // Adds, clears, and marks notifications
+    // Modify notifications
     void addNotification(const QString& message);
     void markAllAsRead();
     void clearAllNotifications();
 
-    // Accessors
+    // Access notification data
     QList<NotificationServiceStruct> unreadNotifications() const;
     const QList<NotificationServiceStruct>& allNotifications() const;
     void suspendNotifications(bool suspend);
-
 
 signals:
     void notificationsUpdated();
 
 private:
-    bool notificationsSuspended = false;
     NotificationServiceManager();
     QString notificationFilePath() const;
 
+    bool notificationsSuspended = false;
     QList<NotificationServiceStruct> notifications;
 };
 

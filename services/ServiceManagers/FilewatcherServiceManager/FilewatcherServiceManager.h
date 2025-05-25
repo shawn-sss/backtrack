@@ -15,19 +15,19 @@ class FileWatcher : public QObject {
 public:
     explicit FileWatcher(QObject* parent = nullptr);
 
-    // Add or remove single paths
+    // Single-path management
     void addPath(const QString& path);
     void removePath(const QString& path);
 
-    // Add or remove multiple paths
+    // Multi-path management
     void addPaths(const QStringList& paths);
     void removeAllPaths();
     void updateWatchList(const QStringList& paths);
 
-    // Watch config and backup-related paths
+    // Watch app-related folders and metadata
     void startWatchingMultiple(const QStringList& rootPaths);
 
-    // Query currently watched paths
+    // Query watch status
     QStringList watchedDirectories() const;
     QStringList watchedFiles() const;
 

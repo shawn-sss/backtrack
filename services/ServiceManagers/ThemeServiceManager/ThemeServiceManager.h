@@ -7,12 +7,9 @@
 // Qt includes
 #include <QObject>
 
-#ifdef Q_OS_WIN
-#include <QAbstractNativeEventFilter>
-#endif
-
 // Forward declaration (Qt class)
 #ifdef Q_OS_WIN
+#include <QAbstractNativeEventFilter>
 class ThemeChangeFilter;
 #endif
 

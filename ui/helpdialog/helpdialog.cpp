@@ -5,10 +5,10 @@
 #include "../../../../services/ServiceDirector/ServiceDirector.h"
 
 // Qt includes
+#include <QDialogButtonBox>
 #include <QTabWidget>
 #include <QTextBrowser>
 #include <QVBoxLayout>
-#include <QDialogButtonBox>
 
 namespace {
 QTextBrowser* createTextBrowser(QWidget* parent, const QString& html) {

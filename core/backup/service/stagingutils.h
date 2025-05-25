@@ -9,10 +9,10 @@ class StagingModel;
 
 namespace Shared::Backup {
 
-// Adds selected file system paths from a QTreeView to the staging model
+// Add selected file system paths from a tree view to the staging model
 void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel);
 
-// Removes selected staged paths from the staging model
+// Remove selected staged paths from the staging model
 void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel);
 
 } // namespace Shared::Backup

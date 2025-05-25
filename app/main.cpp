@@ -1,7 +1,7 @@
 // Project includes
 #include "../ui/mainwindow/mainwindow.h"
-#include "../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../constants/app_info.h"
 #include "../../../../constants/interface_config.h"

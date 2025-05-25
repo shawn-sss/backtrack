@@ -7,10 +7,10 @@
 
 namespace ToolbarServiceStyling {
 
-// Default toolbar service icon size
+// Default icon size for toolbar buttons
 inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
 
-// Toolbar service and button base style
+// Base stylesheet for toolbar and buttons
 inline const QString BASE_STYLE = QStringLiteral(
     "QToolBar {"
     "    background-color: transparent;"

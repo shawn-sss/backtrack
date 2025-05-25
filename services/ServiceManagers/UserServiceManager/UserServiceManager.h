@@ -5,18 +5,16 @@
 #include <QJsonObject>
 #include <QString>
 
-// Manages user-specific settings, including loading, saving, and defaults
+// Manages user-specific settings
 class UserServiceManager {
 public:
     explicit UserServiceManager(const QString& serviceFilePath);
 
-    // Loads settings from file
+    // Load/save operations
     void load();
-
-    // Saves current settings to file
     void save() const;
 
-    // Initializes settings with default values
+    // Initialize settings with default values
     void initializeDefaults();
 
     // Accessors

@@ -110,7 +110,8 @@ inline const QString k_BROKEN_APP_STRUCTURE_MESSAGE =
     QStringLiteral("The application structure appears to be incomplete or damaged. "
                    "Consider restarting the app or resetting its data to resolve the issue.");
 
-constexpr auto k_READ_ACCESS_LOST_MESSAGE = "The following items lost read access and were removed from staging:\n%1";
+inline constexpr auto k_READ_ACCESS_LOST_MESSAGE =
+    "The following items lost read access and were removed from staging:\n%1";
 }
 
 // About window labels and content
@@ -133,7 +134,7 @@ inline constexpr auto k_HELP_WINDOW_MESSAGE =
 inline constexpr auto k_HELP_EXTENDED_MESSAGE = "\n\nYour settings are stored at:\n%1";
 }
 
-// BitLocker unlock messages
+// Encryption unlock messages
 namespace BitLockerMessages {
 inline constexpr auto k_NO_DRIVE_SELECTED_TITLE = "No Drive Selected";
 inline const QString k_NO_DRIVE_SELECTED_MESSAGE =

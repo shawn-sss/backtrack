@@ -8,39 +8,38 @@
 BackupServiceManager::BackupServiceManager(UserServiceManager& serviceManager)
     : userServiceManager(serviceManager) {}
 
-
-// Return the full backup settings group
+// Returns the full backup settings group
 QJsonObject BackupServiceManager::getBackupSettings() const {
     const QJsonObject& settings = userServiceManager.settings();
     const QJsonValue groupValue = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP);
     return groupValue.isObject() ? groupValue.toObject() : QJsonObject{};
 }
 
-// Return the configured backup directory
+// Returns the configured backup directory
 QString BackupServiceManager::getBackupDirectory() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ServiceKeys::BACKUP_DIRECTORY_KEY)
         .toString(PathServiceManager::backupSetupFolderPath());
 }
 
-// Set the backup directory
+// Sets the backup directory
 void BackupServiceManager::setBackupDirectory(const QString& dir) {
     updateBackupSetting(ServiceKeys::BACKUP_DIRECTORY_KEY, dir, PathServiceManager::backupSetupFolderPath());
 }
 
-// Return the configured backup prefix
+// Returns the configured backup prefix
 QString BackupServiceManager::getBackupPrefix() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ServiceKeys::BACKUP_PREFIX_KEY)
         .toString(ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Set the backup prefix
+// Sets the backup prefix
 void BackupServiceManager::setBackupPrefix(const QString& prefix) {
     updateBackupSetting(ServiceKeys::BACKUP_PREFIX_KEY, prefix, ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Apply and persist a backup setting if it has changed
+// Updates and persists a backup setting if changed
 void BackupServiceManager::updateBackupSetting(const QString& key, const QString& newValue, const QString& defaultValue) {
     QJsonObject& settings = userServiceManager.settings();
     QJsonObject backupSettings = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP).toObject();

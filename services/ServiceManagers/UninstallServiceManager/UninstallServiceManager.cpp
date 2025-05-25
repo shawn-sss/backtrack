@@ -1,3 +1,4 @@
+// Project includes
 #include "UninstallServiceManager.h"
 #include "UninstallServiceConstants.h"
 
@@ -9,7 +10,6 @@
 
 using namespace UninstallServiceConstants;
 
-// Constructs the uninstall service manager
 UninstallServiceManager::UninstallServiceManager() = default;
 
 // Returns the app's local installation directory

@@ -9,23 +9,13 @@
 #include <QJsonDocument>
 #include <QSaveFile>
 
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
-
-namespace FileOperations {
-
-// Recursively copies a directory and its contents
-bool copyDirectoryRecursively(const QString& sourcePath, const QString& destinationPath) {
+// Recursively copy a directory and its contents
+bool FileOperations::copyDirectoryRecursively(const QString& sourcePath, const QString& destinationPath) {
     const QDir sourceDir(sourcePath);
-    if (!sourceDir.exists())
-        return false;
+    if (!sourceDir.exists()) return false;
 
     QDir destinationDir(destinationPath);
-    if (!destinationDir.exists() && !destinationDir.mkpath("."))
-        return false;
+    if (!destinationDir.exists() && !destinationDir.mkpath(".")) return false;
 
     const QFileInfoList entries = sourceDir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
     for (const QFileInfo& entry : entries) {
@@ -33,34 +23,32 @@ bool copyDirectoryRecursively(const QString& sourcePath, const QString& destinat
         const QString destFilePath = destinationDir.filePath(entry.fileName());
 
         if (entry.isDir()) {
-            if (!copyDirectoryRecursively(srcFilePath, destFilePath))
-                return false;
+            if (!copyDirectoryRecursively(srcFilePath, destFilePath)) return false;
         } else {
-            if (!QFile::copy(srcFilePath, destFilePath))
-                return false;
+            if (!QFile::copy(srcFilePath, destFilePath)) return false;
         }
     }
 
     return true;
 }
 
-// Deletes a directory and its contents
-bool deleteDirectory(const QString& path) {
+// Delete a directory and its contents
+bool FileOperations::deleteDirectory(const QString& path) {
     QDir dir(path);
     return dir.exists() && dir.removeRecursively();
 }
 
-// Creates a directory if it does not exist
-bool createDirectory(const QString& path) {
+// Create a directory if it does not exist
+bool FileOperations::createDirectory(const QString& path) {
     QDir dir(path);
     return dir.exists() || dir.mkpath(".");
 }
 
-// Calculates the total size of a directory
-quint64 calculateDirectorySize(const QDir& dir) {
+// Calculate the total size of a directory
+quint64 FileOperations::calculateDirectorySize(const QDir& dir) {
     quint64 totalSize = 0;
-
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+
     for (const QFileInfo& entry : entries) {
         if (entry.isDir()) {
             totalSize += calculateDirectorySize(QDir(entry.absoluteFilePath()));
@@ -72,11 +60,10 @@ quint64 calculateDirectorySize(const QDir& dir) {
     return totalSize;
 }
 
-// Recursively collects file paths from a directory
-void collectFilesRecursively(const QString& dirPath, QSet<QString>& uniqueFiles, QJsonArray& filesArray) {
+// Recursively collect file paths from a directory
+void FileOperations::collectFilesRecursively(const QString& dirPath, QSet<QString>& uniqueFiles, QJsonArray& filesArray) {
     const QDir dir(dirPath);
-    if (!dir.exists())
-        return;
+    if (!dir.exists()) return;
 
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     for (const QFileInfo& entry : entries) {
@@ -90,11 +77,10 @@ void collectFilesRecursively(const QString& dirPath, QSet<QString>& uniqueFiles,
     }
 }
 
-// Recursively collects directory paths
-void collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& uniqueFolders, QJsonArray& foldersArray) {
+// Recursively collect directory paths
+void FileOperations::collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& uniqueFolders, QJsonArray& foldersArray) {
     const QDir dir(dirPath);
-    if (!dir.exists())
-        return;
+    if (!dir.exists()) return;
 
     const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs);
     for (const QFileInfo& entry : entries) {
@@ -107,8 +93,8 @@ void collectDirectoriesRecursively(const QString& dirPath, QSet<QString>& unique
     }
 }
 
-// Creates required backup folder infrastructure
-bool createBackupInfrastructure(const QString& /* backupDir */, QString& errorMessage) {
+// Create required backup folder infrastructure
+bool FileOperations::createBackupInfrastructure(const QString& /* backupDir */, QString& errorMessage) {
     const QString appFolderPath = PathServiceManager::backupConfigFolderPath();
     const QString logsFolderPath = PathServiceManager::backupLogsFolderPath();
 
@@ -124,5 +110,3 @@ bool createBackupInfrastructure(const QString& /* backupDir */, QString& errorMe
 
     return true;
 }
-
-} // namespace FileOperations

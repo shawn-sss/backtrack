@@ -37,7 +37,7 @@ inline constexpr auto k_RESET_BACKUP_BUTTON_STYLE = R"(
     font-weight: bold;
 )";
 
-// Helper to create bold labels
+// Creates bold-styled QLabel
 inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
     auto* label = new QLabel(text, parent);
     QFont font = label->font();
@@ -46,7 +46,7 @@ inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
     return label;
 }
 
-// Helper to create gray, small, word-wrapped labels
+// Creates gray, small, word-wrapped QLabel
 inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
     auto* label = new QLabel(text, parent);
     label->setStyleSheet("color: gray; font-size: 11px;");

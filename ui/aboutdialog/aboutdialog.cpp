@@ -2,12 +2,11 @@
 #include "aboutdialog.h"
 #include "aboutdialogconstants.h"
 #include "AboutDialogStyling.h"
-#include "../../../../constants/app_info.h"
 
 // Qt includes
+#include <QDialogButtonBox>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <QDialogButtonBox>
 
 // Constructs and sets up the About dialog
 AboutDialog::AboutDialog(QWidget* parent)
@@ -18,10 +17,11 @@ AboutDialog::AboutDialog(QWidget* parent)
     logoLabel = new QLabel(this);
     QPixmap logoPixmap(":/resources/icons/app_icon.png");
     logoLabel->setPixmap(
-        logoPixmap.scaled(AboutDialogConstants::kLogoSize,
-                          AboutDialogConstants::kLogoSize,
-                          Qt::KeepAspectRatio,
-                          Qt::SmoothTransformation));
+        logoPixmap.scaled(
+            AboutDialogConstants::kLogoSize,
+            AboutDialogConstants::kLogoSize,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation));
     logoLabel->setAlignment(Qt::AlignCenter);
     logoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 

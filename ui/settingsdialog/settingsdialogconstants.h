@@ -15,9 +15,9 @@ inline constexpr auto k_LABEL_THEME_LIGHT_MODE        = "Light Mode";
 inline constexpr auto k_LABEL_THEME_DARK_MODE         = "Dark Mode";
 
 // Descriptions
-inline constexpr auto k_DESC_BACKUP_PREFIX = "Backup Prefix Description:";
-inline constexpr auto k_DESC_BACKUP_SUBTITLE = "This is the first part of each backup name to help group and identify them.";
-inline constexpr auto k_DESC_BACKUP_INFO = "Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.";
+inline constexpr auto k_DESC_BACKUP_PREFIX            = "Backup Prefix Description:";
+inline constexpr auto k_DESC_BACKUP_SUBTITLE          = "This is the first part of each backup name to help group and identify them.";
+inline constexpr auto k_DESC_BACKUP_INFO              = "Allowed: letters (A–Z, a–z) and digits (0–9), up to 12 characters.";
 
 // Button labels
 inline constexpr auto k_BUTTON_SAVE_TEXT              = "Save";

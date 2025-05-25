@@ -7,7 +7,6 @@
 #include <QBrush>
 #include <QFont>
 #include <QDateTime>
-#include "../../../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 
 namespace NotificationsDialogStyling {
 

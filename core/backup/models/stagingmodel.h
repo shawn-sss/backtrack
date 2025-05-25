@@ -16,7 +16,7 @@ public:
     explicit StagingModel(QObject* parent = nullptr);
     Q_DISABLE_COPY(StagingModel)
 
-    // Model interface overrides
+    // Core model interface
     QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& child) const override;
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -24,16 +24,14 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Path management
+    // Modify staged paths
     void addPath(const QString& path);
-    void removePath(const QString& path);
-    QStringList getStagedPaths() const;
-
-    // Returns true if the given path is already in the staging list
-    bool containsPath(const QString& path) const;
-
-    // Adds multiple new paths to the staging list if they are not already present
     void addPaths(const QStringList& paths);
+    void removePath(const QString& path);
+
+    // Query staged paths
+    QStringList getStagedPaths() const;
+    bool containsPath(const QString& path) const;
 
 private:
     QVector<QString> stagedPaths;

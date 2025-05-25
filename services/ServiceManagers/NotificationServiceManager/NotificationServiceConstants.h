@@ -9,7 +9,6 @@
 
 // Notification service values and keys
 namespace NotificationSettings {
-
 inline constexpr auto& kNotificationFileName = App::Items::k_APPDATA_SETUP_NOTIFICATIONS_FILE;
 inline constexpr auto& kNotificationFolder   = App::Items::k_APPDATA_SETUP_FOLDER;
 inline constexpr auto* k_DEFAULT_WELCOME_MESSAGE = "👋 Welcome! Thanks for using this app.";
@@ -20,7 +19,6 @@ inline constexpr auto* k_MESSAGE   = "message";
 inline constexpr auto* k_TIMESTAMP = "timestamp";
 inline constexpr auto* k_READ      = "read";
 }
-
 } // namespace NotificationSettings
 
 #endif // NOTIFICATIONSERVICECONSTANTS_H

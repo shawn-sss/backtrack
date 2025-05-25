@@ -156,7 +156,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     layout->addWidget(buttonRow);
 
     connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
-            emit requestAppDataClear();
+        emit requestAppDataClear();
     });
 
     connect(resetBackupArchiveButton, &QPushButton::clicked, this, [this]() {

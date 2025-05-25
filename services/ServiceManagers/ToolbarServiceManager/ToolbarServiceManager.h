@@ -9,24 +9,24 @@
 // C++ includes
 #include <array>
 
-// Manages toolbar setup and actions
+// Manages toolbar setup and user interaction
 class ToolbarServiceManager : public QObject {
     Q_OBJECT
 
 public:
     explicit ToolbarServiceManager(QObject* parent = nullptr);
 
-    // Initializes the toolbar with appearance and actions
+    // Initializes the toolbar with style and actions
     void initialize(QToolBar* toolBar);
 
-    // Accessors for specific actions
+    // Access to individual toolbar actions
     QAction* getActionOpenSettings() const;
     QAction* getActionExit() const;
     QAction* getActionHelp() const;
     QAction* getActionAbout() const;
 
 private:
-    // Toolbar setup methods
+    // Toolbar setup and customization
     void setupAppearance(QToolBar* toolBar);
     void createActions();
     void addActions(QToolBar* toolBar);
@@ -35,7 +35,7 @@ private:
     std::array<QAction*, 4> actions;
 
 private slots:
-    // Dialog invocation slots
+    // Action handlers for toolbar buttons
     void showSettings();
     void showHelp();
     void showAbout();

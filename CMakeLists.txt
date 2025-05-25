@@ -92,6 +92,11 @@ set(SRC_UI
 )
 
 # Core: Backup Controllers
+
+set(CORE_BACKUP_CONSTANTS
+    core/backup/constants/backupconstants.h
+)
+
 set(CORE_BACKUP_CONTROLLERS
     core/backup/controller/backupcontroller.cpp
     core/backup/controller/backupcontroller.h
@@ -123,6 +128,7 @@ set(CORE_BACKUP_MODELS
 
 # Core: All Backup Components
 set(SRC_CORE_BACKUP
+    ${CORE_BACKUP_CONSTANTS}
     ${CORE_BACKUP_CONTROLLERS}
     ${CORE_BACKUP_SERVICES}
     ${CORE_BACKUP_WORKERS}
@@ -187,9 +193,7 @@ set(SRC_SERVICE_MANAGERS
 # Constants
 set(SRC_CONSTANTS
     constants/app_info.h
-    constants/backup_config.h
     constants/interface_config.h
-    constants/kvp_info.h
     constants/system_constants.h
     constants/units_config.h
     constants/window_config.h

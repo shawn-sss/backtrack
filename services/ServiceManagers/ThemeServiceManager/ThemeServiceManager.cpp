@@ -10,12 +10,9 @@
 #include <QStyleFactory>
 #include <QStyle>
 
+// OS includes
 #ifdef Q_OS_WIN
 #include <QAbstractNativeEventFilter>
-#endif
-
-// C++ includes
-#ifdef Q_OS_WIN
 #include <windows.h>
 #endif
 
@@ -40,7 +37,7 @@ public:
 ThemeChangeFilter* ThemeServiceManager::eventFilter = nullptr;
 #endif
 
-// Loads a stylesheet from file
+// Loads QSS file content
 static QString loadQssFile(const QString& path) {
     QFile file(path);
     return (file.open(QFile::ReadOnly | QFile::Text)) ? QString::fromUtf8(file.readAll()) : QString();
@@ -52,23 +49,22 @@ ThemeServiceManager& ThemeServiceManager::instance() {
     return _instance;
 }
 
-// Constructor sets the default theme
+// Constructor
 ThemeServiceManager::ThemeServiceManager(QObject* parent)
     : QObject(parent),
-    _currentTheme(AppTheme::Dark)
-{}
+    _currentTheme(AppTheme::Dark) {}
 
-// Returns the current theme
+// Returns the current app theme
 AppTheme ThemeServiceManager::currentTheme() const {
     return _currentTheme;
 }
 
-// Returns the saved user preference
+// Gets saved user theme preference
 UserThemePreference ThemeServiceManager::getUserThemePreference() const {
     return ServiceDirector::getInstance().getThemePreference();
 }
 
-// Returns true if the system is using dark mode
+// Determines if the system is in dark mode
 bool ThemeServiceManager::isDarkTheme() const {
 #ifdef Q_OS_WIN
     QSettings settings(kThemeRegistryPath, QSettings::NativeFormat);
@@ -78,13 +74,13 @@ bool ThemeServiceManager::isDarkTheme() const {
 #endif
 }
 
-// Sets the user theme preference and applies it
+// Sets user theme preference and reapplies theme
 void ThemeServiceManager::setUserThemePreference(UserThemePreference preference) {
     ServiceDirector::getInstance().setThemePreference(preference);
     applyTheme();
 }
 
-// Applies the theme based on preference and system setting
+// Applies the appropriate theme
 void ThemeServiceManager::applyTheme() {
     const UserThemePreference preference = getUserThemePreference();
 
@@ -105,7 +101,7 @@ void ThemeServiceManager::applyTheme() {
     emit themeChanged();
 }
 
-// Installs a native event filter on Windows
+// Installs system theme change listener (Windows only)
 void ThemeServiceManager::installEventFilter(QObject*) {
 #ifdef Q_OS_WIN
     if (!eventFilter) {

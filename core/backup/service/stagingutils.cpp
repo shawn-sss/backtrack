@@ -4,13 +4,11 @@
 
 // Qt includes
 #include <QFileSystemModel>
-#include <QSet>
 #include <QItemSelectionModel>
-
-namespace Shared::Backup {
+#include <QSet>
 
 // Add selected file system paths from a tree view to the staging model
-void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
+void Shared::Backup::addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel) return;
 
     QItemSelectionModel* selectionModel = treeView->selectionModel();
@@ -28,9 +26,8 @@ void addSelectedPathsToStaging(QTreeView* treeView, StagingModel* stagingModel) 
     }
 }
 
-
 // Remove selected paths from the staging model
-void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
+void Shared::Backup::removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingModel) {
     if (!treeView || !stagingModel) return;
 
     QItemSelectionModel* selectionModel = treeView->selectionModel();
@@ -50,5 +47,3 @@ void removeSelectedPathsFromStaging(QTreeView* treeView, StagingModel* stagingMo
         stagingModel->removePath(path);
     }
 }
-
-} // namespace Shared::Backup

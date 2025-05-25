@@ -5,7 +5,6 @@
 #include <QString>
 
 namespace MainWindowStyling {
-
 namespace Styles {
 
 namespace BackupViewContainer {
@@ -84,24 +83,24 @@ inline constexpr auto k_DELETE_BACKUP      = "Delete the selected backup from th
 inline constexpr auto k_RESET_DESTINATION  = "Delete ALL contents from the backup destination";
 inline constexpr auto k_NOTIFICATIONS      = "View backup notifications";
 inline constexpr auto k_UNINSTALL          = "Uninstall the application and delete all local data";
+inline constexpr auto k_UNLOCK_DRIVE       = "Prompt to unlock a BitLocker-protected drive";
 }
-inline constexpr auto k_UNLOCK_DRIVE = "Prompt to unlock a BitLocker-protected drive";
 
 namespace Visuals {
-inline constexpr auto COLOR_GREEN        = "green";
-inline constexpr auto COLOR_RED          = "red";
-inline constexpr auto COLOR_YELLOW       = "yellow";
-inline constexpr auto COLOR_GRAY         = "gray";
-inline constexpr auto COLOR_TRANSPARENT  = "transparent";
-inline constexpr auto COLOR_WARNING      = "orange";
-inline constexpr auto COLOR_INFO         = "blue";
+inline constexpr auto COLOR_GREEN       = "green";
+inline constexpr auto COLOR_RED         = "red";
+inline constexpr auto COLOR_YELLOW      = "yellow";
+inline constexpr auto COLOR_GRAY        = "gray";
+inline constexpr auto COLOR_TRANSPARENT = "transparent";
+inline constexpr auto COLOR_WARNING     = "orange";
+inline constexpr auto COLOR_INFO        = "blue";
 
-inline constexpr auto TITLE_BAR          = "#222";
-inline constexpr auto WINDOW_BACKGROUND  = "#2B2B2B";
+inline constexpr auto TITLE_BAR         = "#222";
+inline constexpr auto WINDOW_BACKGROUND = "#2B2B2B";
 
-inline constexpr auto BACKUP_STATUS_COLOR_FOUND      = COLOR_GREEN;
-inline constexpr auto BACKUP_STATUS_COLOR_NOT_FOUND  = COLOR_RED;
-inline constexpr auto BACKUP_STATUS_COLOR_WARNING    = COLOR_YELLOW;
+inline constexpr auto BACKUP_STATUS_COLOR_FOUND     = COLOR_GREEN;
+inline constexpr auto BACKUP_STATUS_COLOR_NOT_FOUND = COLOR_RED;
+inline constexpr auto BACKUP_STATUS_COLOR_WARNING   = COLOR_YELLOW;
 
 inline constexpr auto STATUS_LIGHT_ICON = "<img src='data:image/png;base64,%1' style='%2'>";
 inline constexpr auto STATUS_LABEL_HTML = R"(
@@ -112,7 +111,6 @@ inline constexpr auto STATUS_LABEL_HTML = R"(
 }
 
 } // namespace Styles
-
 } // namespace MainWindowStyling
 
 #endif // MAINWINDOWSTYLING_H

@@ -13,7 +13,9 @@
 #include <QFileSystemModel>
 #include <QLabel>
 #include <QLayout>
+#include <QList>
 #include <QMainWindow>
+#include <QPair>
 #include <QPushButton>
 #include <QString>
 #include <QStringList>
@@ -21,8 +23,6 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
-#include <QList>
-#include <QPair>
 
 // Forward declaration (Custom class)
 class BackupController;

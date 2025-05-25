@@ -1,9 +1,7 @@
+// Project includes
 #include "UserServiceManager.h"
 #include "UserServiceConstants.h"
-
-// Project includes
 #include "../JsonServiceManager/JsonServiceManager.h"
-#include "../../../../constants/kvp_info.h"
 #include "../PathServiceManager/PathServiceManager.h"
 #include "../ThemeServiceManager/ThemeServiceConstants.h"
 
@@ -16,9 +14,8 @@ UserServiceManager::UserServiceManager(const QString& serviceFilePath)
 // Loads settings from file
 void UserServiceManager::load() {
     QJsonObject rootObject;
-    if (JsonManager::loadJsonFile(userServicePath, rootObject) && !rootObject.isEmpty()) {
+    if (JsonManager::loadJsonFile(userServicePath, rootObject) && !rootObject.isEmpty())
         userSettings = rootObject;
-    }
 }
 
 // Saves settings to file
@@ -39,14 +36,13 @@ const QJsonObject& UserServiceManager::settings() const {
 // Initializes default values for user settings
 void UserServiceManager::initializeDefaults() {
     QJsonObject backupGroup{
-        { App::KVP::UserServiceKeys::k_BACKUP_DIRECTORY_KEY, PathServiceManager::backupSetupFolderPath() },
-        { App::KVP::UserServiceKeys::k_BACKUP_PREFIX_KEY,    UserServiceDefaults::k_BACKUP_PREFIX }
+        { UserServiceKeys::k_BACKUP_DIRECTORY_KEY, PathServiceManager::backupSetupFolderPath() },
+        { UserServiceKeys::k_BACKUP_PREFIX_KEY,    UserServiceDefaults::k_BACKUP_PREFIX }
     };
 
     QJsonObject userService;
-    userService[App::KVP::UserServiceKeys::k_BACKUP_SERVICE_GROUP] =
-        backupGroup;
-    userService[App::KVP::UserServiceKeys::k_THEME_PREFERENCE_KEY] =
+    userService[UserServiceKeys::k_BACKUP_SERVICE_GROUP] = backupGroup;
+    userService[UserServiceKeys::k_THEME_PREFERENCE_KEY] =
         userThemePreferenceToString(UserThemePreference::Auto);
 
     JsonManager::saveJsonFile(userServicePath, userService);

@@ -1,12 +1,12 @@
 // Project includes
 #include "backupservice.h"
+#include "../constants/backupconstants.h"
 #include "../../../core/backup/service/fileoperations.h"
+#include "../../../../constants/app_info.h"
+#include "../../../../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
 #include "../../../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
-#include "../../../../constants/kvp_info.h"
-#include "../../../../constants/app_info.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
-#include "../../../../services/ServiceDirector/ServiceDirector.h"
 
 // Qt includes
 #include <QDateTime>
@@ -20,17 +20,17 @@
 BackupService::BackupService(const QString& backupRoot, QObject* parent)
     : QObject(parent), backupRootPath(backupRoot) {}
 
-// Sets the backup root path
+// Set the backup root path
 void BackupService::setBackupRoot(const QString& path) {
     backupRootPath = path;
 }
 
-// Returns the backup root path
+// Get the backup root path
 QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-// Ensures backup infrastructure exists if it doesn't already
+// Initialize the backup folder structure if it doesn't exist
 void BackupService::initializeBackupRootIfNeeded() {
     const QString configFilePath = PathServiceManager::backupInitMetadataFilePath();
     if (QFile::exists(configFilePath)) return;
@@ -53,7 +53,7 @@ void BackupService::initializeBackupRootIfNeeded() {
     JsonManager::saveJsonFile(configFilePath, backupConfig);
 }
 
-// Scans and evaluates current backup structure and logs
+// Scan backup root and return status report
 BackupScanResult BackupService::scanForBackupStatus() const {
     BackupScanResult result;
     const QDir rootDir(backupRootPath);
@@ -108,7 +108,7 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     return result;
 }
 
-// Returns list of backup log files, optionally sorted by time
+// Return backup log files, optionally sorted by time
 QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
     const QDir logsDir(PathServiceManager::backupLogsFolderPath());
     const QString pattern = "*_" + QString::fromUtf8(App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE);
@@ -119,7 +119,7 @@ QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
         );
 }
 
-// Returns metadata from the most recent backup log file
+// Return metadata from the latest backup log
 QJsonObject BackupService::getLastBackupMetadata() const {
     const QFileInfoList logFiles = getBackupLogFiles(true);
     if (logFiles.isEmpty()) return {};
@@ -132,26 +132,26 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return {};
 }
 
-// Returns total count of existing backup logs
+// Return total number of backup logs
 int BackupService::getBackupCount() const {
     return getBackupLogFiles().size();
 }
 
-// Computes total size of all recorded backups
+// Calculate total size of all backups recorded in logs
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
     const QFileInfoList& logFiles = getBackupLogFiles();
     for (const QFileInfo& logFile : logFiles) {
         QJsonObject metadata;
         if (JsonManager::loadJsonFile(logFile.absoluteFilePath(), metadata)) {
-            totalSize += metadata.value(App::KVP::BackupMetadata::k_SIZE_BYTES)
+            totalSize += metadata.value(BackupMetadata::k_SIZE_BYTES)
             .toVariant().toULongLong();
         }
     }
     return totalSize;
 }
 
-// Computes total size of a given set of paths
+// Calculate total size of the given list of paths
 qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     qint64 totalSize = 0;
     for (const QString& item : items) {
@@ -163,7 +163,7 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     return totalSize;
 }
 
-// Creates and writes backup summary log file
+// Create backup summary log for a new backup
 void BackupService::createBackupSummary(const QString& backupFolderPath,
                                         const QStringList& selectedItems,
                                         qint64 backupDuration) {
@@ -181,7 +181,7 @@ void BackupService::createBackupSummary(const QString& backupFolderPath,
     emit backupSummaryWritten(logFilePath);
 }
 
-// Constructs JSON metadata object for backup summary
+// Build JSON summary metadata for a backup operation
 QJsonObject BackupService::createBackupMetadata(const QString& backupFolderPath,
                                                 const QStringList& selectedItems,
                                                 qint64 backupDuration) const {
@@ -206,17 +206,17 @@ QJsonObject BackupService::createBackupMetadata(const QString& backupFolderPath,
     const QDateTime now = QDateTime::currentDateTime();
 
     return QJsonObject{
-        {App::KVP::BackupMetadata::k_NAME, folderName},
-        {App::KVP::BackupMetadata::k_TIMESTAMP, Shared::Formatting::formatTimestamp(now, Qt::ISODate)},
-        {App::KVP::BackupMetadata::k_DURATION, backupDuration},
-        {App::KVP::BackupMetadata::k_DURATION_READABLE, Shared::Formatting::formatDuration(backupDuration)},
-        {App::KVP::BackupMetadata::k_SIZE_BYTES, totalSize},
-        {App::KVP::BackupMetadata::k_SIZE_READABLE, Shared::Formatting::formatSize(totalSize)},
-        {App::KVP::BackupMetadata::k_FILE_COUNT, filesArray.size()},
-        {App::KVP::BackupMetadata::k_FOLDER_COUNT, uniqueFolders.size()},
-        {App::KVP::BackupMetadata::k_USER_SELECTED_ITEMS, userItemsArray},
-        {App::KVP::BackupMetadata::k_USER_SELECTED_ITEM_COUNT, selectedItems.size()},
-        {App::KVP::BackupMetadata::k_BACKUP_FILES, filesArray},
-        {App::KVP::BackupMetadata::k_BACKUP_FOLDERS, foldersArray}
+        {BackupMetadata::k_NAME, folderName},
+        {BackupMetadata::k_TIMESTAMP, Shared::Formatting::formatTimestamp(now, Qt::ISODate)},
+        {BackupMetadata::k_DURATION, backupDuration},
+        {BackupMetadata::k_DURATION_READABLE, Shared::Formatting::formatDuration(backupDuration)},
+        {BackupMetadata::k_SIZE_BYTES, totalSize},
+        {BackupMetadata::k_SIZE_READABLE, Shared::Formatting::formatSize(totalSize)},
+        {BackupMetadata::k_FILE_COUNT, filesArray.size()},
+        {BackupMetadata::k_FOLDER_COUNT, uniqueFolders.size()},
+        {BackupMetadata::k_USER_SELECTED_ITEMS, userItemsArray},
+        {BackupMetadata::k_USER_SELECTED_ITEM_COUNT, selectedItems.size()},
+        {BackupMetadata::k_BACKUP_FILES, filesArray},
+        {BackupMetadata::k_BACKUP_FOLDERS, foldersArray}
     };
 }

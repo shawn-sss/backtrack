@@ -1,9 +1,10 @@
+// Project includes
 #include "ToolbarServiceManager.h"
 #include "ToolbarServiceConstants.h"
 #include "ToolbarServiceStyling.h"
 
-#include "../../../ui/mainwindow/mainwindowlabels.h"
 #include "../../../ui/mainwindow/mainwindow.h"
+#include "../../../ui/mainwindow/mainwindowlabels.h"
 #include "../../../ui/settingsdialog/settingsdialog.h"
 #include "../../../ui/helpdialog/helpdialog.h"
 #include "../../../ui/aboutdialog/aboutdialog.h"
@@ -12,12 +13,10 @@
 #include <QApplication>
 #include <QCursor>
 #include <QIcon>
-#include <QToolButton>
-#include <QSizePolicy>
-#include <QWidget>
 #include <QMessageBox>
-
-using namespace Resources::ToolbarService;
+#include <QSizePolicy>
+#include <QToolButton>
+#include <QWidget>
 
 // Constructs the toolbar service manager
 ToolbarServiceManager::ToolbarServiceManager(QObject* parent)
@@ -46,37 +45,37 @@ void ToolbarServiceManager::setupAppearance(QToolBar* toolBar) {
     toolBar->setIconSize(ToolbarServiceStyling::DEFAULT_ICON_SIZE);
 }
 
-// Creates the actions for settings, exit, help, and about
+// Creates the toolbar actions and sets their properties
 void ToolbarServiceManager::createActions() {
     actions[0]->setText(Labels::Toolbar::k_SETTINGS);
-    actions[0]->setIcon(QIcon(k_SETTINGS_ICON_PATH));
+    actions[0]->setIcon(QIcon(Resources::ToolbarService::k_SETTINGS_ICON_PATH));
     connect(actions[0], &QAction::triggered, this, &ToolbarServiceManager::showSettings);
 
     actions[1]->setText(Labels::Toolbar::k_EXIT);
-    actions[1]->setIcon(QIcon(k_EXIT_ICON_PATH));
+    actions[1]->setIcon(QIcon(Resources::ToolbarService::k_EXIT_ICON_PATH));
     connect(actions[1], &QAction::triggered, qApp, &QApplication::quit);
 
     actions[2]->setText(Labels::Toolbar::k_HELP);
-    actions[2]->setIcon(QIcon(k_HELP_ICON_PATH));
+    actions[2]->setIcon(QIcon(Resources::ToolbarService::k_HELP_ICON_PATH));
     connect(actions[2], &QAction::triggered, this, &ToolbarServiceManager::showHelp);
 
     actions[3]->setText(Labels::Toolbar::k_ABOUT);
-    actions[3]->setIcon(QIcon(k_ABOUT_ICON_PATH));
+    actions[3]->setIcon(QIcon(Resources::ToolbarService::k_ABOUT_ICON_PATH));
     connect(actions[3], &QAction::triggered, this, &ToolbarServiceManager::showAbout);
 }
 
-// Adds the actions to the toolbar in a specific layout
+// Adds toolbar actions and a spacer widget to organize layout
 void ToolbarServiceManager::addActions(QToolBar* toolBar) {
     toolBar->clear();
-    toolBar->addAction(actions[0]); // Settings
-    toolBar->addAction(actions[2]); // Help
-    toolBar->addAction(actions[3]); // About
+    toolBar->addAction(actions[0]);
+    toolBar->addAction(actions[2]);
+    toolBar->addAction(actions[3]);
 
     auto* spacer = new QWidget(toolBar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     toolBar->addWidget(spacer);
 
-    toolBar->addAction(actions[1]); // Exit
+    toolBar->addAction(actions[1]);
 }
 
 // Applies cursor style and object names to toolbar buttons
@@ -95,17 +94,17 @@ void ToolbarServiceManager::applyCursorStyle(QToolBar* toolBar) {
     }
 }
 
-// Displays the Settings dialog
+// Shows the Settings dialog with connections to MainWindow slots
 void ToolbarServiceManager::showSettings() {
     auto* parentWidget = qobject_cast<QWidget*>(parent());
     SettingsDialog dialog(parentWidget);
 
     if (MainWindow* mainWindow = qobject_cast<MainWindow*>(parentWidget)) {
-        QObject::connect(&dialog, &SettingsDialog::requestBackupReset, mainWindow, [mainWindow](const QString& path, const QString& type) {
+        connect(&dialog, &SettingsDialog::requestBackupReset, mainWindow, [mainWindow](const QString& path, const QString& type) {
             mainWindow->handleBackupDeletion(path, type);
         });
 
-        QObject::connect(&dialog, &SettingsDialog::requestAppDataClear, mainWindow, [mainWindow]() {
+        connect(&dialog, &SettingsDialog::requestAppDataClear, mainWindow, [mainWindow]() {
             mainWindow->handleAppDataClear();
         });
     }
@@ -113,19 +112,19 @@ void ToolbarServiceManager::showSettings() {
     dialog.exec();
 }
 
-// Displays the Help dialog
+// Shows the Help dialog
 void ToolbarServiceManager::showHelp() {
     HelpDialog dialog(qobject_cast<QWidget*>(parent()));
     dialog.exec();
 }
 
-// Displays the About dialog
+// Shows the About dialog
 void ToolbarServiceManager::showAbout() {
     AboutDialog dialog(qobject_cast<QWidget*>(parent()));
     dialog.exec();
 }
 
-// Accessors for toolbar actions
+// Provides access to the toolbar actions
 QAction* ToolbarServiceManager::getActionOpenSettings() const { return actions[0]; }
 QAction* ToolbarServiceManager::getActionExit() const          { return actions[1]; }
 QAction* ToolbarServiceManager::getActionHelp() const          { return actions[2]; }

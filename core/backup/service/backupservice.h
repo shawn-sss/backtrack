@@ -38,7 +38,7 @@ public:
     explicit BackupService(const QString& backupRoot, QObject* parent = nullptr);
     Q_DISABLE_COPY(BackupService)
 
-    // Configuration
+    // Backup configuration
     void setBackupRoot(const QString& path);
     QString getBackupRoot() const;
     void initializeBackupRootIfNeeded();
@@ -46,7 +46,7 @@ public:
     // Structure scanning
     BackupScanResult scanForBackupStatus() const;
 
-    // Backup metadata access
+    // Backup metadata and summary
     QJsonObject getLastBackupMetadata() const;
     void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
 
@@ -58,7 +58,7 @@ signals:
     void backupSummaryWritten(const QString& logFilePath);
 
 private:
-    // Internal helpers for metadata and file analysis
+    // Internal metadata and file helpers
     QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
     qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
     QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;

@@ -1,16 +1,19 @@
 #ifndef HELPDIALOGSTYLING_H
 #define HELPDIALOGSTYLING_H
 
+// Project includes
+#include "HelpDialogConstants.h"
+
 // Qt includes
 #include <QAbstractButton>
 #include <QDialogButtonBox>
 #include <QTabBar>
 #include <QTabWidget>
 #include <QString>
-#include "HelpDialogConstants.h"
 
 namespace HelpDialogStyling {
 
+// Applies pointing hand cursors to tab bar and dialog buttons
 inline void applyCursors(QTabWidget* tabWidget, QDialogButtonBox* buttonBox) {
     if (QTabBar* tabBar = tabWidget->findChild<QTabBar*>()) {
         tabBar->setCursor(Qt::PointingHandCursor);
@@ -22,6 +25,7 @@ inline void applyCursors(QTabWidget* tabWidget, QDialogButtonBox* buttonBox) {
     }
 }
 
+// Builds HTML content for the Getting Started tab
 inline QString buildGettingStartedHtml() {
     return QString(HelpDialogConstants::kSectionGettingStartedTitle) +
            QString::fromUtf8(R"(
@@ -38,6 +42,7 @@ inline QString buildGettingStartedHtml() {
            )");
 }
 
+// Builds HTML content for the Features tab
 inline QString buildFeaturesHtml() {
     return QString(HelpDialogConstants::kSectionFeaturesTitle) +
            QString::fromUtf8(R"(
@@ -50,6 +55,7 @@ inline QString buildFeaturesHtml() {
            )");
 }
 
+// Builds HTML content for the FAQ tab
 inline QString buildFaqHtml(const QString& appDataPath) {
     return QString(HelpDialogConstants::kSectionFAQTitle) +
            QString(R"(
@@ -61,6 +67,6 @@ inline QString buildFaqHtml(const QString& appDataPath) {
            )").arg(appDataPath);
 }
 
-} // namespace HelpDialogStyling
+}
 
 #endif // HELPDIALOGSTYLING_H

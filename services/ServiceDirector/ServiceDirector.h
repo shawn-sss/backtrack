@@ -22,13 +22,13 @@ class ServiceDirector {
 public:
     static ServiceDirector& getInstance();
 
-    // Backup service
+    // Backup service access
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
     QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
-    // Theme management
+    // Theme preference access
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
     void setThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
@@ -36,12 +36,12 @@ public:
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // Filesystem access
+    // Filesystem path access
     QString getAppInstallDir() const;
     QString getFilePath(const QString& fileName) const;
     inline QString getAppInstallDirPublic() const { return getAppInstallDir(); }
 
-    // Uninstallation
+    // Uninstallation interface
     bool uninstallAppWithConfirmation(QWidget* parent);
     UninstallServiceManager* getUninstallServiceManager();
     const UninstallServiceManager* getUninstallServiceManager() const;
@@ -49,6 +49,7 @@ public:
 private:
     ServiceDirector();
 
+    // Internal helpers
     void setupFilePaths();
     void setupDefaults();
     bool isFirstRun() const;

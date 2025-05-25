@@ -1,13 +1,13 @@
 // Project includes
 #include "backupcontroller.h"
+#include "../constants/backupconstants.h"
 #include "../service/backupservice.h"
 #include "../worker/transferworker.h"
 #include "../../../ui/mainwindow/mainwindowmessages.h"
-#include "../../../services/ServiceDirector/ServiceDirector.h"
-#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
-#include "../../../../constants/interface_config.h"
-#include "../../../../constants/backup_config.h"
 #include "../../../../constants/app_info.h"
+#include "../../../../constants/interface_config.h"
+#include "../../../../services/ServiceDirector/ServiceDirector.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 
 // Qt includes
 #include <QDateTime>

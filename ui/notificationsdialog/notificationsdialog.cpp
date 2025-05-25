@@ -14,7 +14,7 @@
 // C++ includes
 #include <algorithm>
 
-// Constructs the notifications dialog with populated notification items
+// Constructs the notifications dialog and sets up UI and logic
 NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
     : QDialog(parent) {
     setWindowTitle(NotificationsDialogConstants::kWindowTitle);
@@ -68,8 +68,11 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
 
         if (reply == QMessageBox::Yes) {
             NotificationServiceManager::instance().clearAllNotifications();
-            QMessageBox::information(this, NotificationsDialogConstants::kClearedTitle,
-                                     NotificationsDialogConstants::kClearedMessage);
+            QMessageBox::information(
+                this,
+                NotificationsDialogConstants::kClearedTitle,
+                NotificationsDialogConstants::kClearedMessage
+                );
             accept();
         }
     });

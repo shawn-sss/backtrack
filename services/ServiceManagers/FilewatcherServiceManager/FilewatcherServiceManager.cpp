@@ -22,7 +22,7 @@ inline const QStringList& Required() {
     };
     return files;
 }
-} // namespace AppConfigFiles
+}
 
 namespace {
 
@@ -68,20 +68,20 @@ QStringList buildCompleteWatchList(const QStringList& roots) {
 
 } // namespace
 
-// Constructor to initialize file system watcher and connect signals
+// Construct file watcher and connect signals
 FileWatcher::FileWatcher(QObject* parent)
     : QObject(parent), watcher(new QFileSystemWatcher(this)) {
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcher::directoryChanged);
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcher::fileChanged);
 }
 
-// Replace all watched paths with the provided list
+// Replace current watch list with new paths
 void FileWatcher::updateWatchList(const QStringList& paths) {
     removeAllPaths();
     addPaths(paths);
 }
 
-// Add a single path to the watcher
+// Add single path to watcher
 void FileWatcher::addPath(const QString& path) {
     const QString normalized = normalizeAndCheckPath(path, true);
     if (!normalized.isEmpty() &&
@@ -91,7 +91,7 @@ void FileWatcher::addPath(const QString& path) {
     }
 }
 
-// Add multiple paths to the watcher, skipping already watched paths
+// Add multiple new paths to watcher
 void FileWatcher::addPaths(const QStringList& paths) {
     QSet<QString> currentWatched;
     currentWatched.unite(QSet<QString>(watcher->directories().begin(), watcher->directories().end()));
@@ -110,7 +110,7 @@ void FileWatcher::addPaths(const QStringList& paths) {
     }
 }
 
-// Remove a single path from the watcher
+// Remove a single path from watcher
 void FileWatcher::removePath(const QString& path) {
     const QString normalized = QDir::fromNativeSeparators(path.trimmed());
     if (watcher->directories().contains(normalized) || watcher->files().contains(normalized)) {
@@ -118,7 +118,7 @@ void FileWatcher::removePath(const QString& path) {
     }
 }
 
-// Remove all watched paths
+// Remove all currently watched paths
 void FileWatcher::removeAllPaths() {
     const QStringList allPaths = watcher->directories() + watcher->files();
     if (!allPaths.isEmpty()) {
@@ -126,17 +126,17 @@ void FileWatcher::removeAllPaths() {
     }
 }
 
-// Return list of watched directories
+// Return watched directories
 QStringList FileWatcher::watchedDirectories() const {
     return watcher->directories();
 }
 
-// Return list of watched files
+// Return watched files
 QStringList FileWatcher::watchedFiles() const {
     return watcher->files();
 }
 
-// Watch additional related files and folders based on root paths
+// Watch root directories along with related files
 void FileWatcher::startWatchingMultiple(const QStringList& roots) {
     static QStringList lastWatched;
 

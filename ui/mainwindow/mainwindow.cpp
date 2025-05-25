@@ -4,25 +4,24 @@
 #include "mainwindowmessages.h"
 #include "mainwindowstyling.h"
 #include "ui_mainwindow.h"
-#include "../../../../constants/backup_config.h"
-#include "../../../../constants/interface_config.h"
-#include "../../../../constants/kvp_info.h"
-#include "../../../../constants/window_config.h"
-#include "../../core/backup/controller/backupcontroller.h"
-#include "../../core/backup/models/destinationproxymodel.h"
 #include "../../core/backup/models/stagingmodel.h"
+#include "../../core/backup/controller/backupcontroller.h"
 #include "../../core/backup/service/fileoperations.h"
+#include "../../core/backup/service/stagingutils.h"
+#include "../../core/backup/models/destinationproxymodel.h"
+#include "../../core/backup/constants/backupconstants.h"
+#include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h"
 #include "../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
-#include "../../core/backup/service/stagingutils.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
-#include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
+#include "../../../../constants/interface_config.h"
+#include "../../../../constants/window_config.h"
 
 // Qt includes
 #include <QElapsedTimer>
@@ -54,8 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete ui;
 }
-
-// Core Setup
 
 // Initializes models used for source, destination, and staging
 void MainWindow::initializeModels() {
@@ -153,7 +150,7 @@ void MainWindow::applyButtonCursors() {
         {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
         {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
         {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
-        {ui->UnlockDriveButton, MainWindowStyling::Styles::k_UNLOCK_DRIVE}
+        {ui->UnlockDriveButton, MainWindowStyling::Styles::ToolTips::k_UNLOCK_DRIVE}
     };
 
     std::for_each(buttons.begin(), buttons.end(), [](const auto &pair) {
@@ -557,10 +554,10 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    const QString name = metadata.value(App::KVP::BackupMetadata::k_NAME).toString();
-    const QString timestampRaw = metadata.value(App::KVP::BackupMetadata::k_TIMESTAMP).toString();
-    const int durationSec = metadata.value(App::KVP::BackupMetadata::k_DURATION).toInt();
-    const QString sizeStr = metadata.value(App::KVP::BackupMetadata::k_SIZE_READABLE).toString();
+    const QString name = metadata.value(BackupMetadata::k_NAME).toString();
+    const QString timestampRaw = metadata.value(BackupMetadata::k_TIMESTAMP).toString();
+    const int durationSec = metadata.value(BackupMetadata::k_DURATION).toInt();
+    const QString sizeStr = metadata.value(BackupMetadata::k_SIZE_READABLE).toString();
 
     const QString formattedTimestamp = Shared::Formatting::formatTimestamp(
         QDateTime::fromString(timestampRaw, Qt::ISODate),
@@ -1252,20 +1249,26 @@ void MainWindow::styleThreeColumnLayout(QLayout *layout) {
 // Handles backup deletion or archive reset
 void MainWindow::handleBackupDeletion(const QString &path, const QString &deleteType) {
     const QString correctBackupDir = backupService->getBackupRoot();
-    ui->BackupDestinationView->setModel(nullptr);
-    resetDestinationModels();
 
     if (deleteType == "reset") {
         if (fileWatcher) fileWatcher->removeAllPaths();
         backupController->resetBackupArchive(path);
         if (fileWatcher) fileWatcher->startWatchingMultiple({correctBackupDir});
-    } else if (deleteType == "single") {
-        backupController->deleteBackup(path);
-    }
 
-    setupDestinationView(correctBackupDir);
-    refreshFileWatcher();
-    ensureBackupStatusUpdated();
+        resetDestinationModels();
+        setupDestinationView(correctBackupDir);
+        refreshFileWatcher();
+        ensureBackupStatusUpdated();
+    } else if (deleteType == "single") {
+
+        backupController->deleteBackup(path);
+        QTimer::singleShot(0, this, [this, correctBackupDir]() {
+            resetDestinationModels();
+            setupDestinationView(correctBackupDir);
+            refreshFileWatcher();
+            ensureBackupStatusUpdated();
+        });
+    }
 }
 
 // Clears app data and performs uninstall sequence

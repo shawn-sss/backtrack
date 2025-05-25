@@ -2,10 +2,9 @@
 #define UNINSTALLSERVICECONSTANTS_H
 
 // Qt includes
-#include <QString>
 #include <QObject>
+#include <QString>
 
-// Text used in uninstall confirmation dialogs
 namespace UninstallServiceConstants {
 
 // Dialog titles

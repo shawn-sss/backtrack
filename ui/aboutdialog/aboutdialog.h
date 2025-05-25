@@ -8,8 +8,8 @@
 class QLabel;
 class QDialogButtonBox;
 
-class AboutDialog : public QDialog
-{
+// About dialog displaying application information
+class AboutDialog : public QDialog {
     Q_OBJECT
 
 public:

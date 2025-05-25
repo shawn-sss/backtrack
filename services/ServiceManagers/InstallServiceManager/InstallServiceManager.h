@@ -17,7 +17,7 @@ public:
     // Initialize metadata with default values
     static void initializeDefaults();
 
-    // Accessors
+    // Metadata accessors
     const QJsonObject& getMetadata() const;
     void setMetadata(const QJsonObject& metadata);
 

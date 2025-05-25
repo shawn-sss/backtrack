@@ -6,7 +6,6 @@
 
 // Backup-related labels and buttons
 namespace Labels::Backup {
-//inline constexpr auto k_STATUS_LIGHT_IMAGE_FORMAT        = "PNG";
 inline constexpr auto k_FOUND                            = "Backup Found: ";
 inline constexpr auto k_LOCATION                         = "";
 inline constexpr auto k_TOTAL_COUNT                      = "Backup Total Count: ";
@@ -54,9 +53,6 @@ inline constexpr auto k_DURATION  = "Last Backup Duration: ";
 inline constexpr auto k_SIZE      = "Last Backup Size: ";
 inline const QString k_NO_BACKUPS_MESSAGE = QStringLiteral("No backups yet. Create one to see details here.");
 }
-
-// Toolbar action labels
-
 
 // Directory status labels
 namespace Labels::DirectoryStatus {
