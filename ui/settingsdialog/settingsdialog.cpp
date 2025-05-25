@@ -3,7 +3,6 @@
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
-#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 
 // Qt includes

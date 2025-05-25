@@ -3,7 +3,6 @@
 
 // Project includes
 #include "../../../../constants/app_info.h"
-#include "../../../../constants/window_config.h"
 
 // References to application metadata from app settings
 namespace InstallMetadataSettings {

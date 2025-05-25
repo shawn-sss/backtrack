@@ -53,7 +53,8 @@ QStringList buildCompleteWatchList(const QStringList& roots) {
             });
 
             QDir logDir(logsFolder);
-            for (const QFileInfo& fileInfo : logDir.entryInfoList({"*.json"}, QDir::Files)) {
+            const QFileInfoList fileList = logDir.entryInfoList({"*.json"}, QDir::Files);
+            for (const QFileInfo& fileInfo : fileList) {
                 pathsToWatch.insert(fileInfo.absoluteFilePath());
             }
         }
@@ -94,8 +95,10 @@ void FileWatcher::addPath(const QString& path) {
 // Add multiple new paths to watcher
 void FileWatcher::addPaths(const QStringList& paths) {
     QSet<QString> currentWatched;
-    currentWatched.unite(QSet<QString>(watcher->directories().begin(), watcher->directories().end()));
-    currentWatched.unite(QSet<QString>(watcher->files().begin(), watcher->files().end()));
+    QStringList dirs = watcher->directories();
+    QStringList files = watcher->files();
+    currentWatched.unite(QSet<QString>(dirs.begin(), dirs.end()));
+    currentWatched.unite(QSet<QString>(files.begin(), files.end()));
 
     QStringList newPaths;
     for (const QString& path : paths) {

@@ -4,7 +4,6 @@
 #include "ToolbarServiceStyling.h"
 
 #include "../../../ui/mainwindow/mainwindow.h"
-#include "../../../ui/mainwindow/mainwindowlabels.h"
 #include "../../../ui/settingsdialog/settingsdialog.h"
 #include "../../../ui/helpdialog/helpdialog.h"
 #include "../../../ui/aboutdialog/aboutdialog.h"

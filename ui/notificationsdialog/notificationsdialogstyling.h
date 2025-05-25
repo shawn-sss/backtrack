@@ -1,6 +1,9 @@
 #ifndef NOTIFICATIONSDIALOGSTYLING_H
 #define NOTIFICATIONSDIALOGSTYLING_H
 
+// Project includes
+#include "../../../../services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h"
+
 // Qt includes
 #include <QString>
 #include <QListWidgetItem>

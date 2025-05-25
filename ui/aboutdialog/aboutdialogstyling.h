@@ -17,7 +17,8 @@ namespace AboutDialogStyling {
 
 // Applies pointing hand cursor to dialog buttons
 inline void applyCursors(QDialogButtonBox* buttonBox) {
-    for (QAbstractButton* button : buttonBox->buttons())
+    const QList<QAbstractButton*>& buttons = buttonBox->buttons();
+    for (QAbstractButton* button : buttons)
         button->setCursor(Qt::PointingHandCursor);
 }
 
