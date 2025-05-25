@@ -14,7 +14,27 @@
 // C++ includes
 #include <algorithm>
 
-// Constructs the notifications dialog and sets up UI and logic
+// Formats the text for each notification item
+static QString formatNotificationText(const NotificationServiceStruct& notif) {
+    QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
+    QString badge = notif.read ? "" : "🔴 ";
+    return QString("%1%2\n%3").arg(badge, dateStr, notif.message);
+}
+
+// Creates a styled list widget item based on read state
+static QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
+    QListWidgetItem* item = new QListWidgetItem(formatNotificationText(notif));
+    if (notif.read) {
+        item->setForeground(QBrush(Qt::gray));
+    } else {
+        QFont font;
+        font.setBold(true);
+        item->setFont(font);
+    }
+    return item;
+}
+
+// Constructor: sets up UI and behavior for notifications dialog
 NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
     : QDialog(parent) {
     setWindowTitle(NotificationsDialogConstants::kWindowTitle);
@@ -46,7 +66,7 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
         listWidget->addItem(new QListWidgetItem(NotificationsDialogConstants::kNoNotificationsText));
     } else {
         for (const auto& notif : sortedNotifications) {
-            listWidget->addItem(NotificationsDialogStyling::createNotificationItem(notif));
+            listWidget->addItem(createNotificationItem(notif));
         }
         listWidget->setCurrentRow(0);
         listWidget->scrollToItem(listWidget->item(0), QAbstractItemView::PositionAtTop);
