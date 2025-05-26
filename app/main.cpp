@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     Shared::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
 
     // Show welcome dialog (temporarily disabled)
-    bool disableWelcome = 0; if (disableWelcome == 0)
+    bool disableWelcome = 1; if (disableWelcome == 0)
     {ServiceDirector::getInstance().maybeShowWelcomeDialog(&mainWindow);}
 
     // Start event loop
