@@ -2,37 +2,40 @@
 #define MAINWINDOW_H
 
 // Project includes
-#include "../../../../constants/system_constants.h"
 #include "../../core/backup/service/backupservice.h"
+#include "../../constants/system_constants.h"
+#include "../../../../constants/system_constants.h"
 
 // Qt includes
-#include <QAbstractItemModel>
-#include <QAbstractItemView>
-#include <QCloseEvent>
-#include <QElapsedTimer>
-#include <QFileSystemModel>
-#include <QLabel>
-#include <QLayout>
-#include <QList>
-#include <QMainWindow>
-#include <QPair>
-#include <QPushButton>
-#include <QString>
-#include <QStringList>
 #include <QTabWidget>
-#include <QTimer>
-#include <QToolBar>
+#include <QSystemTrayIcon>
 #include <QTreeView>
+#include <QToolBar>
+#include <QTimer>
+#include <QPushButton>
+#include <QPair>
+#include <QMenu>
+#include <QMainWindow>
+#include <QList>
+#include <QLayout>
+#include <QLabel>
+#include <QFileSystemModel>
+#include <QElapsedTimer>
+#include <QCloseEvent>
+#include <QAbstractItemView>
+#include <QAbstractItemModel>
+#include <QStringList>
+#include <QString>
 
 // Forward declaration (Custom class)
 class BackupController;
-class BackupService;
 class DestinationProxyModel;
 class FileWatcher;
 class NotificationServiceManager;
 class StagingModel;
 class ToolbarServiceManager;
 class NotificationServiceStruct;
+class SettingsDialog;
 
 // Forward declaration (Qt class)
 class QWidget;
@@ -84,7 +87,6 @@ private:
     void configureTreeView(QTreeView* treeView, QAbstractItemModel* model,
                            QAbstractItemView::SelectionMode selectionMode,
                            bool stretchLastColumn, bool showHeader = true);
-    void removeAllColumnsFromTreeView(QTreeView* treeView);
 
     // Backup UI and status updates
     void initializeBackupUi();
@@ -128,17 +130,17 @@ private:
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
     void applyCustomTreePalette(QTreeView* treeView);
     void applyCustomPalettesToAllTreeViews();
-    void styleThreeColumnLayout(QLayout* layout);
     QPair<QString, QString> statusVisualsForColor(const QString& color) const;
     QString checkInstallIntegrityStatus();
 
     // Drive and reset handling
     QString getSelectedDriveLetter() const;
     void onDriveSelectionChanged();
-    void resetDestinationModel();
-    void resetDestinationViews();
     void resetDestinationModels();
     void updateApplicationStatusLabel();
+
+    // Tray icon
+    void setupTrayIcon();
 
 private slots:
     // User interaction slots
@@ -184,6 +186,15 @@ private:
 
     // Backup scan cache
     BackupScanResult latestBackupScan;
+
+    // Tray icon
+    QSystemTrayIcon* trayIcon = nullptr;
+    QMenu* trayMenu = nullptr;
+
+    SettingsDialog* settingsDialog = nullptr;
+
+    bool suppressNextMenuClick = false;
+    bool ignoreTriggerAfterContext = false;
 };
 
 #endif // MAINWINDOW_H

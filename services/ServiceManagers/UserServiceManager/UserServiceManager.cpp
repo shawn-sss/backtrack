@@ -5,35 +5,33 @@
 #include "../PathServiceManager/PathServiceManager.h"
 #include "../ThemeServiceManager/ThemeServiceConstants.h"
 
-using namespace ThemeServiceConstants;
-
-// Constructs the user service manager with a path to the settings file
+// Initializes the user service manager with the settings file path
 UserServiceManager::UserServiceManager(const QString& serviceFilePath)
     : userServicePath(serviceFilePath) {}
 
-// Loads settings from file
+// Loads user settings from the settings file
 void UserServiceManager::load() {
     QJsonObject rootObject;
     if (JsonManager::loadJsonFile(userServicePath, rootObject) && !rootObject.isEmpty())
         userSettings = rootObject;
 }
 
-// Saves settings to file
+// Saves current user settings to the settings file
 void UserServiceManager::save() const {
     JsonManager::saveJsonFile(userServicePath, userSettings);
 }
 
-// Returns a modifiable reference to the settings object
+// Returns a modifiable reference to user settings
 QJsonObject& UserServiceManager::settings() {
     return userSettings;
 }
 
-// Returns a const reference to the settings object
+// Returns a const reference to user settings
 const QJsonObject& UserServiceManager::settings() const {
     return userSettings;
 }
 
-// Initializes default values for user settings
+// Initializes and saves default values for user settings
 void UserServiceManager::initializeDefaults() {
     QJsonObject backupGroup{
         { UserServiceKeys::k_BACKUP_DIRECTORY_KEY, PathServiceManager::backupSetupFolderPath() },
@@ -43,7 +41,8 @@ void UserServiceManager::initializeDefaults() {
     QJsonObject userService;
     userService[UserServiceKeys::k_BACKUP_SERVICE_GROUP] = backupGroup;
     userService[UserServiceKeys::k_THEME_PREFERENCE_KEY] =
-        userThemePreferenceToString(UserThemePreference::Auto);
+        userThemePreferenceToString(ThemeServiceConstants::UserThemePreference::Auto);
+    userService[UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY] = true;
 
     JsonManager::saveJsonFile(userServicePath, userService);
     userSettings = std::move(userService);

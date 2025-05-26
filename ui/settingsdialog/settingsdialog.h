@@ -2,6 +2,7 @@
 #define SETTINGSDIALOG_H
 
 // Qt includes
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
 #include <QLineEdit>
@@ -23,25 +24,29 @@ signals:
     void requestAppDataClear();
 
 private slots:
-    // Save button click handler
+    // Handles Save button click
     void onSaveClicked();
 
 private:
-    // UI layout and page creation
+    // Initializes layout and UI structure
     void setupLayout();
-    QWidget* createUserSettingsPage();
-    QWidget* createSystemSettingsPage();
-    void applyButtonCursorsAndTooltips();
 
-    // UI elements
+    // Builds the user settings page
+    QWidget* createUserSettingsPage();
+
+    // Builds the system settings page
+    QWidget* createSystemSettingsPage();
+
+    // Core UI widgets
     QListWidget* categoryList = nullptr;
     QStackedWidget* settingsStack = nullptr;
     QLineEdit* backupPrefixEdit = nullptr;
     QComboBox* themeComboBox = nullptr;
     QPushButton* saveButton = nullptr;
     QTimer* saveCooldownTimer = nullptr;
+    QCheckBox* minimizeOnCloseCheckbox = nullptr;
 
-    // System settings action buttons
+    // Action buttons for system settings
     QPushButton* clearAppDataButton = nullptr;
     QPushButton* resetBackupArchiveButton = nullptr;
 };

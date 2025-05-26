@@ -34,6 +34,7 @@ set(SRC_ENTRY_POINT
 set(SRC_RESOURCES
     resources/icons_resource.qrc
     resources/themes_resource.qrc
+    ui/systemtraycontextmenu.h
 )
 
 # UI: Main Window

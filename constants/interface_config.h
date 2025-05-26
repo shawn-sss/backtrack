@@ -3,7 +3,7 @@
 
 // Resource paths
 namespace UI::Resources {
-inline constexpr auto k_ICON_PATH = ":/resources/app_icon.png";
+inline constexpr auto k_ICON_PATH = ":/resources/icons/app_icon.png";
 }
 
 // TreeView column configuration

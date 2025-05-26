@@ -1,9 +1,11 @@
 // Project includes
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
 #include "mainwindowlabels.h"
 #include "mainwindowmessages.h"
 #include "mainwindowstyling.h"
-#include "ui_mainwindow.h"
+#include "../systemtraycontextmenu.h"
+#include "../settingsdialog/settingsdialog.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 #include "../../core/backup/constants/backupconstants.h"
 #include "../../core/backup/models/destinationproxymodel.h"
@@ -20,6 +22,8 @@
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
+#include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
+#include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../../../../constants/interface_config.h"
 #include "../../../../constants/window_config.h"
@@ -31,10 +35,12 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QLabel>
+#include <QMenu>
 #include <QMessageBox>
 #include <QProcess>
 #include <QPushButton>
 #include <QScreen>
+#include <QSystemTrayIcon>
 #include <QTimer>
 #include <QVBoxLayout>
 
@@ -48,11 +54,18 @@ MainWindow::MainWindow(QWidget *parent)
     initializeToolbar();
     initializeBackupUi();
     initializeThemeHandling();
+    setupTrayIcon();
 }
 
 // Destructor: Cleans up UI resources
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+// Connects theme change signal to update handler
+void MainWindow::initializeThemeHandling() {
+    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
+            this, &MainWindow::onThemeChanged);
 }
 
 // Initializes models used for source, destination, and staging
@@ -75,23 +88,73 @@ void MainWindow::initializeServices() {
     backupController = new BackupController(backupService, this);
 }
 
-// Sets up backup directory, models, tree views, and UI state
-void MainWindow::initializeBackupSystem() {
-    const QString savedBackupDir = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
-    PathServiceManager::setBackupDirectory(savedBackupDir);
-    backupService->setBackupRoot(savedBackupDir);
+// System Tray Setup
 
-    if (!FileOperations::createDirectory(savedBackupDir)) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
-                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
-    }
+// Initializes the system tray icon and its menu
+void MainWindow::setupTrayIcon() {
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setIcon(QIcon(UI::Resources::k_ICON_PATH));
+    trayIcon->setToolTip(App::Info::k_APP_NAME);
 
-    setupDestinationView(savedBackupDir);
-    setupSourceTreeView();
-    setupBackupStagingTreeView();
-    ensureBackupStatusUpdated();
-    applyCustomPalettesToAllTreeViews();
-    ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
+    auto* systemTrayContextMenu = new SystemTrayContextMenu(this);
+    trayMenu = systemTrayContextMenu;
+
+    QAction* actionOpen = systemTrayContextMenu->addAction("Open");
+    QAction* actionSettings = systemTrayContextMenu->addAction("Settings...");
+    systemTrayContextMenu->addSeparator();
+    QAction* actionExit = systemTrayContextMenu->addAction("Exit");
+
+    connect(systemTrayContextMenu, &SystemTrayContextMenu::safeTriggered, this, [this](QAction* action) {
+        const QString text = action->text().trimmed();
+
+        if (text == "Open") {
+            this->showNormal();
+            this->activateWindow();
+        } else if (text == "Settings...") {
+            if (settingsDialog && settingsDialog->isVisible()) {
+                settingsDialog->raise();
+                settingsDialog->activateWindow();
+                return;
+            }
+
+            settingsDialog = new SettingsDialog(this);
+            connect(settingsDialog, &SettingsDialog::requestBackupReset, this,
+                    [this](const QString& path, const QString& type) {
+                        this->handleBackupDeletion(path, type);
+                    });
+            connect(settingsDialog, &SettingsDialog::requestAppDataClear, this,
+                    [this]() {
+                        this->handleAppDataClear();
+                    });
+
+            settingsDialog->exec();
+            delete settingsDialog;
+            settingsDialog = nullptr;
+        } else if (text == "Exit") {
+            QApplication::quit();
+        }
+    });
+
+    trayIcon->setContextMenu(systemTrayContextMenu);
+    trayIcon->show();
+
+    connect(trayIcon, &QSystemTrayIcon::activated, this,
+            [this, systemTrayContextMenu](QSystemTrayIcon::ActivationReason reason) {
+                QPoint cursorPos = QCursor::pos();
+
+                switch (reason) {
+                case QSystemTrayIcon::Trigger:
+                    this->showNormal();
+                    this->activateWindow();
+                    break;
+                case QSystemTrayIcon::Context:
+                    systemTrayContextMenu->popup(cursorPos);
+                    break;
+                case QSystemTrayIcon::DoubleClick:
+                default:
+                    break;
+                }
+            });
 }
 
 // UI Setup
@@ -177,31 +240,64 @@ void MainWindow::initializeBackupUi() {
     });
 }
 
-// Connects theme change signal to update handler
-void MainWindow::initializeThemeHandling() {
-    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
-            this, &MainWindow::onThemeChanged);
+// Sets up backup directory, models, tree views, and UI state
+void MainWindow::initializeBackupSystem() {
+    const QString savedBackupDir = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
+    PathServiceManager::setBackupDirectory(savedBackupDir);
+    backupService->setBackupRoot(savedBackupDir);
+
+    if (!FileOperations::createDirectory(savedBackupDir)) {
+        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
+                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
+    }
+
+    setupDestinationView(savedBackupDir);
+    setupSourceTreeView();
+    setupBackupStagingTreeView();
+    ensureBackupStatusUpdated();
+    applyCustomPalettesToAllTreeViews();
+    ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
 }
 
 // Event Handling
 
 // Intercepts close event to prevent closing during active backup
-void MainWindow::closeEvent(QCloseEvent *event) {
-    if (backupController->isBackupInProgress()) {
-        QMessageBox::warning(this, ErrorMessages::k_ERROR_OPERATION_IN_PROGRESS,
-                             WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+void MainWindow::closeEvent(QCloseEvent* event) {
+    bool minimizeOnClose = ServiceDirector::getInstance()
+    .getUserServiceManager()
+        ->settings()
+        .value(UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY)
+        .toBool(true);
+
+    if (minimizeOnClose) {
+        hide();
         event->ignore();
         return;
     }
+
+    if (trayIcon) {
+        trayIcon->setContextMenu(nullptr);
+        trayIcon->hide();
+        trayIcon->disconnect();
+        trayIcon->deleteLater();
+        trayIcon = nullptr;
+    }
+
+    if (trayMenu) {
+        trayMenu->hide();
+        trayMenu->deleteLater();
+        trayMenu = nullptr;
+    }
+
     QMainWindow::closeEvent(event);
 }
+
+// Window and Tree View Layout
 
 // Refreshes all views when theme changes
 void MainWindow::onThemeChanged() {
     applyCustomPalettesToAllTreeViews();
 }
-
-// Window and Tree View Layout
 
 // Sets initial window size and position
 void MainWindow::configureWindow() {
@@ -265,7 +361,6 @@ void MainWindow::setupDestinationView(const QString &backupDir) {
 void MainWindow::configureTreeView(QTreeView *treeView, QAbstractItemModel *model,
                                    QAbstractItemView::SelectionMode selectionMode,
                                    bool stretchLastColumn, bool showHeader) {
-    Q_ASSERT(treeView && model);
     if (!treeView || !model) return;
 
     treeView->setModel(model);
@@ -275,16 +370,6 @@ void MainWindow::configureTreeView(QTreeView *treeView, QAbstractItemModel *mode
 
     for (int i = UI::TreeView::k_START_HIDDEN_COLUMN; i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
         treeView->setColumnHidden(i, true);
-    }
-}
-
-// Hides all extra columns from a given tree view
-void MainWindow::removeAllColumnsFromTreeView(QTreeView *treeView) {
-    if (!treeView) return;
-    if (QAbstractItemModel *model = treeView->model(); model) {
-        for (int i = UI::TreeView::k_START_HIDDEN_COLUMN; i < UI::TreeView::k_DEFAULT_COLUMN_COUNT; ++i) {
-            treeView->setColumnHidden(i, true);
-        }
     }
 }
 
@@ -318,6 +403,7 @@ void MainWindow::applyCustomPalettesToAllTreeViews() {
         applyCustomTreePalette(tree);
     }
 }
+
 
 // File Watcher and Path Monitoring
 
@@ -1236,18 +1322,6 @@ bool canWriteToDir(const QString &path) {
     return false;
 }
 
-// Styles layout for a three-column appearance
-void MainWindow::styleThreeColumnLayout(QLayout *layout) {
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(3);
-
-    if (auto *boxLayout = qobject_cast<QBoxLayout *>(layout)) {
-        for (int i = 0; i < 3; ++i) {
-            boxLayout->setStretch(i, 1);
-        }
-    }
-}
-
 // Backup Maintenance
 
 // Handles backup deletion or archive reset
@@ -1299,12 +1373,6 @@ void MainWindow::handleAppDataClear() {
     if (success) QApplication::quit();
 }
 
-// Resets and reinitializes destination model
-void MainWindow::resetDestinationModel() {
-    delete destinationModel;
-    destinationModel = new QFileSystemModel(this);
-}
-
 // Resets and reinitializes destination models
 void MainWindow::resetDestinationModels() {
     delete destinationModel;
@@ -1312,9 +1380,4 @@ void MainWindow::resetDestinationModels() {
 
     delete destinationProxyModel;
     destinationProxyModel = nullptr;
-}
-
-// Resets and updates destination views
-void MainWindow::resetDestinationViews() {
-    resetDestinationModels();
 }

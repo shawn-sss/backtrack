@@ -17,7 +17,7 @@ public:
     // Initialize settings with default values
     void initializeDefaults();
 
-    // Accessors
+    // Accessors for user settings
     QJsonObject& settings();
     const QJsonObject& settings() const;
 

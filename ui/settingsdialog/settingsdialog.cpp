@@ -3,10 +3,13 @@
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
+#include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
+#include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 
 // Qt includes
 #include <QApplication>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QDir>
@@ -33,7 +36,6 @@ using namespace SettingsDialogConstants;
 using namespace SettingsDialogStyling;
 using ThemeServiceConstants::UserThemePreference;
 
-// Constructor and destructor
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -43,7 +45,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 
 SettingsDialog::~SettingsDialog() = default;
 
-// Creates a bold QLabel with optional parent
+// Creates a bold label
 inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
     auto* label = new QLabel(text, parent);
     QFont font = label->font();
@@ -52,7 +54,7 @@ inline QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
     return label;
 }
 
-// Creates a small gray QLabel with word wrap and optional parent
+// Creates a small gray label
 inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
     auto* label = new QLabel(text, parent);
     label->setStyleSheet("color: gray; font-size: 11px;");
@@ -60,7 +62,7 @@ inline QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullp
     return label;
 }
 
-// Sets up dialog layout, category selector, and button box
+// Sets up the main layout and stacks
 void SettingsDialog::setupLayout() {
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
@@ -114,7 +116,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QFormLayout(widget);
 
-    layout->addRow(createBoldLabel(k_DESC_BACKUP_PREFIX));
+    layout->addRow(createBoldLabel("Backup Prefix:"));
     layout->addRow(createGraySmallLabel(k_DESC_BACKUP_SUBTITLE));
 
     backupPrefixEdit = new QLineEdit(widget);
@@ -124,12 +126,26 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     layout->addRow(k_LABEL_BACKUP_PREFIX, backupPrefixEdit);
 
     layout->addRow(createGraySmallLabel(k_DESC_BACKUP_INFO));
+    layout->addItem(new QSpacerItem(0, 12, QSizePolicy::Minimum, QSizePolicy::Fixed));
+
+    layout->addRow(createBoldLabel("Close Behavior:"));
+    layout->addRow(createGraySmallLabel("Choose what happens when you close the app window."));
+
+    minimizeOnCloseCheckbox = new QCheckBox("Minimize to system tray instead of exiting");
+    bool currentMinimizeSetting = ServiceDirector::getInstance()
+                                      .getUserServiceManager()
+                                      ->settings()
+                                      .value(UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY)
+                                      .toBool(true);
+    minimizeOnCloseCheckbox->setChecked(currentMinimizeSetting);
+    layout->addRow(minimizeOnCloseCheckbox);
+
     layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 
     return widget;
 }
 
-// Constructs the system settings page with theme and management buttons
+// Constructs the system settings page
 QWidget* SettingsDialog::createSystemSettingsPage() {
     auto* widget = new QWidget();
     auto* layout = new QVBoxLayout(widget);
@@ -197,7 +213,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     return widget;
 }
 
-// Applies user-entered settings and triggers save feedback
+// Applies user-entered settings
 void SettingsDialog::onSaveClicked() {
     backupPrefixEdit->clearFocus();
     QString newPrefix = backupPrefixEdit->text().trimmed();
@@ -213,6 +229,11 @@ void SettingsDialog::onSaveClicked() {
     auto selectedTheme = static_cast<UserThemePreference>(themeComboBox->currentData().toInt());
     ServiceDirector::getInstance().setThemePreference(selectedTheme);
     ServiceDirector::getInstance().applyTheme();
+
+    bool minimizeSetting = minimizeOnCloseCheckbox->isChecked();
+    auto& settings = ServiceDirector::getInstance().getUserServiceManager()->settings();
+    settings[UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY] = minimizeSetting;
+    ServiceDirector::getInstance().getUserServiceManager()->save();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);
