@@ -26,7 +26,7 @@ public:
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
     void setThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
-    // Install metadata management
+    // Install metadata operations
     void loadInstallMetadata();
     void saveInstallMetadata();
 
@@ -36,9 +36,13 @@ public:
     InstallServiceManager* getInstallServiceManager();
     ThemeServiceManager* getThemeServiceManager();
 
-    // Theme operations
+    // Theme handling
     void applyTheme();
     void installThemeEventFilter(QObject* target);
+
+    // First run detection and onboarding
+    bool isFirstRun() const;
+    void maybeShowWelcomeDialog(QWidget* parent = nullptr);
 
 private:
     ServiceDirector();
@@ -47,6 +51,8 @@ private:
     std::unique_ptr<InstallServiceManager> installServiceManager;
     std::unique_ptr<UserServiceManager> userServiceManager;
     std::unique_ptr<BackupServiceManager> backupServiceManager;
+
+    bool firstRun = false;
 };
 
 #endif // SERVICEDIRECTOR_H

@@ -30,6 +30,10 @@ int main(int argc, char* argv[]) {
     // Set pointer cursor for tab widget
     Shared::UI::setTabWidgetCursorToPointer(mainWindow.getDetailsTabWidget());
 
+    // Show welcome dialog (temporarily disabled)
+    bool disableWelcome = 0; if (disableWelcome == 0)
+    {ServiceDirector::getInstance().maybeShowWelcomeDialog(&mainWindow);}
+
     // Start event loop
     return app.exec();
 }

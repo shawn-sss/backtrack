@@ -83,6 +83,15 @@ set(UI_DIALOG_ABOUT
     ui/aboutdialog/aboutdialogstyling.h
 )
 
+# UI: Dialogs - Welcome
+set(UI_DIALOG_WELCOME
+    ui/welcomedialog/welcomedialog.h
+    ui/welcomedialog/welcomedialog.cpp
+    ui/welcomedialog/welcomedialog.ui
+    ui/welcomedialog/welcomedialogconstants.h
+    ui/welcomedialog/welcomedialogstyling.h
+)
+
 # All UI Sources
 set(SRC_UI
     ${UI_MAIN_WINDOW}
@@ -90,6 +99,7 @@ set(SRC_UI
     ${UI_DIALOG_SETTINGS}
     ${UI_DIALOG_HELP}
     ${UI_DIALOG_ABOUT}
+    ${UI_DIALOG_WELCOME}
 )
 
 # Core: Backup Controllers
