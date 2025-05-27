@@ -2,30 +2,32 @@
 #define MAINWINDOW_H
 
 // Project includes
+#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
 #include "../../core/backup/service/backupservice.h"
 #include "../../constants/system_constants.h"
 #include "../../../../constants/system_constants.h"
 
 // Qt includes
-#include <QTabWidget>
-#include <QSystemTrayIcon>
-#include <QTreeView>
-#include <QToolBar>
-#include <QTimer>
-#include <QPushButton>
-#include <QPair>
-#include <QMenu>
-#include <QMainWindow>
-#include <QList>
-#include <QLayout>
-#include <QLabel>
-#include <QFileSystemModel>
-#include <QElapsedTimer>
-#include <QCloseEvent>
-#include <QAbstractItemView>
 #include <QAbstractItemModel>
-#include <QStringList>
+#include <QAbstractItemView>
+#include <QCloseEvent>
+#include <QElapsedTimer>
+#include <QFileSystemModel>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLayout>
+#include <QList>
+#include <QMainWindow>
+#include <QMenu>
+#include <QPair>
+#include <QPushButton>
 #include <QString>
+#include <QStringList>
+#include <QSystemTrayIcon>
+#include <QTabWidget>
+#include <QTimer>
+#include <QToolBar>
+#include <QTreeView>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -37,13 +39,11 @@ class ToolbarServiceManager;
 class NotificationServiceStruct;
 class SettingsDialog;
 
-// Forward declaration (Qt class)
-class QWidget;
-
 namespace Ui {
 class MainWindow;
 }
 
+// Main application window managing UI, backup system, and notification controls
 class MainWindow final : public QMainWindow {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(MainWindow)
@@ -52,10 +52,8 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
-    // UI accessors
     QTabWidget* getDetailsTabWidget();
 
-    // User actions
     void handleBackupDeletion(const QString& path, const QString& deleteType);
     void handleAppDataClear();
 
@@ -66,20 +64,17 @@ private:
     // Initialization
     void configureWindow();
     void initializeUI();
-    void setupLayout();
-    void setupConnections();
     void initializeUiAndLayout();
-    void initializeThemeHandling();
-
-    // Model and service setup
     void initializeModels();
     void initializeServices();
-    void initializeBackupSystem();
-    void connectBackupSignals();
+    void initializeThemeHandling();
+    void setupLayout();
+    void setupConnections();
+    void setupTrayIcon();
 
-    // Toolbar and views
+    // Views
     void initializeToolbar();
-    void setupNotificationButton();
+    void initializeBackupUi();
     void setupSourceTreeView();
     void setupBackupStagingTreeView();
     void setupDestinationView();
@@ -88,10 +83,19 @@ private:
                            QAbstractItemView::SelectionMode selectionMode,
                            bool stretchLastColumn, bool showHeader = true);
 
-    // Backup UI and status updates
-    void initializeBackupUi();
+    // File Watching
+    void initializeFileWatcher();
+    void refreshFileWatcher();
+    void resetFileWatcherAndDestinationView();
+    void startWatchingBackupDirectory(const QString& path);
+    QStringList getWatchedRoots() const;
+    void handleWatchedPathChanged(const QString& path);
+    void checkStagingForReadAccessLoss();
+
+    // Backup Status
+    void initializeBackupSystem();
+    void connectBackupSignals();
     void updateBackupLabels();
-    void refreshBackupStatus();
     void updateBackupMetadataLabels();
     void updateLastBackupInfo();
     void updateBackupStatusLabel(const QString& statusColor);
@@ -100,99 +104,97 @@ private:
     void updateBackupTotalCountLabel();
     void updateBackupTotalSizeLabel();
     void handleSpecialBackupLabelStates(const BackupScanResult& scan);
-    void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
     void ensureBackupStatusUpdated();
+    void refreshBackupStatus();
+    void notifyOrphanOrBrokenBackupIssues(const BackupScanResult& scan);
     void revalidateBackupAndAppStatus();
     void revalidateBackupAndAppStatus(const QString& appStatus);
 
-    // Notifications
-    void updateNotificationButtonState();
-    void showNotificationDialog();
-    void feedbackNotificationButton();
-    void displayNotificationPopup(const NotificationServiceStruct& notif);
-    void finishNotificationQueue();
-    void showNextNotification();
-
-    // File watcher
-    void initializeFileWatcher();
-    void startWatchingBackupDirectory(const QString& path);
-    void resetFileWatcherAndDestinationView();
-    QStringList getWatchedRoots() const;
-    void checkStagingForReadAccessLoss();
-    void refreshFileWatcher();
-    void handleWatchedPathChanged(const QString& path);
-
-    // UI utilities
+    // UI Utilities
     void applyButtonCursors();
+    void applyCustomTreePalette(QTreeView* treeView);
+    void applyCustomPalettesToAllTreeViews();
     void triggerButtonFeedback(QPushButton* button,
                                const QString& feedbackText,
                                const QString& originalText,
                                int durationMs = System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
-    void applyCustomTreePalette(QTreeView* treeView);
-    void applyCustomPalettesToAllTreeViews();
     QPair<QString, QString> statusVisualsForColor(const QString& color) const;
     QString checkInstallIntegrityStatus();
-
-    // Drive and reset handling
     QString getSelectedDriveLetter() const;
-    void onDriveSelectionChanged();
     void resetDestinationModels();
     void updateApplicationStatusLabel();
 
-    // Tray icon
-    void setupTrayIcon();
+    // Notifications
+    void setupNotificationButton();
+    void updateNotificationButtonState();
+    void showNotificationDialog();
+    void feedbackNotificationButton();
+    void displayNotificationPopup(const NotificationServiceStruct& notif);
+    void showNextNotification();
+    void finishNotificationQueue();
+
+    // SnapList / Staging title section
+    void updateBackupStagingTitle(const QString& name);
 
 private slots:
-    // User interaction slots
     void onAddToBackupClicked();
     void onRemoveFromBackupClicked();
     void onCreateBackupClicked();
     void onDeleteBackupClicked();
     void onChangeBackupDestinationClicked();
+    void onUnlockDriveClicked();
+    void onSnapListButtonClicked();
     void onBackupDirectoryChanged();
     void onFileChanged(const QString& path);
     void onBackupCompleted();
     void onBackupError(const QString& error);
     void onCooldownFinished();
     void onNotificationButtonClicked();
+    void onDriveSelectionChanged();
     void onThemeChanged();
-    void onUnlockDriveClicked();
-    void setStatusLabel(QLabel* label, const QString& emoji, const QString& text, const QString& style = "");
+    void setStatusLabel(QLabel* label, const QString& emoji,
+                        const QString& text, const QString& style = "");
 
 private:
-    // UI components
     Ui::MainWindow* ui = nullptr;
     QToolBar* toolBar = nullptr;
     QLabel* notificationBadge = nullptr;
 
-    // Models and services
+    // Models & Services
     QFileSystemModel* sourceModel = nullptr;
-    StagingModel* stagingModel = nullptr;
     QFileSystemModel* destinationModel = nullptr;
     DestinationProxyModel* destinationProxyModel = nullptr;
+    StagingModel* stagingModel = nullptr;
     BackupService* backupService = nullptr;
     BackupController* backupController = nullptr;
     FileWatcher* fileWatcher = nullptr;
     ToolbarServiceManager* toolbarManager = nullptr;
 
-    // Timers
-    QTimer* createBackupCooldownTimer = nullptr;
-    QElapsedTimer backupStartTimer;
+    SnapListServiceManager snapListServiceManager;
 
-    // Notification state
+    // Backup state
+    BackupScanResult latestBackupScan;
+    QElapsedTimer backupStartTimer;
+    QTimer* createBackupCooldownTimer = nullptr;
+
+    // Tray
+    QSystemTrayIcon* trayIcon = nullptr;
+    QMenu* trayMenu = nullptr;
+
+    // Dialogs
+    SettingsDialog* settingsDialog = nullptr;
+
+    // Notifications
     QList<NotificationServiceStruct> notificationQueue;
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // Backup scan cache
-    BackupScanResult latestBackupScan;
+    // SnapList / Title bar programmatic controls
+    QLabel* stagingTitleLabel = nullptr;
+    QPushButton* snapListResetButton = nullptr;
+    QHBoxLayout* stagingTitleLayout = nullptr;
 
-    // Tray icon
-    QSystemTrayIcon* trayIcon = nullptr;
-    QMenu* trayMenu = nullptr;
-
-    SettingsDialog* settingsDialog = nullptr;
-
+    QString loadedSnapListName;
     bool suppressNextMenuClick = false;
     bool ignoreTriggerAfterContext = false;
 };

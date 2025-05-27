@@ -5,12 +5,14 @@
 #include "../../constants/app_info.h"
 
 // Qt includes
-#include <QLabel>
+#include <QAbstractButton>
 #include <QDialogButtonBox>
-#include <QVBoxLayout>
+#include <QLabel>
 #include <QPixmap>
 #include <QSizePolicy>
-#include <QAbstractButton>
+#include <QVBoxLayout>
+
+using namespace WelcomeDialogConstants;
 
 // Applies pointing hand cursor to dialog buttons
 static void applyCursors(QDialogButtonBox* buttonBox) {
@@ -21,14 +23,10 @@ static void applyCursors(QDialogButtonBox* buttonBox) {
 
 // Constructs the welcome message HTML
 static QString buildWelcomeHtmlText() {
-    return QStringLiteral(
-               "<h2>Welcome to %1</h2>"
-               "<p>Version: <b>%2</b></p>"
-               "<p>Thank you for installing our application!</p>"
-               "<p style='margin-top:%3px;'>Let's get you started...</p>")
-        .arg(App::Info::k_APP_NAME,
-             App::Info::k_APP_VERSION,
-             QString::number(WelcomeDialogConstants::kTopMargin));
+    return QString(k_WELCOME_HTML)
+    .arg(App::Info::k_APP_NAME,
+         App::Info::k_APP_VERSION,
+         QString::number(kTopMargin));
 }
 
 // Styles a QLabel for centered, wrapped rich text
@@ -38,20 +36,20 @@ static void styleLabel(QLabel* label, bool richText = false) {
     label->setTextFormat(richText ? Qt::RichText : Qt::PlainText);
 }
 
-// Constructs the WelcomeDialog
-WelcomeDialog::WelcomeDialog(QWidget *parent)
+// Constructs the welcome dialog with styled logo, message, and OK button
+WelcomeDialog::WelcomeDialog(QWidget* parent)
     : QDialog(parent),
     logoLabel(new QLabel(this)),
     textLabel(new QLabel(this)),
     buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok, this)) {
 
-    setWindowTitle(tr("Welcome"));
-    resize(WelcomeDialogConstants::kDialogWidth, WelcomeDialogConstants::kDialogHeight);
+    setWindowTitle(tr(k_WINDOW_TITLE));
+    resize(kDialogWidth, kDialogHeight);
 
-    const QPixmap logoPixmap(":/resources/icons/app_icon.png");
+    const QPixmap logoPixmap(k_LOGO_RESOURCE_PATH);
     logoLabel->setPixmap(logoPixmap.scaled(
-        WelcomeDialogConstants::kLogoSize,
-        WelcomeDialogConstants::kLogoSize,
+        kLogoSize,
+        kLogoSize,
         Qt::KeepAspectRatio,
         Qt::SmoothTransformation));
     logoLabel->setAlignment(Qt::AlignCenter);

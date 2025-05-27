@@ -8,6 +8,7 @@
 namespace WelcomeDialogStyling {
 namespace Styles {
 
+// Text label styling
 inline constexpr auto TEXT_LABEL_STYLE = R"(
     QLabel {
         font-size: 12pt;
@@ -15,12 +16,14 @@ inline constexpr auto TEXT_LABEL_STYLE = R"(
     }
 )";
 
+// Logo label styling
 inline constexpr auto LOGO_LABEL_STYLE = R"(
     QLabel {
         margin-bottom: 12px;
     }
 )";
 
+// Button styling
 inline constexpr auto BUTTON_STYLE = R"(
     QPushButton {
         background-color: #558B2F;

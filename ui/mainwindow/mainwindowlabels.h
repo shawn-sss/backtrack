@@ -4,7 +4,7 @@
 // Qt includes
 #include <QString>
 
-// Backup-related labels and buttons
+// Backup-related labels and button texts
 namespace Labels::Backup {
 inline constexpr auto k_FOUND                            = "Backup Found: ";
 inline constexpr auto k_LOCATION                         = "";
@@ -51,6 +51,7 @@ inline constexpr auto k_NAME      = "Last Backup Name: ";
 inline constexpr auto k_TIMESTAMP = "Last Backup Timestamp: ";
 inline constexpr auto k_DURATION  = "Last Backup Duration: ";
 inline constexpr auto k_SIZE      = "Last Backup Size: ";
+
 inline const QString k_NO_BACKUPS_MESSAGE = QStringLiteral("No backups yet. Create one to see details here.");
 }
 
@@ -63,8 +64,9 @@ inline constexpr auto k_UNKNOWN   = "Unknown";
 
 // Application status labels
 namespace Labels::ApplicationStatus {
-inline constexpr auto k_HEALTHY      = "Healthy";
-inline constexpr auto k_INVALID      = "Invalid";
+inline constexpr auto k_HEALTHY  = "Healthy";
+inline constexpr auto k_INVALID  = "Invalid";
+
 inline const QString k_STATUS_LABEL = QStringLiteral("<b>App Config Status:</b> %1 %2");
 }
 

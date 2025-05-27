@@ -24,20 +24,24 @@ if(NOT DEFINED QT_VERSION_MAJOR)
     message(FATAL_ERROR "QT_VERSION_MAJOR is not defined. Ensure Qt5 or Qt6 is found properly.")
 endif()
 
-# Entry Point
+# Entry point files
 set(SRC_ENTRY_POINT
     app/app_manifest.rc
     app/main.cpp
 )
 
-# Qt Resource Files
+# Qt resource files
 set(SRC_RESOURCES
     resources/icons_resource.qrc
     resources/themes_resource.qrc
+)
+
+# Shared UI headers
+set(UI_SHARED_HEADERS
     ui/systemtraycontextmenu.h
 )
 
-# UI: Main Window
+# UI: Main window
 set(UI_MAIN_WINDOW
     ui/mainwindow/mainwindow.cpp
     ui/mainwindow/mainwindow.h
@@ -47,7 +51,7 @@ set(UI_MAIN_WINDOW
     ui/mainwindow/mainwindowstyling.h
 )
 
-# UI: Dialogs - Notifications
+# UI: Notifications dialog
 set(UI_DIALOG_NOTIFICATIONS
     ui/notificationsdialog/notificationsdialog.cpp
     ui/notificationsdialog/notificationsdialog.h
@@ -56,7 +60,7 @@ set(UI_DIALOG_NOTIFICATIONS
     ui/notificationsdialog/notificationsdialogstyling.h
 )
 
-# UI: Dialogs - Settings
+# UI: Settings dialog
 set(UI_DIALOG_SETTINGS
     ui/settingsdialog/settingsdialog.cpp
     ui/settingsdialog/settingsdialog.h
@@ -65,7 +69,7 @@ set(UI_DIALOG_SETTINGS
     ui/settingsdialog/settingsdialogstyling.h
 )
 
-# UI: Dialogs - Help
+# UI: Help dialog
 set(UI_DIALOG_HELP
     ui/helpdialog/helpdialog.cpp
     ui/helpdialog/helpdialog.h
@@ -74,7 +78,7 @@ set(UI_DIALOG_HELP
     ui/helpdialog/helpdialogstyling.h
 )
 
-# UI: Dialogs - About
+# UI: About dialog
 set(UI_DIALOG_ABOUT
     ui/aboutdialog/aboutdialog.cpp
     ui/aboutdialog/aboutdialog.h
@@ -83,7 +87,7 @@ set(UI_DIALOG_ABOUT
     ui/aboutdialog/aboutdialogstyling.h
 )
 
-# UI: Dialogs - Welcome
+# UI: Welcome dialog
 set(UI_DIALOG_WELCOME
     ui/welcomedialog/welcomedialog.h
     ui/welcomedialog/welcomedialog.cpp
@@ -92,7 +96,15 @@ set(UI_DIALOG_WELCOME
     ui/welcomedialog/welcomedialogstyling.h
 )
 
-# All UI Sources
+# UI: SnapList dialog
+set(UI_DIALOG_SNAPLIST
+    ui/snaplistdialog/snaplistdialog.h
+    ui/snaplistdialog/snaplistdialog.cpp
+    ui/snaplistdialog/snaplistdialog.ui
+    ui/snaplistdialog/snaplistdialogconstants.h
+)
+
+# Combined UI sources
 set(SRC_UI
     ${UI_MAIN_WINDOW}
     ${UI_DIALOG_NOTIFICATIONS}
@@ -100,20 +112,22 @@ set(SRC_UI
     ${UI_DIALOG_HELP}
     ${UI_DIALOG_ABOUT}
     ${UI_DIALOG_WELCOME}
+    ${UI_DIALOG_SNAPLIST}
+    ${UI_SHARED_HEADERS}
 )
 
-# Core: Backup Controllers
-
+# Core: Backup constants
 set(CORE_BACKUP_CONSTANTS
     core/backup/constants/backupconstants.h
 )
 
+# Core: Backup controllers
 set(CORE_BACKUP_CONTROLLERS
     core/backup/controller/backupcontroller.cpp
     core/backup/controller/backupcontroller.h
 )
 
-# Core: Backup Services
+# Core: Backup services
 set(CORE_BACKUP_SERVICES
     core/backup/service/backupservice.cpp
     core/backup/service/backupservice.h
@@ -123,13 +137,13 @@ set(CORE_BACKUP_SERVICES
     core/backup/service/stagingutils.h
 )
 
-# Core: Backup Workers
+# Core: Backup workers
 set(CORE_BACKUP_WORKERS
     core/backup/worker/transferworker.cpp
     core/backup/worker/transferworker.h
 )
 
-# Core: Backup Models
+# Core: Backup models
 set(CORE_BACKUP_MODELS
     core/backup/models/destinationproxymodel.cpp
     core/backup/models/destinationproxymodel.h
@@ -137,7 +151,7 @@ set(CORE_BACKUP_MODELS
     core/backup/models/stagingmodel.h
 )
 
-# Core: All Backup Components
+# Combined core backup sources
 set(SRC_CORE_BACKUP
     ${CORE_BACKUP_CONSTANTS}
     ${CORE_BACKUP_CONTROLLERS}
@@ -146,7 +160,7 @@ set(SRC_CORE_BACKUP
     ${CORE_BACKUP_MODELS}
 )
 
-# Service Managers
+# Service managers
 set(SRC_SERVICE_MANAGERS
     services/ServiceDirector/ServiceDirector.cpp
     services/ServiceDirector/ServiceDirector.h
@@ -179,6 +193,10 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/PathServiceManager/PathServiceManager.cpp
     services/ServiceManagers/PathServiceManager/PathServiceManager.h
 
+    services/ServiceManagers/SnapListServiceManager/SnapListServiceConstants.h
+    services/ServiceManagers/SnapListServiceManager/SnapListServiceManager.cpp
+    services/ServiceManagers/SnapListServiceManager/SnapListServiceManager.h
+
     services/ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h
     services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.cpp
     services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h
@@ -200,7 +218,7 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/UserServiceManager/UserServiceManager.h
 )
 
-# Constants
+# Global constants
 set(SRC_CONSTANTS
     constants/app_info.h
     constants/interface_config.h
@@ -209,7 +227,7 @@ set(SRC_CONSTANTS
     constants/window_config.h
 )
 
-# Full Project Sources
+# Final full project source list
 set(PROJECT_SOURCES
     ${SRC_ENTRY_POINT}
     ${SRC_RESOURCES}

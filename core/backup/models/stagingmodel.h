@@ -28,6 +28,7 @@ public:
     void addPath(const QString& path);
     void addPaths(const QStringList& paths);
     void removePath(const QString& path);
+    void clear();
 
     // Query staged paths
     QStringList getStagedPaths() const;

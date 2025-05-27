@@ -7,6 +7,7 @@
 #include "../systemtraycontextmenu.h"
 #include "../settingsdialog/settingsdialog.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
+#include "../../ui/snaplistdialog/snaplistdialog.h"
 #include "../../core/backup/constants/backupconstants.h"
 #include "../../core/backup/models/destinationproxymodel.h"
 #include "../../core/backup/models/stagingmodel.h"
@@ -24,6 +25,7 @@
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
+#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../../../../constants/interface_config.h"
 #include "../../../../constants/window_config.h"
@@ -46,7 +48,9 @@
 
 // Constructor: Sets up main window, UI, and all services
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+    : QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    snapListServiceManager(PathServiceManager::appConfigFolderPath() + "/user_lists.json", this) {
     ui->setupUi(this);
     initializeModels();
     initializeServices();
@@ -60,12 +64,6 @@ MainWindow::MainWindow(QWidget *parent)
 // Destructor: Cleans up UI resources
 MainWindow::~MainWindow() {
     delete ui;
-}
-
-// Connects theme change signal to update handler
-void MainWindow::initializeThemeHandling() {
-    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
-            this, &MainWindow::onThemeChanged);
 }
 
 // Initializes models used for source, destination, and staging
@@ -88,7 +86,102 @@ void MainWindow::initializeServices() {
     backupController = new BackupController(backupService, this);
 }
 
-// System Tray Setup
+// Initializes window settings and main layout
+void MainWindow::initializeUiAndLayout() {
+    configureWindow();
+    setupLayout();
+    initializeUI();
+    applyButtonCursors();
+    updateApplicationStatusLabel();
+}
+
+// Adds and configures main window toolbar
+void MainWindow::initializeToolbar() {
+    addToolBar(Qt::LeftToolBarArea, toolBar);
+    toolbarManager->initialize(toolBar);
+}
+
+// Configures progress bar and backup status UI
+void MainWindow::initializeUI() {
+    Shared::UI::setupProgressBar(ui->TransferProgressBar,
+                                 UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
+                                 UI::Progress::k_PROGRESS_BAR_MAX_VALUE,
+                                 UI::ProgressDetails::k_PROGRESS_BAR_HEIGHT,
+                                 UI::Progress::k_PROGRESS_BAR_TEXT_VISIBLE);
+
+    if (ui->TransferProgressBar->value() == 0) {
+        ui->TransferProgressBar->setVisible(false);
+        ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
+    }
+
+    stagingTitleLayout = new QHBoxLayout(ui->StagingListTitleContainer);
+    stagingTitleLayout->setContentsMargins(0, 0, 0, 0);
+    stagingTitleLayout->setSpacing(6);
+    stagingTitleLayout->setAlignment(Qt::AlignLeft);
+
+    stagingTitleLabel = new QLabel("Backup Staging", ui->StagingListTitleContainer);
+    stagingTitleLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    stagingTitleLayout->addWidget(stagingTitleLabel);
+
+    snapListResetButton = new QPushButton("✕", ui->StagingListTitleContainer);
+    snapListResetButton->setToolTip("Unload SnapList");
+    snapListResetButton->setCursor(Qt::PointingHandCursor);
+    snapListResetButton->setStyleSheet(MainWindowStyling::Styles::ResetSnapListButton::STYLE);
+    snapListResetButton->setFixedSize(16, 16);
+    snapListResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    snapListResetButton->setVisible(false);
+
+    connect(snapListResetButton, &QPushButton::clicked, this, [this]() {
+        stagingModel->clear();
+        ui->BackupStagingTreeView->clearSelection();
+        ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+        updateBackupStagingTitle("");
+    });
+
+    stagingTitleLayout->addWidget(snapListResetButton);
+    initializeBackupSystem();
+}
+
+// Sets tooltips and cursors for window buttons
+void MainWindow::applyButtonCursors() {
+    const QList<QPair<QPushButton *, QString>> buttons = {
+        {ui->AddToBackupButton, MainWindowStyling::Styles::ToolTips::k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton, MainWindowStyling::Styles::ToolTips::k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
+        {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
+        {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
+        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
+        {ui->UnlockDriveButton, MainWindowStyling::Styles::ToolTips::k_UNLOCK_DRIVE}
+    };
+
+    std::for_each(buttons.begin(), buttons.end(), [](const auto &pair) {
+        if (auto *button = pair.first) {
+            button->setCursor(Qt::PointingHandCursor);
+            button->setToolTip(pair.second);
+        }
+    });
+}
+
+// Connects theme change signal to update handler
+void MainWindow::initializeThemeHandling() {
+    connect(&ThemeServiceManager::instance(), &ThemeServiceManager::themeChanged,
+            this, &MainWindow::onThemeChanged);
+}
+
+// Defines layout container and central widget
+void MainWindow::setupLayout() {
+    auto *container = new QWidget(this);
+    auto *mainLayout = new QHBoxLayout(container);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    QWidget *contentContainer = centralWidget();
+    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mainLayout->addWidget(contentContainer, 1);
+
+    setCentralWidget(container);
+}
 
 // Initializes the system tray icon and its menu
 void MainWindow::setupTrayIcon() {
@@ -155,74 +248,6 @@ void MainWindow::setupTrayIcon() {
                     break;
                 }
             });
-}
-
-// UI Setup
-
-// Initializes window settings and main layout
-void MainWindow::initializeUiAndLayout() {
-    configureWindow();
-    setupLayout();
-    initializeUI();
-    applyButtonCursors();
-    updateApplicationStatusLabel();
-}
-
-// Configures progress bar and backup status UI
-void MainWindow::initializeUI() {
-    Shared::UI::setupProgressBar(ui->TransferProgressBar,
-                                 UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
-                                 UI::Progress::k_PROGRESS_BAR_MAX_VALUE,
-                                 UI::ProgressDetails::k_PROGRESS_BAR_HEIGHT,
-                                 UI::Progress::k_PROGRESS_BAR_TEXT_VISIBLE);
-
-    if (ui->TransferProgressBar->value() == 0) {
-        ui->TransferProgressBar->setVisible(false);
-        ui->TransferProgressText->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
-    }
-
-    initializeBackupSystem();
-}
-
-// Defines layout container and central widget
-void MainWindow::setupLayout() {
-    auto *container = new QWidget(this);
-    auto *mainLayout = new QHBoxLayout(container);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(0);
-
-    QWidget *contentContainer = centralWidget();
-    contentContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mainLayout->addWidget(contentContainer, 1);
-
-    setCentralWidget(container);
-}
-
-// Adds and configures main window toolbar
-void MainWindow::initializeToolbar() {
-    addToolBar(Qt::LeftToolBarArea, toolBar);
-    toolbarManager->initialize(toolBar);
-}
-
-// Sets tooltips and cursors for window buttons
-void MainWindow::applyButtonCursors() {
-    const QList<QPair<QPushButton *, QString>> buttons = {
-        {ui->AddToBackupButton, MainWindowStyling::Styles::ToolTips::k_ADD_TO_BACKUP},
-        {ui->RemoveFromBackupButton, MainWindowStyling::Styles::ToolTips::k_REMOVE_FROM_BACKUP},
-        {ui->CreateBackupButton, MainWindowStyling::Styles::ToolTips::k_CREATE_BACKUP},
-        {ui->ChangeBackupDestinationButton, MainWindowStyling::Styles::ToolTips::k_CHANGE_DESTINATION},
-        {ui->DeleteBackupButton, MainWindowStyling::Styles::ToolTips::k_DELETE_BACKUP},
-        {ui->NotificationButton, MainWindowStyling::Styles::ToolTips::k_NOTIFICATIONS},
-        {ui->UnlockDriveButton, MainWindowStyling::Styles::ToolTips::k_UNLOCK_DRIVE}
-    };
-
-    std::for_each(buttons.begin(), buttons.end(), [](const auto &pair) {
-        if (auto *button = pair.first) {
-            button->setCursor(Qt::PointingHandCursor);
-            button->setToolTip(pair.second);
-        }
-    });
 }
 
 // Service and Feature Setup
@@ -534,7 +559,7 @@ void MainWindow::onBackupCompleted() {
 
     QTimer::singleShot(delay, this, [this]() {
         ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
-        ui->CreateBackupButton->setStyleSheet(QString());
+        ui->CreateBackupButton->setStyleSheet(MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
         ui->CreateBackupButton->setEnabled(true);
 
         QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
@@ -567,6 +592,7 @@ void MainWindow::onBackupCompleted() {
     ui->BackupDestinationView->clearSelection();
     ui->BackupDestinationView->setCurrentIndex(QModelIndex());
 }
+
 
 // Re-enables backup button after cooldown timer
 void MainWindow::onCooldownFinished() {
@@ -670,11 +696,15 @@ void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
 
     setStatusLabel(ui->BackupStatusLabel, emoji, text, style);
 
-    for (QLabel *label : {ui->LastBackupNameLabel, ui->LastBackupTimestampLabel,
-                          ui->LastBackupDurationLabel, ui->LastBackupSizeLabel}) {
+    for (QLabel *label : {
+                          ui->LastBackupNameLabel,
+                          ui->LastBackupTimestampLabel,
+                          ui->LastBackupDurationLabel,
+                          ui->LastBackupSizeLabel }) {
         label->setVisible(true);
     }
 }
+
 
 // Returns emoji and label message based on backup status color
 QPair<QString, QString> MainWindow::statusVisualsForColor(const QString &color) const {
@@ -745,7 +775,6 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
     const bool hasBackupIssue =
         !isUninitialized && (!scan.validBackupStructure || scan.hasMissingLogs || scan.hasOrphanedLogs);
 
-    const QString redStyle = MainWindowStyling::Styles::GeneralText::k_RED_BOLD_STYLE;
     const QString infoLine = Labels::Backup::k_SEE_NOTIFICATIONS_LABEL;
 
     if (hasAppIssue && hasBackupIssue) {
@@ -762,7 +791,7 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
         ui->BackupLocationStatusLabel->setText(infoLine);
     } else if (isUninitialized || (backupCount == 0 && (backupDirEmpty || !locationInitialized))) {
         ui->BackupTotalCountLabel->setText(Labels::Backup::k_NO_BACKUPS_COUNT_LABEL);
-        ui->BackupTotalCountLabel->setStyleSheet(redStyle);
+        ui->BackupTotalCountLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE);
         ui->BackupTotalSizeLabel->setText("");
         ui->BackupLocationStatusLabel->setText("");
 
@@ -770,9 +799,9 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
         ui->BackupLocationStatusLabel->hide();
         return;
     } else {
-        ui->BackupTotalCountLabel->setStyleSheet("");
-        ui->BackupTotalSizeLabel->setStyleSheet("");
-        ui->BackupLocationStatusLabel->setStyleSheet("");
+        ui->BackupTotalCountLabel->setStyleSheet(MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
+        ui->BackupTotalSizeLabel->setStyleSheet(MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
+        ui->BackupLocationStatusLabel->setStyleSheet(MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
 
         updateBackupTotalCountLabel();
         updateBackupTotalSizeLabel();
@@ -783,14 +812,15 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
         return;
     }
 
-    ui->BackupTotalCountLabel->setStyleSheet(redStyle);
-    ui->BackupTotalSizeLabel->setStyleSheet(redStyle);
-    ui->BackupLocationStatusLabel->setStyleSheet(redStyle);
+    ui->BackupTotalCountLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE);
+    ui->BackupTotalSizeLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE);
+    ui->BackupLocationStatusLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE);
 
     ui->BackupTotalCountLabel->show();
     ui->BackupTotalSizeLabel->show();
     ui->BackupLocationStatusLabel->show();
 }
+
 
 // Displays backup integrity notifications only if the structure is partially broken and not uninitialized.
 void MainWindow::notifyOrphanOrBrokenBackupIssues(const BackupScanResult &scan) {
@@ -909,7 +939,9 @@ void MainWindow::setupConnections() {
         {ui->RemoveFromBackupButton, &MainWindow::onRemoveFromBackupClicked},
         {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
         {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
-        {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked}
+        {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked},
+        {ui->SnapListButton, &MainWindow::onSnapListButtonClicked}
+
     };
 
     for (const auto &[button, slot] : connections) {
@@ -998,6 +1030,7 @@ void MainWindow::onAddToBackupClicked() {
 
     if (!toStage.isEmpty()) {
         stagingModel->addPaths(toStage);
+        snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths()); // ✅ ADD THIS LINE
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
 
@@ -1006,6 +1039,7 @@ void MainWindow::onAddToBackupClicked() {
                               Labels::Backup::k_ADD_TO_BACKUP_ORIGINAL_TEXT);
     }
 }
+
 
 // Removes selected files from the staging view
 void MainWindow::onRemoveFromBackupClicked() {
@@ -1017,10 +1051,13 @@ void MainWindow::onRemoveFromBackupClicked() {
     }
 
     Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
+    snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths()); // ✅ ADD THIS LINE
+
     triggerButtonFeedback(ui->RemoveFromBackupButton,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_BUTTON_TEXT,
                           Labels::Backup::k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT);
 }
+
 
 // Opens dialog to change backup destination directory
 void MainWindow::onChangeBackupDestinationClicked() {
@@ -1157,6 +1194,44 @@ void MainWindow::onDeleteBackupClicked() {
                           Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
                           Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
 }
+
+// On Open SnapList management click
+void MainWindow::onSnapListButtonClicked() {
+    auto* dialog = new SnapListDialog(&snapListServiceManager, this);
+
+    connect(dialog, &SnapListDialog::snapListLoaded, this,
+            [this](const QVector<QString>& paths, const QString& name) {
+                stagingModel->clear();
+                stagingModel->addPaths(paths);
+                ui->BackupStagingTreeView->clearSelection();
+                ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+                updateBackupStagingTitle(name);
+
+                snapListServiceManager.setCurrentStagingEntries(paths);
+            });
+
+    dialog->exec();
+    dialog->deleteLater();
+}
+
+void MainWindow::updateBackupStagingTitle(const QString& name) {
+    const bool hasSnapList = !name.isEmpty();
+
+    if (stagingTitleLabel) {
+        stagingTitleLabel->setText(hasSnapList ? name : "Backup Staging");
+        stagingTitleLabel->setStyleSheet(hasSnapList
+                                             ? MainWindowStyling::Styles::StagingTitleLabel::STYLE
+                                             : MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
+    }
+
+    if (snapListResetButton) {
+        snapListResetButton->setVisible(hasSnapList);
+    }
+}
+
+
+
+
 
 // Drive Selection and Unlocking
 
