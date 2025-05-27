@@ -1,7 +1,7 @@
 // Project includes
 #include "backupservice.h"
 #include "../constants/backupconstants.h"
-#include "../../../core/backup/service/fileoperations.h"
+#include "../../backup_module/service/fileoperations.h"
 #include "../../../../constants/app_info.h"
 #include "../../../../services/ServiceDirector/ServiceDirector.h"
 #include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"

@@ -118,37 +118,37 @@ set(SRC_UI
 
 # Core: Backup constants
 set(CORE_BACKUP_CONSTANTS
-    core/backup/constants/backupconstants.h
+    backup_module/constants/backupconstants.h
 )
 
 # Core: Backup controllers
 set(CORE_BACKUP_CONTROLLERS
-    core/backup/controller/backupcontroller.cpp
-    core/backup/controller/backupcontroller.h
+    backup_module/controller/backupcontroller.cpp
+    backup_module/controller/backupcontroller.h
 )
 
 # Core: Backup services
 set(CORE_BACKUP_SERVICES
-    core/backup/service/backupservice.cpp
-    core/backup/service/backupservice.h
-    core/backup/service/fileoperations.cpp
-    core/backup/service/fileoperations.h
-    core/backup/service/stagingutils.cpp
-    core/backup/service/stagingutils.h
+    backup_module/service/backupservice.cpp
+    backup_module/service/backupservice.h
+    backup_module/service/fileoperations.cpp
+    backup_module/service/fileoperations.h
+    backup_module/service/stagingutils.cpp
+    backup_module/service/stagingutils.h
 )
 
 # Core: Backup workers
 set(CORE_BACKUP_WORKERS
-    core/backup/worker/transferworker.cpp
-    core/backup/worker/transferworker.h
+    backup_module/worker/transferworker.cpp
+    backup_module/worker/transferworker.h
 )
 
 # Core: Backup models
 set(CORE_BACKUP_MODELS
-    core/backup/models/destinationproxymodel.cpp
-    core/backup/models/destinationproxymodel.h
-    core/backup/models/stagingmodel.cpp
-    core/backup/models/stagingmodel.h
+    backup_module/models/destinationproxymodel.cpp
+    backup_module/models/destinationproxymodel.h
+    backup_module/models/stagingmodel.cpp
+    backup_module/models/stagingmodel.h
 )
 
 # Combined core backup sources

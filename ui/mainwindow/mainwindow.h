@@ -3,7 +3,7 @@
 
 // Project includes
 #include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
-#include "../../core/backup/service/backupservice.h"
+#include "../../backup_module/service/backupservice.h"
 #include "../../constants/system_constants.h"
 #include "../../../../constants/system_constants.h"
 

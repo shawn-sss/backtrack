@@ -1,7 +1,7 @@
 // Project includes
 #include "transferworker.h"
 #include "../service/fileoperations.h"
-#include "../../../ui/mainwindow/mainwindowmessages.h"
+#include "../../ui/mainwindow/mainwindowmessages.h"
 #include "../constants/backupconstants.h"
 
 // Qt includes
