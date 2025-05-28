@@ -104,6 +104,15 @@ set(UI_DIALOG_SNAPLIST
     ui/snaplistdialog/snaplistdialogconstants.h
 )
 
+# UI: Prompt dialog
+set(UI_DIALOG_PROMPT
+    ui/promptdialog/promptdialog.h
+    ui/promptdialog/promptdialog.cpp
+    ui/promptdialog/promptdialog.ui
+    ui/promptdialog/promptdialogconstants.h
+    ui/promptdialog/promptdialogstyling.h
+)
+
 # Combined UI sources
 set(SRC_UI
     ${UI_MAIN_WINDOW}
@@ -113,6 +122,7 @@ set(SRC_UI
     ${UI_DIALOG_ABOUT}
     ${UI_DIALOG_WELCOME}
     ${UI_DIALOG_SNAPLIST}
+    ${UI_DIALOG_PROMPT}
     ${UI_SHARED_HEADERS}
 )
 

@@ -1,0 +1,4 @@
+#ifndef PROMPTDIALOG_H
+#define PROMPTDIALOG_H
+
+#endif // PROMPTDIALOG_H
