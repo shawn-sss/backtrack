@@ -1,18 +1,27 @@
+// // Prompt Dialog Usage:
+// PromptDialog::showDialog(
+//     &mainWindow,
+//     PromptDialog::Information,
+//     "Message window-title",
+//     "Message text",
+//     "Message info-tex",
+//     PromptDialog::Ok
+// );
+
 #ifndef PROMPTDIALOG_H
 #define PROMPTDIALOG_H
 
 // Qt includes
 #include <QDialog>
-#include <QMessageBox>
 #include <QDialogButtonBox>
 
 // Forward declaration (Qt class)
 class QLabel;
 class QVBoxLayout;
+class QAbstractButton;
 
-// Represents a custom dialog for prompts with icon, message, and buttons
-class PromptDialog : public QDialog
-{
+// PromptDialog class for displaying styled modal messages
+class PromptDialog : public QDialog {
     Q_OBJECT
 
 public:
@@ -24,43 +33,49 @@ public:
         Question
     };
 
+    enum Button {
+        None   = 0x0,
+        Ok     = 0x1,
+        Cancel = 0x2,
+        Yes    = 0x4,
+        No     = 0x8
+    };
+    Q_DECLARE_FLAGS(Buttons, Button)
+
     explicit PromptDialog(QWidget *parent = nullptr);
     ~PromptDialog();
 
-    // Setters for dialog content
+    // Setters
     void setMessageText(const QString &text);
     void setInformativeText(const QString &text);
     void setIcon(Icon icon);
-    void setStandardButtons(QMessageBox::StandardButtons buttons);
-    void setDefaultButton(QMessageBox::StandardButton button);
+    void setStandardButtons(Buttons buttons);
+    void setDefaultButton(Button button);
 
-    // Static method to show the dialog and return selected button
-    static QMessageBox::StandardButton showDialog(QWidget *parent,
-                                                  Icon icon,
-                                                  const QString &title,
-                                                  const QString &messageText,
-                                                  const QString &informativeText = QString(),
-                                                  QMessageBox::StandardButtons buttons = QMessageBox::Ok,
-                                                  QMessageBox::StandardButton defaultButton = QMessageBox::NoButton);
+    // Static dialog display method
+    static Button showDialog(QWidget *parent,
+                             Icon icon,
+                             const QString &title,
+                             const QString &messageText,
+                             const QString &informativeText = QString(),
+                             Buttons buttons = Ok,
+                             Button defaultButton = Ok);
 
 private slots:
-    // Handles button click events
     void handleButtonClicked(QAbstractButton *button);
 
 private:
-    // Initializes the full UI of the dialog
+    // UI setup
     void initializeUI();
-
-    // Widget creation and layout setup
     void createWidgets();
     void setupLayouts();
-
-    // Applies style settings and connects signals
     void applyStyling();
     void configureConnections();
 
-    // Utility for retrieving icon pixmap
+    // Helpers
     QPixmap iconPixmap(Icon iconType);
+    static QDialogButtonBox::StandardButtons toStandardButtons(Buttons buttons);
+    static QDialogButtonBox::StandardButton toStandardButton(Button button);
 
     QLabel *iconDisplay = nullptr;
     QLabel *messageLabel = nullptr;
@@ -68,7 +83,9 @@ private:
     QDialogButtonBox *buttonBox = nullptr;
     QVBoxLayout *mainLayout = nullptr;
 
-    QMessageBox::StandardButton userChoice = QMessageBox::NoButton;
+    Button userChoice = None;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(PromptDialog::Buttons)
 
 #endif // PROMPTDIALOG_H

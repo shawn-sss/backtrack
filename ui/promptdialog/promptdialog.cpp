@@ -16,17 +16,16 @@
 using namespace PromptDialogStyling::Styles;
 using namespace PromptDialogConstants;
 
+// Constructor and destructor
 PromptDialog::PromptDialog(QWidget *parent)
-    : QDialog(parent)
-{
+    : QDialog(parent) {
     initializeUI();
 }
 
 PromptDialog::~PromptDialog() {}
 
-// Initializes and configures the dialog's UI
-void PromptDialog::initializeUI()
-{
+// Initializes and configures dialog UI
+void PromptDialog::initializeUI() {
     createWidgets();
     setupLayouts();
     applyStyling();
@@ -37,9 +36,8 @@ void PromptDialog::initializeUI()
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMaximizeButtonHint);
 }
 
-// Creates the UI widgets used in the dialog
-void PromptDialog::createWidgets()
-{
+// Creates core widgets
+void PromptDialog::createWidgets() {
     iconDisplay = new QLabel;
     iconDisplay->setAlignment(Qt::AlignCenter);
     iconDisplay->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -59,9 +57,8 @@ void PromptDialog::createWidgets()
     mainLayout = new QVBoxLayout;
 }
 
-// Sets up and arranges all layouts within the dialog
-void PromptDialog::setupLayouts()
-{
+// Builds and arranges layouts
+void PromptDialog::setupLayouts() {
     auto *iconLayout = new QVBoxLayout;
     iconLayout->setContentsMargins(0, 0, 0, 0);
     iconLayout->setSpacing(0);
@@ -96,67 +93,63 @@ void PromptDialog::setupLayouts()
     setLayout(mainLayout);
 }
 
-// Applies stylesheet settings to the dialog and widgets
-void PromptDialog::applyStyling()
-{
+// Applies stylesheet to dialog components
+void PromptDialog::applyStyling() {
     setStyleSheet(DIALOG_STYLE);
     iconDisplay->setStyleSheet(ICON_LABEL_STYLE);
     messageLabel->setStyleSheet(TEXT_LABEL_STYLE);
     detailLabel->setStyleSheet(INFO_TEXT_LABEL_STYLE);
 }
 
-// Sets up signal-slot connections
-void PromptDialog::configureConnections()
-{
+// Connects dialog signals and slots
+void PromptDialog::configureConnections() {
     connect(buttonBox, &QDialogButtonBox::clicked, this, &PromptDialog::handleButtonClicked);
 }
 
-// Sets the main message text
-void PromptDialog::setMessageText(const QString &text)
-{
+// Sets main message text
+void PromptDialog::setMessageText(const QString &text) {
     messageLabel->setText(text);
 }
 
-// Sets the informative text (optional details)
-void PromptDialog::setInformativeText(const QString &text)
-{
+// Sets additional informative text
+void PromptDialog::setInformativeText(const QString &text) {
     detailLabel->setText(text);
     detailLabel->setVisible(!text.isEmpty());
 }
 
-// Sets the icon displayed in the dialog
-void PromptDialog::setIcon(Icon icon)
-{
+// Sets icon based on message type
+void PromptDialog::setIcon(Icon icon) {
     QPixmap original = iconPixmap(icon);
     QPixmap scaled = original.scaled(k_ICON_SIZE, k_ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     iconDisplay->setPixmap(scaled);
 }
 
-// Sets the standard buttons for the dialog
-void PromptDialog::setStandardButtons(QMessageBox::StandardButtons buttons)
-{
-    buttonBox->setStandardButtons(static_cast<QDialogButtonBox::StandardButtons>(static_cast<int>(buttons)));
+// Configures standard buttons on dialog
+void PromptDialog::setStandardButtons(Buttons buttons) {
+    buttonBox->setStandardButtons(toStandardButtons(buttons));
 }
 
-// Sets the default button for the dialog
-void PromptDialog::setDefaultButton(QMessageBox::StandardButton button)
-{
-    auto *defaultBtn = buttonBox->button(static_cast<QDialogButtonBox::StandardButton>(static_cast<int>(button)));
+// Sets default button to focus
+void PromptDialog::setDefaultButton(Button button) {
+    auto *defaultBtn = buttonBox->button(toStandardButton(button));
     if (defaultBtn)
         defaultBtn->setDefault(true);
 }
 
-// Handles user button selection and stores the result
-void PromptDialog::handleButtonClicked(QAbstractButton *button)
-{
-    userChoice = static_cast<QMessageBox::StandardButton>(
-        static_cast<int>(buttonBox->standardButton(button)));
+// Handles button click event
+void PromptDialog::handleButtonClicked(QAbstractButton *button) {
+    switch (buttonBox->standardButton(button)) {
+    case QDialogButtonBox::Ok: userChoice = Ok; break;
+    case QDialogButtonBox::Cancel: userChoice = Cancel; break;
+    case QDialogButtonBox::Yes: userChoice = Yes; break;
+    case QDialogButtonBox::No: userChoice = No; break;
+    default: userChoice = None; break;
+    }
     accept();
 }
 
-// Returns a QPixmap based on the specified icon type
-QPixmap PromptDialog::iconPixmap(Icon iconType)
-{
+// Returns icon pixmap for given type
+QPixmap PromptDialog::iconPixmap(Icon iconType) {
     QStyle *style = QApplication::style();
     switch (iconType) {
     case Information:
@@ -172,22 +165,29 @@ QPixmap PromptDialog::iconPixmap(Icon iconType)
     }
 }
 
-// Static method to show the dialog and return the user's selection
-QMessageBox::StandardButton PromptDialog::showDialog(QWidget *parent,
-                                                     Icon icon,
-                                                     const QString &title,
-                                                     const QString &messageText,
-                                                     const QString &informativeText,
-                                                     QMessageBox::StandardButtons buttons,
-                                                     QMessageBox::StandardButton defaultButton)
-{
+// Displays and centers dialog, returns selected button
+PromptDialog::Button PromptDialog::showDialog(QWidget *parent,
+                                              Icon icon,
+                                              const QString &title,
+                                              const QString &messageText,
+                                              const QString &informativeText,
+                                              Buttons buttons,
+                                              Button defaultButton) {
     PromptDialog dialog(parent);
     dialog.setWindowTitle(title);
     dialog.setIcon(icon);
     dialog.setMessageText(messageText);
     dialog.setInformativeText(informativeText);
     dialog.setStandardButtons(buttons);
-    dialog.setDefaultButton(defaultButton == QMessageBox::NoButton ? QMessageBox::Ok : defaultButton);
+
+    if (defaultButton == None) {
+        if (buttons.testFlag(Ok)) defaultButton = Ok;
+        else if (buttons.testFlag(Yes)) defaultButton = Yes;
+        else if (buttons.testFlag(No)) defaultButton = No;
+        else if (buttons.testFlag(Cancel)) defaultButton = Cancel;
+    }
+
+    dialog.setDefaultButton(defaultButton);
 
     const QRect targetRect = parent ? parent->geometry() : QApplication::primaryScreen()->geometry();
     const QPoint centerPoint = targetRect.center() - QPoint(dialog.width() / 2, dialog.height() / 2);
@@ -195,4 +195,25 @@ QMessageBox::StandardButton PromptDialog::showDialog(QWidget *parent,
 
     dialog.exec();
     return dialog.userChoice;
+}
+
+// Converts Buttons flags to QDialogButtonBox::StandardButtons
+QDialogButtonBox::StandardButtons PromptDialog::toStandardButtons(Buttons buttons) {
+    QDialogButtonBox::StandardButtons stdButtons;
+    if (buttons.testFlag(Ok)) stdButtons |= QDialogButtonBox::Ok;
+    if (buttons.testFlag(Cancel)) stdButtons |= QDialogButtonBox::Cancel;
+    if (buttons.testFlag(Yes)) stdButtons |= QDialogButtonBox::Yes;
+    if (buttons.testFlag(No)) stdButtons |= QDialogButtonBox::No;
+    return stdButtons;
+}
+
+// Converts single Button to QDialogButtonBox::StandardButton
+QDialogButtonBox::StandardButton PromptDialog::toStandardButton(Button button) {
+    switch (button) {
+    case Ok: return QDialogButtonBox::Ok;
+    case Cancel: return QDialogButtonBox::Cancel;
+    case Yes: return QDialogButtonBox::Yes;
+    case No: return QDialogButtonBox::No;
+    default: return QDialogButtonBox::NoButton;
+    }
 }
