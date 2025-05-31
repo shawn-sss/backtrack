@@ -8,26 +8,26 @@
 #include "../../../../constants/system_constants.h"
 
 // Qt includes
-#include <QAbstractItemModel>
+#include <QTabWidget>
+#include <QToolBar>
+#include <QSystemTrayIcon>
+#include <QTreeView>
+#include <QPushButton>
+#include <QFileSystemModel>
 #include <QAbstractItemView>
+#include <QAbstractItemModel>
+#include <QHBoxLayout>
+#include <QMainWindow>
 #include <QCloseEvent>
 #include <QElapsedTimer>
-#include <QFileSystemModel>
-#include <QHBoxLayout>
+#include <QTimer>
 #include <QLabel>
 #include <QLayout>
-#include <QList>
-#include <QMainWindow>
-#include <QMenu>
-#include <QPair>
-#include <QPushButton>
 #include <QString>
 #include <QStringList>
-#include <QSystemTrayIcon>
-#include <QTabWidget>
-#include <QTimer>
-#include <QToolBar>
-#include <QTreeView>
+#include <QMenu>
+#include <QPair>
+#include <QList>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -53,7 +53,6 @@ public:
     ~MainWindow() override;
 
     QTabWidget* getDetailsTabWidget();
-
     void handleBackupDeletion(const QString& path, const QString& deleteType);
     void handleAppDataClear();
 
@@ -135,6 +134,7 @@ private:
 
     // SnapList / Staging title section
     void updateBackupStagingTitle(const QString& name);
+    void setInitialButtonTexts();
 
 private slots:
     void onAddToBackupClicked();
@@ -169,7 +169,6 @@ private:
     BackupController* backupController = nullptr;
     FileWatcher* fileWatcher = nullptr;
     ToolbarServiceManager* toolbarManager = nullptr;
-
     SnapListServiceManager snapListServiceManager;
 
     // Backup state

@@ -7,29 +7,30 @@
 // Backup-related labels and button texts
 namespace Labels::Backup {
 inline constexpr auto k_FOUND                            = "Backup Found: ";
-inline constexpr auto k_LOCATION                         = "";
 inline constexpr auto k_TOTAL_COUNT                      = "Backup Total Count: ";
 inline constexpr auto k_TOTAL_SIZE                       = "Backup Total Size: ";
 inline constexpr auto k_LOCATION_ACCESS                  = "Backup Location Access: ";
 
-inline constexpr auto k_UNLOCK_DRIVE_BUTTON              = "Unlock Drive";
-inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "Unlock Drive";
-inline constexpr auto k_UNLOCKING_FEEDBACK_TEXT          = "🔒 Unlocking...";
+inline constexpr auto k_ADD_TO_BACKUP_ORIGINAL_TEXT      = "➕ Add to Backup";
+inline constexpr auto k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT = "➖ Remove from Backup";
+inline constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT      = "🗑️ Delete Backup";
+inline constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "📁 Change Location";
+inline constexpr auto k_CREATE_BACKUP_ORIGINAL_TEXT      = "📦 Create Backup";
+inline constexpr auto k_NOTIFICATION_ORIGINAL_TEXT       = "🔔 Notifications";
+inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "🔓 Unlock Drive";
+inline constexpr auto k_SNAP_LIST_ORIGINAL_TEXT          = "📋 SnapList";
 
-inline constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "Notifications";
-inline constexpr auto k_NOTIFICATION_FEEDBACK_TEXT       = "🔔 Opened!";
+inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "✅ Added!";
+inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "✅ Removed!";
+inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "✅ Deleted!";
+inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "✅ Changed!";
+inline constexpr auto k_CREATE_BACKUP_BUTTON_TEXT        = "✅ Created!";
+inline constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "✅ Opened!";
+inline constexpr auto k_UNLOCK_DRIVE_BUTTON_TEXT         = "✅ Unlocked!";
+inline constexpr auto k_SNAP_LIST_BUTTON_TEXT            = "✅ Loaded!";
+
 inline constexpr auto k_BACKING_UP_BUTTON_TEXT           = "📦 Backing Up...";
-inline constexpr auto k_CREATE_BACKUP_BUTTON_TEXT        = "Create Backup";
-
-inline constexpr auto k_ADD_TO_BACKUP_ORIGINAL_TEXT      = "Add to Backup";
-inline constexpr auto k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT = "Remove from Backup";
-inline constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT      = "Delete Backup";
-inline constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "Change Location";
-
-inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "➕ Added!";
-inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "➖ Removed!";
-inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "🗑️ Deleted!";
-inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "📁 Changed!";
+inline constexpr auto k_UNLOCKING_FEEDBACK_TEXT          = "🔒 Unlocking...";
 
 inline constexpr auto k_READY_LABEL                      = "OK";
 inline constexpr auto k_WARNING_LABEL                    = "Warning";
@@ -64,8 +65,8 @@ inline constexpr auto k_UNKNOWN   = "Unknown";
 
 // Application status labels
 namespace Labels::ApplicationStatus {
-inline constexpr auto k_HEALTHY  = "Healthy";
-inline constexpr auto k_INVALID  = "Invalid";
+inline constexpr auto k_HEALTHY = "Healthy";
+inline constexpr auto k_INVALID = "Invalid";
 
 inline const QString k_STATUS_LABEL = QStringLiteral("<b>App Config Status:</b> %1 %2");
 }

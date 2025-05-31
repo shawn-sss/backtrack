@@ -49,6 +49,7 @@ set(UI_MAIN_WINDOW
     ui/mainwindow/mainwindowlabels.h
     ui/mainwindow/mainwindowmessages.h
     ui/mainwindow/mainwindowstyling.h
+    ui/mainwindow/mainwindowconstants.h
 )
 
 # UI: Notifications dialog
@@ -218,6 +219,8 @@ set(SRC_SERVICE_MANAGERS
 
     services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.cpp
     services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h
+    services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceConstants.h
+    services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceStyling.h
 
     services/ServiceManagers/UninstallServiceManager/UninstallServiceConstants.h
     services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.cpp

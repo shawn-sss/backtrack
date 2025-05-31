@@ -7,6 +7,22 @@ QPushButton {
     font-size: 14px;
 }
 
+/* SnapList reset button */
+QPushButton#SnapListResetButton {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    color: black;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
+}
+
+QPushButton#SnapListResetButton:hover {
+    color: red;
+}
+
 /* === Inputs === */
 QLineEdit,
 QTextEdit,

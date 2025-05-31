@@ -8,9 +8,9 @@
 namespace InfoMessages {
 inline constexpr auto k_SELECT_BACKUP_DESTINATION_TITLE = "Select Backup Destination";
 inline const QString k_NOTIFICATION_POPUP_TITLE = QStringLiteral("Notification");
-inline constexpr auto k_INSTALL_OK = "ok";
-inline constexpr auto k_INSTALL_PARTIAL = "partial";
-inline constexpr auto k_INSTALL_BROKEN = "broken";
+inline constexpr auto k_INSTALL_OK       = "ok";
+inline constexpr auto k_INSTALL_PARTIAL  = "partial";
+inline constexpr auto k_INSTALL_BROKEN   = "broken";
 }
 
 // Warning prompts and confirmations
@@ -54,7 +54,6 @@ inline constexpr auto k_ERROR_DELETING_BACKUP_LOG =
 inline constexpr auto k_ERROR_DELETING_BACKUP_DIRECTORY =
     "Unable to remove the backup directory.\nEnsure all files inside are closed and try again.";
 inline constexpr auto k_ERROR_BACKUP_ALREADY_IN_PROGRESS = "Backup Already in Progress";
-inline constexpr auto k_ERROR_OPERATION_IN_PROGRESS = "Ongoing Operation";
 inline constexpr auto k_ERROR_TRANSFER_FAILED = "Unable to transfer the following item: %1";
 inline constexpr auto k_ERROR_FILE_ACCESS_DENIED = "File access was denied.";
 inline constexpr auto k_ERROR_CREATE_BACKUP_FOLDER = "Failed to create '%1' folder.";
@@ -90,18 +89,6 @@ inline const QString k_BROKEN_APP_STRUCTURE_MESSAGE =
                    "Consider restarting the app or resetting its data to resolve the issue.");
 inline constexpr auto k_READ_ACCESS_LOST_MESSAGE =
     "The following items lost read access and were removed from staging:\n%1";
-}
-
-// Help window instructions and messages
-namespace HelpInfo {
-inline constexpr auto k_HELP_WINDOW_TITLE = "Help";
-inline constexpr auto k_HELP_WINDOW_MESSAGE =
-    "How to create a backup:\n"
-    "1. Select one or more drives, directories, or files.\n"
-    "2. Click the add to backup button.\n"
-    "3. Confirm desired items are selected for backup.\n"
-    "4. Click the create backup button.";
-inline constexpr auto k_HELP_EXTENDED_MESSAGE = "\n\nYour settings are stored at:\n%1";
 }
 
 // Encryption unlock messages

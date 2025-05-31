@@ -1,4 +1,3 @@
-// Project includes
 #include "UIUtilsServiceManager.h"
 
 // Qt includes
@@ -9,74 +8,87 @@
 
 namespace Shared::UI {
 
-// Handles window dragging on mouse press
+// Window dragging helpers
 void handleMousePress(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (!window || !event || event->button() != Qt::LeftButton)
         return;
-
     dragging = true;
     lastMousePosition = event->globalPosition().toPoint();
     event->accept();
 }
 
-// Moves window while mouse is dragged
 void handleMouseMove(QWidget* window, QMouseEvent* event, bool& dragging, QPoint& lastMousePosition) {
     if (!window || !event || !dragging)
         return;
-
     const QPoint globalPos = event->globalPosition().toPoint();
     const QPoint delta = globalPos - lastMousePosition;
     window->move(window->pos() + delta);
     lastMousePosition = globalPos;
 }
 
-// Ends window dragging on mouse release
 void handleMouseRelease(QMouseEvent* event, bool& dragging) {
     if (!event || event->button() != Qt::LeftButton)
         return;
-
     dragging = false;
     event->accept();
 }
 
-// Hides columns in a QTreeView starting from a given index
+// Tree view utilities
 void removeAllColumnsFromTreeView(QTreeView* treeView, int startColumn, int columnCount) {
     if (!treeView || !treeView->model())
         return;
-
     for (int i = startColumn; i < columnCount; ++i)
         treeView->setColumnHidden(i, true);
 }
 
-// Configures a QProgressBar with range, height, and text visibility
+// Progress bar setup
 void setupProgressBar(QProgressBar* progressBar, int minValue, int maxValue, int height, bool textVisible) {
     if (!progressBar)
         return;
-
     progressBar->setRange(minValue, maxValue);
     progressBar->setValue(minValue);
     progressBar->setTextVisible(textVisible);
     progressBar->setFixedHeight(height);
 }
 
-// Changes the cursor on QTabWidget to a pointing hand
+// Tab widget utilities
 void setTabWidgetCursorToPointer(QTabWidget* tabWidget) {
     if (tabWidget && tabWidget->tabBar())
         tabWidget->tabBar()->setCursor(Qt::PointingHandCursor);
 }
 
-// Creates a circular colored pixmap (status light)
+// Pixmap generation
 QPixmap createStatusLightPixmap(const QString& color, int size) {
     QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
-
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setBrush(QColor(color));
     painter.setPen(Qt::NoPen);
     painter.drawEllipse(0, 0, size, size);
-
     return pixmap;
+}
+
+// Button styling utilities
+void applyButtonTooltipAndCursor(QPushButton* button, const QString& tooltip) {
+    if (!button)
+        return;
+    button->setCursor(Qt::PointingHandCursor);
+    button->setToolTip(tooltip);
+}
+
+void applyButtonStyling(const QList<QPair<QPushButton*, QString>>& buttonTooltipPairs) {
+    for (const auto& pair : buttonTooltipPairs) {
+        applyButtonTooltipAndCursor(pair.first, pair.second);
+    }
+}
+
+void applyButtonStylingWithObjectName(QPushButton* button, const QString& tooltip, const QString& objectName) {
+    if (!button)
+        return;
+    button->setCursor(Qt::PointingHandCursor);
+    button->setToolTip(tooltip);
+    button->setObjectName(objectName);
 }
 
 } // namespace Shared::UI
