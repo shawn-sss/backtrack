@@ -3,6 +3,7 @@
 #include "NotificationsDialogStyling.h"
 #include "NotificationsDialogConstants.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QVBoxLayout>
@@ -23,7 +24,7 @@ static QString formatNotificationText(const NotificationServiceStruct& notif) {
 
 // Creates a styled list widget item based on read state
 static QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
-    QListWidgetItem* item = new QListWidgetItem(formatNotificationText(notif));
+    auto* item = new QListWidgetItem(formatNotificationText(notif));
     if (notif.read) {
         item->setForeground(QBrush(Qt::gray));
     } else {
@@ -49,13 +50,13 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     listWidget->setStyleSheet(NotificationsDialogStyling::kListWidgetStyle);
 
     clearAllButton = new QPushButton(NotificationsDialogConstants::kClearAllText, this);
-    clearAllButton->setToolTip(NotificationsDialogConstants::kClearAllTooltip);
-    clearAllButton->setCursor(Qt::PointingHandCursor);
-
     closeButton = new QPushButton(NotificationsDialogConstants::kCloseText, this);
-    closeButton->setToolTip(NotificationsDialogConstants::kCloseTooltip);
-    closeButton->setCursor(Qt::PointingHandCursor);
 
+    // Unified cursor + tooltip setup via shared UI service
+    Shared::UI::applyButtonTooltipAndCursor(clearAllButton, NotificationsDialogConstants::kClearAllTooltip);
+    Shared::UI::applyButtonTooltipAndCursor(closeButton, NotificationsDialogConstants::kCloseTooltip);
+
+    // Sort and populate list
     QList<NotificationServiceStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
               [](const NotificationServiceStruct& a, const NotificationServiceStruct& b) {

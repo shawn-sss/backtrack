@@ -1,6 +1,8 @@
 // Project includes
 #include "snaplistdialog.h"
 #include "snaplistdialogconstants.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h" // ✅ added
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceConstants.h"
 
 // Qt includes
 #include <QInputDialog>
@@ -21,6 +23,11 @@ SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
     loadButton = new QPushButton(tr(k_LOAD_BUTTON_TEXT), this);
     deleteButton = new QPushButton(tr(k_DELETE_BUTTON_TEXT), this);
     saveButton = new QPushButton(tr(k_SAVE_BUTTON_TEXT), this);
+
+    // ✅ Centralized button styling and tooltip/cursor logic
+    Shared::UI::applyButtonTooltipAndCursor(loadButton, tr(k_LOAD_BUTTON_TOOLTIP));
+    Shared::UI::applyButtonTooltipAndCursor(deleteButton, tr(k_DELETE_BUTTON_TOOLTIP));
+    Shared::UI::applyButtonTooltipAndCursor(saveButton, tr(k_SAVE_BUTTON_TOOLTIP));
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     QHBoxLayout* buttonLayout = new QHBoxLayout();

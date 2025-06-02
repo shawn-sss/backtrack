@@ -6,6 +6,7 @@
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h" // ✅ added
 
 // Qt includes
 #include <QApplication>
@@ -90,8 +91,7 @@ void SettingsDialog::setupLayout() {
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
     saveButton->setText(k_BUTTON_SAVE_TEXT);
-    saveButton->setToolTip(k_TOOLTIP_SAVE_BUTTON);
-    saveButton->setCursor(Qt::PointingHandCursor);
+    Shared::UI::applyButtonTooltipAndCursor(saveButton, k_TOOLTIP_SAVE_BUTTON); // ✅ centralized
 
     QFontMetrics fm(saveButton->font());
     int saveWidth = fm.horizontalAdvance(k_BUTTON_SAVE_WIDTH_TEXT) + 40;
@@ -104,7 +104,6 @@ void SettingsDialog::setupLayout() {
     connect(saveCooldownTimer, &QTimer::timeout, this, [this]() {
         saveButton->setText(k_BUTTON_SAVE_TEXT);
         saveButton->setEnabled(true);
-        saveButton->setStyleSheet({});
     });
 
     mainLayout->addWidget(centralWidget);
@@ -172,19 +171,17 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     rowLayout->setContentsMargins(0, 24, 0, 0);
 
     resetBackupArchiveButton = new QPushButton(k_BUTTON_RESET_BACKUP, buttonRow);
-    resetBackupArchiveButton->setCursor(Qt::PointingHandCursor);
-    resetBackupArchiveButton->setToolTip(k_TOOLTIP_RESET_BACKUP);
-    resetBackupArchiveButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    resetBackupArchiveButton->setStyleSheet(k_RESET_BACKUP_BUTTON_STYLE);
-    rowLayout->addWidget(resetBackupArchiveButton);
-
     clearAppDataButton = new QPushButton(k_BUTTON_CLEAR_APP, buttonRow);
-    clearAppDataButton->setCursor(Qt::PointingHandCursor);
-    clearAppDataButton->setToolTip(k_TOOLTIP_CLEAR_APP);
-    clearAppDataButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    clearAppDataButton->setStyleSheet(k_CLEAR_APP_BUTTON_STYLE);
-    rowLayout->addWidget(clearAppDataButton);
 
+    // ✅ Apply global button styling
+    Shared::UI::applyButtonTooltipAndCursor(resetBackupArchiveButton, k_TOOLTIP_RESET_BACKUP);
+    Shared::UI::applyButtonTooltipAndCursor(clearAppDataButton, k_TOOLTIP_CLEAR_APP);
+
+    resetBackupArchiveButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    clearAppDataButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    rowLayout->addWidget(resetBackupArchiveButton);
+    rowLayout->addWidget(clearAppDataButton);
     layout->addWidget(buttonRow);
 
     connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
@@ -237,7 +234,6 @@ void SettingsDialog::onSaveClicked() {
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);
     saveButton->setEnabled(false);
-    saveButton->setStyleSheet(COOLDOWN_BUTTON_STYLE);
 
     saveCooldownTimer->start(k_SAVE_FEEDBACK_COOLDOWN_MS);
 }

@@ -3,6 +3,7 @@
 #include "welcomedialogconstants.h"
 #include "welcomedialogstyling.h"
 #include "../../constants/app_info.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QAbstractButton>
@@ -11,15 +12,9 @@
 #include <QPixmap>
 #include <QSizePolicy>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 using namespace WelcomeDialogConstants;
-
-// Applies pointing hand cursor to dialog buttons
-static void applyCursors(QDialogButtonBox* buttonBox) {
-    const QList<QAbstractButton*>& buttons = buttonBox->buttons();
-    for (auto* button : buttons)
-        button->setCursor(Qt::PointingHandCursor);
-}
 
 // Constructs the welcome message HTML
 static QString buildWelcomeHtmlText() {
@@ -46,6 +41,7 @@ WelcomeDialog::WelcomeDialog(QWidget* parent)
     setWindowTitle(tr(k_WINDOW_TITLE));
     resize(kDialogWidth, kDialogHeight);
 
+    // Logo setup
     const QPixmap logoPixmap(k_LOGO_RESOURCE_PATH);
     logoLabel->setPixmap(logoPixmap.scaled(
         kLogoSize,
@@ -56,14 +52,22 @@ WelcomeDialog::WelcomeDialog(QWidget* parent)
     logoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     logoLabel->setStyleSheet(WelcomeDialogStyling::Styles::LOGO_LABEL_STYLE);
 
+    // Text setup
     textLabel->setText(buildWelcomeHtmlText());
     styleLabel(textLabel, true);
     textLabel->setStyleSheet(WelcomeDialogStyling::Styles::TEXT_LABEL_STYLE);
 
+    // Connect button
     connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    applyCursors(buttonBox);
-    buttonBox->setStyleSheet(WelcomeDialogStyling::Styles::BUTTON_STYLE);
 
+    // ✅ Centralized button handling with safe cast
+    for (QAbstractButton* button : buttonBox->buttons()) {
+        if (auto* pushButton = qobject_cast<QPushButton*>(button)) {
+            Shared::UI::applyButtonTooltipAndCursor(pushButton, tr("OK"));
+        }
+    }
+
+    // Layout setup
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(logoLabel);
     layout->addWidget(textLabel);

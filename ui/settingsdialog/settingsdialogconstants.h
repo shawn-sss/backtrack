@@ -6,6 +6,10 @@
 
 namespace SettingsDialogConstants {
 
+// Settings Window button tooltips
+inline constexpr auto k_RESET_DESTINATION  = "Delete ALL contents from the backup destination";
+inline constexpr auto k_UNINSTALL          = "Uninstall the application and delete all local data";
+
 // Labels
 inline constexpr auto k_LABEL_BACKUP_PREFIX           = "Backup Prefix:";
 inline constexpr auto k_LABEL_BACKUP_PREFIX_TOOLTIP   = "Modify the prefix used when creating backups.";

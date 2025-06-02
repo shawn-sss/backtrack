@@ -3,6 +3,7 @@
 #include "HelpDialogConstants.h"
 #include "HelpDialogStyling.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
+#include "../../../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QAbstractButton>
@@ -11,19 +12,9 @@
 #include <QTabWidget>
 #include <QTextBrowser>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 namespace {
-
-// Apply pointing hand cursors to tab bar and dialog buttons
-void applyCursors(QTabWidget* tabWidget, QDialogButtonBox* buttonBox) {
-    if (QTabBar* tabBar = tabWidget->findChild<QTabBar*>()) {
-        tabBar->setCursor(Qt::PointingHandCursor);
-    }
-    const auto buttons = buttonBox->buttons();
-    for (QAbstractButton* button : buttons) {
-        button->setCursor(Qt::PointingHandCursor);
-    }
-}
 
 // Builds HTML content for the Getting Started tab
 QString buildGettingStartedHtml() {
@@ -79,12 +70,13 @@ QTextBrowser* HelpDialog::createTextBrowser(const QString& html) {
 // Constructs the HelpDialog with all tabs and styled layout
 HelpDialog::HelpDialog(QWidget* parent)
     : QDialog(parent),
-    tabWidget(new QTabWidget(this))
-{
+    tabWidget(new QTabWidget(this)) {
+
     setWindowTitle(HelpDialogConstants::kWindowTitle);
     resize(HelpDialogConstants::kDialogWidth, HelpDialogConstants::kDialogHeight);
 
     QString appDataPath = PathServiceManager::appDataRootDir();
+
     gettingStartedText = createTextBrowser(buildGettingStartedHtml());
     featuresText = createTextBrowser(buildFeaturesHtml());
     faqText = createTextBrowser(buildFaqHtml(appDataPath));
@@ -96,11 +88,22 @@ HelpDialog::HelpDialog(QWidget* parent)
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Close, this);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-    applyCursors(tabWidget, buttonBox);
-    buttonBox->setStyleSheet(HelpDialogStyling::Styles::BUTTON_STYLE);
+    // Use centralized service for pointer cursor + tooltip
+    const QList<QAbstractButton*> buttons = buttonBox->buttons();
+    for (QAbstractButton* button : buttons) {
+        if (auto* pushButton = qobject_cast<QPushButton*>(button)) {
+            Shared::UI::applyButtonTooltipAndCursor(pushButton, tr("Close"));
+        }
+    }
+
+    // Central tab cursor handling
+    Shared::UI::setTabWidgetCursorToPointer(tabWidget);
+
+    // Tab widget style (retained from local styling)
     tabWidget->setStyleSheet(HelpDialogStyling::Styles::TAB_WIDGET_STYLE);
 
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(tabWidget);
     layout->addWidget(buttonBox);
+    setLayout(layout);
 }

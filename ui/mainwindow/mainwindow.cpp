@@ -1,5 +1,6 @@
 // Project includes
 #include "mainwindow.h"
+#include "mainwindowconstants.h"
 #include "mainwindowlabels.h"
 #include "mainwindowmessages.h"
 #include "mainwindowstyling.h"
@@ -221,21 +222,21 @@ void MainWindow::setInitialButtonTexts() {
 // Applies styling and tooltips to all relevant buttons
 void MainWindow::applyButtonCursors() {
     const QList<QPair<QPushButton *, QString>> buttons = {
-        {ui->AddToBackupButton, UIUtilsServiceConstants::ToolTips::k_ADD_TO_BACKUP},
-        {ui->RemoveFromBackupButton, UIUtilsServiceConstants::ToolTips::k_REMOVE_FROM_BACKUP},
-        {ui->CreateBackupButton, UIUtilsServiceConstants::ToolTips::k_CREATE_BACKUP},
-        {ui->ChangeBackupDestinationButton, UIUtilsServiceConstants::ToolTips::k_CHANGE_DESTINATION},
-        {ui->DeleteBackupButton, UIUtilsServiceConstants::ToolTips::k_DELETE_BACKUP},
-        {ui->NotificationButton, UIUtilsServiceConstants::ToolTips::k_NOTIFICATIONS},
-        {ui->UnlockDriveButton, UIUtilsServiceConstants::ToolTips::k_UNLOCK_DRIVE},
-        {ui->SnapListButton, UIUtilsServiceConstants::ToolTips::k_SNAP_LIST}
+        {ui->AddToBackupButton, k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton, k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton, k_CREATE_BACKUP},
+        {ui->ChangeBackupDestinationButton, k_CHANGE_DESTINATION},
+        {ui->DeleteBackupButton, k_DELETE_BACKUP},
+        {ui->NotificationButton, k_NOTIFICATIONS},
+        {ui->UnlockDriveButton, k_UNLOCK_DRIVE},
+        {ui->SnapListButton, k_SNAP_LIST}
     };
 
     Shared::UI::applyButtonStyling(buttons);
 
     Shared::UI::applyButtonStylingWithObjectName(
         snapListResetButton,
-        UIUtilsServiceConstants::ToolTips::k_RESET_SNAP_LIST,
+        k_RESET_SNAP_LIST,
         Shared::UI::Styling::Buttons::k_SNAPLIST_RESET_BUTTON_OBJECT_NAME
         );
 }

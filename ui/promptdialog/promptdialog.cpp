@@ -2,6 +2,7 @@
 #include "promptdialog.h"
 #include "PromptDialogConstants.h"
 #include "PromptDialogStyling.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h" // ✅ added
 
 // Qt includes
 #include <QLabel>
@@ -127,6 +128,15 @@ void PromptDialog::setIcon(Icon icon) {
 // Configures standard buttons on dialog
 void PromptDialog::setStandardButtons(Buttons buttons) {
     buttonBox->setStandardButtons(toStandardButtons(buttons));
+
+    // ✅ Apply shared button styling after button creation
+    const auto btns = buttonBox->buttons();
+    for (QAbstractButton* button : btns) {
+        if (auto* pushBtn = qobject_cast<QPushButton*>(button)) {
+            QString text = pushBtn->text();
+            Shared::UI::applyButtonTooltipAndCursor(pushBtn, text);  // Use button text as tooltip
+        }
+    }
 }
 
 // Sets default button to focus

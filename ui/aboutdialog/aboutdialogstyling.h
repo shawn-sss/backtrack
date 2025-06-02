@@ -22,22 +22,6 @@ inline constexpr auto LOGO_LABEL_STYLE = R"(
     }
 )";
 
-// Style for the dialog buttons
-inline constexpr auto BUTTON_STYLE = R"(
-    QPushButton {
-        background-color: #444;
-        color: white;
-        border-radius: 5px;
-        padding: 4px 10px;
-    }
-    QPushButton:hover {
-        background-color: #666;
-    }
-    QPushButton:pressed {
-        background-color: #222;
-    }
-)";
-
 } // namespace Styles
 } // namespace AboutDialogStyling
 

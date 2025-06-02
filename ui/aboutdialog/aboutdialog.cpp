@@ -1,8 +1,9 @@
 // Project includes
 #include "aboutdialog.h"
 #include "aboutdialogconstants.h"
-#include "aboutdialogstyling.h"
+#include "aboutdialogstyling.h"  // Kept for label styles only
 #include "../../constants/app_info.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QLabel>
@@ -11,13 +12,7 @@
 #include <QAbstractButton>
 #include <QPixmap>
 #include <QSizePolicy>
-
-// Applies pointing hand cursor to dialog buttons
-static void applyCursors(QDialogButtonBox* buttonBox) {
-    const QList<QAbstractButton*>& buttons = buttonBox->buttons();
-    for (int i = 0; i < buttons.size(); ++i)
-        buttons[i]->setCursor(Qt::PointingHandCursor);
-}
+#include <QPushButton>
 
 // Builds the HTML content for the About dialog text
 static QString buildAboutHtmlText() {
@@ -50,6 +45,7 @@ AboutDialog::AboutDialog(QWidget* parent)
     setWindowTitle(tr("About"));
     resize(AboutDialogConstants::kDialogWidth, AboutDialogConstants::kDialogHeight);
 
+    // Logo setup
     const QPixmap logoPixmap(":/resources/icons/app_icon.png");
     logoLabel->setPixmap(logoPixmap.scaled(
         AboutDialogConstants::kLogoSize,
@@ -60,14 +56,23 @@ AboutDialog::AboutDialog(QWidget* parent)
     logoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     logoLabel->setStyleSheet(AboutDialogStyling::Styles::LOGO_LABEL_STYLE);
 
+    // Text setup
     textLabel->setText(buildAboutHtmlText());
     styleLabel(textLabel, true);
     textLabel->setStyleSheet(AboutDialogStyling::Styles::TEXT_LABEL_STYLE);
 
+    // Button setup
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    applyCursors(buttonBox);
-    buttonBox->setStyleSheet(AboutDialogStyling::Styles::BUTTON_STYLE);
 
+    const QList<QAbstractButton*> buttons = buttonBox->buttons();
+    for (QAbstractButton* button : buttons) {
+        if (auto* pushButton = qobject_cast<QPushButton*>(button)) {
+            Shared::UI::applyButtonTooltipAndCursor(pushButton, tr("Close"));
+            // Styling is now handled globally in UIUtilsServiceManager, so no setStyleSheet here
+        }
+    }
+
+    // Layout
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(logoLabel);
     layout->addWidget(textLabel);

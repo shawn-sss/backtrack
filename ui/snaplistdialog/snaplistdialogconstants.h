@@ -3,6 +3,11 @@
 
 namespace SnapListDialogConstants {
 
+// SnapList Manager button tooltips
+constexpr const char* k_LOAD_BUTTON_TOOLTIP = "Load the selected snap list";
+constexpr const char* k_DELETE_BUTTON_TOOLTIP = "Delete the selected snap list";
+constexpr const char* k_SAVE_BUTTON_TOOLTIP = "Save a new snap list with current items";
+
 // Dialog dimensions
 constexpr int k_MIN_WIDTH = 400;
 constexpr int k_MIN_HEIGHT = 300;

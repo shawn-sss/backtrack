@@ -32,21 +32,6 @@ inline constexpr auto TAB_WIDGET_STYLE = R"(
     }
 )";
 
-// Style for the dialog's close button
-inline constexpr auto BUTTON_STYLE = R"(
-    QPushButton {
-        background-color: #444;
-        color: white;
-        border-radius: 5px;
-        padding: 4px 10px;
-    }
-    QPushButton:hover {
-        background-color: #666;
-    }
-    QPushButton:pressed {
-        background-color: #222;
-    }
-)";
 
 } // namespace Styles
 } // namespace HelpDialogStyling
