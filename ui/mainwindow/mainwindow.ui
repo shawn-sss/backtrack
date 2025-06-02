@@ -72,16 +72,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="UnlockDriveButton">
+         <widget class="QPushButton" name="AddToBackupButton">
           <property name="text">
-           <string>Unlock Drive</string>
+           <string>Add to Backup</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="AddToBackupButton">
+         <widget class="QPushButton" name="UnlockDriveButton">
           <property name="text">
-           <string>Add to Backup</string>
+           <string>Unlock Drive</string>
           </property>
          </widget>
         </item>

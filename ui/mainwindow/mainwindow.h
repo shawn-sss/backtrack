@@ -8,26 +8,26 @@
 #include "../../../../constants/system_constants.h"
 
 // Qt includes
-#include <QTabWidget>
-#include <QToolBar>
-#include <QSystemTrayIcon>
-#include <QTreeView>
-#include <QPushButton>
-#include <QFileSystemModel>
-#include <QAbstractItemView>
 #include <QAbstractItemModel>
-#include <QHBoxLayout>
-#include <QMainWindow>
+#include <QAbstractItemView>
 #include <QCloseEvent>
 #include <QElapsedTimer>
-#include <QTimer>
+#include <QFileSystemModel>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLayout>
-#include <QString>
-#include <QStringList>
+#include <QList>
+#include <QMainWindow>
 #include <QMenu>
 #include <QPair>
-#include <QList>
+#include <QPushButton>
+#include <QString>
+#include <QStringList>
+#include <QSystemTrayIcon>
+#include <QTabWidget>
+#include <QTimer>
+#include <QToolBar>
+#include <QTreeView>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -39,11 +39,9 @@ class ToolbarServiceManager;
 class NotificationServiceStruct;
 class SettingsDialog;
 
-namespace Ui {
-class MainWindow;
-}
+namespace Ui {class MainWindow;}
 
-// Main application window managing UI, backup system, and notification controls
+// Main application window
 class MainWindow final : public QMainWindow {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(MainWindow)
@@ -71,7 +69,7 @@ private:
     void setupConnections();
     void setupTrayIcon();
 
-    // Views
+    // Toolbar and views setup
     void initializeToolbar();
     void initializeBackupUi();
     void setupSourceTreeView();
@@ -91,7 +89,7 @@ private:
     void handleWatchedPathChanged(const QString& path);
     void checkStagingForReadAccessLoss();
 
-    // Backup Status
+    // Backup system and status
     void initializeBackupSystem();
     void connectBackupSignals();
     void updateBackupLabels();
@@ -109,7 +107,7 @@ private:
     void revalidateBackupAndAppStatus();
     void revalidateBackupAndAppStatus(const QString& appStatus);
 
-    // UI Utilities
+    // UI utilities
     void applyButtonCursors();
     void applyCustomTreePalette(QTreeView* treeView);
     void applyCustomPalettesToAllTreeViews();
@@ -132,7 +130,7 @@ private:
     void showNextNotification();
     void finishNotificationQueue();
 
-    // SnapList / Staging title section
+    // SnapList
     void updateBackupStagingTitle(const QString& name);
     void setInitialButtonTexts();
 
@@ -150,7 +148,6 @@ private slots:
     void onBackupError(const QString& error);
     void onCooldownFinished();
     void onNotificationButtonClicked();
-    void onDriveSelectionChanged();
     void onThemeChanged();
     void setStatusLabel(QLabel* label, const QString& emoji,
                         const QString& text, const QString& style = "");

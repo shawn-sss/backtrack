@@ -92,14 +92,19 @@ inline constexpr auto k_READ_ACCESS_LOST_MESSAGE =
 }
 
 // Encryption unlock messages
-namespace BitLockerMessages {
+namespace EncryptionMessages {
 inline constexpr auto k_NO_DRIVE_SELECTED_TITLE = "No Drive Selected";
 inline const QString k_NO_DRIVE_SELECTED_MESSAGE =
     QStringLiteral("Please select a drive from the list first.");
+
 inline constexpr auto k_UNLOCK_FAILED_TITLE = "Unlock Failed";
 inline const QString k_UNLOCK_FAILED_MESSAGE =
     QStringLiteral("Could not launch BitLocker password prompt.\n"
                    "Ensure PowerShell is available and you have permission to elevate.");
+
+inline constexpr auto k_DRIVE_ALREADY_UNLOCKED_TITLE = "Drive Already Unlocked";
+inline const QString k_DRIVE_ALREADY_UNLOCKED_MESSAGE =
+    QStringLiteral("Drive %1 is already unlocked and accessible.");
 }
 
 #endif // MAINWINDOWMESSAGES_H

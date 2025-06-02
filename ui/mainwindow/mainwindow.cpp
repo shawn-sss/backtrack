@@ -23,7 +23,6 @@
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceConstants.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceStyling.h"
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
@@ -138,10 +137,6 @@ void MainWindow::setupConnections() {
             connect(button, &QPushButton::clicked, this, slot);
         }
     }
-
-    connect(ui->DriveTreeView->selectionModel(),
-            &QItemSelectionModel::currentChanged,
-            this, &MainWindow::onDriveSelectionChanged);
 }
 
 // Connects backup controller signals to the appropriate handlers
@@ -406,7 +401,7 @@ void MainWindow::checkStagingForReadAccessLoss() {
     }
 
     if (!lostAccess.isEmpty()) {
-        for (const QString &path : lostAccess) {
+        for (const auto &path : std::as_const(lostAccess)) {
             stagingModel->removePath(path);
         }
 
@@ -866,10 +861,6 @@ void MainWindow::onAddToBackupClicked() {
         snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
-
-        triggerButtonFeedback(ui->AddToBackupButton,
-                              Labels::Backup::k_ADD_TO_BACKUP_BUTTON_TEXT,
-                              Labels::Backup::k_ADD_TO_BACKUP_ORIGINAL_TEXT);
     }
 }
 
@@ -884,10 +875,6 @@ void MainWindow::onRemoveFromBackupClicked() {
 
     Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
     snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
-
-    triggerButtonFeedback(ui->RemoveFromBackupButton,
-                          Labels::Backup::k_REMOVE_FROM_BACKUP_BUTTON_TEXT,
-                          Labels::Backup::k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT);
 }
 
 // Prompts the user to select a backup destination folder
@@ -914,15 +901,11 @@ void MainWindow::onChangeBackupDestinationClicked() {
     setupDestinationView(selectedDir);
     ensureBackupStatusUpdated();
     refreshFileWatcher();
-
-    triggerButtonFeedback(ui->ChangeBackupDestinationButton,
-                          Labels::Backup::k_CHANGE_DESTINATION_BUTTON_TEXT,
-                          Labels::Backup::k_CHANGE_DESTINATION_ORIGINAL_TEXT);
 }
 
 // Creates a backup using the currently staged files
 void MainWindow::onCreateBackupClicked() {
-    QStringList pathsToBackup = stagingModel->getStagedPaths();
+    const QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
         QMessageBox::warning(this, ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
                              ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
@@ -930,7 +913,7 @@ void MainWindow::onCreateBackupClicked() {
     }
 
     QStringList unreadablePaths;
-    for (const QString &path : pathsToBackup) {
+    for (const auto &path : pathsToBackup) {
         QFileInfo fileInfo(path);
         if (!fileInfo.exists() || !fileInfo.isReadable()) {
             unreadablePaths << path;
@@ -938,7 +921,8 @@ void MainWindow::onCreateBackupClicked() {
     }
 
     if (!unreadablePaths.isEmpty()) {
-        for (const QString &path : unreadablePaths) {
+        const QStringList pathsToRemove = unreadablePaths;
+        for (const auto &path : pathsToRemove) {
             stagingModel->removePath(path);
         }
 
@@ -961,11 +945,6 @@ void MainWindow::onCreateBackupClicked() {
     }
 
     backupStartTimer.start();
-
-    triggerButtonFeedback(ui->CreateBackupButton,
-                          Labels::Backup::k_BACKING_UP_BUTTON_TEXT,
-                          Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT,
-                          System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
 
     ui->TransferProgressBar->setValue(UI::Progress::k_PROGRESS_BAR_MIN_VALUE);
     ui->TransferProgressBar->setVisible(true);
@@ -1015,10 +994,6 @@ void MainWindow::onDeleteBackupClicked() {
     resetDestinationModels();
 
     handleBackupDeletion(selectedPath, "single");
-
-    triggerButtonFeedback(ui->DeleteBackupButton,
-                          Labels::Backup::k_DELETE_BACKUP_BUTTON_TEXT,
-                          Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
 }
 
 // Updates UI on backup error
@@ -1026,56 +1001,40 @@ void MainWindow::onBackupError(const QString &error) {
     Q_UNUSED(error);
     ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     ui->TransferProgressText->setVisible(true);
-
-    const int elapsed = backupStartTimer.elapsed();
-    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
-
-    QTimer::singleShot(delay, this, [this]() {
-        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
-        ui->CreateBackupButton->setStyleSheet(QString());
-        ui->CreateBackupButton->setEnabled(true);
-    });
+    ui->CreateBackupButton->setEnabled(true);
 }
 
 // Updates UI on backup completion
 void MainWindow::onBackupCompleted() {
     ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_COMPLETION_MESSAGE);
     ui->TransferProgressText->setVisible(true);
+    ui->CreateBackupButton->setEnabled(true);
 
-    const int elapsed = backupStartTimer.elapsed();
-    const int delay = qMax(0, System::Timing::k_BUTTON_FEEDBACK_DURATION_MS - elapsed);
-
-    QTimer::singleShot(delay, this, [this]() {
-        ui->CreateBackupButton->setText(Labels::Backup::k_CREATE_BACKUP_BUTTON_TEXT);
-        ui->CreateBackupButton->setStyleSheet(MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE);
-        ui->CreateBackupButton->setEnabled(true);
-
-        QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
-            ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
-        });
-
-        ensureBackupStatusUpdated();
-        refreshFileWatcher();
-
-        const QString backupRoot = backupService->getBackupRoot();
-        QDir dir(backupRoot);
-        dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-        dir.setSorting(QDir::Time | QDir::Reversed);
-
-        const QFileInfoList entries = dir.entryInfoList();
-        if (!entries.isEmpty()) {
-            const QString newestFolderPath = entries.last().absoluteFilePath();
-            QModelIndex sourceIndex = destinationModel->index(newestFolderPath);
-            QModelIndex proxyIndex = destinationProxyModel->mapFromSource(sourceIndex);
-
-            if (proxyIndex.isValid()) {
-                ui->BackupDestinationView->setCurrentIndex(proxyIndex);
-                ui->BackupDestinationView->selectionModel()->select(
-                    proxyIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-                ui->BackupDestinationView->scrollTo(proxyIndex);
-            }
-        }
+    QTimer::singleShot(System::Timing::k_BUTTON_FEEDBACK_DURATION_MS, this, [this]() {
+        ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     });
+
+    ensureBackupStatusUpdated();
+    refreshFileWatcher();
+
+    const QString backupRoot = backupService->getBackupRoot();
+    QDir dir(backupRoot);
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    dir.setSorting(QDir::Time | QDir::Reversed);
+
+    const QFileInfoList entries = dir.entryInfoList();
+    if (!entries.isEmpty()) {
+        const QString newestFolderPath = entries.last().absoluteFilePath();
+        QModelIndex sourceIndex = destinationModel->index(newestFolderPath);
+        QModelIndex proxyIndex = destinationProxyModel->mapFromSource(sourceIndex);
+
+        if (proxyIndex.isValid()) {
+            ui->BackupDestinationView->setCurrentIndex(proxyIndex);
+            ui->BackupDestinationView->selectionModel()->select(
+                proxyIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+            ui->BackupDestinationView->scrollTo(proxyIndex);
+        }
+    }
 
     ui->BackupDestinationView->clearSelection();
     ui->BackupDestinationView->setCurrentIndex(QModelIndex());
@@ -1119,11 +1078,6 @@ void MainWindow::onSnapListButtonClicked() {
                 ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
                 updateBackupStagingTitle(name);
                 snapListServiceManager.setCurrentStagingEntries(paths);
-
-                triggerButtonFeedback(ui->SnapListButton,
-                                      Labels::Backup::k_SNAP_LIST_BUTTON_TEXT,
-                                      Labels::Backup::k_SNAP_LIST_ORIGINAL_TEXT,
-                                      System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
             });
 
     dialog->exec();
@@ -1149,27 +1103,24 @@ void MainWindow::updateBackupStagingTitle(const QString& name) {
 // Drive and Encryption Handling \\
 
 // Enables the unlock button when a drive is selected
-void MainWindow::onDriveSelectionChanged() {
-    ui->UnlockDriveButton->setEnabled(true);
-}
-
-// Unlocks the selected BitLocker-protected drive
 void MainWindow::onUnlockDriveClicked() {
     QString driveLetter = getSelectedDriveLetter();
     if (driveLetter.isEmpty()) {
-        QMessageBox::warning(this, BitLockerMessages::k_NO_DRIVE_SELECTED_TITLE,
-                             BitLockerMessages::k_NO_DRIVE_SELECTED_MESSAGE);
+        QMessageBox::warning(this,
+                             EncryptionMessages::k_NO_DRIVE_SELECTED_TITLE,
+                             EncryptionMessages::k_NO_DRIVE_SELECTED_MESSAGE);
         return;
     }
 
     QString drivePath = driveLetter + ":/";
     QDir driveDir(drivePath);
-    if (driveDir.exists() && driveDir.isReadable()) return;
 
-    triggerButtonFeedback(ui->UnlockDriveButton,
-                          Labels::Backup::k_UNLOCKING_FEEDBACK_TEXT,
-                          Labels::Backup::k_UNLOCK_DRIVE_ORIGINAL_TEXT,
-                          System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
+    if (driveDir.exists() && driveDir.isReadable()) {
+        QMessageBox::information(this,
+                                 EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_TITLE,
+                                 EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_MESSAGE.arg(driveLetter));
+        return;
+    }
 
     QProcess taskKill;
     taskKill.start("taskkill", QStringList() << "/IM" << "manage-bde.exe" << "/F");
@@ -1180,21 +1131,17 @@ void MainWindow::onUnlockDriveClicked() {
                          .arg(driveLetter.toUpper());
 
     if (!QProcess::startDetached("powershell", QStringList() << "-Command" << script)) {
-        QMessageBox::critical(this, BitLockerMessages::k_UNLOCK_FAILED_TITLE,
-                              BitLockerMessages::k_UNLOCK_FAILED_MESSAGE);
+        QMessageBox::critical(this,
+                              EncryptionMessages::k_UNLOCK_FAILED_TITLE,
+                              EncryptionMessages::k_UNLOCK_FAILED_MESSAGE);
         return;
     }
 
-    QTimer::singleShot(7500, this, [this]() {
+    QTimer::singleShot(5000, this, [this]() {
         ensureBackupStatusUpdated();
         refreshFileWatcher();
         ui->DriveTreeView->setModel(sourceModel);
         setupSourceTreeView();
-
-        triggerButtonFeedback(ui->UnlockDriveButton,
-                              Labels::Backup::k_UNLOCK_DRIVE_BUTTON_TEXT,
-                              Labels::Backup::k_UNLOCK_DRIVE_ORIGINAL_TEXT,
-                              System::Timing::k_BUTTON_FEEDBACK_DURATION_MS);
     });
 }
 
@@ -1296,7 +1243,6 @@ void MainWindow::feedbackNotificationButton() {
 // Handles notification button click
 void MainWindow::onNotificationButtonClicked() {
     showNotificationDialog();
-    feedbackNotificationButton();
 }
 
 // Application Status \\
