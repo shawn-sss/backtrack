@@ -1,50 +1,78 @@
 # MyDataBackupApp *(Beta Release v0.6)*
 ![Version](https://img.shields.io/badge/version-v0.6-orange)
+
 <p align="center">
   <img src="screenshot.jpg" alt="Screenshot">
 </p>
 
-A lightweight **C++** utility for **selecting** and **safely storing** important files and folders. This is still in the **early stages**, with the current release emphasizing core functionality. However, the project is actively evolving to include new capabilities and improvements over time.
+**MyDataBackupApp** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. This tool has grown beyond basic backup functionality, now offering encrypted drive support, backup health monitoring, reusable SnapList templates, in-app help, and a revamped settings experience.
 
-## Overview
+Whether you're a casual user or a power user who wants full control over backups, **MyDataBackupApp** provides a fast, reliable, and transparent way to protect your data.
 
-**MyDataBackupApp** lets you easily pick which files or folders to back up, securely save them to your chosen backup location, and review backup details—such as how many backups exist and when the most recent backup was performed. It's designed to be **straightforward** to use, with a focus on clarity and ease of use for typical backup scenarios.
+## 🚀 Overview
 
-## Features
+Easily select what to back up—from files and folders to entire drives—and store them safely in your chosen location. The app generates metadata, supports customizable backup templates, and keeps users informed if anything goes wrong with their backups or install files. It's designed for simplicity, but loaded with thoughtful features.
 
-- **Flexible File & Folder Selection**  
-  Choose exactly which items to back up, enabling you to back up the files and folders most important to you.
+## 🧰 Features
 
-- **Visual Progress and Backup Overview**  
-  Get an at-a-glance overview of your backup location, including total backups created, storage space used, and overall progress metrics.
+### Core Features
+- **Flexible Selection Options**  
+  Back up individual files, folders, or entire drives via a simple UI.
+
+- **Visual Progress & Backup Overview**  
+  See how many backups exist, total storage used, and when the last backup was created.
 
 - **Detailed Backup Summaries**  
-  Get detailed information on the most recent backup, including file sizes, completion time, and success status.
+  Each backup shows sizes, timestamps, and status indicators.
 
-- **Metadata Log File**  
-  A JSON log is specifically created regarding each backup for recordkeeping and peace of mind.
+- **Metadata Log Files**  
+  A JSON log accompanies every backup for traceability and auditing.
 
-Though the current version delivers **core backup functionality**, future updates aim to expand on these fundamentals in various ways.
+### Advanced Features
+- 🔐 **Encrypted Drive Support**  
+  Unlock encrypted drives before backing them up using the built-in unlock tool.
 
-## Installation & Usage
+- 📋 **SnapLists (Backup Templates)**  
+  Save and load reusable sets of selected items to simplify repeated backup jobs.
+
+- 🛡️ **Backup Health Monitoring & Notifications**  
+  Detects and alerts you to missing logs, backup mismatches, or broken paths in the archive or app install.
+
+- ⚙️ **Revamped Settings Panel**  
+  Now split into *User* and *System* settings:
+  - Choose between light and dark themes
+  - Set custom backup filename prefixes
+  - Enable or disable minimize-to-tray
+  - Reset the archive or clear app data in one click
+
+- 🆘 **Built-In Help Window**  
+  Includes tabs for “Getting Started”, “Features”, and “FAQ” to help you navigate the app and troubleshoot common questions.
+
+## 🖥️ Installation & Usage
 
 ### Installation
-1. **Clone or Download** this repository.  
-2. Build the code using your preferred **C++** development tools.  
+1. **Clone or Download** this repository.
+2. Build the code using your preferred **C++** compiler or IDE.
 
 ### Usage
-1. Run the resulting program.  
-2. Select your backup destination.  
-3. Choose files or folders to include.  
-4. Click “Create Backup” to proceed.  
+1. Launch the program.
+2. Choose a destination for your backups.
+3. Select files, folders, or drives to include.
+4. (Optional) Save selections as a SnapList for reuse.
+5. Click **“Create Backup”** to begin.
 
-> **Note**: Because this is an early stages, please test with non-critical files before relying on this tool for important data.
+> **Note**: While stable and feature-rich, the app is still in beta. Test with non-critical data before relying on it for essential backups.
 
-## Contributing
+## 🤝 Contributing
 
-Contributions and suggestions are always appreciated, as we work to define the project's long-term roadmap. If you have a comment or idea, feel free to open an Issue or submit a Pull Request with a small improvement. As we progress, we'll offer more structured guidelines and opportunities for broader collaboration.
+Contributions and feedback are always welcome!  
+- Submit issues for bugs, suggestions, or feature requests.  
+- Open a Pull Request if you'd like to propose a code improvement or UI tweak.  
+- Contribution may be limited until things stabilize—more to come as the roadmap develops.
 
-## Contact & Feedback
+## 📬 Contact & Feedback
 
-- **Issues/Requests**: Open a GitHub Issue if you encounter a bug or wish to request a feature.  
-- **Stay Tuned**: Additional contact or support channels may emerge as development continues.
+- **Report Issues**: Use the GitHub Issues tab to report bugs or request features.  
+- **Need Help?**: Browse the in-app Help window or start a discussion on GitHub.
+
+**Thanks for checking out MyDataBackupApp — your data deserves better backups.**
