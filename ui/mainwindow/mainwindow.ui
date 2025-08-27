@@ -391,6 +391,19 @@
       <string>SnapList</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="ScheduleButton">
+     <property name="geometry">
+      <rect>
+       <x>620</x>
+       <y>130</y>
+       <width>277</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>ScheduleButton</string>
+     </property>
+    </widget>
    </widget>
    <zorder>DashboardContainer</zorder>
    <zorder>BackupViewContainer</zorder>

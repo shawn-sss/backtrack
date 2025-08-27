@@ -19,6 +19,7 @@ inline constexpr auto k_CREATE_BACKUP_ORIGINAL_TEXT      = "📦 Create Backup";
 inline constexpr auto k_NOTIFICATION_ORIGINAL_TEXT       = "🔔 Notifications";
 inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "🔓 Unlock Drive";
 inline constexpr auto k_SNAP_LIST_ORIGINAL_TEXT          = "📋 SnapList";
+inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT          = "📅 Schedule";
 
 inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "✅ Added!";
 inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "✅ Removed!";

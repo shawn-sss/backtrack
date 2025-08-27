@@ -2,32 +2,36 @@
 #define MAINWINDOW_H
 
 // Project includes
+#include "../../ui/scheduledialog/scheduledialog.h"
 #include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
 #include "../../backup_module/service/backupservice.h"
-#include "../../constants/system_constants.h"
 #include "../../../../constants/system_constants.h"
 
 // Qt includes
+#include <QMainWindow>
+#include <QFileSystemModel>
+#include <QSystemTrayIcon>
+#include <QElapsedTimer>
+#include <QPointer>
+#include <QPushButton>
+#include <QHBoxLayout>
 #include <QAbstractItemModel>
 #include <QAbstractItemView>
 #include <QCloseEvent>
-#include <QElapsedTimer>
-#include <QFileSystemModel>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLayout>
 #include <QList>
-#include <QMainWindow>
 #include <QMenu>
 #include <QPair>
-#include <QPushButton>
 #include <QString>
 #include <QStringList>
-#include <QSystemTrayIcon>
 #include <QTabWidget>
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
+
+// C++ includes
+#include <memory>
 
 // Forward declaration (Custom class)
 class BackupController;
@@ -38,8 +42,10 @@ class StagingModel;
 class ToolbarServiceManager;
 class NotificationServiceStruct;
 class SettingsDialog;
+class ScheduleServiceManager;
 
-namespace Ui {class MainWindow;}
+// Forward declaration (Qt class)
+namespace Ui { class MainWindow; }
 
 // Main application window
 class MainWindow final : public QMainWindow {
@@ -80,7 +86,7 @@ private:
                            QAbstractItemView::SelectionMode selectionMode,
                            bool stretchLastColumn, bool showHeader = true);
 
-    // File Watching
+    // File watching
     void initializeFileWatcher();
     void refreshFileWatcher();
     void resetFileWatcherAndDestinationView();
@@ -151,6 +157,7 @@ private slots:
     void onThemeChanged();
     void setStatusLabel(QLabel* label, const QString& emoji,
                         const QString& text, const QString& style = "");
+    void onScheduleButtonClicked();
 
 private:
     Ui::MainWindow* ui = nullptr;
@@ -185,7 +192,7 @@ private:
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // SnapList / Title bar programmatic controls
+    // SnapList / Title bar controls
     QLabel* stagingTitleLabel = nullptr;
     QPushButton* snapListResetButton = nullptr;
     QHBoxLayout* stagingTitleLayout = nullptr;
@@ -193,6 +200,10 @@ private:
     QString loadedSnapListName;
     bool suppressNextMenuClick = false;
     bool ignoreTriggerAfterContext = false;
+
+    // Scheduling
+    ScheduleServiceManager* scheduleService_ = nullptr;
+    QPointer<ScheduleDialog> openScheduleDialog_;
 };
 
 #endif // MAINWINDOW_H

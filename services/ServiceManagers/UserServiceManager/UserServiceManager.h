@@ -14,10 +14,10 @@ public:
     void load();
     void save() const;
 
-    // Initialize settings with default values
+    // Initialize default settings
     void initializeDefaults();
 
-    // Accessors for user settings
+    // User settings accessors
     QJsonObject& settings();
     const QJsonObject& settings() const;
 

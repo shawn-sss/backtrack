@@ -5,33 +5,23 @@
 #include "../PathServiceManager/PathServiceManager.h"
 #include "../ThemeServiceManager/ThemeServiceConstants.h"
 
-// Initializes the user service manager with the settings file path
+// Initializes the user service manager
 UserServiceManager::UserServiceManager(const QString& serviceFilePath)
     : userServicePath(serviceFilePath) {}
 
-// Loads user settings from the settings file
+// Loads user settings from file
 void UserServiceManager::load() {
     QJsonObject rootObject;
     if (JsonManager::loadJsonFile(userServicePath, rootObject) && !rootObject.isEmpty())
         userSettings = rootObject;
 }
 
-// Saves current user settings to the settings file
+// Saves user settings to file
 void UserServiceManager::save() const {
     JsonManager::saveJsonFile(userServicePath, userSettings);
 }
 
-// Returns a modifiable reference to user settings
-QJsonObject& UserServiceManager::settings() {
-    return userSettings;
-}
-
-// Returns a const reference to user settings
-const QJsonObject& UserServiceManager::settings() const {
-    return userSettings;
-}
-
-// Initializes and saves default values for user settings
+// Initializes and saves default user settings
 void UserServiceManager::initializeDefaults() {
     QJsonObject backupGroup{
         { UserServiceKeys::k_BACKUP_DIRECTORY_KEY, PathServiceManager::backupSetupFolderPath() },
@@ -46,4 +36,14 @@ void UserServiceManager::initializeDefaults() {
 
     JsonManager::saveJsonFile(userServicePath, userService);
     userSettings = std::move(userService);
+}
+
+// Returns modifiable user settings
+QJsonObject& UserServiceManager::settings() {
+    return userSettings;
+}
+
+// Returns read-only user settings
+const QJsonObject& UserServiceManager::settings() const {
+    return userSettings;
 }

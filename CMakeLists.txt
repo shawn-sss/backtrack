@@ -105,6 +105,15 @@ set(UI_DIALOG_SNAPLIST
     ui/snaplistdialog/snaplistdialogconstants.h
 )
 
+# UI: Schedule dialog
+set(UI_DIALOG_SCHEDULE
+    ui/scheduledialog/scheduledialog.h
+    ui/scheduledialog/scheduledialog.cpp
+    ui/scheduledialog/scheduledialog.ui
+    ui/scheduledialog/scheduledialogconstants.h
+    ui/scheduledialog/scheduledialogstyling.h
+)
+
 # UI: Prompt dialog
 set(UI_DIALOG_PROMPT
     ui/promptdialog/promptdialog.h
@@ -123,6 +132,7 @@ set(SRC_UI
     ${UI_DIALOG_ABOUT}
     ${UI_DIALOG_WELCOME}
     ${UI_DIALOG_SNAPLIST}
+    ${UI_DIALOG_SCHEDULE}
     ${UI_DIALOG_PROMPT}
     ${UI_SHARED_HEADERS}
 )
@@ -229,6 +239,10 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/UserServiceManager/UserServiceConstants.h
     services/ServiceManagers/UserServiceManager/UserServiceManager.cpp
     services/ServiceManagers/UserServiceManager/UserServiceManager.h
+
+    services/ServiceManagers/ScheduleServiceManager/ScheduleServiceConstants.h
+    services/ServiceManagers/ScheduleServiceManager/ScheduleServiceManager.cpp
+    services/ServiceManagers/ScheduleServiceManager/ScheduleServiceManager.h
 )
 
 # Global constants

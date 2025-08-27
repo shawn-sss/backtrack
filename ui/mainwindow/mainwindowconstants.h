@@ -11,5 +11,6 @@ inline constexpr auto k_DELETE_BACKUP      = "Delete the selected backup from th
 inline constexpr auto k_NOTIFICATIONS      = "View backup notifications";
 inline constexpr auto k_SNAP_LIST          = "Manage SnapLists";
 inline constexpr auto k_RESET_SNAP_LIST    = "Unload SnapList";
+inline constexpr auto k_SCHEDULE           = "Manage backup schedule";
 
 #endif // MAINWINDOWCONSTANTS_H
