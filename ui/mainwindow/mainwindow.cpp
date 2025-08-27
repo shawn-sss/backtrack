@@ -462,10 +462,10 @@ void MainWindow::initializeFileWatcher() {
 }
 
 // Reset file watcher and destination view
-void MainWindow::resetFileWatcherAndDestinationView() {
-    fileWatcher->startWatchingMultiple(getWatchedRoots());
-    setupDestinationView(PathServiceManager::backupSetupFolderPath());
-}
+// void MainWindow::resetFileWatcherAndDestinationView() {
+//     fileWatcher->startWatchingMultiple(getWatchedRoots());
+//     setupDestinationView(PathServiceManager::backupSetupFolderPath());
+// }
 
 // Refresh file watcher
 void MainWindow::refreshFileWatcher() {
@@ -473,10 +473,10 @@ void MainWindow::refreshFileWatcher() {
 }
 
 // Start watching the backup directory
-void MainWindow::startWatchingBackupDirectory(const QString &path) {
-    fileWatcher->startWatchingMultiple(QStringList() << path);
-    connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
-}
+// void MainWindow::startWatchingBackupDirectory(const QString &path) {
+//     fileWatcher->startWatchingMultiple(QStringList() << path);
+//     connect(fileWatcher, &FileWatcher::directoryChanged, this, &MainWindow::onBackupDirectoryChanged);
+// }
 
 // Compute watched root paths
 QStringList MainWindow::getWatchedRoots() const {
@@ -506,16 +506,7 @@ void MainWindow::handleWatchedPathChanged(const QString &path) {
     checkStagingForReadAccessLoss();
 }
 
-// Handle file change
-void MainWindow::onFileChanged(const QString &path) {
-    fileWatcher->addPath(path);
 
-    const QString appConfigDir = PathServiceManager::appConfigFolderPath();
-    const QString backupDir = PathServiceManager::backupDataRootDir();
-
-    if (path.startsWith(appConfigDir)) updateApplicationStatusLabel();
-    if (path.startsWith(backupDir)) ensureBackupStatusUpdated();
-}
 
 // Handle backup directory change
 void MainWindow::onBackupDirectoryChanged() {

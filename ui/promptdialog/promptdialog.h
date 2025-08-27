@@ -1,26 +1,15 @@
-// // Prompt Dialog Usage:
-// PromptDialog::showDialog(
-//     &mainWindow,
-//     PromptDialog::Information,
-//     "Message window-title",
-//     "Message text",
-//     "Message info-tex",
-//     PromptDialog::Ok
-// );
-
 #ifndef PROMPTDIALOG_H
 #define PROMPTDIALOG_H
 
-// Qt includes
+// Qt
 #include <QDialog>
 #include <QDialogButtonBox>
 
-// Forward declaration (Qt class)
 class QLabel;
 class QVBoxLayout;
 class QAbstractButton;
+class QScrollArea;
 
-// PromptDialog class for displaying styled modal messages
 class PromptDialog : public QDialog {
     Q_OBJECT
 
@@ -52,7 +41,7 @@ public:
     void setStandardButtons(Buttons buttons);
     void setDefaultButton(Button button);
 
-    // Static dialog display method
+    // Modal convenience API
     static Button showDialog(QWidget *parent,
                              Icon icon,
                              const QString &title,
@@ -72,14 +61,39 @@ private:
     void applyStyling();
     void configureConnections();
 
+    // Layout/sizing helpers
+    void resizeToContent();                // compute final size from content
+    int  computeTargetDialogWidth() const; // hybrid width (widest line + base)
+    int  computeTextColumnWidth(int targetDialogW) const;
+
     // Helpers
     QPixmap iconPixmap(Icon iconType);
-    static QDialogButtonBox::StandardButtons toStandardButtons(Buttons buttons);
-    static QDialogButtonBox::StandardButton toStandardButton(Button button);
 
+    // ---- Inline helpers (fixes unresolved externals) ----
+    static inline QDialogButtonBox::StandardButtons toStandardButtons(Buttons buttons) {
+        QDialogButtonBox::StandardButtons stdButtons;
+        if (buttons.testFlag(Ok))     stdButtons |= QDialogButtonBox::Ok;
+        if (buttons.testFlag(Cancel)) stdButtons |= QDialogButtonBox::Cancel;
+        if (buttons.testFlag(Yes))    stdButtons |= QDialogButtonBox::Yes;
+        if (buttons.testFlag(No))     stdButtons |= QDialogButtonBox::No;
+        return stdButtons;
+    }
+    static inline QDialogButtonBox::StandardButton toStandardButton(Button button) {
+        switch (button) {
+        case Ok:     return QDialogButtonBox::Ok;
+        case Cancel: return QDialogButtonBox::Cancel;
+        case Yes:    return QDialogButtonBox::Yes;
+        case No:     return QDialogButtonBox::No;
+        default:     return QDialogButtonBox::NoButton;
+        }
+    }
+
+    // Widgets
     QLabel *iconDisplay = nullptr;
     QLabel *messageLabel = nullptr;
     QLabel *detailLabel = nullptr;
+
+    QScrollArea *textScrollArea = nullptr;
     QDialogButtonBox *buttonBox = nullptr;
     QVBoxLayout *mainLayout = nullptr;
 

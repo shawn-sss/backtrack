@@ -30,9 +30,6 @@
 #include <QToolBar>
 #include <QTreeView>
 
-// C++ includes
-#include <memory>
-
 // Forward declaration (Custom class)
 class BackupController;
 class DestinationProxyModel;
@@ -89,8 +86,8 @@ private:
     // File watching
     void initializeFileWatcher();
     void refreshFileWatcher();
-    void resetFileWatcherAndDestinationView();
-    void startWatchingBackupDirectory(const QString& path);
+    //void resetFileWatcherAndDestinationView();
+    //void startWatchingBackupDirectory(const QString& path);
     QStringList getWatchedRoots() const;
     void handleWatchedPathChanged(const QString& path);
     void checkStagingForReadAccessLoss();
@@ -149,7 +146,6 @@ private slots:
     void onUnlockDriveClicked();
     void onSnapListButtonClicked();
     void onBackupDirectoryChanged();
-    void onFileChanged(const QString& path);
     void onBackupCompleted();
     void onBackupError(const QString& error);
     void onCooldownFinished();
