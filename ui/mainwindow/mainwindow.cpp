@@ -10,6 +10,7 @@
 #include "../../ui/notificationsdialog/notificationsdialog.h"
 #include "../../ui/snaplistdialog/snaplistdialog.h"
 #include "../../ui/scheduledialog/scheduledialog.h"
+#include "../../ui/promptdialog/promptdialog.h"
 #include "../../backup_module/constants/backupconstants.h"
 #include "../../backup_module/models/destinationproxymodel.h"
 #include "../../backup_module/models/stagingmodel.h"
@@ -126,7 +127,15 @@ void MainWindow::initializeServices() {
     connect(scheduleService_, &ScheduleServiceManager::fired, this, [this]() {
         QTimer::singleShot(800, this, [this]() {
             onCreateBackupClicked();
-            QMessageBox::information(this, tr("Scheduled Task"), tr("SCHEDULE MET"));
+            PromptDialog::showDialog(
+                this,
+                PromptDialog::Information,
+                tr("Scheduled Task"),
+                tr("SCHEDULE MET"),
+                QString(),
+                PromptDialog::Ok,
+                PromptDialog::Ok
+                );
         });
     });
 
@@ -150,6 +159,7 @@ void MainWindow::initializeServices() {
                 openScheduleDialog_->setConfig(dlgCfg);
             });
 }
+
 
 // Initialize toolbar
 void MainWindow::initializeToolbar() {
@@ -214,7 +224,15 @@ void MainWindow::connectBackupSignals() {
     connect(backupController, &BackupController::errorOccurred,
             this, [this](const QString &error) {
                 onBackupError(error);
-                QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE, error);
+                PromptDialog::showDialog(
+                    this,
+                    PromptDialog::Critical,
+                    ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+                    error,
+                    QString(),
+                    PromptDialog::Ok,
+                    PromptDialog::Ok
+                    );
             });
 }
 
@@ -262,7 +280,15 @@ void MainWindow::onScheduleButtonClicked() {
                 }
 
                 scheduleService_->setConfig(svcCfg, true);
-                QMessageBox::information(this, tr("Schedule"), tr("Schedule saved."));
+                PromptDialog::showDialog(
+                    this,
+                    PromptDialog::Information,
+                    tr("Schedule"),
+                    tr("Schedule saved."),
+                    QString(),
+                    PromptDialog::Ok,
+                    PromptDialog::Ok
+                    );
             });
 
     dlg.exec();
@@ -645,8 +671,15 @@ void MainWindow::initializeBackupSystem() {
     backupService->setBackupRoot(savedBackupDir);
 
     if (!FileOperations::createDirectory(savedBackupDir)) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
-                              ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            ErrorMessages::k_BACKUP_INITIALIZATION_FAILED_TITLE,
+            ErrorMessages::k_ERROR_CREATING_DEFAULT_BACKUP_DIRECTORY,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
     }
 
     setupDestinationView(savedBackupDir);
@@ -656,6 +689,7 @@ void MainWindow::initializeBackupSystem() {
     applyCustomPalettesToAllTreeViews();
     ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
 }
+
 
 // Ensure backup status refresh is serialized
 void MainWindow::ensureBackupStatusUpdated() {
@@ -927,8 +961,15 @@ void MainWindow::revalidateBackupAndAppStatus(const QString &appStatus) {
 void MainWindow::onAddToBackupClicked() {
     const QModelIndexList selectedIndexes = ui->DriveTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
-                             ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_BACKUP_SELECTION_REQUIRED_TITLE,
+            ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -950,13 +991,27 @@ void MainWindow::onAddToBackupClicked() {
     }
 
     if (!notReadable.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
-                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(notReadable.join("\n")));
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
+            ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(notReadable.join("\n")),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
     }
 
     if (!alreadyStaged.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_ALREADY_STAGED_TITLE,
-                             ErrorMessages::k_ERROR_ALREADY_IN_STAGING.arg(alreadyStaged.join("\n")));
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_ALREADY_STAGED_TITLE,
+            ErrorMessages::k_ERROR_ALREADY_IN_STAGING.arg(alreadyStaged.join("\n")),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
     }
 
     if (!toStage.isEmpty()) {
@@ -971,8 +1026,15 @@ void MainWindow::onAddToBackupClicked() {
 void MainWindow::onRemoveFromBackupClicked() {
     const QModelIndexList selectedIndexes = ui->BackupStagingTreeView->selectionModel()->selectedIndexes();
     if (selectedIndexes.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_REMOVE_SELECTION_REQUIRED_TITLE,
-                             ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_REMOVE_SELECTION_REQUIRED_TITLE,
+            ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_REMOVAL,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -980,20 +1042,35 @@ void MainWindow::onRemoveFromBackupClicked() {
     snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
 }
 
+
 // Change backup destination directory
 void MainWindow::onChangeBackupDestinationClicked() {
     const QString selectedDir = QFileDialog::getExistingDirectory(
         this, InfoMessages::k_SELECT_BACKUP_DESTINATION_TITLE, QDir::rootPath());
 
     if (selectedDir.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_LOCATION_REQUIRED_TITLE,
-                             ErrorMessages::k_ERROR_NO_BACKUP_LOCATION_PATH_SELECTED);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_BACKUP_LOCATION_REQUIRED_TITLE,
+            ErrorMessages::k_ERROR_NO_BACKUP_LOCATION_PATH_SELECTED,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
     if (!FileOperations::createDirectory(selectedDir)) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DIRECTORY_ERROR_TITLE,
-                              ErrorMessages::k_ERROR_CREATING_BACKUP_DIRECTORY);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            ErrorMessages::k_BACKUP_DIRECTORY_ERROR_TITLE,
+            ErrorMessages::k_ERROR_CREATING_BACKUP_DIRECTORY,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1010,8 +1087,15 @@ void MainWindow::onChangeBackupDestinationClicked() {
 void MainWindow::onCreateBackupClicked() {
     const QStringList pathsToBackup = stagingModel->getStagedPaths();
     if (pathsToBackup.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
-                             ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_NO_ITEMS_STAGED_FOR_BACKUP_TITLE,
+            ErrorMessages::k_ERROR_NO_ITEMS_STAGED_FOR_BACKUP,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1035,15 +1119,30 @@ void MainWindow::onCreateBackupClicked() {
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
 
-        QMessageBox::warning(this, ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
-                             ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(unreadablePaths.join("\n")));
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_READ_ACCESS_DENIED_TITLE,
+            ErrorMessages::k_READ_ACCESS_DENIED_BODY.arg(unreadablePaths.join("\n")),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
     const QString backupRoot = destinationModel->rootPath();
     QString errorMessage;
     if (!FileOperations::createBackupInfrastructure(backupRoot, errorMessage)) {
-        QMessageBox::critical(this, ErrorMessages::k_ERROR_BACKUP_ALREADY_IN_PROGRESS, errorMessage);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            ErrorMessages::k_ERROR_BACKUP_ALREADY_IN_PROGRESS,
+            errorMessage,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1059,22 +1158,43 @@ void MainWindow::onCreateBackupClicked() {
 // Delete a selected backup
 void MainWindow::onDeleteBackupClicked() {
     if (!destinationModel) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
-                              ErrorMessages::k_ERROR_DESTINATION_MODEL_NULL);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+            ErrorMessages::k_ERROR_DESTINATION_MODEL_NULL,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
     const QModelIndex selectedIndex = ui->BackupDestinationView->currentIndex();
     if (!selectedIndex.isValid()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
-                             ErrorMessages::k_ERROR_BACKUP_DELETE_FAILED);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+            ErrorMessages::k_ERROR_BACKUP_DELETE_FAILED,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
     auto fsModel = qobject_cast<QFileSystemModel *>(destinationModel);
     if (!fsModel) {
-        QMessageBox::critical(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
-                              ErrorMessages::k_ERROR_MODEL_TYPE_INVALID);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+            ErrorMessages::k_ERROR_MODEL_TYPE_INVALID,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1082,14 +1202,28 @@ void MainWindow::onDeleteBackupClicked() {
         fsModel->filePath(destinationProxyModel->mapToSource(selectedIndex));
 
     if (selectedPath.isEmpty()) {
-        QMessageBox::warning(this, ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
-                             ErrorMessages::k_ERROR_SELECTED_PATH_INVALID);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            ErrorMessages::k_BACKUP_DELETION_ERROR_TITLE,
+            ErrorMessages::k_ERROR_SELECTED_PATH_INVALID,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
-    if (QMessageBox::question(this, WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
-                              QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
-                              QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes) {
+    const auto confirm = PromptDialog::showDialog(
+        this,
+        PromptDialog::Question,
+        WarningMessages::k_WARNING_CONFIRM_BACKUP_DELETION,
+        QString(WarningMessages::k_MESSAGE_CONFIRM_BACKUP_DELETION).arg(selectedPath),
+        QString(),
+        PromptDialog::Yes | PromptDialog::No,
+        PromptDialog::No
+        );
+    if (confirm != PromptDialog::Yes) {
         return;
     }
 
@@ -1098,6 +1232,7 @@ void MainWindow::onDeleteBackupClicked() {
 
     handleBackupDeletion(selectedPath, "single");
 }
+
 
 // Handle backup error
 void MainWindow::onBackupError(const QString &error) {
@@ -1205,9 +1340,15 @@ void MainWindow::updateBackupStagingTitle(const QString& name) {
 void MainWindow::onUnlockDriveClicked() {
     QString driveLetter = getSelectedDriveLetter();
     if (driveLetter.isEmpty()) {
-        QMessageBox::warning(this,
-                             EncryptionMessages::k_NO_DRIVE_SELECTED_TITLE,
-                             EncryptionMessages::k_NO_DRIVE_SELECTED_MESSAGE);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            EncryptionMessages::k_NO_DRIVE_SELECTED_TITLE,
+            EncryptionMessages::k_NO_DRIVE_SELECTED_MESSAGE,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1215,9 +1356,15 @@ void MainWindow::onUnlockDriveClicked() {
     QDir driveDir(drivePath);
 
     if (driveDir.exists() && driveDir.isReadable()) {
-        QMessageBox::information(this,
-                                 EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_TITLE,
-                                 EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_MESSAGE.arg(driveLetter));
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Information,
+            EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_TITLE,
+            EncryptionMessages::k_DRIVE_ALREADY_UNLOCKED_MESSAGE.arg(driveLetter),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1230,9 +1377,15 @@ void MainWindow::onUnlockDriveClicked() {
                          .arg(driveLetter.toUpper());
 
     if (!QProcess::startDetached("powershell", QStringList() << "-Command" << script)) {
-        QMessageBox::critical(this,
-                              EncryptionMessages::k_UNLOCK_FAILED_TITLE,
-                              EncryptionMessages::k_UNLOCK_FAILED_MESSAGE);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Critical,
+            EncryptionMessages::k_UNLOCK_FAILED_TITLE,
+            EncryptionMessages::k_UNLOCK_FAILED_MESSAGE,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 
@@ -1287,18 +1440,23 @@ void MainWindow::showNextNotification() {
 
 // Display a single notification popup
 void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
-    QString message = QString("[%1]\n%2")
-    .arg(notif.timestamp.toLocalTime().toString(Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT),
-         notif.message);
+    QString message = QString("[%1]")
+    .arg(notif.timestamp.toLocalTime().toString(Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT));
 
-    auto *box = new QMessageBox(this);
-    box->setWindowTitle(InfoMessages::k_NOTIFICATION_POPUP_TITLE);
-    box->setText(message);
-    box->setAttribute(Qt::WA_DeleteOnClose);
-    connect(box, &QMessageBox::finished, this, [this](int) {
+    auto *dlg = new PromptDialog(this);
+    dlg->setWindowTitle(InfoMessages::k_NOTIFICATION_POPUP_TITLE);
+    dlg->setIcon(PromptDialog::Information);
+    dlg->setMessageText(message);
+    dlg->setInformativeText(notif.message);
+    dlg->setStandardButtons(PromptDialog::Ok);
+    dlg->setDefaultButton(PromptDialog::Ok);
+
+    connect(dlg, &QDialog::finished, this, [this, dlg](int) {
+        dlg->deleteLater();
         showNextNotification();
     });
-    box->show();
+
+    dlg->open(); // non-blocking, like QMessageBox::show()
 }
 
 // Update notification badge visibility

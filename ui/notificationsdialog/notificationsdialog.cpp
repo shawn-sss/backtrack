@@ -2,6 +2,7 @@
 #include "notificationsdialog.h"
 #include "NotificationsDialogStyling.h"
 #include "NotificationsDialogConstants.h"
+#include "../promptdialog/promptdialog.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
@@ -80,20 +81,29 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     connect(closeButton, &QPushButton::clicked, this, &NotificationsDialog::accept);
 
     connect(clearAllButton, &QPushButton::clicked, this, [this]() {
-        const QMessageBox::StandardButton reply = QMessageBox::warning(
+        const auto reply = PromptDialog::showDialog(
             this,
+            PromptDialog::Question,
             NotificationsDialogConstants::kConfirmTitle,
             NotificationsDialogConstants::kConfirmMessage,
-            QMessageBox::Yes | QMessageBox::Cancel
+            QString(),
+            PromptDialog::Yes | PromptDialog::Cancel,
+            PromptDialog::Cancel
             );
 
-        if (reply == QMessageBox::Yes) {
+        if (reply == PromptDialog::Yes) {
             NotificationServiceManager::instance().clearAllNotifications();
-            QMessageBox::information(
+
+            PromptDialog::showDialog(
                 this,
+                PromptDialog::Information,
                 NotificationsDialogConstants::kClearedTitle,
-                NotificationsDialogConstants::kClearedMessage
+                NotificationsDialogConstants::kClearedMessage,
+                QString(),
+                PromptDialog::Ok,
+                PromptDialog::Ok
                 );
+
             accept();
         }
     });

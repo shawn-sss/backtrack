@@ -1,6 +1,7 @@
 // Project includes
 #include "UninstallServiceManager.h"
 #include "UninstallServiceConstants.h"
+#include "../../../ui/promptdialog/promptdialog.h"
 
 // Qt includes
 #include <QApplication>
@@ -22,33 +23,61 @@ bool UninstallServiceManager::confirmUninstall(QWidget* parent) const {
     const QString installDir = getInstallDirectory();
 
     if (installDir.isEmpty() || !QDir(installDir).exists()) {
-        QMessageBox::warning(parent, titleResetAppInstallation(), msgInvalidDir());
+        PromptDialog::showDialog(
+            parent,
+            PromptDialog::Warning,
+            titleResetAppInstallation(),
+            msgInvalidDir(),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return false;
     }
 
-    const QMessageBox::StandardButton confirm = QMessageBox::warning(
+    const auto confirm = PromptDialog::showDialog(
         parent,
+        PromptDialog::Question,
         titleConfirmAppReset(),
         msgConfirmReset(installDir),
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No
+        QString(),
+        PromptDialog::Yes | PromptDialog::No,
+        PromptDialog::No
         );
 
-    return (confirm == QMessageBox::Yes);
+    return (confirm == PromptDialog::Yes);
 }
+
 
 // Performs the uninstall and notifies the user
 bool UninstallServiceManager::performUninstall() const {
     const QString installDir = getInstallDirectory();
 
     if (deleteDirectory(installDir)) {
-        QMessageBox::information(nullptr, titleAppReset(), msgSuccess());
+        PromptDialog::showDialog(
+            nullptr,
+            PromptDialog::Information,
+            titleAppReset(),
+            msgSuccess(),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return true;
     }
 
-    QMessageBox::critical(nullptr, titleResetFailed(), msgFailure());
+    PromptDialog::showDialog(
+        nullptr,
+        PromptDialog::Critical,
+        titleResetFailed(),
+        msgFailure(),
+        QString(),
+        PromptDialog::Ok,
+        PromptDialog::Ok
+        );
     return false;
 }
+
 
 // Deletes the specified directory recursively
 bool UninstallServiceManager::deleteDirectory(const QString& path) const {

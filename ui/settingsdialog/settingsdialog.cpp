@@ -2,6 +2,7 @@
 #include "settingsdialog.h"
 #include "settingsdialogconstants.h"
 #include "settingsdialogstyling.h"
+#include "../promptdialog/promptdialog.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
@@ -191,18 +192,28 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
     connect(resetBackupArchiveButton, &QPushButton::clicked, this, [this]() {
         const QString backupLocation = ServiceDirector::getInstance().getBackupServiceManager()->getBackupDirectory();
         if (backupLocation.isEmpty() || !QDir(backupLocation).exists()) {
-            QMessageBox::warning(this, k_WARNING_INVALID_PATH_TITLE, k_WARNING_INVALID_PATH_MESSAGE);
+            PromptDialog::showDialog(
+                this,
+                PromptDialog::Warning,
+                k_WARNING_INVALID_PATH_TITLE,
+                k_WARNING_INVALID_PATH_MESSAGE,
+                QString(),
+                PromptDialog::Ok,
+                PromptDialog::Ok
+                );
             return;
         }
 
-        const QMessageBox::StandardButton confirm = QMessageBox::warning(
+        const auto confirm = PromptDialog::showDialog(
             this,
+            PromptDialog::Question,
             k_CONFIRM_RESET_TITLE,
             k_CONFIRM_RESET_MESSAGE.arg(backupLocation),
-            QMessageBox::Yes | QMessageBox::No
+            QString(),
+            PromptDialog::Yes | PromptDialog::No,
+            PromptDialog::No
             );
-
-        if (confirm != QMessageBox::Yes) return;
+        if (confirm != PromptDialog::Yes) return;
 
         emit requestBackupReset(backupLocation, "reset");
     });
@@ -217,7 +228,15 @@ void SettingsDialog::onSaveClicked() {
 
     static const QRegularExpression prefixRegex("^[A-Za-z0-9]+$");
     if (!prefixRegex.match(newPrefix).hasMatch()) {
-        QMessageBox::warning(this, k_WARNING_INVALID_PREFIX_TITLE, k_WARNING_INVALID_PREFIX_MESSAGE);
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            k_WARNING_INVALID_PREFIX_TITLE,
+            k_WARNING_INVALID_PREFIX_MESSAGE,
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         return;
     }
 

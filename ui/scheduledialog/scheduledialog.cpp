@@ -1,6 +1,7 @@
 // Project includes
 #include "scheduledialog.h"
 #include "scheduledialogconstants.h"
+#include "../promptdialog/promptdialog.h"
 
 // Qt includes
 #include <QDateTime>
@@ -142,7 +143,15 @@ void ScheduleDialog::onAcceptClicked() {
     QDateTime chosen = forceSecondsZero(dateTimeEdit->dateTime());
 
     if (chosen < minAllowed) {
-        QMessageBox::warning(this, tr(k_TIME_INVALID_TITLE), tr(k_TIME_INVALID_BODY));
+        PromptDialog::showDialog(
+            this,
+            PromptDialog::Warning,
+            tr(k_TIME_INVALID_TITLE),
+            tr(k_TIME_INVALID_BODY),
+            QString(),
+            PromptDialog::Ok,
+            PromptDialog::Ok
+            );
         dateTimeEdit->setMinimumDateTime(minAllowed);
         dateTimeEdit->setDateTime(minAllowed);
         return;
