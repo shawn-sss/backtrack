@@ -1,13 +1,11 @@
+// filename: helpdialogstyling.h
+
 #ifndef HELPDIALOGSTYLING_H
 #define HELPDIALOGSTYLING_H
-
-// Qt includes
-#include <QString>
 
 namespace HelpDialogStyling {
 namespace Styles {
 
-// Style for the tab widget
 inline constexpr auto TAB_WIDGET_STYLE = R"(
     QTabWidget::pane {
         border: 1px solid #888;
@@ -31,7 +29,6 @@ inline constexpr auto TAB_WIDGET_STYLE = R"(
         background: #444;
     }
 )";
-
 
 } // namespace Styles
 } // namespace HelpDialogStyling

@@ -1,10 +1,12 @@
+// filename: promptdialog.cpp
+
 // Project includes
 #include "PromptDialog.h"
 #include "PromptDialogConstants.h"
 #include "PromptDialogStyling.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
-// Qt
+// Qt includes
 #include <QLabel>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -14,19 +16,21 @@
 #include <QApplication>
 #include <QScreen>
 #include <QScrollArea>
+#include <QAbstractScrollArea>
 #include <QAbstractButton>
 #include <QFrame>
 #include <QFontMetrics>
+#include <QPixmap>
 
 using namespace PromptDialogStyling::Styles;
 using namespace PromptDialogConstants;
 
+// Constructs PromptDialog and initializes UI
 PromptDialog::PromptDialog(QWidget *parent) : QDialog(parent) {
     initializeUI();
 }
 
-PromptDialog::~PromptDialog() {}
-
+// Initializes UI components and dialog settings
 void PromptDialog::initializeUI() {
     createWidgets();
     setupLayouts();
@@ -35,19 +39,12 @@ void PromptDialog::initializeUI() {
 
     setModal(true);
     mainLayout->setSizeConstraint(QLayout::SetMinimumSize);
-
-    // No help/maximize; we’ll lock resizing in showDialog()
-    setWindowFlags(windowFlags()
-                   & ~Qt::WindowContextHelpButtonHint
-                   & ~Qt::WindowMaximizeButtonHint);
-
-    // Avoid any implicit size grip (artifact over buttons)
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMaximizeButtonHint);
     setSizeGripEnabled(false);
-
-    // Initial compute; final lock happens in showDialog()
     resizeToContent();
 }
 
+// Creates widgets
 void PromptDialog::createWidgets() {
     iconDisplay = new QLabel;
     iconDisplay->setAlignment(Qt::AlignCenter);
@@ -58,7 +55,7 @@ void PromptDialog::createWidgets() {
     messageLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     messageLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     messageLabel->setContentsMargins(0, 0, 0, 0);
-    messageLabel->setTextFormat(Qt::PlainText);   // preserve newlines
+    messageLabel->setTextFormat(Qt::PlainText);
 
     detailLabel = new QLabel;
     detailLabel->setWordWrap(true);
@@ -76,8 +73,8 @@ void PromptDialog::createWidgets() {
     mainLayout = new QVBoxLayout;
 }
 
+// Sets up layouts
 void PromptDialog::setupLayouts() {
-    // Icon column
     auto *iconLayout = new QVBoxLayout;
     iconLayout->setContentsMargins(0, 0, 0, 0);
     iconLayout->setSpacing(0);
@@ -88,7 +85,6 @@ void PromptDialog::setupLayouts() {
     auto *iconWrapper = new QWidget;
     iconWrapper->setLayout(iconLayout);
 
-    // Text column
     auto *textLayout = new QVBoxLayout;
     textLayout->addWidget(messageLabel);
     textLayout->addWidget(detailLabel);
@@ -101,14 +97,12 @@ void PromptDialog::setupLayouts() {
     textScrollArea->setWidget(textContainer);
     textScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    // Top row: icon + scrollable text
     auto *topLayout = new QHBoxLayout;
     topLayout->setContentsMargins(k_OUTER_MARGIN / 2, 0, k_OUTER_MARGIN / 2, 0);
-    topLayout->setSpacing(8);
+    topLayout->setSpacing(k_ICON_MARGIN);
     topLayout->addWidget(iconWrapper, 0);
     topLayout->addWidget(textScrollArea, 1);
 
-    // Main layout
     mainLayout->addLayout(topLayout);
     mainLayout->addSpacing(k_SECTION_SPACING);
     mainLayout->addWidget(buttonBox);
@@ -118,6 +112,7 @@ void PromptDialog::setupLayouts() {
     setLayout(mainLayout);
 }
 
+// Applies stylesheets
 void PromptDialog::applyStyling() {
     setStyleSheet(DIALOG_STYLE);
     iconDisplay->setStyleSheet(ICON_LABEL_STYLE);
@@ -129,14 +124,9 @@ void PromptDialog::applyStyling() {
         if (auto *vp = textScrollArea->viewport())
             vp->setAutoFillBackground(false);
     }
-
-    for (QAbstractButton *btn : buttonBox->buttons()) {
-        if (auto *push = qobject_cast<QPushButton*>(btn)) {
-            push->setStyleSheet(BUTTON_STYLE);
-        }
-    }
 }
 
+// Configures signal-slot connections
 void PromptDialog::configureConnections() {
     connect(buttonBox, &QDialogButtonBox::clicked, this, &PromptDialog::handleButtonClicked);
 }
@@ -146,30 +136,36 @@ void PromptDialog::setMessageText(const QString &text) {
     messageLabel->setText(text);
     resizeToContent();
 }
+
 void PromptDialog::setInformativeText(const QString &text) {
     detailLabel->setText(text);
     detailLabel->setVisible(!text.isEmpty());
     resizeToContent();
 }
+
 void PromptDialog::setIcon(Icon icon) {
-    QPixmap original = iconPixmap(icon);
-    QPixmap scaled = original.scaled(k_ICON_SIZE, k_ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    const QPixmap original = iconPixmap(icon);
+    const QPixmap scaled = original.scaled(k_ICON_SIZE, k_ICON_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     iconDisplay->setPixmap(scaled);
 }
+
 void PromptDialog::setStandardButtons(Buttons buttons) {
     buttonBox->setStandardButtons(toStandardButtons(buttons));
     const auto btns = buttonBox->buttons();
     for (QAbstractButton* button : btns) {
         if (auto* pushBtn = qobject_cast<QPushButton*>(button)) {
+            pushBtn->setStyleSheet(BUTTON_STYLE);
             const QString text = pushBtn->text();
             Shared::UI::applyButtonTooltipAndCursor(pushBtn, text);
         }
     }
     resizeToContent();
 }
+
 void PromptDialog::setDefaultButton(Button button) {
-    auto *defaultBtn = buttonBox->button(toStandardButton(button));
-    if (defaultBtn) defaultBtn->setDefault(true);
+    if (auto *defaultBtn = buttonBox->button(toStandardButton(button))) {
+        defaultBtn->setDefault(true);
+    }
 }
 
 // ====== clicks ======
@@ -186,22 +182,22 @@ void PromptDialog::handleButtonClicked(QAbstractButton *button) {
 
 // ====== icons ======
 QPixmap PromptDialog::iconPixmap(Icon iconType) {
-    QStyle *style = QApplication::style();
+    QStyle *s = style();
     switch (iconType) {
     case Information:
-        return style->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(k_ICON_SIZE, k_ICON_SIZE);
+        return s->standardIcon(QStyle::SP_MessageBoxInformation).pixmap(k_ICON_SIZE, k_ICON_SIZE);
     case Warning:
-        return style->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(k_ICON_SIZE, k_ICON_SIZE);
+        return s->standardIcon(QStyle::SP_MessageBoxWarning).pixmap(k_ICON_SIZE, k_ICON_SIZE);
     case Critical:
-        return style->standardIcon(QStyle::SP_MessageBoxCritical).pixmap(k_ICON_SIZE, k_ICON_SIZE);
+        return s->standardIcon(QStyle::SP_MessageBoxCritical).pixmap(k_ICON_SIZE, k_ICON_SIZE);
     case Question:
-        return style->standardIcon(QStyle::SP_MessageBoxQuestion).pixmap(k_ICON_SIZE, k_ICON_SIZE);
+        return s->standardIcon(QStyle::SP_MessageBoxQuestion).pixmap(k_ICON_SIZE, k_ICON_SIZE);
     default:
         return QPixmap();
     }
 }
 
-// ====== exec helper (locks size) ======
+// ====== exec helper ======
 PromptDialog::Button PromptDialog::showDialog(QWidget *parent,
                                               Icon icon,
                                               const QString &title,
@@ -217,22 +213,21 @@ PromptDialog::Button PromptDialog::showDialog(QWidget *parent,
     dialog.setStandardButtons(buttons);
 
     if (defaultButton == None) {
-        if (buttons.testFlag(Ok))        defaultButton = Ok;
-        else if (buttons.testFlag(Yes))  defaultButton = Yes;
-        else if (buttons.testFlag(No))   defaultButton = No;
+        if (buttons.testFlag(Ok))          defaultButton = Ok;
+        else if (buttons.testFlag(Yes))    defaultButton = Yes;
+        else if (buttons.testFlag(No))     defaultButton = No;
         else if (buttons.testFlag(Cancel)) defaultButton = Cancel;
     }
     dialog.setDefaultButton(defaultButton);
 
-    // Final sizing + centering
     dialog.resizeToContent();
+
     const QRect targetRect = parent
                                  ? parent->geometry()
                                  : QApplication::primaryScreen()->availableGeometry();
-    dialog.move(targetRect.center() - dialog.rect().center());
 
-    // 🔒 Make non-resizable after sizing/centering
-    dialog.setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, true); // Windows UX hint
+    dialog.move(targetRect.center() - dialog.rect().center());
+    dialog.setWindowFlag(Qt::MSWindowsFixedSizeDialogHint, true);
     dialog.setFixedSize(dialog.size());
 
     dialog.exec();
@@ -242,30 +237,27 @@ PromptDialog::Button PromptDialog::showDialog(QWidget *parent,
 // ====== sizing logic ======
 int PromptDialog::computeTargetDialogWidth() const {
     const QRect avail = QApplication::primaryScreen()->availableGeometry();
-    const int capW = int(avail.width() * 0.80);
+    const int capW = int(avail.width() * k_DIALOG_WIDTH_RATIO);
 
     int targetW = qMax(k_DIALOG_MIN_WIDTH, k_DIALOG_BASE_WIDTH);
 
-    auto joinText = [](const QLabel* lbl) -> QString {
-        if (!lbl || !lbl->isVisible()) return {};
-        return lbl->text();
-    };
-    const QString allText = joinText(messageLabel)
-                            + (detailLabel && detailLabel->isVisible() && !detailLabel->text().isEmpty()
-                                   ? "\n" + detailLabel->text() : QString());
+    const QString message = (messageLabel && messageLabel->isVisible()) ? messageLabel->text() : QString();
+    const QString detail  = (detailLabel  && detailLabel->isVisible())  ? detailLabel->text()  : QString();
+    const QString allText = detail.isEmpty() ? message : (message + QLatin1Char('\n') + detail);
+
+    const QString normText = QString(allText).replace(QLatin1Char('\t'), QStringLiteral("    "));
 
     QFontMetrics fmMessage(messageLabel->font());
     QFontMetrics fmDetail(detailLabel->font());
     int widest = 0;
-    const QString normText = QString(allText).replace('\t', "    ");
-    const auto lines = normText.split('\n');
+    const auto lines = normText.split(QLatin1Char('\n'));
     for (const QString &line : lines) {
         widest = qMax(widest, fmMessage.horizontalAdvance(line));
         widest = qMax(widest, fmDetail.horizontalAdvance(line));
     }
 
-    const int iconW = iconDisplay->sizeHint().width() + 16 /*spacing*/ + k_OUTER_MARGIN;
-    const int paddings = k_OUTER_MARGIN * 2; // dialog left/right margins
+    const int iconW = iconDisplay->sizeHint().width() + k_ICON_MARGIN + k_OUTER_MARGIN;
+    const int paddings = k_OUTER_MARGIN * 2;
     const int naturalDialogW = widest + iconW + paddings;
 
     targetW = qMax(targetW, naturalDialogW);
@@ -275,8 +267,8 @@ int PromptDialog::computeTargetDialogWidth() const {
 
 int PromptDialog::computeTextColumnWidth(int targetDialogW) const {
     const int iconW = iconDisplay->sizeHint().width();
-    const int between = 8; // topLayout spacing
-    const int sideMargins = (k_OUTER_MARGIN / 2) * 2; // topLayout L/R
+    const int between = k_ICON_MARGIN;
+    const int sideMargins = (k_OUTER_MARGIN / 2) * 2;
     const int dialogMargins = k_OUTER_MARGIN * 2;
     const int contentRowW = targetDialogW - dialogMargins;
     const int textW = contentRowW - (iconW + between + sideMargins);
@@ -285,9 +277,9 @@ int PromptDialog::computeTextColumnWidth(int targetDialogW) const {
 
 void PromptDialog::resizeToContent() {
     const QRect avail = QApplication::primaryScreen()->availableGeometry();
-    const int capW  = int(avail.width()  * 0.80); // dialog max width
-    const int capH  = int(avail.height() * 0.80); // dialog max height
-    const int capTextH = int(avail.height() * 0.60); // scroll area max
+    const int capW  = int(avail.width()  * k_DIALOG_WIDTH_RATIO);
+    const int capH  = int(avail.height() * k_DIALOG_HEIGHT_RATIO);
+    const int capTextH = int(avail.height() * k_TEXTAREA_HEIGHT_RATIO);
 
     const int targetDialogW = computeTargetDialogWidth();
 
@@ -300,7 +292,7 @@ void PromptDialog::resizeToContent() {
         const int contentH = textContainer->sizeHint().height();
         const int desiredTextH = qMin(contentH, capTextH);
         textScrollArea->setMaximumHeight(desiredTextH);
-        textScrollArea->setMinimumHeight(qMin(desiredTextH, 420));
+        textScrollArea->setMinimumHeight(qMin(desiredTextH, k_TEXTAREA_MIN_HEIGHT));
     }
 
     adjustSize();

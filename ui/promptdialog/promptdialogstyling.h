@@ -1,17 +1,17 @@
+// filename: promptdialogstyling.h
+
 #ifndef PROMPTDIALOGSTYLING_H
 #define PROMPTDIALOGSTYLING_H
 
 namespace PromptDialogStyling {
 namespace Styles {
 
-// Dialog container
 inline constexpr auto DIALOG_STYLE = R"(
     QDialog {
         border-radius: 8px;
     }
 )";
 
-// Icon label
 inline constexpr auto ICON_LABEL_STYLE = R"(
     QLabel {
         padding-top: 8px;
@@ -20,7 +20,6 @@ inline constexpr auto ICON_LABEL_STYLE = R"(
     }
 )";
 
-// Main / title-ish text
 inline constexpr auto TEXT_LABEL_STYLE = R"(
     QLabel {
         font-size: 11pt;
@@ -30,7 +29,6 @@ inline constexpr auto TEXT_LABEL_STYLE = R"(
     }
 )";
 
-// Informational text
 inline constexpr auto INFO_TEXT_LABEL_STYLE = R"(
     QLabel {
         font-size: 10pt;
@@ -39,7 +37,6 @@ inline constexpr auto INFO_TEXT_LABEL_STYLE = R"(
     }
 )";
 
-// Scroll area blends with dialog
 inline constexpr auto SCROLLAREA_STYLE = R"(
     QScrollArea {
         background: transparent;
@@ -50,7 +47,6 @@ inline constexpr auto SCROLLAREA_STYLE = R"(
     }
 )";
 
-// Rounded push buttons (palette-aware)
 inline constexpr auto BUTTON_STYLE = R"(
     QPushButton {
         border-radius: 6px;

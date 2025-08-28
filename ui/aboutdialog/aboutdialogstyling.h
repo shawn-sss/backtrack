@@ -1,13 +1,10 @@
 #ifndef ABOUTDIALOGSTYLING_H
 #define ABOUTDIALOGSTYLING_H
 
-// Qt includes
-#include <QString>
-
+// Styling for About dialog
 namespace AboutDialogStyling {
 namespace Styles {
 
-// Style for the descriptive text label
 inline constexpr auto TEXT_LABEL_STYLE = R"(
     QLabel {
         font-size: 12pt;
@@ -15,7 +12,6 @@ inline constexpr auto TEXT_LABEL_STYLE = R"(
     }
 )";
 
-// Style for the logo label
 inline constexpr auto LOGO_LABEL_STYLE = R"(
     QLabel {
         margin-bottom: 10px;

@@ -1,17 +1,22 @@
+// filename: snaplistdialog.cpp
+
 // Project includes
 #include "snaplistdialog.h"
 #include "snaplistdialogconstants.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h" // ✅ added
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceConstants.h"
+#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
+#include <QAbstractItemView>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
+#include <QStringList>
 
+// Constructs SnapListDialog and sets up UI
 SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
     : QDialog(parent), snapService(service) {
     using namespace SnapListDialogConstants;
@@ -19,18 +24,20 @@ SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
     setWindowTitle(tr(k_WINDOW_TITLE));
     setMinimumSize(k_MIN_WIDTH, k_MIN_HEIGHT);
 
-    listWidget = new QListWidget(this);
-    loadButton = new QPushButton(tr(k_LOAD_BUTTON_TEXT), this);
+    listWidget   = new QListWidget(this);
+    loadButton   = new QPushButton(tr(k_LOAD_BUTTON_TEXT), this);
     deleteButton = new QPushButton(tr(k_DELETE_BUTTON_TEXT), this);
-    saveButton = new QPushButton(tr(k_SAVE_BUTTON_TEXT), this);
+    saveButton   = new QPushButton(tr(k_SAVE_BUTTON_TEXT), this);
 
-    // ✅ Centralized button styling and tooltip/cursor logic
-    Shared::UI::applyButtonTooltipAndCursor(loadButton, tr(k_LOAD_BUTTON_TOOLTIP));
+    listWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    listWidget->setUniformItemSizes(true);
+
+    Shared::UI::applyButtonTooltipAndCursor(loadButton,   tr(k_LOAD_BUTTON_TOOLTIP));
     Shared::UI::applyButtonTooltipAndCursor(deleteButton, tr(k_DELETE_BUTTON_TOOLTIP));
-    Shared::UI::applyButtonTooltipAndCursor(saveButton, tr(k_SAVE_BUTTON_TOOLTIP));
+    Shared::UI::applyButtonTooltipAndCursor(saveButton,   tr(k_SAVE_BUTTON_TOOLTIP));
 
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
+    auto* mainLayout   = new QVBoxLayout(this);
+    auto* buttonLayout = new QHBoxLayout();
 
     buttonLayout->addWidget(loadButton);
     buttonLayout->addWidget(deleteButton);
@@ -38,26 +45,38 @@ SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
 
     mainLayout->addWidget(listWidget);
     mainLayout->addLayout(buttonLayout);
-    setLayout(mainLayout);
 
-    connect(loadButton, &QPushButton::clicked, this, &SnapListDialog::onLoadClicked);
+    const bool serviceOk = (snapService != nullptr);
+    loadButton->setEnabled(serviceOk);
+    deleteButton->setEnabled(serviceOk);
+    saveButton->setEnabled(serviceOk);
+
+    connect(loadButton,   &QPushButton::clicked, this, &SnapListDialog::onLoadClicked);
     connect(deleteButton, &QPushButton::clicked, this, &SnapListDialog::onDeleteClicked);
-    connect(saveButton, &QPushButton::clicked, this, &SnapListDialog::onSaveClicked);
+    connect(saveButton,   &QPushButton::clicked, this, &SnapListDialog::onSaveClicked);
+
+    connect(listWidget, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem*) { onLoadClicked(); });
 
     populateSnapList();
 }
 
-// Refreshes the list widget with available snap list names
+// Refreshes the list of snap lists
 void SnapListDialog::populateSnapList() {
     listWidget->clear();
+    if (!snapService) return;
+
     const QStringList snapLists = snapService->listSnapLists();
-    for (const QString& name : snapLists) {
-        listWidget->addItem(name);
+    listWidget->addItems(snapLists);
+
+    if (!snapLists.isEmpty()) {
+        listWidget->setCurrentRow(0);
     }
 }
 
-// Loads the selected snap list and emits the loaded data
+// Loads the selected snap list
 void SnapListDialog::onLoadClicked() {
+    if (!snapService) return;
+
     QListWidgetItem* item = listWidget->currentItem();
     if (!item) return;
 
@@ -65,6 +84,7 @@ void SnapListDialog::onLoadClicked() {
     const QVector<SnapListEntry> entries = snapService->loadSnapList(selectedListName);
 
     QStringList loadedPaths;
+    loadedPaths.reserve(entries.size());
     for (const SnapListEntry& entry : entries) {
         loadedPaths.append(entry.path);
     }
@@ -73,29 +93,32 @@ void SnapListDialog::onLoadClicked() {
     accept();
 }
 
-// Deletes the selected snap list after user confirmation
+// Deletes the selected snap list
 void SnapListDialog::onDeleteClicked() {
     using namespace SnapListDialogConstants;
+    if (!snapService) return;
 
     QListWidgetItem* item = listWidget->currentItem();
     if (!item) return;
 
+    const QString name = item->text();
     if (QMessageBox::question(
             this,
             tr(k_DELETE_CONFIRM_TITLE),
-            tr(k_DELETE_CONFIRM_MESSAGE).arg(item->text()),
+            k_DELETE_CONFIRM_MESSAGE.arg(name),
             QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-        snapService->deleteSnapList(item->text());
+        snapService->deleteSnapList(name);
         populateSnapList();
     }
 }
 
-// Saves the current staging entries to a new snap list and optionally loads it
+// Saves the current staging entries to a new snap list
 void SnapListDialog::onSaveClicked() {
     using namespace SnapListDialogConstants;
+    if (!snapService) return;
 
     QString name = QInputDialog::getText(
-        this, tr(k_SAVE_PROMPT_TITLE), tr(k_SAVE_PROMPT_MESSAGE));
+                       this, tr(k_SAVE_PROMPT_TITLE), tr(k_SAVE_PROMPT_MESSAGE)).trimmed();
 
     if (name.isEmpty()) return;
 
@@ -103,23 +126,24 @@ void SnapListDialog::onSaveClicked() {
 
     if (!snapService->saveSnapList(name, entries)) {
         QMessageBox::critical(this, tr(k_SAVE_FAILED_TITLE), tr(k_SAVE_FAILED_MESSAGE));
-    } else {
-        populateSnapList();
+        return;
+    }
 
-        const int choice = QMessageBox::question(
-            this,
-            tr(k_LOAD_NEW_PROMPT_TITLE),
-            tr(k_LOAD_NEW_PROMPT_MESSAGE).arg(name),
-            QMessageBox::Yes | QMessageBox::No);
+    populateSnapList();
 
-        if (choice == QMessageBox::Yes) {
-            QStringList loadedPaths;
-            for (const SnapListEntry& entry : entries) {
-                loadedPaths.append(entry.path);
-            }
+    const int choice = QMessageBox::question(
+        this,
+        tr(k_LOAD_NEW_PROMPT_TITLE),
+        k_LOAD_NEW_PROMPT_MESSAGE.arg(name),
+        QMessageBox::Yes | QMessageBox::No);
 
-            emit snapListLoaded(loadedPaths, name);
-            accept();
+    if (choice == QMessageBox::Yes) {
+        QStringList loadedPaths;
+        loadedPaths.reserve(entries.size());
+        for (const SnapListEntry& entry : entries) {
+            loadedPaths.append(entry.path);
         }
+        emit snapListLoaded(loadedPaths, name);
+        accept();
     }
 }

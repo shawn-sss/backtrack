@@ -1,24 +1,27 @@
+// filename: helpdialogconstants.h
+
 #ifndef HELPDIALOGCONSTANTS_H
 #define HELPDIALOGCONSTANTS_H
 
+// C++ includes
+#include <QString>
+
 namespace HelpDialogConstants {
 
-// Window title
-inline constexpr auto kWindowTitle = "Help & Support";
+inline const QString kWindowTitle = QStringLiteral("Help & Support");
 
-// Dialog dimensions
-inline constexpr int kDialogWidth = 600;
-inline constexpr int kDialogHeight = 400;
+constexpr int kDialogWidth  = 600;
+constexpr int kDialogHeight = 400;
 
-// Tab labels
-inline constexpr auto kTabGettingStarted = "Getting Started";
-inline constexpr auto kTabFeatures = "Features";
-inline constexpr auto kTabFAQ = "FAQ";
+inline const QString kTabGettingStarted = QStringLiteral("Getting Started");
+inline const QString kTabFeatures       = QStringLiteral("Features");
+inline const QString kTabFAQ            = QStringLiteral("FAQ");
 
-// Section titles
-inline constexpr auto kSectionGettingStartedTitle = "<h2>Getting Started</h2>";
-inline constexpr auto kSectionFeaturesTitle = "<h2>Features</h2>";
-inline constexpr auto kSectionFAQTitle = "<h2>Frequently Asked Questions</h2>";
+inline const QString kSectionGettingStartedTitle = QStringLiteral("<h2>Getting Started</h2>");
+inline const QString kSectionFeaturesTitle       = QStringLiteral("<h2>Features</h2>");
+inline const QString kSectionFAQTitle            = QStringLiteral("<h2>Frequently Asked Questions</h2>");
+
+inline const QString kCloseButtonText = QStringLiteral("Close");
 
 } // namespace HelpDialogConstants
 

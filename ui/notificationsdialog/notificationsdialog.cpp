@@ -1,3 +1,5 @@
+// filename: notificationsdialog.cpp
+
 // Project includes
 #include "notificationsdialog.h"
 #include "NotificationsDialogStyling.h"
@@ -10,35 +12,42 @@
 #include <QVBoxLayout>
 #include <QListWidget>
 #include <QPushButton>
+#include <QAbstractItemView>
 #include <QAbstractScrollArea>
-#include <QMessageBox>
+#include <QLocale>
+#include <QBrush>
+#include <QDateTime>
 
 // C++ includes
 #include <algorithm>
 
-// Formats the text for each notification item
-static QString formatNotificationText(const NotificationServiceStruct& notif) {
-    QString dateStr = notif.timestamp.toLocalTime().toString("MMM d, yyyy - h:mm AP");
-    QString badge = notif.read ? "" : "🔴 ";
-    return QString("%1%2\n%3").arg(badge, dateStr, notif.message);
+namespace {
+
+QString formatNotificationText(const NotificationServiceStruct& notif) {
+    const QString dateStr =
+        QLocale().toString(notif.timestamp.toLocalTime(), QStringLiteral("MMM d, yyyy - h:mm AP"));
+    const QString badge = notif.read ? QString() : QStringLiteral("🔴 ");
+    return QStringLiteral("%1%2\n%3").arg(badge, dateStr, notif.message);
 }
 
-// Creates a styled list widget item based on read state
-static QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
+QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
     auto* item = new QListWidgetItem(formatNotificationText(notif));
     if (notif.read) {
         item->setForeground(QBrush(Qt::gray));
     } else {
-        QFont font;
-        font.setBold(true);
-        item->setFont(font);
+        QFont f = item->font();
+        f.setBold(true);
+        item->setFont(f);
     }
     return item;
 }
 
-// Constructor: sets up UI and behavior for notifications dialog
+} // namespace
+
+// Constructs NotificationsDialog and initializes UI, list, and actions
 NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
     : QDialog(parent) {
+
     setWindowTitle(NotificationsDialogConstants::kWindowTitle);
     resize(NotificationsDialogConstants::kDialogWidth, NotificationsDialogConstants::kDialogHeight);
 
@@ -47,17 +56,17 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     listWidget = new QListWidget(this);
     listWidget->setWordWrap(true);
     listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     listWidget->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+    listWidget->setAlternatingRowColors(true);
     listWidget->setStyleSheet(NotificationsDialogStyling::kListWidgetStyle);
 
     clearAllButton = new QPushButton(NotificationsDialogConstants::kClearAllText, this);
-    closeButton = new QPushButton(NotificationsDialogConstants::kCloseText, this);
+    closeButton    = new QPushButton(NotificationsDialogConstants::kCloseText, this);
 
-    // Unified cursor + tooltip setup via shared UI service
     Shared::UI::applyButtonTooltipAndCursor(clearAllButton, NotificationsDialogConstants::kClearAllTooltip);
-    Shared::UI::applyButtonTooltipAndCursor(closeButton, NotificationsDialogConstants::kCloseTooltip);
+    Shared::UI::applyButtonTooltipAndCursor(closeButton,    NotificationsDialogConstants::kCloseTooltip);
 
-    // Sort and populate list
     QList<NotificationServiceStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
               [](const NotificationServiceStruct& a, const NotificationServiceStruct& b) {
@@ -67,7 +76,7 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     if (sortedNotifications.isEmpty()) {
         listWidget->addItem(new QListWidgetItem(NotificationsDialogConstants::kNoNotificationsText));
     } else {
-        for (const auto& notif : sortedNotifications) {
+        for (const NotificationServiceStruct& notif : sortedNotifications) {
             listWidget->addItem(createNotificationItem(notif));
         }
         listWidget->setCurrentRow(0);
@@ -88,8 +97,7 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
             NotificationsDialogConstants::kConfirmMessage,
             QString(),
             PromptDialog::Yes | PromptDialog::Cancel,
-            PromptDialog::Cancel
-            );
+            PromptDialog::Cancel);
 
         if (reply == PromptDialog::Yes) {
             NotificationServiceManager::instance().clearAllNotifications();
@@ -101,8 +109,7 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
                 NotificationsDialogConstants::kClearedMessage,
                 QString(),
                 PromptDialog::Ok,
-                PromptDialog::Ok
-                );
+                PromptDialog::Ok);
 
             accept();
         }

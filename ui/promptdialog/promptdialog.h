@@ -1,14 +1,18 @@
+// filename: promptdialog.h
+
 #ifndef PROMPTDIALOG_H
 #define PROMPTDIALOG_H
 
-// Qt
+// Qt includes
 #include <QDialog>
 #include <QDialogButtonBox>
 
+// Forward declaration (Qt class)
 class QLabel;
 class QVBoxLayout;
 class QAbstractButton;
 class QScrollArea;
+class QPixmap;
 
 class PromptDialog : public QDialog {
     Q_OBJECT
@@ -32,7 +36,6 @@ public:
     Q_DECLARE_FLAGS(Buttons, Button)
 
     explicit PromptDialog(QWidget *parent = nullptr);
-    ~PromptDialog();
 
     // Setters
     void setMessageText(const QString &text);
@@ -41,7 +44,7 @@ public:
     void setStandardButtons(Buttons buttons);
     void setDefaultButton(Button button);
 
-    // Modal convenience API
+    // Modal dialog helper
     static Button showDialog(QWidget *parent,
                              Icon icon,
                              const QString &title,
@@ -54,22 +57,18 @@ private slots:
     void handleButtonClicked(QAbstractButton *button);
 
 private:
-    // UI setup
     void initializeUI();
     void createWidgets();
     void setupLayouts();
     void applyStyling();
     void configureConnections();
 
-    // Layout/sizing helpers
-    void resizeToContent();                // compute final size from content
-    int  computeTargetDialogWidth() const; // hybrid width (widest line + base)
+    void resizeToContent();
+    int  computeTargetDialogWidth() const;
     int  computeTextColumnWidth(int targetDialogW) const;
 
-    // Helpers
     QPixmap iconPixmap(Icon iconType);
 
-    // ---- Inline helpers (fixes unresolved externals) ----
     static inline QDialogButtonBox::StandardButtons toStandardButtons(Buttons buttons) {
         QDialogButtonBox::StandardButtons stdButtons;
         if (buttons.testFlag(Ok))     stdButtons |= QDialogButtonBox::Ok;
@@ -88,16 +87,16 @@ private:
         }
     }
 
-    // Widgets
-    QLabel *iconDisplay = nullptr;
-    QLabel *messageLabel = nullptr;
-    QLabel *detailLabel = nullptr;
-
-    QScrollArea *textScrollArea = nullptr;
-    QDialogButtonBox *buttonBox = nullptr;
-    QVBoxLayout *mainLayout = nullptr;
+    QLabel *iconDisplay          = nullptr;
+    QLabel *messageLabel         = nullptr;
+    QLabel *detailLabel          = nullptr;
+    QScrollArea *textScrollArea  = nullptr;
+    QDialogButtonBox *buttonBox  = nullptr;
+    QVBoxLayout *mainLayout      = nullptr;
 
     Button userChoice = None;
+
+    Q_DISABLE_COPY_MOVE(PromptDialog)
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(PromptDialog::Buttons)

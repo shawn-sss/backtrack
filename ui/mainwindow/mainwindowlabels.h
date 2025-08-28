@@ -19,7 +19,7 @@ inline constexpr auto k_CREATE_BACKUP_ORIGINAL_TEXT      = "📦 Create Backup";
 inline constexpr auto k_NOTIFICATION_ORIGINAL_TEXT       = "🔔 Notifications";
 inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "🔓 Unlock Drive";
 inline constexpr auto k_SNAP_LIST_ORIGINAL_TEXT          = "📋 SnapList";
-inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT          = "📅 Schedule";
+inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT           = "📅 Schedule";
 
 inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "✅ Added!";
 inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "✅ Removed!";
@@ -43,6 +43,9 @@ inline constexpr auto k_BACKUP_ISSUE_LABEL               = "Backup issue detecte
 inline constexpr auto k_APP_ISSUE_LABEL                  = "App issue detected.";
 inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "Backup archive location uninitialized.";
 inline constexpr auto k_SEE_NOTIFICATIONS_LABEL          = "See Notifications for more details.";
+
+inline constexpr auto k_STAGING_TITLE                    = "Backup Staging";
+inline constexpr auto k_SNAPLIST_RESET_BUTTON_TXT        = "✕";
 
 inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Archive Status:</b> %1 %2");
 }
@@ -77,6 +80,16 @@ namespace Labels::Emoji {
 inline constexpr auto k_GREEN  = "🟢";
 inline constexpr auto k_YELLOW = "🟡";
 inline constexpr auto k_RED    = "🔴";
+}
+
+// General-purpose literals
+namespace Labels::General {
+inline constexpr auto k_ELLIPSIS = "...";
+}
+
+// Notification-related
+namespace Labels::Notification {
+inline const QString k_TIMESTAMP_TEMPLATE = QStringLiteral("[%1]");
 }
 
 #endif // MAINWINDOWLABELS_H

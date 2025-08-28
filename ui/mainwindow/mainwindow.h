@@ -44,7 +44,6 @@ class ScheduleServiceManager;
 // Forward declaration (Qt class)
 namespace Ui { class MainWindow; }
 
-// Main application window
 class MainWindow final : public QMainWindow {
     Q_OBJECT
     Q_DISABLE_COPY_MOVE(MainWindow)
@@ -86,8 +85,6 @@ private:
     // File watching
     void initializeFileWatcher();
     void refreshFileWatcher();
-    //void resetFileWatcherAndDestinationView();
-    //void startWatchingBackupDirectory(const QString& path);
     QStringList getWatchedRoots() const;
     void handleWatchedPathChanged(const QString& path);
     void checkStagingForReadAccessLoss();

@@ -1,54 +1,50 @@
+// filename: settingsdialog.h
+
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
 // Qt includes
-#include <QCheckBox>
-#include <QComboBox>
 #include <QDialog>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QPushButton>
-#include <QStackedWidget>
-#include <QTimer>
 
-// SettingsDialog manages user and system settings configuration
+// Forward declaration (Qt class)
+class QListWidget;
+class QStackedWidget;
+class QLineEdit;
+class QComboBox;
+class QPushButton;
+class QTimer;
+class QCheckBox;
+class QString;
+
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
     explicit SettingsDialog(QWidget* parent = nullptr);
-    ~SettingsDialog() override;
 
 signals:
     void requestBackupReset(const QString& path, const QString& deleteType);
     void requestAppDataClear();
 
 private slots:
-    // Handles Save button click
     void onSaveClicked();
 
 private:
-    // Initializes layout and UI structure
-    void setupLayout();
-
-    // Builds the user settings page
+    void     setupLayout();
     QWidget* createUserSettingsPage();
-
-    // Builds the system settings page
     QWidget* createSystemSettingsPage();
 
-    // Core UI widgets
-    QListWidget* categoryList = nullptr;
-    QStackedWidget* settingsStack = nullptr;
-    QLineEdit* backupPrefixEdit = nullptr;
-    QComboBox* themeComboBox = nullptr;
-    QPushButton* saveButton = nullptr;
-    QTimer* saveCooldownTimer = nullptr;
-    QCheckBox* minimizeOnCloseCheckbox = nullptr;
+    QListWidget*    categoryList            = nullptr;
+    QStackedWidget* settingsStack           = nullptr;
+    QLineEdit*      backupPrefixEdit        = nullptr;
+    QComboBox*      themeComboBox           = nullptr;
+    QPushButton*    saveButton              = nullptr;
+    QTimer*         saveCooldownTimer       = nullptr;
+    QCheckBox*      minimizeOnCloseCheckbox = nullptr;
+    QPushButton*    clearAppDataButton      = nullptr;
+    QPushButton*    resetBackupArchiveButton= nullptr;
 
-    // Action buttons for system settings
-    QPushButton* clearAppDataButton = nullptr;
-    QPushButton* resetBackupArchiveButton = nullptr;
+    Q_DISABLE_COPY_MOVE(SettingsDialog)
 };
 
 #endif // SETTINGSDIALOG_H

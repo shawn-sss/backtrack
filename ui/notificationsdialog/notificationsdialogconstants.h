@@ -1,31 +1,30 @@
+// filename: notificationsdialogconstants.h
+
 #ifndef NOTIFICATIONSDIALOGCONSTANTS_H
 #define NOTIFICATIONSDIALOGCONSTANTS_H
 
+// C++ includes
+#include <QString>
+
 namespace NotificationsDialogConstants {
 
-// Window title
-inline constexpr auto kWindowTitle = "Notifications";
+inline const QString kWindowTitle = QStringLiteral("Notifications");
 
-// Dialog size
-inline constexpr int kDialogWidth = 400;
-inline constexpr int kDialogHeight = 300;
+constexpr int kDialogWidth  = 400;
+constexpr int kDialogHeight = 300;
 
-// Button texts
-inline constexpr auto kClearAllText = "Clear All";
-inline constexpr auto kCloseText = "Close";
+inline const QString kClearAllText = QStringLiteral("Clear All");
+inline const QString kCloseText    = QStringLiteral("Close");
 
-// Tooltips
-inline constexpr auto kClearAllTooltip = "Delete all notifications";
-inline constexpr auto kCloseTooltip = "Close the notifications dialog";
+inline const QString kClearAllTooltip = QStringLiteral("Delete all notifications");
+inline const QString kCloseTooltip    = QStringLiteral("Close the notifications dialog");
 
-// Default text
-inline constexpr auto kNoNotificationsText = "No notifications.";
+inline const QString kNoNotificationsText = QStringLiteral("No notifications.");
 
-// Message box strings
-inline constexpr auto kConfirmTitle = "Confirm Deletion";
-inline constexpr auto kConfirmMessage = "This will delete all notifications permanently. Are you sure?";
-inline constexpr auto kClearedTitle = "Cleared";
-inline constexpr auto kClearedMessage = "All notifications have been deleted.";
+inline const QString kConfirmTitle   = QStringLiteral("Confirm Deletion");
+inline const QString kConfirmMessage = QStringLiteral("This will delete all notifications permanently. Are you sure?");
+inline const QString kClearedTitle   = QStringLiteral("Cleared");
+inline const QString kClearedMessage = QStringLiteral("All notifications have been deleted.");
 
 } // namespace NotificationsDialogConstants
 

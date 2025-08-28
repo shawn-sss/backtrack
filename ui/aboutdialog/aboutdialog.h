@@ -4,10 +4,11 @@
 // Qt includes
 #include <QDialog>
 
-// Forward declarations
+// Forward declaration (Qt class)
 class QLabel;
 class QDialogButtonBox;
 
+// About dialog window
 class AboutDialog : public QDialog {
     Q_OBJECT
 
@@ -15,9 +16,9 @@ public:
     explicit AboutDialog(QWidget* parent = nullptr);
 
 private:
-    QLabel* logoLabel;
-    QLabel* textLabel;
-    QDialogButtonBox* buttonBox;
+    QLabel*           logoLabel   = nullptr;
+    QLabel*           textLabel   = nullptr;
+    QDialogButtonBox* buttonBox   = nullptr;
 };
 
 #endif // ABOUTDIALOG_H

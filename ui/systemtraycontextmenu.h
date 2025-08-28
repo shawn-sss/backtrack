@@ -1,19 +1,11 @@
 #ifndef SYSTEMTRAYCONTEXTMENU_H
 #define SYSTEMTRAYCONTEXTMENU_H
 
-// Project includes
-
 // Qt includes
 #include <QMenu>
 #include <QElapsedTimer>
 #include <QMouseEvent>
 #include <QAction>
-
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
 
 class SystemTrayContextMenu : public QMenu {
     Q_OBJECT
