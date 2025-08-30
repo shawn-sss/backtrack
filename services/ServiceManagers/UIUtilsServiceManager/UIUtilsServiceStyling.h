@@ -6,12 +6,12 @@
 
 namespace Shared::UI::Styling::Buttons {
 
-// Object name for SnapList reset button
-inline constexpr auto k_SNAPLIST_RESET_BUTTON_OBJECT_NAME = "SnapListResetButton";
+// Object name for Template reset button
+inline const QString k_TEMPLATE_RESET_BUTTON_OBJECT_NAME = QStringLiteral("TemplateResetButton");
 
-// Style sheet for SnapList reset button
-inline constexpr auto k_SNAPLIST_RESET_BUTTON_STYLE = R"(
-    QPushButton#SnapListResetButton {
+// Style sheet for Template reset button
+inline const QString k_TEMPLATE_RESET_BUTTON_STYLE = QStringLiteral(R"(
+    #TemplateResetButton {
         background-color: #a33;
         color: white;
         border: none;
@@ -25,10 +25,11 @@ inline constexpr auto k_SNAPLIST_RESET_BUTTON_STYLE = R"(
         margin-left: 4px;
     }
 
-    QPushButton#SnapListResetButton:hover {
+    #TemplateResetButton:hover {
         background-color: #c44;
     }
-)";
+)");
+
 
 } // namespace Shared::UI::Styling::Buttons
 

@@ -1,9 +1,9 @@
-// filename: snaplistdialog.cpp
+// filename: templatedialog.cpp
 
 // Project includes
-#include "snaplistdialog.h"
-#include "snaplistdialogconstants.h"
-#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
+#include "templatedialog.h"
+#include "templatedialogconstants.h"
+#include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
@@ -16,10 +16,10 @@
 #include <QPushButton>
 #include <QStringList>
 
-// Constructs SnapListDialog and sets up UI
-SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
-    : QDialog(parent), snapService(service) {
-    using namespace SnapListDialogConstants;
+// Constructs TemplateDialog and sets up UI
+TemplateDialog::TemplateDialog(TemplateServiceManager* service, QWidget* parent)
+    : QDialog(parent), templateService(service) {
+    using namespace TemplateDialogConstants;
 
     setWindowTitle(tr(k_WINDOW_TITLE));
     setMinimumSize(k_MIN_WIDTH, k_MIN_HEIGHT);
@@ -46,57 +46,57 @@ SnapListDialog::SnapListDialog(SnapListServiceManager* service, QWidget* parent)
     mainLayout->addWidget(listWidget);
     mainLayout->addLayout(buttonLayout);
 
-    const bool serviceOk = (snapService != nullptr);
+    const bool serviceOk = (templateService != nullptr);
     loadButton->setEnabled(serviceOk);
     deleteButton->setEnabled(serviceOk);
     saveButton->setEnabled(serviceOk);
 
-    connect(loadButton,   &QPushButton::clicked, this, &SnapListDialog::onLoadClicked);
-    connect(deleteButton, &QPushButton::clicked, this, &SnapListDialog::onDeleteClicked);
-    connect(saveButton,   &QPushButton::clicked, this, &SnapListDialog::onSaveClicked);
+    connect(loadButton,   &QPushButton::clicked, this, &TemplateDialog::onLoadClicked);
+    connect(deleteButton, &QPushButton::clicked, this, &TemplateDialog::onDeleteClicked);
+    connect(saveButton,   &QPushButton::clicked, this, &TemplateDialog::onSaveClicked);
 
     connect(listWidget, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem*) { onLoadClicked(); });
 
-    populateSnapList();
+    populateTemplateList();
 }
 
-// Refreshes the list of snap lists
-void SnapListDialog::populateSnapList() {
+// Refreshes the list of templates
+void TemplateDialog::populateTemplateList() {
     listWidget->clear();
-    if (!snapService) return;
+    if (!templateService) return;
 
-    const QStringList snapLists = snapService->listSnapLists();
-    listWidget->addItems(snapLists);
+    const QStringList templates = templateService->listTemplates();
+    listWidget->addItems(templates);
 
-    if (!snapLists.isEmpty()) {
+    if (!templates.isEmpty()) {
         listWidget->setCurrentRow(0);
     }
 }
 
-// Loads the selected snap list
-void SnapListDialog::onLoadClicked() {
-    if (!snapService) return;
+// Loads the selected template
+void TemplateDialog::onLoadClicked() {
+    if (!templateService) return;
 
     QListWidgetItem* item = listWidget->currentItem();
     if (!item) return;
 
-    const QString selectedListName = item->text();
-    const QVector<SnapListEntry> entries = snapService->loadSnapList(selectedListName);
+    const QString selectedTemplateName = item->text();
+    const QVector<TemplateEntry> entries = templateService->loadTemplate(selectedTemplateName);
 
     QStringList loadedPaths;
     loadedPaths.reserve(entries.size());
-    for (const SnapListEntry& entry : entries) {
+    for (const TemplateEntry& entry : entries) {
         loadedPaths.append(entry.path);
     }
 
-    emit snapListLoaded(loadedPaths, selectedListName);
+    emit templateLoaded(loadedPaths, selectedTemplateName);
     accept();
 }
 
-// Deletes the selected snap list
-void SnapListDialog::onDeleteClicked() {
-    using namespace SnapListDialogConstants;
-    if (!snapService) return;
+// Deletes the selected template
+void TemplateDialog::onDeleteClicked() {
+    using namespace TemplateDialogConstants;
+    if (!templateService) return;
 
     QListWidgetItem* item = listWidget->currentItem();
     if (!item) return;
@@ -107,29 +107,29 @@ void SnapListDialog::onDeleteClicked() {
             tr(k_DELETE_CONFIRM_TITLE),
             k_DELETE_CONFIRM_MESSAGE.arg(name),
             QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
-        snapService->deleteSnapList(name);
-        populateSnapList();
+        templateService->deleteTemplate(name);
+        populateTemplateList();
     }
 }
 
-// Saves the current staging entries to a new snap list
-void SnapListDialog::onSaveClicked() {
-    using namespace SnapListDialogConstants;
-    if (!snapService) return;
+// Saves the current staging entries to a new template
+void TemplateDialog::onSaveClicked() {
+    using namespace TemplateDialogConstants;
+    if (!templateService) return;
 
     QString name = QInputDialog::getText(
                        this, tr(k_SAVE_PROMPT_TITLE), tr(k_SAVE_PROMPT_MESSAGE)).trimmed();
 
     if (name.isEmpty()) return;
 
-    const QVector<SnapListEntry> entries = snapService->getCurrentStagingEntries();
+    const QVector<TemplateEntry> entries = templateService->getCurrentStagingEntries();
 
-    if (!snapService->saveSnapList(name, entries)) {
+    if (!templateService->saveTemplate(name, entries)) {
         QMessageBox::critical(this, tr(k_SAVE_FAILED_TITLE), tr(k_SAVE_FAILED_MESSAGE));
         return;
     }
 
-    populateSnapList();
+    populateTemplateList();
 
     const int choice = QMessageBox::question(
         this,
@@ -140,10 +140,10 @@ void SnapListDialog::onSaveClicked() {
     if (choice == QMessageBox::Yes) {
         QStringList loadedPaths;
         loadedPaths.reserve(entries.size());
-        for (const SnapListEntry& entry : entries) {
+        for (const TemplateEntry& entry : entries) {
             loadedPaths.append(entry.path);
         }
-        emit snapListLoaded(loadedPaths, name);
+        emit templateLoaded(loadedPaths, name);
         accept();
     }
 }

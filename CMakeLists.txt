@@ -97,12 +97,12 @@ set(UI_DIALOG_WELCOME
     ui/welcomedialog/welcomedialogstyling.h
 )
 
-# UI: SnapList dialog
-set(UI_DIALOG_SNAPLIST
-    ui/snaplistdialog/snaplistdialog.h
-    ui/snaplistdialog/snaplistdialog.cpp
-    ui/snaplistdialog/snaplistdialog.ui
-    ui/snaplistdialog/snaplistdialogconstants.h
+# UI: Template dialog
+set(UI_DIALOG_TEMPLATE
+    ui/templatedialog/templatedialog.h
+    ui/templatedialog/templatedialog.cpp
+    ui/templatedialog/templatedialog.ui
+    ui/templatedialog/templatedialogconstants.h
 )
 
 # UI: Schedule dialog
@@ -131,7 +131,7 @@ set(SRC_UI
     ${UI_DIALOG_HELP}
     ${UI_DIALOG_ABOUT}
     ${UI_DIALOG_WELCOME}
-    ${UI_DIALOG_SNAPLIST}
+    ${UI_DIALOG_TEMPLATE}
     ${UI_DIALOG_SCHEDULE}
     ${UI_DIALOG_PROMPT}
     ${UI_SHARED_HEADERS}
@@ -214,9 +214,9 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/PathServiceManager/PathServiceManager.cpp
     services/ServiceManagers/PathServiceManager/PathServiceManager.h
 
-    services/ServiceManagers/SnapListServiceManager/SnapListServiceConstants.h
-    services/ServiceManagers/SnapListServiceManager/SnapListServiceManager.cpp
-    services/ServiceManagers/SnapListServiceManager/SnapListServiceManager.h
+    services/ServiceManagers/TemplateServiceManager/TemplateServiceConstants.h
+    services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.cpp
+    services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h
 
     services/ServiceManagers/ThemeServiceManager/ThemeServiceConstants.h
     services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.cpp

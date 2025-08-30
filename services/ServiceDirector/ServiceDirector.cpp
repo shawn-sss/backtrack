@@ -18,10 +18,6 @@
 // C++ includes
 #include <memory>
 
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
-
 using namespace ThemeServiceConstants;
 
 // Lifecycle: singleton, construction, defaults, first-run

@@ -1,4 +1,5 @@
 #include "UIUtilsServiceManager.h"
+#include "UIUtilsServiceStyling.h"  // Access Template button constants
 
 // Qt includes
 #include <QCursor>
@@ -89,6 +90,22 @@ void applyButtonStylingWithObjectName(QPushButton* button, const QString& toolti
     button->setCursor(Qt::PointingHandCursor);
     button->setToolTip(tooltip);
     button->setObjectName(objectName);
+}
+
+// --- New: Template reset button styling (replaces former SnapList helper) ---
+void UIUtilsServiceManager::applyTemplateResetButtonStyling(QPushButton* button) {
+    if (!button)
+        return;
+
+    // Set tooltip + object name
+    applyButtonStylingWithObjectName(
+        button,
+        QStringLiteral("Reset Template"),
+        Shared::UI::Styling::Buttons::k_TEMPLATE_RESET_BUTTON_OBJECT_NAME
+        );
+
+    // Apply stylesheet
+    button->setStyleSheet(Shared::UI::Styling::Buttons::k_TEMPLATE_RESET_BUTTON_STYLE);
 }
 
 } // namespace Shared::UI

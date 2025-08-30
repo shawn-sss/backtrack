@@ -18,7 +18,7 @@ inline constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "📁 Change Location
 inline constexpr auto k_CREATE_BACKUP_ORIGINAL_TEXT      = "📦 Create Backup";
 inline constexpr auto k_NOTIFICATION_ORIGINAL_TEXT       = "🔔 Notifications";
 inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "🔓 Unlock Drive";
-inline constexpr auto k_SNAP_LIST_ORIGINAL_TEXT          = "📋 SnapList";
+inline constexpr auto k_TEMPLATE_ORIGINAL_TEXT           = "📋 Template";
 inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT           = "📅 Schedule";
 
 inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "✅ Added!";
@@ -28,7 +28,7 @@ inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "✅ Changed!";
 inline constexpr auto k_CREATE_BACKUP_BUTTON_TEXT        = "✅ Created!";
 inline constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "✅ Opened!";
 inline constexpr auto k_UNLOCK_DRIVE_BUTTON_TEXT         = "✅ Unlocked!";
-inline constexpr auto k_SNAP_LIST_BUTTON_TEXT            = "✅ Loaded!";
+inline constexpr auto k_TEMPLATE_BUTTON_TEXT             = "✅ Loaded!";
 
 inline constexpr auto k_BACKING_UP_BUTTON_TEXT           = "📦 Backing Up...";
 inline constexpr auto k_UNLOCKING_FEEDBACK_TEXT          = "🔒 Unlocking...";
@@ -45,7 +45,7 @@ inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "Backup archive locat
 inline constexpr auto k_SEE_NOTIFICATIONS_LABEL          = "See Notifications for more details.";
 
 inline constexpr auto k_STAGING_TITLE                    = "Backup Staging";
-inline constexpr auto k_SNAPLIST_RESET_BUTTON_TXT        = "✕";
+inline constexpr auto k_TEMPLATE_RESET_BUTTON_TXT        = "✕";
 
 inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Archive Status:</b> %1 %2");
 }

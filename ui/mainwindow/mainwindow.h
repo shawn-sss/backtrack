@@ -3,7 +3,7 @@
 
 // Project includes
 #include "../../ui/scheduledialog/scheduledialog.h"
-#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
+#include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 #include "../../backup_module/service/backupservice.h"
 #include "../../../../constants/system_constants.h"
 
@@ -130,7 +130,7 @@ private:
     void showNextNotification();
     void finishNotificationQueue();
 
-    // SnapList
+    // Template
     void updateBackupStagingTitle(const QString& name);
     void setInitialButtonTexts();
 
@@ -141,7 +141,7 @@ private slots:
     void onDeleteBackupClicked();
     void onChangeBackupDestinationClicked();
     void onUnlockDriveClicked();
-    void onSnapListButtonClicked();
+    void onTemplateButtonClicked();
     void onBackupDirectoryChanged();
     void onBackupCompleted();
     void onBackupError(const QString& error);
@@ -166,7 +166,7 @@ private:
     BackupController* backupController = nullptr;
     FileWatcher* fileWatcher = nullptr;
     ToolbarServiceManager* toolbarManager = nullptr;
-    SnapListServiceManager snapListServiceManager;
+    TemplateServiceManager templateServiceManager;
 
     // Backup state
     BackupScanResult latestBackupScan;
@@ -185,12 +185,12 @@ private:
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // SnapList / Title bar controls
+    // Template / Title bar controls
     QLabel* stagingTitleLabel = nullptr;
-    QPushButton* snapListResetButton = nullptr;
+    QPushButton* templateResetButton = nullptr;
     QHBoxLayout* stagingTitleLayout = nullptr;
 
-    QString loadedSnapListName;
+    QString loadedTemplateName;
     bool suppressNextMenuClick = false;
     bool ignoreTriggerAfterContext = false;
 

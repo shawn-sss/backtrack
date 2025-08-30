@@ -44,7 +44,7 @@ class UIUtilsServiceManager {
 public:
     static QList<QPair<QPushButton*, QString>> mainWindowButtonMappings(Ui::MainWindow* ui);
     static void applyMainWindowButtonStyling(Ui::MainWindow* ui);
-    static void applySnapListResetButtonStyling(QPushButton* button);
+    static void applyTemplateResetButtonStyling(QPushButton* button);
 };
 
 } // namespace Shared::UI

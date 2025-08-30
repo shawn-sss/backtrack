@@ -8,7 +8,7 @@
 #include "../systemtraycontextmenu.h"
 #include "../settingsdialog/settingsdialog.h"
 #include "../../ui/notificationsdialog/notificationsdialog.h"
-#include "../../ui/snaplistdialog/snaplistdialog.h"
+#include "../../ui/templatedialog/templatedialog.h"
 #include "../../ui/scheduledialog/scheduledialog.h"
 #include "../../ui/promptdialog/promptdialog.h"
 #include "../../backup_module/constants/backupconstants.h"
@@ -25,11 +25,10 @@
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
 #include "../../services/ServiceManagers/ToolbarServiceManager/ToolbarServiceManager.h"
 #include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceStyling.h"
 #include "../../services/ServiceManagers/UninstallServiceManager/UninstallServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
-#include "../../services/ServiceManagers/SnapListServiceManager/snaplistservicemanager.h"
+#include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 #include "../../services/ServiceManagers/ScheduleServiceManager/ScheduleServiceManager.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
 #include "../../../../constants/interface_config.h"
@@ -81,7 +80,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
-    snapListServiceManager(PathServiceManager::appConfigFolderPath() + "/user_lists.json", this) {
+    templateServiceManager(PathServiceManager::appConfigFolderPath() + "/" + App::Items::k_APPDATA_SETUP_USER_TEMPLATES_FILE, this) {
     ui->setupUi(this);
     initializeModels();
     initializeServices();
@@ -193,7 +192,7 @@ void MainWindow::setupConnections() {
         {ui->CreateBackupButton, &MainWindow::onCreateBackupClicked},
         {ui->DeleteBackupButton, &MainWindow::onDeleteBackupClicked},
         {ui->UnlockDriveButton, &MainWindow::onUnlockDriveClicked},
-        {ui->SnapListButton, &MainWindow::onSnapListButtonClicked},
+        {ui->TemplateButton, &MainWindow::onTemplateButtonClicked},
         {ui->ScheduleButton, &MainWindow::onScheduleButtonClicked}
     };
 
@@ -279,6 +278,7 @@ void MainWindow::onScheduleButtonClicked() {
 
 // UI: controls and staging
 void MainWindow::initializeUI() {
+    // Progress bar
     Shared::UI::setupProgressBar(
         ui->TransferProgressBar,
         UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
@@ -292,6 +292,7 @@ void MainWindow::initializeUI() {
         ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
+    // Staging title row (label + reset button)
     stagingTitleLayout = new QHBoxLayout(ui->StagingListTitleContainer);
     stagingTitleLayout->setContentsMargins(0, 0, 0, 0);
     stagingTitleLayout->setSpacing(6);
@@ -301,23 +302,29 @@ void MainWindow::initializeUI() {
     stagingTitleLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     stagingTitleLayout->addWidget(stagingTitleLabel);
 
-    snapListResetButton = new QPushButton(Labels::Backup::k_SNAPLIST_RESET_BUTTON_TXT, ui->StagingListTitleContainer);
-    snapListResetButton->setToolTip(k_RESET_SNAP_LIST);
-    snapListResetButton->setCursor(Qt::PointingHandCursor);
-    snapListResetButton->setStyleSheet(Shared::UI::Styling::Buttons::k_SNAPLIST_RESET_BUTTON_STYLE);
-    snapListResetButton->setFixedSize(16, 16);
-    snapListResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    snapListResetButton->setVisible(false);
+    // Tiny red reset button with an ✖
+    templateResetButton = new QPushButton(QStringLiteral("✖"), ui->StagingListTitleContainer);
 
-    connect(snapListResetButton, &QPushButton::clicked, this, [this]() {
+    // Apply official styling: sets cursor, tooltip, objectName = "TemplateResetButton", and stylesheet
+    Shared::UI::UIUtilsServiceManager::applyTemplateResetButtonStyling(templateResetButton);
+
+    // Keep it tiny regardless of layout/theme
+    templateResetButton->setFixedSize(16, 16);
+    templateResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    // Hidden until a template is selected
+    templateResetButton->setVisible(false);
+
+    connect(templateResetButton, &QPushButton::clicked, this, [this]() {
         stagingModel->clear();
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
-        updateBackupStagingTitle("");
+        updateBackupStagingTitle(QString());  // clears title & hides the reset button
     });
 
-    stagingTitleLayout->addWidget(snapListResetButton);
+    stagingTitleLayout->addWidget(templateResetButton);
 
+    // Rest of UI init
     initializeBackupSystem();
     setInitialButtonTexts();
 }
@@ -331,28 +338,25 @@ void MainWindow::setInitialButtonTexts() {
     ui->DeleteBackupButton->setText(Labels::Backup::k_DELETE_BACKUP_ORIGINAL_TEXT);
     ui->NotificationButton->setText(Labels::Backup::k_NOTIFICATION_ORIGINAL_TEXT);
     ui->UnlockDriveButton->setText(Labels::Backup::k_UNLOCK_DRIVE_ORIGINAL_TEXT);
-    ui->SnapListButton->setText(Labels::Backup::k_SNAP_LIST_ORIGINAL_TEXT);
+    ui->TemplateButton->setText(Labels::Backup::k_TEMPLATE_ORIGINAL_TEXT);
     ui->ScheduleButton->setText(Labels::Backup::k_SCHEDULE_ORIGINAL_TEXT);
 }
 
 // UI: cursors, tooltips, and styles
 void MainWindow::applyButtonCursors() {
     const QList<QPair<QPushButton *, QString>> buttons = {
-        {ui->AddToBackupButton, k_ADD_TO_BACKUP},
-        {ui->RemoveFromBackupButton, k_REMOVE_FROM_BACKUP},
-        {ui->CreateBackupButton, k_CREATE_BACKUP},
+        {ui->AddToBackupButton,       k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton,  k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton,      k_CREATE_BACKUP},
         {ui->ChangeBackupDestinationButton, k_CHANGE_DESTINATION},
-        {ui->DeleteBackupButton, k_DELETE_BACKUP},
-        {ui->NotificationButton, k_NOTIFICATIONS},
-        {ui->UnlockDriveButton, k_UNLOCK_DRIVE},
-        {ui->SnapListButton, k_SNAP_LIST},
-        {ui->ScheduleButton, k_SCHEDULE}
+        {ui->DeleteBackupButton,      k_DELETE_BACKUP},
+        {ui->NotificationButton,      k_NOTIFICATIONS},
+        {ui->UnlockDriveButton,       k_UNLOCK_DRIVE},
+        {ui->TemplateButton,          k_TEMPLATE},
+        {ui->ScheduleButton,          k_SCHEDULE}
     };
 
     Shared::UI::applyButtonStyling(buttons);
-
-    snapListResetButton->setStyleSheet(MainWindowStyling::Styles::ButtonStyles::RESET);
-    snapListResetButton->setObjectName("ResetSnapListButton");
 }
 
 // Theming: initialization
@@ -946,7 +950,7 @@ void MainWindow::onAddToBackupClicked() {
 
     if (!toStage.isEmpty()) {
         stagingModel->addPaths(toStage);
-        snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
+        templateServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
     }
@@ -968,7 +972,7 @@ void MainWindow::onRemoveFromBackupClicked() {
     }
 
     Shared::Backup::removeSelectedPathsFromStaging(ui->BackupStagingTreeView, stagingModel);
-    snapListServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
+    templateServiceManager.setCurrentStagingEntries(stagingModel->getStagedPaths());
 }
 
 // Actions: change backup destination
@@ -1212,31 +1216,31 @@ void MainWindow::triggerButtonFeedback(QPushButton *button,
     });
 }
 
-// SnapList: open dialog
-void MainWindow::onSnapListButtonClicked() {
-    auto* dialog = new SnapListDialog(&snapListServiceManager, this);
+// Template: open dialog
+void MainWindow::onTemplateButtonClicked() {
+    auto* dialog = new TemplateDialog(&templateServiceManager, this);
 
-    connect(dialog, &SnapListDialog::snapListLoaded, this, [this](const QVector<QString>& paths, const QString& name) {
+    connect(dialog, &TemplateDialog::templateLoaded, this, [this](const QStringList& paths, const QString& name) {
         stagingModel->clear();
         stagingModel->addPaths(paths);
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
         updateBackupStagingTitle(name);
-        snapListServiceManager.setCurrentStagingEntries(paths);
+        templateServiceManager.setCurrentStagingEntries(paths);
     });
 
     dialog->exec();
     dialog->deleteLater();
 }
 
-// SnapList: update title and reset button
-void MainWindow::updateBackupStagingTitle(const QString &snapListName) {
-    if (snapListName.isEmpty()) {
+// Template: update title and reset button
+void MainWindow::updateBackupStagingTitle(const QString &templateName) {
+    if (templateName.isEmpty()) {
         stagingTitleLabel->setText(Labels::Backup::k_STAGING_TITLE);
-        snapListResetButton->setVisible(false);
+        templateResetButton->setVisible(false);
     } else {
-        stagingTitleLabel->setText(QString("%1 - %2").arg(Labels::Backup::k_STAGING_TITLE, snapListName));
-        snapListResetButton->setVisible(true);
+        stagingTitleLabel->setText(QString("%1 - %2").arg(Labels::Backup::k_STAGING_TITLE, templateName));
+        templateResetButton->setVisible(true);
     }
 }
 
