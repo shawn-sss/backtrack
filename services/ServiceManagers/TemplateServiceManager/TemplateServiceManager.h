@@ -1,45 +1,51 @@
-// filename: templateservicemanager.h
-
 #ifndef TEMPLATESERVICEMANAGER_H
 #define TEMPLATESERVICEMANAGER_H
 
+// Project includes
+#include "TemplateServiceConstants.h"
+
+// Qt includes
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVector>
 #include <QJsonObject>
 
+// Represents a single template entry
 struct TemplateEntry {
     QString path;
     bool isFolder;
 
     QJsonObject toJson() const {
         return QJsonObject{
-            { "path", path },
-            { "isFolder", isFolder }
+            { TemplateServiceConstants::Keys::Path, path },
+            { TemplateServiceConstants::Keys::IsFolder, isFolder }
         };
     }
 
     static TemplateEntry fromJson(const QJsonObject& obj) {
-        return TemplateEntry{
-            obj.value("path").toString(),
-            obj.value("isFolder").toBool()
+        return {
+            obj.value(TemplateServiceConstants::Keys::Path).toString(),
+            obj.value(TemplateServiceConstants::Keys::IsFolder).toBool()
         };
     }
 };
 
+// Manages templates persisted to JSON
 class TemplateServiceManager : public QObject {
     Q_OBJECT
 
 public:
     explicit TemplateServiceManager(const QString& filePath, QObject* parent = nullptr);
 
+    // Mutation
     bool saveTemplate(const QString& name, const QVector<TemplateEntry>& entries);
+    bool deleteTemplate(const QString& name);
+    void setCurrentStagingEntries(const QVector<QString>& paths);
+
+    // Query
     QVector<TemplateEntry> loadTemplate(const QString& name);
     QStringList listTemplates() const;
-    bool deleteTemplate(const QString& name);
-
-    void setCurrentStagingEntries(const QVector<QString>& paths);
     QVector<TemplateEntry> getCurrentStagingEntries() const;
 
 private:
@@ -50,4 +56,4 @@ private:
     bool writeJsonFile(const QJsonObject& obj) const;
 };
 
-#endif // TEMPLATESERVICEMANAGER_H
+#endif

@@ -6,26 +6,20 @@
 
 namespace ThemeServiceConstants {
 
-inline constexpr const char* k_DEFAULT_THEME_STRING = "auto";
+// Defaults
+inline constexpr const char* DefaultThemeString = "auto";
 
 // App-wide theme styles
-enum class AppTheme {
-    Light,
-    Dark
-};
+enum class AppTheme { Light, Dark };
 
-// User-selectable theme preferences
-enum class UserThemePreference {
-    Light,
-    Dark,
-    Auto
-};
+// User-selectable preferences
+enum class UserThemePreference { Light, Dark, Auto };
 
-// String conversion methods for theme preferences
+// Conversion helpers
 inline UserThemePreference stringToUserThemePreference(const QString& value) {
     const QString v = value.trimmed().toLower();
-    if (v == "light") return UserThemePreference::Light;
-    if (v == "dark")  return UserThemePreference::Dark;
+    if (v == QStringLiteral("light")) return UserThemePreference::Light;
+    if (v == QStringLiteral("dark"))  return UserThemePreference::Dark;
     return UserThemePreference::Auto;
 }
 
@@ -39,20 +33,24 @@ inline QString userThemePreferenceToString(UserThemePreference pref) {
 }
 
 // Theme file paths
-namespace ThemeConstants {
-inline constexpr const char* k_BASE_THEME_PATH  = ":/resources/themes/base.qss";
-inline constexpr const char* k_DARK_THEME_PATH  = ":/resources/themes/dark.qss";
-inline constexpr const char* k_LIGHT_THEME_PATH = ":/resources/themes/light.qss";
+namespace ThemePaths {
+inline constexpr const char* Base = ":/resources/themes/base.qss";
+inline constexpr const char* Dark = ":/resources/themes/dark.qss";
+inline constexpr const char* Light = ":/resources/themes/light.qss";
+}
+
+// Style names
+namespace StyleNames {
+inline constexpr const char* Fusion = "Fusion";
 }
 
 } // namespace ThemeServiceConstants
 
 #ifdef Q_OS_WIN
-// Windows theme detection registry keys
 namespace WindowsThemeRegistry {
-inline constexpr auto kThemeRegistryPath    = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
-inline constexpr auto kAppsUseLightThemeKey = "AppsUseLightTheme";
+inline constexpr const char* ThemeRegistryPath = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize";
+inline constexpr const char* AppsUseLightThemeKey = "AppsUseLightTheme";
 }
 #endif
 
-#endif // THEMESERVICECONSTANTS_H
+#endif

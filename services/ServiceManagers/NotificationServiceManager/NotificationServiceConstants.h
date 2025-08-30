@@ -4,21 +4,18 @@
 // Project includes
 #include "../../../../constants/app_info.h"
 
-// Qt includes
-#include <QString>
-
-// Notification service values and keys
+// Notification settings
 namespace NotificationSettings {
 inline constexpr auto& kNotificationFileName = App::Items::k_APPDATA_SETUP_NOTIFICATIONS_FILE;
-inline constexpr auto& kNotificationFolder   = App::Items::k_APPDATA_SETUP_FOLDER;
-inline constexpr auto* k_DEFAULT_WELCOME_MESSAGE = "👋 Welcome! Thanks for using this app.";
+inline constexpr auto& kNotificationFolder = App::Items::k_APPDATA_SETUP_FOLDER;
+inline constexpr const char* kDefaultWelcomeMessage = "👋 Welcome! Thanks for using this app.";
 
-// Keys used in each notification entry
+// Notification entry fields
 namespace Fields {
-inline constexpr auto* k_MESSAGE   = "message";
-inline constexpr auto* k_TIMESTAMP = "timestamp";
-inline constexpr auto* k_READ      = "read";
+inline constexpr const char* kMessage = "message";
+inline constexpr const char* kTimestamp = "timestamp";
+inline constexpr const char* kRead = "read";
 }
-} // namespace NotificationSettings
+}
 
-#endif // NOTIFICATIONSERVICECONSTANTS_H
+#endif

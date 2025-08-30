@@ -15,23 +15,23 @@ struct NotificationServiceStruct {
     QDateTime timestamp;
     bool read;
 
-    // Convert struct to JSON object
+    // Convert to JSON
     QJsonObject toJson() const {
         return {
-            { NotificationSettings::Fields::k_MESSAGE, message },
-            { NotificationSettings::Fields::k_TIMESTAMP, timestamp.toString(Qt::ISODate) },
-            { NotificationSettings::Fields::k_READ, read }
+            { NotificationSettings::Fields::kMessage, message },
+            { NotificationSettings::Fields::kTimestamp, timestamp.toString(Qt::ISODate) },
+            { NotificationSettings::Fields::kRead, read }
         };
     }
 
-    // Create struct from JSON object
+    // Construct from JSON
     static NotificationServiceStruct fromJson(const QJsonObject& obj) {
         return {
-            obj.value(NotificationSettings::Fields::k_MESSAGE).toString(),
-            QDateTime::fromString(obj.value(NotificationSettings::Fields::k_TIMESTAMP).toString(), Qt::ISODate),
-            obj.value(NotificationSettings::Fields::k_READ).toBool()
+            obj.value(NotificationSettings::Fields::kMessage).toString(),
+            QDateTime::fromString(obj.value(NotificationSettings::Fields::kTimestamp).toString(), Qt::ISODate),
+            obj.value(NotificationSettings::Fields::kRead).toBool()
         };
     }
 };
 
-#endif // NOTIFICATIONSERVICESTRUCT_H
+#endif

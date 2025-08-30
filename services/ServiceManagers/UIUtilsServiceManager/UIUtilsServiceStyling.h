@@ -6,11 +6,11 @@
 
 namespace Shared::UI::Styling::Buttons {
 
-// Object name for Template reset button
-inline const QString k_TEMPLATE_RESET_BUTTON_OBJECT_NAME = QStringLiteral("TemplateResetButton");
+// Object name
+inline const QString TemplateResetButtonObjectName = QStringLiteral("TemplateResetButton");
 
-// Style sheet for Template reset button
-inline const QString k_TEMPLATE_RESET_BUTTON_STYLE = QStringLiteral(R"(
+// Stylesheet
+inline const QString TemplateResetButtonStyle = QStringLiteral(R"(
     #TemplateResetButton {
         background-color: #a33;
         color: white;
@@ -30,7 +30,6 @@ inline const QString k_TEMPLATE_RESET_BUTTON_STYLE = QStringLiteral(R"(
     }
 )");
 
+}
 
-} // namespace Shared::UI::Styling::Buttons
-
-#endif // UIUTILSSERVICESTYLING_H
+#endif

@@ -143,7 +143,7 @@ QWidget* SettingsDialog::createUserSettingsPage() {
     {
         auto* userMgr = ServiceDirector::getInstance().getUserServiceManager();
         const bool currentMinimizeSetting = userMgr->settings()
-                                                .value(UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY)
+                                                .value(UserServiceKeys::MinimizeOnCloseKey)
                                                 .toBool(true);
         minimizeOnCloseCheckbox->setChecked(currentMinimizeSetting);
     }
@@ -265,7 +265,7 @@ void SettingsDialog::onSaveClicked() {
     const bool minimizeSetting = minimizeOnCloseCheckbox->isChecked();
     auto* userMgr = sd->getUserServiceManager();
     auto& settings = userMgr->settings();
-    settings[UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY] = minimizeSetting;
+    settings[UserServiceKeys::MinimizeOnCloseKey] = minimizeSetting;
     userMgr->save();
 
     saveButton->setText(k_BUTTON_SAVED_TEXT);

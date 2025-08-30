@@ -10,19 +10,19 @@
 
 // Qt includes
 #include <QApplication>
-#include <QCursor>
 #include <QIcon>
-#include <QMessageBox>
 #include <QSizePolicy>
 #include <QToolButton>
 #include <QWidget>
 
-// Constructs the toolbar service manager
+using namespace ToolbarServiceStyling;
+
+// Lifecycle
 ToolbarServiceManager::ToolbarServiceManager(QObject* parent)
     : QObject(parent),
-    actions{new QAction(this), new QAction(this), new QAction(this), new QAction(this)} {}
+    actions{ new QAction(this), new QAction(this), new QAction(this), new QAction(this) } {}
 
-// Initializes the toolbar and its actions
+// Initialization
 void ToolbarServiceManager::initialize(QToolBar* toolBar) {
     setupAppearance(toolBar);
     createActions();
@@ -30,9 +30,9 @@ void ToolbarServiceManager::initialize(QToolBar* toolBar) {
     applyCursorStyle(toolBar);
 }
 
-// Sets up the appearance and behavior of the toolbar
+// Setup
 void ToolbarServiceManager::setupAppearance(QToolBar* toolBar) {
-    toolBar->setObjectName("MainToolBar");
+    toolBar->setObjectName(QStringLiteral("MainToolBar"));
     toolBar->setOrientation(Qt::Vertical);
     toolBar->setMovable(false);
     toolBar->setFloatable(false);
@@ -40,68 +40,67 @@ void ToolbarServiceManager::setupAppearance(QToolBar* toolBar) {
     toolBar->setVisible(true);
     toolBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    toolBar->setStyleSheet(ToolbarServiceStyling::BASE_STYLE);
-    toolBar->setIconSize(ToolbarServiceStyling::DEFAULT_ICON_SIZE);
+    toolBar->setStyleSheet(BaseStyle);
+    toolBar->setIconSize(DefaultIconSize);
 }
 
-// Creates the toolbar actions and sets their properties
+// Actions
 void ToolbarServiceManager::createActions() {
-    actions[0]->setText(Labels::Toolbar::k_SETTINGS);
-    actions[0]->setIcon(QIcon(Resources::ToolbarService::k_SETTINGS_ICON_PATH));
+    actions[0]->setText(ToolbarLabels::Settings);
+    actions[0]->setIcon(QIcon(ToolbarIcons::Settings));
     connect(actions[0], &QAction::triggered, this, &ToolbarServiceManager::showSettings);
 
-    actions[1]->setText(Labels::Toolbar::k_EXIT);
-    actions[1]->setIcon(QIcon(Resources::ToolbarService::k_EXIT_ICON_PATH));
+    actions[1]->setText(ToolbarLabels::Exit);
+    actions[1]->setIcon(QIcon(ToolbarIcons::Exit));
     connect(actions[1], &QAction::triggered, qApp, &QApplication::quit);
 
-    actions[2]->setText(Labels::Toolbar::k_HELP);
-    actions[2]->setIcon(QIcon(Resources::ToolbarService::k_HELP_ICON_PATH));
+    actions[2]->setText(ToolbarLabels::Help);
+    actions[2]->setIcon(QIcon(ToolbarIcons::Help));
     connect(actions[2], &QAction::triggered, this, &ToolbarServiceManager::showHelp);
 
-    actions[3]->setText(Labels::Toolbar::k_ABOUT);
-    actions[3]->setIcon(QIcon(Resources::ToolbarService::k_ABOUT_ICON_PATH));
+    actions[3]->setText(ToolbarLabels::About);
+    actions[3]->setIcon(QIcon(ToolbarIcons::About));
     connect(actions[3], &QAction::triggered, this, &ToolbarServiceManager::showAbout);
 }
 
-// Adds toolbar actions and a spacer widget to organize layout
 void ToolbarServiceManager::addActions(QToolBar* toolBar) {
     toolBar->clear();
-    toolBar->addAction(actions[0]);
-    toolBar->addAction(actions[2]);
-    toolBar->addAction(actions[3]);
+    toolBar->addAction(actions[0]); // Settings
+    toolBar->addAction(actions[2]); // Help
+    toolBar->addAction(actions[3]); // About
 
     auto* spacer = new QWidget(toolBar);
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     toolBar->addWidget(spacer);
 
-    toolBar->addAction(actions[1]);
+    toolBar->addAction(actions[1]); // Exit at bottom
 }
 
-// Applies cursor style and object names to toolbar buttons
 void ToolbarServiceManager::applyCursorStyle(QToolBar* toolBar) {
-    const QStringList objectNames = {
+    static constexpr const char* ObjectNames[4] = {
         "SettingsButton", "ExitButton", "HelpButton", "AboutButton"
     };
 
-    for (int i = 0; i < actions.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(actions.size()); ++i) {
         if (QWidget* w = toolBar->widgetForAction(actions[i])) {
             w->setCursor(Qt::PointingHandCursor);
             if (QToolButton* btn = qobject_cast<QToolButton*>(w)) {
-                btn->setObjectName(objectNames.value(i));
+                btn->setObjectName(QString::fromLatin1(ObjectNames[i]));
             }
         }
     }
 }
 
-// Shows the Settings dialog with connections to MainWindow slots
+// Slots
 void ToolbarServiceManager::showSettings() {
     auto* parentWidget = qobject_cast<QWidget*>(parent());
     SettingsDialog dialog(parentWidget);
 
     if (MainWindow* mainWindow = qobject_cast<MainWindow*>(parentWidget)) {
-        connect(&dialog, &SettingsDialog::requestBackupReset, mainWindow, [mainWindow](const QString& path, const QString& type) {
-            mainWindow->handleBackupDeletion(path, type);
-        });
+        connect(&dialog, &SettingsDialog::requestBackupReset, mainWindow,
+                [mainWindow](const QString& path, const QString& type) {
+                    mainWindow->handleBackupDeletion(path, type);
+                });
 
         connect(&dialog, &SettingsDialog::requestAppDataClear, mainWindow, [mainWindow]() {
             mainWindow->handleAppDataClear();
@@ -111,19 +110,17 @@ void ToolbarServiceManager::showSettings() {
     dialog.exec();
 }
 
-// Shows the Help dialog
 void ToolbarServiceManager::showHelp() {
     HelpDialog dialog(qobject_cast<QWidget*>(parent()));
     dialog.exec();
 }
 
-// Shows the About dialog
 void ToolbarServiceManager::showAbout() {
     AboutDialog dialog(qobject_cast<QWidget*>(parent()));
     dialog.exec();
 }
 
-// Provides access to the toolbar actions
+// Query
 QAction* ToolbarServiceManager::getActionOpenSettings() const { return actions[0]; }
 QAction* ToolbarServiceManager::getActionExit() const          { return actions[1]; }
 QAction* ToolbarServiceManager::getActionHelp() const          { return actions[2]; }

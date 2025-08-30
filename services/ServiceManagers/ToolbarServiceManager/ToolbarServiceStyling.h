@@ -7,11 +7,11 @@
 
 namespace ToolbarServiceStyling {
 
-// Default icon size for toolbar buttons
-inline constexpr QSize DEFAULT_ICON_SIZE(24, 24);
+// Defaults
+inline const QSize DefaultIconSize = QSize(24, 24);
 
-// Base stylesheet for toolbar and buttons
-inline const QString BASE_STYLE = QStringLiteral(
+// Styles
+inline const QString BaseStyle = QStringLiteral(
     "QToolBar {"
     "    background-color: transparent;"
     "    border: none;"
@@ -24,8 +24,9 @@ inline const QString BASE_STYLE = QStringLiteral(
     "    min-height: 40px;"
     "    font-size: 14px;"
     "    border: none;"
-    "}");
+    "}"
+    );
 
-} // namespace ToolbarServiceStyling
+}
 
-#endif // TOOLBARSERVICEMANAGERSTYLING_H
+#endif

@@ -4,58 +4,55 @@
 #include "../JsonServiceManager/JsonServiceManager.h"
 
 // Qt includes
+#include <QDateTime>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QStandardPaths>
-#include <QDir>
 
-// Constructs and loads existing notifications
+// Lifecycle: construct and load
 NotificationServiceManager::NotificationServiceManager() {
     load();
 }
 
-// Returns the singleton instance of the notification manager
+// Lifecycle: singleton instance
 NotificationServiceManager& NotificationServiceManager::instance() {
     static NotificationServiceManager instance;
     return instance;
 }
 
-// Returns the full path to the notification JSON file
+// Persistence: file path
 QString NotificationServiceManager::notificationFilePath() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/" +
            NotificationSettings::kNotificationFolder + "/" +
            NotificationSettings::kNotificationFileName;
 }
 
-// Initializes notification file with a welcome message if not present or empty
+// Defaults: initialize with welcome message
 void NotificationServiceManager::initializeDefaults() {
     const QString path = instance().notificationFilePath();
 
     QFile file(path);
     bool needsInit = !file.exists();
     if (!needsInit && file.open(QIODevice::ReadOnly)) {
-        needsInit = file.size() == 0;
+        needsInit = (file.size() == 0);
         file.close();
     }
-
     if (!needsInit) return;
 
     NotificationServiceStruct welcome{
-        NotificationSettings::k_DEFAULT_WELCOME_MESSAGE,
+        NotificationSettings::kDefaultWelcomeMessage,
         QDateTime::currentDateTimeUtc(),
         false
     };
 
-    QJsonArray array{ welcome.toJson() };
-    bool success = JsonManager::saveJsonFile(path, QJsonDocument(array));
-
-    if (success) {
+    const QJsonArray array{ welcome.toJson() };
+    if (JsonManager::saveJsonFile(path, QJsonDocument(array))) {
         instance().load();
     }
 }
 
-// Loads notifications from disk
+// Persistence: load notifications
 void NotificationServiceManager::load() {
     notifications.clear();
 
@@ -71,22 +68,18 @@ void NotificationServiceManager::load() {
     }
 }
 
-// Saves all notifications to disk
+// Persistence: save notifications
 void NotificationServiceManager::save() {
     if (notificationsSuspended) return;
 
     QJsonArray array;
-    const auto& list = notifications;
-
-    for (int i = 0; i < list.size(); ++i) {
-        array.append(list.at(i).toJson());
+    for (const auto& n : notifications) {
+        array.append(n.toJson());
     }
-
-    QJsonDocument doc(array);
-    JsonManager::saveJsonFile(notificationFilePath(), doc);
+    JsonManager::saveJsonFile(notificationFilePath(), QJsonDocument(array));
 }
 
-// Adds a new unread notification
+// Mutation: add notification
 void NotificationServiceManager::addNotification(const QString& message) {
     if (notificationsSuspended) return;
 
@@ -95,7 +88,7 @@ void NotificationServiceManager::addNotification(const QString& message) {
     emit notificationsUpdated();
 }
 
-// Marks all notifications as read
+// Mutation: mark all as read
 void NotificationServiceManager::markAllAsRead() {
     if (notificationsSuspended) return;
 
@@ -106,28 +99,27 @@ void NotificationServiceManager::markAllAsRead() {
     emit notificationsUpdated();
 }
 
-// Returns a list of unread notifications
+// Query: unread notifications
 QList<NotificationServiceStruct> NotificationServiceManager::unreadNotifications() const {
     QList<NotificationServiceStruct> unread;
     for (const auto& n : notifications) {
-        if (!n.read)
-            unread.append(n);
+        if (!n.read) unread.append(n);
     }
     return unread;
 }
 
-// Returns all stored notifications
+// Query: all notifications
 const QList<NotificationServiceStruct>& NotificationServiceManager::allNotifications() const {
     return notifications;
 }
 
-// Clears all notifications and resets with welcome message
+// Mutation: clear all notifications
 void NotificationServiceManager::clearAllNotifications() {
     if (notificationsSuspended) return;
 
     notifications.clear();
     notifications.append({
-        NotificationSettings::k_DEFAULT_WELCOME_MESSAGE,
+        NotificationSettings::kDefaultWelcomeMessage,
         QDateTime::currentDateTimeUtc(),
         false
     });
@@ -135,7 +127,7 @@ void NotificationServiceManager::clearAllNotifications() {
     emit notificationsUpdated();
 }
 
-// Suspends or resumes all notifications and file writes
+// Control: suspend/resume notifications
 void NotificationServiceManager::suspendNotifications(bool suspend) {
     notificationsSuspended = suspend;
 }

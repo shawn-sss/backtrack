@@ -201,7 +201,6 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/InstallServiceManager/InstallServiceManager.cpp
     services/ServiceManagers/InstallServiceManager/InstallServiceManager.h
 
-    services/ServiceManagers/JsonServiceManager/JsonServiceConstants.h
     services/ServiceManagers/JsonServiceManager/JsonServiceManager.cpp
     services/ServiceManagers/JsonServiceManager/JsonServiceManager.h
 

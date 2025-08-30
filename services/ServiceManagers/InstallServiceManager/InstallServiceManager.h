@@ -10,14 +10,14 @@ class InstallServiceManager {
 public:
     explicit InstallServiceManager(const QString& metadataPath);
 
-    // Load and save metadata
+    // Persistence
     void load();
     void save();
 
-    // Initialize metadata with default values
+    // Defaults
     static void initializeDefaults();
 
-    // Metadata accessors
+    // Access
     const QJsonObject& getMetadata() const;
     void setMetadata(const QJsonObject& metadata);
 
@@ -26,4 +26,4 @@ private:
     QJsonObject installMetadata;
 };
 
-#endif // INSTALLSERVICEMANAGER_H
+#endif

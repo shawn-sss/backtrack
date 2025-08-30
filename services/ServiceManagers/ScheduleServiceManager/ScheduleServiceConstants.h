@@ -1,12 +1,21 @@
 #ifndef SCHEDULESERVICEMANAGERCONSTANTS_H
 #define SCHEDULESERVICEMANAGERCONSTANTS_H
 
+// Validation and timing rules
 namespace ScheduleServiceManagerConstants {
+inline constexpr int NextMinuteStepSeconds = 60;
+inline constexpr int MinimumRearmFallbackMs = 60'000;
+}
 
-// Timer / validation rules
-inline constexpr int k_NEXT_MINUTE_STEP_SECONDS = 60;   // enforce the next :00 minute boundary
-inline constexpr int k_MINIMUM_REARM_FALLBACK_MS = 60'000; // if due <= now, fallback 60s
+// Keys for schedule node in user settings
+namespace SchedKeys {
+inline constexpr char Node[] = "schedule";
+inline constexpr char Enabled[] = "enabled";
+inline constexpr char WhenIso[] = "when_iso";
+inline constexpr char Recur[] = "recur";
+inline constexpr char LegacyEnabled[] = "schedule_enabled";
+inline constexpr char LegacyWhenIso[] = "schedule_when_iso";
+inline constexpr char LegacyRecur[] = "schedule_recur";
+}
 
-} // namespace ScheduleServiceManagerConstants
-
-#endif // SCHEDULESERVICEMANAGERCONSTANTS_H
+#endif

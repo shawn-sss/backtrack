@@ -10,14 +10,12 @@ class UserServiceManager {
 public:
     explicit UserServiceManager(const QString& serviceFilePath);
 
-    // Load/save operations
+    // Persistence
     void load();
     void save() const;
-
-    // Initialize default settings
     void initializeDefaults();
 
-    // User settings accessors
+    // Accessors
     QJsonObject& settings();
     const QJsonObject& settings() const;
 
@@ -26,4 +24,4 @@ private:
     QJsonObject userSettings;
 };
 
-#endif // USERSERVICEMANAGER_H
+#endif

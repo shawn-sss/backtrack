@@ -2,12 +2,16 @@
 #include "FormatUtilsServiceManager.h"
 #include "../../../../constants/units_config.h"
 
+// Qt includes
+#include <QDateTime>
+#include <QStringBuilder>
+
 // C++ includes
 #include <array>
 
 namespace Shared::Formatting {
 
-// Format byte size into human-readable form
+// Format: size to human-readable string
 QString formatSize(qint64 size) {
     constexpr std::array<const char*, 4> units = {
         Units::Size::k_SIZE_UNIT_BYTES,
@@ -19,7 +23,7 @@ QString formatSize(qint64 size) {
     int unitIndex = 0;
     double value = static_cast<double>(size);
 
-    while (value >= Units::Size::k_SIZE_CONVERSION_FACTOR && unitIndex < units.size() - 1) {
+    while (value >= Units::Size::k_SIZE_CONVERSION_FACTOR && unitIndex < static_cast<int>(units.size()) - 1) {
         value /= Units::Size::k_SIZE_CONVERSION_FACTOR;
         ++unitIndex;
     }
@@ -27,7 +31,7 @@ QString formatSize(qint64 size) {
     return QString::number(value, 'f', 2) % " " % units[unitIndex];
 }
 
-// Format duration from milliseconds to a human-readable unit
+// Format: duration from milliseconds to appropriate unit
 QString formatDuration(qint64 milliseconds) {
     constexpr qint64 MS_PER_SEC = 1000;
     constexpr qint64 SEC_PER_MIN = 60;
@@ -53,12 +57,12 @@ QString formatDuration(qint64 milliseconds) {
     return QString::number(days) % Units::Duration::k_UNIT_DAYS;
 }
 
-// Format a timestamp using a custom string format
+// Format: timestamp using string format
 QString formatTimestamp(const QDateTime& datetime, const QString& format) {
     return datetime.toString(format);
 }
 
-// Format a timestamp using a Qt::DateFormat enum
+// Format: timestamp using enum format
 QString formatTimestamp(const QDateTime& datetime, Qt::DateFormat format) {
     return datetime.toString(format);
 }

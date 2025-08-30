@@ -1,21 +1,24 @@
 #ifndef USERSERVICECONSTANTS_H
 #define USERSERVICECONSTANTS_H
 
-// Default values for user service settings
+// Defaults
 namespace UserServiceDefaults {
-inline constexpr const char* k_BACKUP_PREFIX = "Backup";
+inline constexpr const char* BackupPrefix     = "Backup";
+inline constexpr bool        MinimizeOnClose = true;
 }
 
-// Keys for the user settings file
+// Keys
 namespace UserServiceKeys {
-inline constexpr auto k_BACKUP_SERVICE_GROUP  = "backup_service";
-inline constexpr auto k_BACKUP_DIRECTORY_KEY  = "backup_directory";
-inline constexpr auto k_BACKUP_PREFIX_KEY     = "backup_prefix";
-inline constexpr auto k_THEME_PREFERENCE_KEY  = "theme_preference";
-inline constexpr auto k_MINIMIZE_ON_CLOSE_KEY = "minimize_on_close";
-inline constexpr auto k_SCHEDULE_ENABLED_KEY    = "schedule_enabled";
-inline constexpr auto k_SCHEDULE_WHEN_ISO_KEY   = "schedule_when_iso";
-inline constexpr auto k_SCHEDULE_RECURRENCE_KEY = "schedule_recur"; // 0=Once,1=Daily,2=Weekly,3=Monthly
+inline constexpr const char* BackupServiceGroup   = "backup_service";
+inline constexpr const char* BackupDirectoryKey   = "backup_directory";
+inline constexpr const char* BackupPrefixKey      = "backup_prefix";
+inline constexpr const char* ThemePreferenceKey   = "theme_preference";
+inline constexpr const char* MinimizeOnCloseKey   = "minimize_on_close";
+
+// Legacy (schedule migration support)
+inline constexpr const char* ScheduleEnabledKey    = "schedule_enabled";
+inline constexpr const char* ScheduleWhenIsoKey   = "schedule_when_iso";
+inline constexpr const char* ScheduleRecurrenceKey = "schedule_recur";
 }
 
-#endif // USERSERVICECONSTANTS_H
+#endif

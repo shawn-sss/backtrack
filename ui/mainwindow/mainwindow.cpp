@@ -1493,7 +1493,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     bool minimizeOnClose = ServiceDirector::getInstance()
     .getUserServiceManager()
         ->settings()
-        .value(UserServiceKeys::k_MINIMIZE_ON_CLOSE_KEY)
+        .value(UserServiceKeys::MinimizeOnCloseKey)
         .toBool(true);
 
     if (minimizeOnClose) {

@@ -8,7 +8,7 @@
 #include <QJsonDocument>
 #include <QSaveFile>
 
-// Load JSON content from a file into a QJsonObject
+// Load JSON into QJsonObject
 bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -24,14 +24,12 @@ bool JsonManager::loadJsonFile(const QString& path, QJsonObject& target) {
     return true;
 }
 
-
-// Save a QJsonObject to a file as JSON
+// Save QJsonObject to file
 bool JsonManager::saveJsonFile(const QString& path, const QJsonObject& data) {
     return saveJsonFile(path, QJsonDocument(data));
 }
 
-
-// Load JSON content from a file and return the QJsonDocument
+// Load JSON into QJsonDocument
 QJsonDocument JsonManager::loadJsonFile(const QString& path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -41,8 +39,7 @@ QJsonDocument JsonManager::loadJsonFile(const QString& path) {
     return QJsonDocument::fromJson(file.readAll());
 }
 
-
-// Save a QJsonDocument to a file with indentation
+// Save QJsonDocument to file
 bool JsonManager::saveJsonFile(const QString& path, const QJsonDocument& doc) {
     QDir().mkpath(QFileInfo(path).absolutePath());
 

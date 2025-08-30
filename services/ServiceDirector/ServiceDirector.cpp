@@ -13,12 +13,9 @@
 #include <QFile>
 #include <QDir>
 #include <QTimer>
-#include <QJsonObject>
 
 // C++ includes
 #include <memory>
-
-using namespace ThemeServiceConstants;
 
 // Lifecycle: singleton, construction, defaults, first-run
 ServiceDirector& ServiceDirector::getInstance() {
@@ -33,8 +30,8 @@ ServiceDirector::ServiceDirector() {
     const QString userServicePath = PathServiceManager::userSettingsFilePath();
 
     installServiceManager = std::make_unique<InstallServiceManager>(appMetadataPath);
-    userServiceManager = std::make_unique<UserServiceManager>(userServicePath);
-    backupServiceManager = std::make_unique<BackupServiceManager>(*userServiceManager);
+    userServiceManager    = std::make_unique<UserServiceManager>(userServicePath);
+    backupServiceManager  = std::make_unique<BackupServiceManager>(*userServiceManager);
 
     firstRun = !QFile::exists(appMetadataPath) || !QFile::exists(userServicePath);
     if (firstRun) {
@@ -60,7 +57,7 @@ void ServiceDirector::maybeShowWelcomeDialog(QWidget* parent) {
     if (!firstRun)
         return;
 
-    QTimer::singleShot(0, parent, [parent]() {
+    QTimer::singleShot(ServiceDirectorConstants::kImmediateMs, parent, [parent]() {
         WelcomeDialog welcomeDialog(parent);
         welcomeDialog.exec();
     });
@@ -75,18 +72,19 @@ void ServiceDirector::installThemeEventFilter(QObject* target) {
     getThemeServiceManager()->installEventFilter(target);
 }
 
-UserThemePreference ServiceDirector::getThemePreference() const {
+ThemeServiceConstants::UserThemePreference ServiceDirector::getThemePreference() const {
     const auto& settings = userServiceManager->settings();
-    const auto& key = UserServiceKeys::k_THEME_PREFERENCE_KEY;
+    const auto& key      = UserServiceKeys::ThemePreferenceKey;
 
     return settings.contains(key)
-               ? stringToUserThemePreference(settings.value(key).toString())
-               : UserThemePreference::Auto;
+               ? ThemeServiceConstants::stringToUserThemePreference(settings.value(key).toString())
+               : ThemeServiceConstants::UserThemePreference::Auto;
 }
 
-void ServiceDirector::setThemePreference(UserThemePreference preference) {
+void ServiceDirector::setThemePreference(ThemeServiceConstants::UserThemePreference preference) {
     auto& settings = userServiceManager->settings();
-    settings[UserServiceKeys::k_THEME_PREFERENCE_KEY] = userThemePreferenceToString(preference);
+    settings[UserServiceKeys::ThemePreferenceKey] =
+        ThemeServiceConstants::userThemePreferenceToString(preference);
     userServiceManager->save();
 }
 

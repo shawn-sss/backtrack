@@ -7,35 +7,32 @@
 // Qt includes
 #include <QObject>
 
-// Forward declaration (Qt class)
 #ifdef Q_OS_WIN
-#include <QAbstractNativeEventFilter>
 class ThemeChangeFilter;
 #endif
 
+// Manages application theming
 class ThemeServiceManager : public QObject {
     Q_OBJECT
 
 public:
-    // Singleton access
+    // Lifecycle
     static ThemeServiceManager& instance();
 
-    // Theme status
+    // Query
     bool isDarkTheme() const;
     ThemeServiceConstants::AppTheme currentTheme() const;
     ThemeServiceConstants::UserThemePreference getUserThemePreference() const;
 
-    // Theme control
+    // Mutation
     void setUserThemePreference(ThemeServiceConstants::UserThemePreference preference);
     void applyTheme();
     void installEventFilter(QObject* target = nullptr);
 
 signals:
-    // Emitted after theme is applied
     void themeChanged();
 
 private:
-    // Constructor
     explicit ThemeServiceManager(QObject* parent = nullptr);
 
 #ifdef Q_OS_WIN
@@ -45,4 +42,4 @@ private:
     ThemeServiceConstants::AppTheme _currentTheme = ThemeServiceConstants::AppTheme::Dark;
 };
 
-#endif // THEMESERVICEMANAGER_H
+#endif

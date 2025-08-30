@@ -1,5 +1,3 @@
-// ScheduleServiceManager.cpp
-
 // Project includes
 #include "ScheduleServiceManager.h"
 #include "ScheduleServiceConstants.h"
@@ -7,32 +5,22 @@
 #include "../../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
 
 // Qt includes
-#include <QDateTime>
 #include <QJsonObject>
 #include <QTimer>
-#include <QTimeZone>
 #include <QtGlobal>
-
-// C++ includes
-
-// Forward declaration (Custom class)
-
-// Forward declaration (Qt class)
+#include <QTimeZone>
 
 using namespace ScheduleServiceManagerConstants;
 
-// Keys for the nested schedule node in user settings
-namespace SchedKeys {
-constexpr char kNode[]    = "schedule";
-constexpr char kEnabled[] = "enabled";
-constexpr char kWhenIso[] = "when_iso";
-constexpr char kRecur[]   = "recur";
-constexpr char kLegacyEnabled[] = "schedule_enabled";
-constexpr char kLegacyWhenIso[] = "schedule_when_iso";
-constexpr char kLegacyRecur[]   = "schedule_recur";
+namespace {
+inline int clampRecurrenceInt(int v) {
+    return qBound(static_cast<int>(ScheduleServiceManager::Recurrence::Once),
+                  v,
+                  static_cast<int>(ScheduleServiceManager::Recurrence::Monthly));
+}
 }
 
-// Static helpers
+// Utility
 QDateTime ScheduleServiceManager::forceSecondsZero(const QDateTime& dt) {
     const QDate d = dt.date();
     const QTime t = dt.time();
@@ -40,8 +28,10 @@ QDateTime ScheduleServiceManager::forceSecondsZero(const QDateTime& dt) {
 }
 
 QDateTime ScheduleServiceManager::nextMinuteFrom(const QDateTime& from) {
-    const QDateTime floorFrom(from.date(), QTime(from.time().hour(), from.time().minute(), 0), from.timeZone());
-    return floorFrom.addSecs(k_NEXT_MINUTE_STEP_SECONDS);
+    const QDateTime floorFrom(from.date(),
+                              QTime(from.time().hour(), from.time().minute(), 0),
+                              from.timeZone());
+    return floorFrom.addSecs(NextMinuteStepSeconds);
 }
 
 QDateTime ScheduleServiceManager::nextMinuteFromNow() {
@@ -58,50 +48,50 @@ QDateTime ScheduleServiceManager::advanceByRecurrence(QDateTime dt, Recurrence r
     }
 }
 
-// Constructor
+// Lifecycle
 ScheduleServiceManager::ScheduleServiceManager(QObject* parent)
-    : QObject(parent)
-{
+    : QObject(parent) {
     timer_ = new QTimer(this);
     timer_->setSingleShot(true);
     connect(timer_, &QTimer::timeout, this, &ScheduleServiceManager::onTimeout);
     loadFromUserSettings();
 }
 
-// Persistence: load from user settings (with legacy migration)
+// Persistence: load from user settings
 void ScheduleServiceManager::loadFromUserSettings() {
     auto& root = ServiceDirector::getInstance().getUserServiceManager()->settings();
 
-    QJsonObject sched = root.value(SchedKeys::kNode).toObject();
+    QJsonObject sched = root.value(SchedKeys::Node).toObject();
 
     if (sched.isEmpty() &&
-        (root.contains(SchedKeys::kLegacyEnabled) ||
-         root.contains(SchedKeys::kLegacyWhenIso) ||
-         root.contains(SchedKeys::kLegacyRecur))) {
+        (root.contains(SchedKeys::LegacyEnabled) ||
+         root.contains(SchedKeys::LegacyWhenIso) ||
+         root.contains(SchedKeys::LegacyRecur))) {
 
         Config migrated;
-        migrated.enabled = root.value(SchedKeys::kLegacyEnabled).toBool(false);
+        migrated.enabled = root.value(SchedKeys::LegacyEnabled).toBool(false);
 
-        const QString whenIsoLegacy = root.value(SchedKeys::kLegacyWhenIso).toString();
+        const QString whenIsoLegacy = root.value(SchedKeys::LegacyWhenIso).toString();
         if (!whenIsoLegacy.isEmpty()) {
             const QDateTime dt = QDateTime::fromString(whenIsoLegacy, Qt::ISODate);
             if (dt.isValid()) migrated.when = dt;
         }
 
-        const int recurLegacy = root.value(SchedKeys::kLegacyRecur).toInt(static_cast<int>(Recurrence::Once));
-        migrated.recur = static_cast<Recurrence>(qBound(0, recurLegacy, 3));
+        const int recurLegacy = root.value(SchedKeys::LegacyRecur)
+                                    .toInt(static_cast<int>(Recurrence::Once));
+        migrated.recur = static_cast<Recurrence>(clampRecurrenceInt(recurLegacy));
 
         QJsonObject out;
-        out.insert(SchedKeys::kEnabled, migrated.enabled);
-        out.insert(SchedKeys::kWhenIso, migrated.when.isValid()
-                                            ? forceSecondsZero(migrated.when).toString(Qt::ISODate)
-                                            : QString());
-        out.insert(SchedKeys::kRecur, static_cast<int>(migrated.recur));
-        root[SchedKeys::kNode] = out;
+        out.insert(SchedKeys::Enabled, migrated.enabled);
+        out.insert(SchedKeys::WhenIso, migrated.when.isValid()
+                                           ? forceSecondsZero(migrated.when).toString(Qt::ISODate)
+                                           : QString());
+        out.insert(SchedKeys::Recur, static_cast<int>(migrated.recur));
+        root[SchedKeys::Node] = out;
 
-        root.remove(SchedKeys::kLegacyEnabled);
-        root.remove(SchedKeys::kLegacyWhenIso);
-        root.remove(SchedKeys::kLegacyRecur);
+        root.remove(SchedKeys::LegacyEnabled);
+        root.remove(SchedKeys::LegacyWhenIso);
+        root.remove(SchedKeys::LegacyRecur);
 
         ServiceDirector::getInstance().getUserServiceManager()->save();
 
@@ -110,16 +100,17 @@ void ScheduleServiceManager::loadFromUserSettings() {
     }
 
     Config c;
-    c.enabled = sched.value(SchedKeys::kEnabled).toBool(false);
+    c.enabled = sched.value(SchedKeys::Enabled).toBool(false);
 
-    const QString whenIso = sched.value(SchedKeys::kWhenIso).toString();
+    const QString whenIso = sched.value(SchedKeys::WhenIso).toString();
     if (!whenIso.isEmpty()) {
         const QDateTime dt = QDateTime::fromString(whenIso, Qt::ISODate);
         if (dt.isValid()) c.when = dt;
     }
 
-    const int recurInt = sched.value(SchedKeys::kRecur).toInt(static_cast<int>(Recurrence::Once));
-    c.recur = static_cast<Recurrence>(qBound(0, recurInt, 3));
+    const int recurInt = sched.value(SchedKeys::Recur)
+                             .toInt(static_cast<int>(Recurrence::Once));
+    c.recur = static_cast<Recurrence>(clampRecurrenceInt(recurInt));
 
     setConfig(c, true);
 }
@@ -129,22 +120,21 @@ void ScheduleServiceManager::saveToUserSettings() const {
     auto& root = ServiceDirector::getInstance().getUserServiceManager()->settings();
 
     QJsonObject sched;
-    sched.insert(SchedKeys::kEnabled, cfg_.enabled);
-    sched.insert(SchedKeys::kWhenIso, cfg_.when.isValid()
-                                          ? forceSecondsZero(cfg_.when).toString(Qt::ISODate)
-                                          : QString());
-    sched.insert(SchedKeys::kRecur, static_cast<int>(cfg_.recur));
+    sched.insert(SchedKeys::Enabled, cfg_.enabled);
+    sched.insert(SchedKeys::WhenIso, cfg_.when.isValid()
+                                         ? forceSecondsZero(cfg_.when).toString(Qt::ISODate)
+                                         : QString());
+    sched.insert(SchedKeys::Recur, static_cast<int>(cfg_.recur));
 
-    root[SchedKeys::kNode] = sched;
+    root[SchedKeys::Node] = sched;
     ServiceDirector::getInstance().getUserServiceManager()->save();
 }
 
-// Configuration: get current config
+// Configuration
 ScheduleServiceManager::Config ScheduleServiceManager::config() const {
     return cfg_;
 }
 
-// Configuration: set new config
 void ScheduleServiceManager::setConfig(const Config& in, bool rearmTimer) {
     Config normalized = in;
 
@@ -166,7 +156,6 @@ void ScheduleServiceManager::setConfig(const Config& in, bool rearmTimer) {
     saveToUserSettings();
 }
 
-// Configuration: enable scheduling
 void ScheduleServiceManager::enable(bool rearmTimer) {
     if (!cfg_.enabled) {
         cfg_.enabled = true;
@@ -184,7 +173,6 @@ void ScheduleServiceManager::enable(bool rearmTimer) {
     }
 }
 
-// Configuration: disable scheduling
 void ScheduleServiceManager::disable(bool clearWhen) {
     if (cfg_.enabled) {
         cfg_.enabled = false;
@@ -195,7 +183,7 @@ void ScheduleServiceManager::disable(bool clearWhen) {
     }
 }
 
-// Scheduling helper: compute next occurrence strictly after now
+// Scheduling helpers
 QDateTime ScheduleServiceManager::nextOccurrence(const Config& c, const QDateTime& now) const {
     QDateTime candidate = c.when.isValid() ? forceSecondsZero(c.when) : nextMinuteFrom(now);
 
@@ -208,7 +196,6 @@ QDateTime ScheduleServiceManager::nextOccurrence(const Config& c, const QDateTim
     return candidate;
 }
 
-// Scheduling helper: compute next due time with clamps
 QDateTime ScheduleServiceManager::computeNextDue(const Config& c, const QDateTime& now) const {
     QDateTime due = nextOccurrence(c, now);
     const QDateTime minAllowed = nextMinuteFrom(now);
@@ -217,19 +204,17 @@ QDateTime ScheduleServiceManager::computeNextDue(const Config& c, const QDateTim
     return forceSecondsZero(due);
 }
 
-// Scheduling helper: expose current due time
 QDateTime ScheduleServiceManager::dueTime(const QDateTime& now) const {
     if (!cfg_.enabled) return QDateTime();
     return computeNextDue(cfg_, now);
 }
 
-// Scheduling helper: milliseconds until due
 qint64 ScheduleServiceManager::msUntilDue(const QDateTime& now) const {
     if (!cfg_.enabled) return -1;
     return now.msecsTo(computeNextDue(cfg_, now));
 }
 
-// Timer control: (re)arm internal timer
+// Timer control
 void ScheduleServiceManager::scheduleOrRescheduleTimer() {
     timer_->stop();
 
@@ -241,12 +226,12 @@ void ScheduleServiceManager::scheduleOrRescheduleTimer() {
     qint64 msec = now.msecsTo(due);
 
     if (msec <= 0)
-        msec = k_MINIMUM_REARM_FALLBACK_MS;
+        msec = MinimumRearmFallbackMs;
 
     timer_->start(static_cast<int>(msec));
 }
 
-// Slot: timer timeout handler
+// Slot
 void ScheduleServiceManager::onTimeout() {
     emit fired();
 

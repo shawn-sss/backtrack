@@ -14,17 +14,21 @@ public:
     explicit BackupServiceManager(UserServiceManager& serviceManager);
 
     // Access backup configuration
-    QJsonObject getBackupSettings() const;
-    QString getBackupDirectory() const;
+    [[nodiscard]] QJsonObject getBackupSettings() const;
+
+    // Backup directory
+    [[nodiscard]] QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
-    QString getBackupPrefix() const;
+
+    // Backup prefix
+    [[nodiscard]] QString getBackupPrefix() const;
     void setBackupPrefix(const QString& prefix);
 
 private:
-    // Internal helper to persist changes
+    // Internal persistence helper
     void updateBackupSetting(const QString& key, const QString& newValue, const QString& defaultValue);
 
     UserServiceManager& userServiceManager;
 };
 
-#endif // BACKUPSERVICEMANAGER_H
+#endif

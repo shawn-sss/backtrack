@@ -1,20 +1,20 @@
 #ifndef TOOLBARSERVICEMANAGERCONSTANTS_H
 #define TOOLBARSERVICEMANAGERCONSTANTS_H
 
-// Icon paths for toolbar service actions
-namespace Resources::ToolbarService {
-inline constexpr auto k_SETTINGS_ICON_PATH = ":/resources/icons/settings.svg";
-inline constexpr auto k_HELP_ICON_PATH     = ":/resources/icons/help.svg";
-inline constexpr auto k_ABOUT_ICON_PATH    = ":/resources/icons/about.svg";
-inline constexpr auto k_EXIT_ICON_PATH     = ":/resources/icons/exit.svg";
+// Icon paths
+namespace ToolbarIcons {
+inline constexpr const char* Settings = ":/resources/icons/settings.svg";
+inline constexpr const char* Help     = ":/resources/icons/help.svg";
+inline constexpr const char* About    = ":/resources/icons/about.svg";
+inline constexpr const char* Exit     = ":/resources/icons/exit.svg";
 }
 
-// Text labels for toolbar actions
-namespace Labels::Toolbar {
-inline constexpr auto k_SETTINGS = "Settings";
-inline constexpr auto k_HELP     = "Help";
-inline constexpr auto k_ABOUT    = "About";
-inline constexpr auto k_EXIT     = "Exit";
+// Labels
+namespace ToolbarLabels {
+inline constexpr const char* Settings = "Settings";
+inline constexpr const char* Help     = "Help";
+inline constexpr const char* About    = "About";
+inline constexpr const char* Exit     = "Exit";
 }
 
-#endif // TOOLBARSERVICEMANAGERCONSTANTS_H
+#endif

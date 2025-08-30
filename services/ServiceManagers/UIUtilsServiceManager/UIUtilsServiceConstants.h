@@ -1,11 +1,9 @@
 #ifndef UIUTILSSERVICECONSTANTS_H
 #define UIUTILSSERVICECONSTANTS_H
 
-// Qt includes
-#include <QString>
-
 namespace UIUtilsServiceConstants {
+// Tooltips
+inline constexpr const char* TemplateResetTooltip = "Reset Template";
+}
 
-} // namespace UIUtilsServiceConstants
-
-#endif // UIUTILSSERVICECONSTANTS_H
+#endif

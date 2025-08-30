@@ -7,13 +7,13 @@
 
 namespace UninstallServiceConstants {
 
-// Dialog titles
+// Titles
 inline QString titleResetAppInstallation() { return QObject::tr("Reset App Installation"); }
 inline QString titleConfirmAppReset()      { return QObject::tr("Confirm App Reset"); }
 inline QString titleAppReset()             { return QObject::tr("App Reset"); }
 inline QString titleResetFailed()          { return QObject::tr("Reset Failed"); }
 
-// Dialog messages
+// Messages
 inline QString msgInvalidDir() {
     return QObject::tr("The application install directory is invalid or does not exist.");
 }
@@ -24,8 +24,8 @@ inline QString msgConfirmReset(const QString& path) {
                "%1\n\n"
                "This will erase all user settings and metadata stored locally.\n"
                "This only targets the folder containing this application's runtime data.\n\n"
-               "Are you sure you want to proceed?"
-               ).arg(path);
+               "Are you sure you want to proceed?")
+        .arg(path);
 }
 
 inline QString msgSuccess() {
@@ -36,6 +36,6 @@ inline QString msgFailure() {
     return QObject::tr("Failed to delete the application install directory. Please check permissions.");
 }
 
-} // namespace UninstallServiceConstants
+}
 
-#endif // UNINSTALLSERVICECONSTANTS_H
+#endif

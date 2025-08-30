@@ -5,20 +5,20 @@
 #include <QString>
 #include <QWidget>
 
-// Handles app data uninstallation
+// Manages app uninstall operations
 class UninstallServiceManager {
 public:
     UninstallServiceManager();
 
-    // Directory management
+    // Query
     QString getInstallDirectory() const;
 
-    // Uninstall operations
-    bool confirmUninstall(QWidget* parent) const;
-    bool performUninstall() const;
+    // Uninstall
+    [[nodiscard]] bool confirmUninstall(QWidget* parent) const;
+    [[nodiscard]] bool performUninstall() const;
 
 private:
-    bool deleteDirectory(const QString& path) const;
+    [[nodiscard]] bool deleteDirectory(const QString& path) const;
 };
 
-#endif // UNINSTALLSERVICEMANAGER_H
+#endif

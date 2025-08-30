@@ -4,42 +4,45 @@
 #include "../UserServiceManager/UserServiceManager.h"
 #include "../PathServiceManager/PathServiceManager.h"
 
-// Constructor
+// Qt includes
+#include <QJsonValue>
+
+// Lifecycle: construction
 BackupServiceManager::BackupServiceManager(UserServiceManager& serviceManager)
     : userServiceManager(serviceManager) {}
 
-// Returns the full backup settings group
+// Retrieval: backup settings group
 QJsonObject BackupServiceManager::getBackupSettings() const {
     const QJsonObject& settings = userServiceManager.settings();
     const QJsonValue groupValue = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP);
     return groupValue.isObject() ? groupValue.toObject() : QJsonObject{};
 }
 
-// Returns the configured backup directory
+// Retrieval: backup directory
 QString BackupServiceManager::getBackupDirectory() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ServiceKeys::BACKUP_DIRECTORY_KEY)
         .toString(PathServiceManager::backupSetupFolderPath());
 }
 
-// Sets the backup directory
+// Mutation: backup directory
 void BackupServiceManager::setBackupDirectory(const QString& dir) {
     updateBackupSetting(ServiceKeys::BACKUP_DIRECTORY_KEY, dir, PathServiceManager::backupSetupFolderPath());
 }
 
-// Returns the configured backup prefix
+// Retrieval: backup prefix
 QString BackupServiceManager::getBackupPrefix() const {
     const QJsonObject backupSettings = getBackupSettings();
     return backupSettings.value(ServiceKeys::BACKUP_PREFIX_KEY)
         .toString(ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Sets the backup prefix
+// Mutation: backup prefix
 void BackupServiceManager::setBackupPrefix(const QString& prefix) {
     updateBackupSetting(ServiceKeys::BACKUP_PREFIX_KEY, prefix, ServiceDefaults::BACKUP_PREFIX);
 }
 
-// Updates and persists a backup setting if changed
+// Internal: update and persist backup setting
 void BackupServiceManager::updateBackupSetting(const QString& key, const QString& newValue, const QString& defaultValue) {
     QJsonObject& settings = userServiceManager.settings();
     QJsonObject backupSettings = settings.value(ServiceKeys::BACKUP_SERVICE_GROUP).toObject();
