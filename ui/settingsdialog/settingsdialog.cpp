@@ -4,10 +4,14 @@
 #include "settingsdialogstyling.h"
 #include "../promptdialog/promptdialog.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
+#include "../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
+#include "../../services/ServiceManagers/ExportServiceManager/ExportServiceConstants.h"
+#include "../../services/ServiceManagers/ExportServiceManager/ExportServiceManager.h"
+#include "../../services/ServiceManagers/ImportServiceManager/ImportServiceConstants.h"
+#include "../../services/ServiceManagers/ImportServiceManager/ImportServiceManager.h"
+#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceManager.h"
-#include "../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
 #include <QCheckBox>
@@ -158,13 +162,42 @@ QWidget* SettingsDialog::createSettingsPage() {
     auto* advancedGroup = new QGroupBox(tr(k_CATEGORY_ADVANCED), widget);
     auto* advancedLayout = new QVBoxLayout(advancedGroup);
 
-    auto* buttonRow = new QWidget(widget);
-    auto* rowLayout = new QHBoxLayout(buttonRow);
+    auto* importExportRow = new QWidget(widget);
+    auto* importExportLayout = new QHBoxLayout(importExportRow);
+    importExportLayout->setSpacing(12);
+    importExportLayout->setContentsMargins(0, 0, 0, 0);
+
+    importPreferencesButton = new QPushButton(ImportServiceConstants::k_BUTTON_IMPORT_PREFS, importExportRow);
+    Shared::UI::applyButtonTooltipAndCursor(importPreferencesButton,
+                                            ImportServiceConstants::k_TOOLTIP_IMPORT_PREFS);
+    importPreferencesButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    exportPreferencesButton = new QPushButton(ExportServiceConstants::k_BUTTON_EXPORT_PREFS, importExportRow);
+    Shared::UI::applyButtonTooltipAndCursor(exportPreferencesButton,
+                                            ExportServiceConstants::k_TOOLTIP_EXPORT_PREFS);
+    exportPreferencesButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    importExportLayout->addWidget(importPreferencesButton);
+    importExportLayout->addWidget(exportPreferencesButton);
+    advancedLayout->addWidget(importExportRow);
+
+    connect(importPreferencesButton, &QPushButton::clicked, this, [this]() {
+        ImportServiceManager importMgr;
+        importMgr.importUserPreferences(this);
+    });
+
+    connect(exportPreferencesButton, &QPushButton::clicked, this, [this]() {
+        ExportServiceManager exportMgr;
+        exportMgr.exportUserPreferences(this);
+    });
+
+    auto* resetClearRow = new QWidget(widget);
+    auto* rowLayout = new QHBoxLayout(resetClearRow);
     rowLayout->setSpacing(12);
     rowLayout->setContentsMargins(0, 0, 0, 0);
 
-    resetBackupArchiveButton = new QPushButton(k_BUTTON_RESET_BACKUP, buttonRow);
-    clearAppDataButton       = new QPushButton(k_BUTTON_CLEAR_APP,   buttonRow);
+    resetBackupArchiveButton = new QPushButton(k_BUTTON_RESET_BACKUP, resetClearRow);
+    clearAppDataButton       = new QPushButton(k_BUTTON_CLEAR_APP,   resetClearRow);
 
     Shared::UI::applyButtonTooltipAndCursor(resetBackupArchiveButton, k_TOOLTIP_RESET_BACKUP);
     Shared::UI::applyButtonTooltipAndCursor(clearAppDataButton,       k_TOOLTIP_CLEAR_APP);
@@ -174,7 +207,7 @@ QWidget* SettingsDialog::createSettingsPage() {
 
     rowLayout->addWidget(resetBackupArchiveButton);
     rowLayout->addWidget(clearAppDataButton);
-    advancedLayout->addWidget(buttonRow);
+    advancedLayout->addWidget(resetClearRow);
 
     connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
         emit requestAppDataClear();

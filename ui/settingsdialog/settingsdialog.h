@@ -27,18 +27,26 @@ private slots:
     void onSaveClicked();
 
 private:
+    // Layout
     void     setupLayout();
     QWidget* createSettingsPage();
 
-    QLineEdit*   backupPrefixEdit         = nullptr;
-    QComboBox*   themeComboBox            = nullptr;
-    QPushButton* saveButton               = nullptr;
-    QTimer*      saveCooldownTimer        = nullptr;
-    QCheckBox*   minimizeOnCloseCheckbox  = nullptr;
+    // User preferences controls
+    QLineEdit*   backupPrefixEdit        = nullptr;
+    QComboBox*   themeComboBox           = nullptr;
+    QCheckBox*   minimizeOnCloseCheckbox = nullptr;
+
+    // Save button + cooldown
+    QPushButton* saveButton        = nullptr;
+    QTimer*      saveCooldownTimer = nullptr;
+
+    // Advanced section buttons
+    QPushButton* exportPreferencesButton  = nullptr;
+    QPushButton* importPreferencesButton  = nullptr;
     QPushButton* clearAppDataButton       = nullptr;
     QPushButton* resetBackupArchiveButton = nullptr;
 
     Q_DISABLE_COPY_MOVE(SettingsDialog)
 };
 
-#endif // SETTINGSDIALOG_H
+#endif

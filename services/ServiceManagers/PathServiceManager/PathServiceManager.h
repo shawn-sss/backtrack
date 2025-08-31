@@ -6,18 +6,19 @@
 
 class PathServiceManager {
 public:
-    // Control
+    // Backup directory control
     static void setBackupDirectory(const QString& path);
     static QString getBackupDirectory();
 
-    // Application data
+    // Application data paths
     static QString appDataRootDir();
     static QString appConfigFolderPath();
     static QString appInitMetadataFilePath();
     static QString appNotificationsFilePath();
     static QString userSettingsFilePath();
+    static QString userTemplatesFilePath();
 
-    // Backup data
+    // Backup paths
     static QString backupDataRootDir();
     static QString backupSetupFolderPath();
     static QString backupConfigFolderPath();

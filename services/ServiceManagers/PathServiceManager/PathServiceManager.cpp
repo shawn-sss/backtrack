@@ -1,6 +1,6 @@
 // Project includes
-#include "PathServiceManager.h"
 #include "PathServiceConstants.h"
+#include "PathServiceManager.h"
 
 // Qt includes
 #include <QDir>
@@ -10,7 +10,7 @@ static QString joinPath(const QString& base, const QString& sub) {
     return QDir(base).filePath(sub);
 }
 
-// Control: set and get backup directory
+// Backup directory control
 void PathServiceManager::setBackupDirectory(const QString& path) {
     userBackupDir = path;
 }
@@ -38,6 +38,10 @@ QString PathServiceManager::appNotificationsFilePath() {
 
 QString PathServiceManager::userSettingsFilePath() {
     return joinPath(appConfigFolderPath(), AppDataFileUserSettings);
+}
+
+QString PathServiceManager::userTemplatesFilePath() {
+    return joinPath(appConfigFolderPath(), AppDataFileUserTemplates);
 }
 
 // Backup paths

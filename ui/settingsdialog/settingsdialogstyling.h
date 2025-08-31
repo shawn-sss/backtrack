@@ -19,4 +19,4 @@ inline constexpr auto DESCRIPTION_LABEL_STYLE = "color: gray; font-size: 11px;";
 } // namespace Styles
 } // namespace SettingsDialogStyling
 
-#endif // SETTINGSDIALOGSTYLING_H
+#endif

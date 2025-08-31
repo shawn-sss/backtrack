@@ -191,6 +191,14 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/BackupServiceManager/BackupServiceManager.cpp
     services/ServiceManagers/BackupServiceManager/BackupServiceManager.h
 
+    services/ServiceManagers/ExportServiceManager/ExportServiceConstants.h
+    services/ServiceManagers/ExportServiceManager/ExportServiceManager.cpp
+    services/ServiceManagers/ExportServiceManager/ExportServiceManager.h
+
+    services/ServiceManagers/ImportServiceManager/ImportServiceConstants.h
+    services/ServiceManagers/ImportServiceManager/ImportServiceManager.cpp
+    services/ServiceManagers/ImportServiceManager/ImportServiceManager.h
+
     services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceConstants.h
     services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.cpp
     services/ServiceManagers/FilewatcherServiceManager/FilewatcherServiceManager.h
