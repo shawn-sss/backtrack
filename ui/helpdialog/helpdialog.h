@@ -1,5 +1,3 @@
-// filename: helpdialog.h
-
 #ifndef HELPDIALOG_H
 #define HELPDIALOG_H
 
@@ -10,6 +8,7 @@
 class QTabWidget;
 class QTextBrowser;
 
+// Help dialog window
 class HelpDialog : public QDialog {
     Q_OBJECT
 
@@ -17,7 +16,6 @@ public:
     explicit HelpDialog(QWidget* parent = nullptr);
 
 private:
-    // Creates and returns a styled QTextBrowser
     QTextBrowser* createTextBrowser(const QString& html);
 
     QTabWidget*   tabWidget          = nullptr;

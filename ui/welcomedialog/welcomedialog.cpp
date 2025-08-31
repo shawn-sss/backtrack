@@ -1,18 +1,12 @@
-// filename: welcomedialog.cpp
-
 // Project includes
 #include "welcomedialog.h"
 #include "welcomedialogconstants.h"
 #include "welcomedialogstyling.h"
 #include "../../constants/app_info.h"
-#include "../../services/ServiceManagers/UIUtilsServiceManager/UIUtilsServiceManager.h"
 
 // Qt includes
-#include <QAbstractButton>
-#include <QDialogButtonBox>
 #include <QLabel>
 #include <QPixmap>
-#include <QPushButton>
 #include <QSizePolicy>
 #include <QVBoxLayout>
 
@@ -20,10 +14,10 @@ namespace {
 
 QString buildWelcomeHtmlText() {
     using namespace WelcomeDialogConstants;
-    return k_WELCOME_HTML
+    return QString(k_WELCOME_HTML)
         .arg(App::Info::k_APP_NAME,
              App::Info::k_APP_VERSION,
-             QString::number(kTopMargin));
+             QString::number(k_TOP_MARGIN));
 }
 
 void styleLabel(QLabel* label, bool richText = false) {
@@ -34,21 +28,23 @@ void styleLabel(QLabel* label, bool richText = false) {
 
 } // namespace
 
-// Constructs WelcomeDialog and sets up UI
+// Construct welcome dialog window
 WelcomeDialog::WelcomeDialog(QWidget* parent)
     : QDialog(parent),
     logoLabel(new QLabel(this)),
-    textLabel(new QLabel(this)),
-    buttonBox(new QDialogButtonBox(QDialogButtonBox::Ok, this)) {
+    textLabel(new QLabel(this))
+{
+    using namespace WelcomeDialogConstants;
+    using namespace WelcomeDialogStyling::Styles;
 
-    setWindowTitle(tr(WelcomeDialogConstants::k_WINDOW_TITLE));
-    resize(WelcomeDialogConstants::kDialogWidth, WelcomeDialogConstants::kDialogHeight);
+    setWindowTitle(tr(k_WINDOW_TITLE));
+    resize(k_DIALOG_WIDTH, k_DIALOG_HEIGHT);
 
-    const QPixmap baseLogo(QString::fromLatin1(WelcomeDialogConstants::k_LOGO_RESOURCE_PATH));
+    const QPixmap baseLogo(QString::fromLatin1(k_LOGO_RESOURCE_PATH));
     if (!baseLogo.isNull()) {
         QPixmap scaled = baseLogo.scaled(
-            WelcomeDialogConstants::kLogoSize,
-            WelcomeDialogConstants::kLogoSize,
+            k_LOGO_SIZE,
+            k_LOGO_SIZE,
             Qt::KeepAspectRatio,
             Qt::SmoothTransformation);
         scaled.setDevicePixelRatio(devicePixelRatioF());
@@ -56,24 +52,19 @@ WelcomeDialog::WelcomeDialog(QWidget* parent)
     }
     logoLabel->setAlignment(Qt::AlignCenter);
     logoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    logoLabel->setStyleSheet(WelcomeDialogStyling::Styles::LOGO_LABEL_STYLE);
+    logoLabel->setStyleSheet(LOGO_LABEL_STYLE);
 
     textLabel->setText(buildWelcomeHtmlText());
     styleLabel(textLabel, true);
-    textLabel->setStyleSheet(WelcomeDialogStyling::Styles::TEXT_LABEL_STYLE);
+    textLabel->setStyleSheet(TEXT_LABEL_STYLE);
     textLabel->setOpenExternalLinks(true);
     textLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-
-    for (auto* button : buttonBox->buttons()) {
-        if (auto* pushButton = qobject_cast<QPushButton*>(button)) {
-            Shared::UI::applyButtonTooltipAndCursor(pushButton, tr(WelcomeDialogConstants::k_OK_BUTTON_TOOLTIP));
-        }
-    }
-
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
+    layout->setSpacing(k_MAIN_SPACING);
+
     layout->addWidget(logoLabel);
     layout->addWidget(textLabel);
-    layout->addWidget(buttonBox);
+    layout->addStretch();
 }

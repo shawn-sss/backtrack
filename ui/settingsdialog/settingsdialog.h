@@ -1,5 +1,3 @@
-// filename: settingsdialog.h
-
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
@@ -7,8 +5,6 @@
 #include <QDialog>
 
 // Forward declaration (Qt class)
-class QListWidget;
-class QStackedWidget;
 class QLineEdit;
 class QComboBox;
 class QPushButton;
@@ -16,6 +12,7 @@ class QTimer;
 class QCheckBox;
 class QString;
 
+// Settings dialog window
 class SettingsDialog : public QDialog {
     Q_OBJECT
 
@@ -31,18 +28,15 @@ private slots:
 
 private:
     void     setupLayout();
-    QWidget* createUserSettingsPage();
-    QWidget* createSystemSettingsPage();
+    QWidget* createSettingsPage();
 
-    QListWidget*    categoryList            = nullptr;
-    QStackedWidget* settingsStack           = nullptr;
-    QLineEdit*      backupPrefixEdit        = nullptr;
-    QComboBox*      themeComboBox           = nullptr;
-    QPushButton*    saveButton              = nullptr;
-    QTimer*         saveCooldownTimer       = nullptr;
-    QCheckBox*      minimizeOnCloseCheckbox = nullptr;
-    QPushButton*    clearAppDataButton      = nullptr;
-    QPushButton*    resetBackupArchiveButton= nullptr;
+    QLineEdit*   backupPrefixEdit         = nullptr;
+    QComboBox*   themeComboBox            = nullptr;
+    QPushButton* saveButton               = nullptr;
+    QTimer*      saveCooldownTimer        = nullptr;
+    QCheckBox*   minimizeOnCloseCheckbox  = nullptr;
+    QPushButton* clearAppDataButton       = nullptr;
+    QPushButton* resetBackupArchiveButton = nullptr;
 
     Q_DISABLE_COPY_MOVE(SettingsDialog)
 };

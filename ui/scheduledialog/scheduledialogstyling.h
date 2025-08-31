@@ -1,5 +1,3 @@
-// filename: scheduledialogstyling.h
-
 #ifndef SCHEDULEDIALOGSTYLING_H
 #define SCHEDULEDIALOGSTYLING_H
 
@@ -23,6 +21,13 @@ inline constexpr auto GROUPBOX_STYLE = R"(
         subcontrol-origin: margin;
         left: 8px;
         padding: 0 4px;
+    }
+)";
+
+inline constexpr auto BUTTON_STYLE = R"(
+    QPushButton {
+        padding: 6px 18px;
+        font-weight: bold;
     }
 )";
 

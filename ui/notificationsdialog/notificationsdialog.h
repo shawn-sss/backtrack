@@ -1,5 +1,3 @@
-// filename: notificationsdialog.h
-
 #ifndef NOTIFICATIONSDIALOG_H
 #define NOTIFICATIONSDIALOG_H
 
@@ -14,7 +12,7 @@
 class QListWidget;
 class QPushButton;
 
-// Dialog for displaying and managing notifications
+// Notifications dialog window
 class NotificationsDialog : public QDialog {
     Q_OBJECT
 
@@ -25,7 +23,6 @@ public:
 
 private:
     QListWidget* listWidget     = nullptr;
-    QPushButton* closeButton    = nullptr;
     QPushButton* clearAllButton = nullptr;
 
     Q_DISABLE_COPY_MOVE(NotificationsDialog)

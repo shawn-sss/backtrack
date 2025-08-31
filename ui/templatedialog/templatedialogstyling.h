@@ -23,9 +23,6 @@ inline constexpr auto k_TABLE_STYLE = R"(
     }
 )";
 
-inline constexpr int k_ACTION_LAYOUT_MARGIN = 0;
-inline constexpr int k_ACTION_LAYOUT_SPACING = 2;
-
 } // namespace Styles
 } // namespace TemplateDialogStyling
 

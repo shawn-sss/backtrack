@@ -1,8 +1,7 @@
-// filename: settingsdialog.cpp
-
 // Project includes
 #include "settingsdialog.h"
 #include "settingsdialogconstants.h"
+#include "settingsdialogstyling.h"
 #include "../promptdialog/promptdialog.h"
 #include "../../services/ServiceDirector/ServiceDirector.h"
 #include "../../services/ServiceManagers/UserServiceManager/UserServiceConstants.h"
@@ -16,15 +15,14 @@
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListWidget>
 #include <QPushButton>
 #include <QRegularExpressionValidator>
 #include <QSignalBlocker>
 #include <QSpacerItem>
-#include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -46,14 +44,14 @@ QLabel* createBoldLabel(const QString& text, QWidget* parent = nullptr) {
 
 QLabel* createGraySmallLabel(const QString& text, QWidget* parent = nullptr) {
     auto* label = new QLabel(text, parent);
-    label->setStyleSheet(QStringLiteral("color: gray; font-size: 11px;"));
+    label->setStyleSheet(SettingsDialogStyling::Styles::DESCRIPTION_LABEL_STYLE);
     label->setWordWrap(true);
     return label;
 }
 
 } // namespace
 
-// Constructs SettingsDialog and sets up layout
+// Construct settings dialog window
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent) {
     setWindowFlags(Qt::Dialog);
@@ -62,7 +60,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     setupLayout();
 }
 
-// Sets up main dialog layout
+// Setup main layout
 void SettingsDialog::setupLayout() {
     using namespace SettingsDialogConstants;
 
@@ -70,24 +68,8 @@ void SettingsDialog::setupLayout() {
     mainLayout->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
     mainLayout->setSpacing(k_MAIN_SPACING);
 
-    auto* centralWidget = new QWidget(this);
-    auto* centralLayout = new QHBoxLayout(centralWidget);
-    centralLayout->setContentsMargins(0, 0, 0, 0);
-    centralLayout->setSpacing(k_MAIN_SPACING);
-
-    categoryList = new QListWidget(centralWidget);
-    categoryList->addItem(tr(k_CATEGORY_USER));
-    categoryList->addItem(tr(k_CATEGORY_SYSTEM));
-    categoryList->setFixedWidth(k_CATEGORY_LIST_WIDTH);
-    centralLayout->addWidget(categoryList);
-
-    settingsStack = new QStackedWidget(centralWidget);
-    settingsStack->addWidget(createUserSettingsPage());
-    settingsStack->addWidget(createSystemSettingsPage());
-    centralLayout->addWidget(settingsStack);
-
-    connect(categoryList, &QListWidget::currentRowChanged, settingsStack, &QStackedWidget::setCurrentIndex);
-    categoryList->setCurrentRow(0);
+    auto* settingsPage = createSettingsPage();
+    mainLayout->addWidget(settingsPage);
 
     auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok, this);
     saveButton = buttonBox->button(QDialogButtonBox::Ok);
@@ -107,19 +89,36 @@ void SettingsDialog::setupLayout() {
         saveButton->setEnabled(true);
     });
 
-    mainLayout->addWidget(centralWidget);
-    mainLayout->addWidget(buttonBox);
+    mainLayout->addWidget(buttonBox, 0, Qt::AlignHCenter);
 }
 
-// Creates user settings page
-QWidget* SettingsDialog::createUserSettingsPage() {
+// Create settings page
+QWidget* SettingsDialog::createSettingsPage() {
     using namespace SettingsDialogConstants;
 
     auto* widget = new QWidget();
-    auto* layout = new QFormLayout(widget);
+    auto* layout = new QVBoxLayout(widget);
+    layout->setSpacing(20);
 
-    layout->addRow(createBoldLabel(tr(k_LABEL_BACKUP_PREFIX)));
-    layout->addRow(createGraySmallLabel(k_DESC_BACKUP_SUBTITLE));
+    auto* userGroup = new QGroupBox(tr(k_CATEGORY_USER_PREFERENCES), widget);
+    auto* userLayout = new QFormLayout(userGroup);
+
+    auto* themeBox = new QVBoxLayout();
+    themeBox->addWidget(createBoldLabel(tr(k_LABEL_THEME)));
+    themeComboBox = new QComboBox(widget);
+    themeComboBox->addItem(tr(k_LABEL_THEME_SYSTEM_DEFAULT), static_cast<int>(UserThemePreference::Auto));
+    themeComboBox->addItem(tr(k_LABEL_THEME_LIGHT_MODE),     static_cast<int>(UserThemePreference::Light));
+    themeComboBox->addItem(tr(k_LABEL_THEME_DARK_MODE),      static_cast<int>(UserThemePreference::Dark));
+    themeBox->addWidget(themeComboBox);
+
+    {
+        const int index = themeComboBox->findData(static_cast<int>(ServiceDirector::getInstance().getThemePreference()));
+        if (index != -1) {
+            QSignalBlocker blocker(themeComboBox);
+            themeComboBox->setCurrentIndex(index);
+        }
+    }
+    userLayout->addRow(themeBox);
 
     backupPrefixEdit = new QLineEdit(widget);
     {
@@ -131,13 +130,13 @@ QWidget* SettingsDialog::createUserSettingsPage() {
         backupPrefixEdit);
     backupPrefixEdit->setValidator(validator);
     backupPrefixEdit->setMaxLength(12);
-    layout->addRow(tr(k_LABEL_BACKUP_PREFIX), backupPrefixEdit);
 
-    layout->addRow(createGraySmallLabel(k_DESC_BACKUP_INFO));
-    layout->addItem(new QSpacerItem(0, 12, QSizePolicy::Minimum, QSizePolicy::Fixed));
-
-    layout->addRow(createBoldLabel(tr(k_LABEL_CLOSE_BEHAVIOR)));
-    layout->addRow(createGraySmallLabel(tr(k_LABEL_CLOSE_BEHAVIOR_DESC)));
+    auto* backupPrefixBox = new QVBoxLayout();
+    backupPrefixBox->addWidget(createBoldLabel(tr(k_LABEL_BACKUP_PREFIX)));
+    backupPrefixBox->addWidget(backupPrefixEdit);
+    backupPrefixBox->addWidget(createGraySmallLabel(k_DESC_BACKUP_SUBTITLE));
+    backupPrefixBox->addWidget(createGraySmallLabel(k_DESC_BACKUP_INFO));
+    userLayout->addRow(backupPrefixBox);
 
     minimizeOnCloseCheckbox = new QCheckBox(tr(k_LABEL_MINIMIZE_ON_CLOSE));
     {
@@ -147,42 +146,22 @@ QWidget* SettingsDialog::createUserSettingsPage() {
                                                 .toBool(true);
         minimizeOnCloseCheckbox->setChecked(currentMinimizeSetting);
     }
-    layout->addRow(minimizeOnCloseCheckbox);
 
-    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    auto* closeBehaviorBox = new QVBoxLayout();
+    closeBehaviorBox->addWidget(createBoldLabel(tr(k_LABEL_CLOSE_BEHAVIOR)));
+    closeBehaviorBox->addWidget(createGraySmallLabel(tr(k_LABEL_CLOSE_BEHAVIOR_DESC)));
+    closeBehaviorBox->addWidget(minimizeOnCloseCheckbox);
+    userLayout->addRow(closeBehaviorBox);
 
-    return widget;
-}
+    layout->addWidget(userGroup);
 
-// Creates system settings page
-QWidget* SettingsDialog::createSystemSettingsPage() {
-    using namespace SettingsDialogConstants;
-
-    auto* widget = new QWidget();
-    auto* layout = new QVBoxLayout(widget);
-
-    layout->addWidget(new QLabel(tr(k_LABEL_THEME)));
-
-    themeComboBox = new QComboBox(widget);
-    themeComboBox->addItem(tr(k_LABEL_THEME_SYSTEM_DEFAULT), static_cast<int>(UserThemePreference::Auto));
-    themeComboBox->addItem(tr(k_LABEL_THEME_LIGHT_MODE),     static_cast<int>(UserThemePreference::Light));
-    themeComboBox->addItem(tr(k_LABEL_THEME_DARK_MODE),      static_cast<int>(UserThemePreference::Dark));
-    layout->addWidget(themeComboBox);
-
-    {
-        const int index = themeComboBox->findData(static_cast<int>(ServiceDirector::getInstance().getThemePreference()));
-        if (index != -1) {
-            QSignalBlocker blocker(themeComboBox);
-            themeComboBox->setCurrentIndex(index);
-        }
-    }
-
-    layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
+    auto* advancedGroup = new QGroupBox(tr(k_CATEGORY_ADVANCED), widget);
+    auto* advancedLayout = new QVBoxLayout(advancedGroup);
 
     auto* buttonRow = new QWidget(widget);
     auto* rowLayout = new QHBoxLayout(buttonRow);
     rowLayout->setSpacing(12);
-    rowLayout->setContentsMargins(0, 24, 0, 0);
+    rowLayout->setContentsMargins(0, 0, 0, 0);
 
     resetBackupArchiveButton = new QPushButton(k_BUTTON_RESET_BACKUP, buttonRow);
     clearAppDataButton       = new QPushButton(k_BUTTON_CLEAR_APP,   buttonRow);
@@ -195,7 +174,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
 
     rowLayout->addWidget(resetBackupArchiveButton);
     rowLayout->addWidget(clearAppDataButton);
-    layout->addWidget(buttonRow);
+    advancedLayout->addWidget(buttonRow);
 
     connect(clearAppDataButton, &QPushButton::clicked, this, [this]() {
         emit requestAppDataClear();
@@ -212,8 +191,7 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
                 k_WARNING_INVALID_PATH_MESSAGE,
                 QString(),
                 PromptDialog::Ok,
-                PromptDialog::Ok
-                );
+                PromptDialog::Ok);
             return;
         }
 
@@ -224,17 +202,17 @@ QWidget* SettingsDialog::createSystemSettingsPage() {
             k_CONFIRM_RESET_MESSAGE.arg(backupLocation),
             QString(),
             PromptDialog::Yes | PromptDialog::No,
-            PromptDialog::No
-            );
+            PromptDialog::No);
         if (confirm != PromptDialog::Yes) return;
 
         emit requestBackupReset(backupLocation, QStringLiteral("reset"));
     });
 
+    layout->addWidget(advancedGroup);
     return widget;
 }
 
-// Handles save button clicked
+// Handle save button click
 void SettingsDialog::onSaveClicked() {
     using namespace SettingsDialogConstants;
 
@@ -249,8 +227,7 @@ void SettingsDialog::onSaveClicked() {
             k_WARNING_INVALID_PREFIX_MESSAGE,
             QString(),
             PromptDialog::Ok,
-            PromptDialog::Ok
-            );
+            PromptDialog::Ok);
         return;
     }
 

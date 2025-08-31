@@ -1,5 +1,3 @@
-// filename: settingsdialogstyling.h
-
 #ifndef SETTINGSDIALOGSTYLING_H
 #define SETTINGSDIALOGSTYLING_H
 
@@ -15,6 +13,8 @@ inline constexpr auto CATEGORY_LIST_STYLE = R"(
         color: white;
     }
 )";
+
+inline constexpr auto DESCRIPTION_LABEL_STYLE = "color: gray; font-size: 11px;";
 
 } // namespace Styles
 } // namespace SettingsDialogStyling

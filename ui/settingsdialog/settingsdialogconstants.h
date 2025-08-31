@@ -1,5 +1,3 @@
-// filename: settingsdialogconstants.h
-
 #ifndef SETTINGSDIALOGCONSTANTS_H
 #define SETTINGSDIALOGCONSTANTS_H
 
@@ -8,8 +6,8 @@
 
 namespace SettingsDialogConstants {
 
-inline constexpr const char* k_CATEGORY_USER   = "User Settings";
-inline constexpr const char* k_CATEGORY_SYSTEM = "System Settings";
+inline constexpr const char* k_CATEGORY_USER_PREFERENCES = "User Preferences";
+inline constexpr const char* k_CATEGORY_ADVANCED         = "Advanced Settings";
 
 inline constexpr const char* k_LABEL_BACKUP_PREFIX       = "Backup Prefix:";
 inline constexpr const char* k_LABEL_CLOSE_BEHAVIOR      = "Close Behavior:";
@@ -46,8 +44,6 @@ inline const QString k_WARNING_INVALID_PATH_MESSAGE = QStringLiteral("Backup loc
 inline const QString k_BACKUP_PREFIX_REGEX_PATTERN = QStringLiteral("^[A-Za-z0-9]{1,12}$");
 
 inline constexpr int k_SAVE_FEEDBACK_COOLDOWN_MS = 3000;
-
-inline constexpr int k_CATEGORY_LIST_WIDTH = 150;
 inline constexpr int k_DIALOG_MIN_WIDTH    = 600;
 inline constexpr int k_DIALOG_MIN_HEIGHT   = 400;
 inline constexpr int k_MAIN_MARGIN         = 10;

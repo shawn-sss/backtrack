@@ -1,5 +1,3 @@
-// filename: scheduledialog.cpp
-
 // Project includes
 #include "scheduledialog.h"
 #include "scheduledialogconstants.h"
@@ -9,7 +7,6 @@
 // Qt includes
 #include <QDateTime>
 #include <QTime>
-#include <QCheckBox>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QFormLayout>
@@ -40,22 +37,13 @@ QDateTime clampToNextMinute(const QDateTime& candidate) {
     return (candidate < minAllowed) ? minAllowed : candidate;
 }
 
-constexpr int IDX_ONCE    = 0;
-constexpr int IDX_DAILY   = 1;
-constexpr int IDX_WEEKLY  = 2;
-constexpr int IDX_MONTHLY = 3;
-
 } // namespace
 
-// Constructs ScheduleDialog and initializes UI
+// Construct schedule dialog window
 ScheduleDialog::ScheduleDialog(QWidget* parent)
     : QDialog(parent) {
-    setWindowTitle(tr("%1").arg(k_WINDOW_TITLE));
+    setWindowTitle(tr(k_WINDOW_TITLE));
     setMinimumSize(k_MIN_WIDTH, k_MIN_HEIGHT);
-
-    enableCheck = new QCheckBox(tr("%1").arg(k_ENABLE_LABEL), this);
-    enableCheck->hide();
-    connect(enableCheck, &QCheckBox::toggled, this, &ScheduleDialog::onEnableToggled);
 
     hintLabel = new QLabel(this);
     hintLabel->setTextFormat(Qt::RichText);
@@ -64,10 +52,10 @@ ScheduleDialog::ScheduleDialog(QWidget* parent)
     hintLabel->setStyleSheet(ScheduleDialogStyling::Styles::HINT_LABEL_STYLE);
     connect(hintLabel, &QLabel::linkActivated, this, &ScheduleDialog::onHintLinkActivated);
 
-    settingsGroup = new QGroupBox(tr("%1").arg(k_GROUP_TITLE), this);
+    settingsGroup = new QGroupBox(tr(k_GROUP_TITLE), this);
     settingsGroup->setStyleSheet(ScheduleDialogStyling::Styles::GROUPBOX_STYLE);
 
-    dateTimeLabel  = new QLabel(tr("%1").arg(k_DATETIME_LABEL), this);
+    dateTimeLabel  = new QLabel(tr(k_DATETIME_LABEL), this);
     dateTimeEdit   = new QDateTimeEdit(this);
     dateTimeEdit->setDisplayFormat(k_DATETIME_DISPLAY_FORMAT);
     dateTimeEdit->setCalendarPopup(true);
@@ -77,12 +65,12 @@ ScheduleDialog::ScheduleDialog(QWidget* parent)
         dateTimeEdit->setDateTime(minAllowed);
     }
 
-    recurrenceLabel = new QLabel(tr("%1").arg(k_RECURRENCE_LABEL), this);
+    recurrenceLabel = new QLabel(tr(k_RECURRENCE_LABEL), this);
     recurrenceBox   = new QComboBox(this);
-    recurrenceBox->addItem(tr("%1").arg(k_RECURRENCE_ONCE));
-    recurrenceBox->addItem(tr("%1").arg(k_RECURRENCE_DAILY));
-    recurrenceBox->addItem(tr("%1").arg(k_RECURRENCE_WEEKLY));
-    recurrenceBox->addItem(tr("%1").arg(k_RECURRENCE_MONTHLY));
+    recurrenceBox->addItem(tr(k_RECURRENCE_ONCE));
+    recurrenceBox->addItem(tr(k_RECURRENCE_DAILY));
+    recurrenceBox->addItem(tr(k_RECURRENCE_WEEKLY));
+    recurrenceBox->addItem(tr(k_RECURRENCE_MONTHLY));
     connect(recurrenceBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &ScheduleDialog::onRecurrenceChanged);
 
@@ -91,36 +79,24 @@ ScheduleDialog::ScheduleDialog(QWidget* parent)
     form->addRow(recurrenceLabel, recurrenceBox);
     settingsGroup->setLayout(form);
 
-    const QString lockedTip = tr("%1").arg(k_TOOLTIP_LOCKED);
-    dateTimeEdit->setToolTip(lockedTip);
-    recurrenceBox->setToolTip(lockedTip);
-    dateTimeLabel->setToolTip(lockedTip);
-    recurrenceLabel->setToolTip(lockedTip);
-
-    okButton = new QPushButton(tr("%1").arg(k_BUTTON_OK_TEXT), this);
+    okButton = new QPushButton(tr(k_BUTTON_OK_TEXT), this);
+    okButton->setStyleSheet(ScheduleDialogStyling::Styles::BUTTON_STYLE);
     connect(okButton, &QPushButton::clicked, this, &ScheduleDialog::onAcceptClicked);
 
-    auto* buttons = new QHBoxLayout;
-    buttons->addStretch();
-    buttons->addWidget(okButton);
-
     auto* main = new QVBoxLayout(this);
+    main->setContentsMargins(k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN, k_MAIN_MARGIN);
+    main->setSpacing(k_MAIN_SPACING);
+
     main->addWidget(hintLabel);
     main->addWidget(settingsGroup);
     main->addStretch();
-    main->addLayout(buttons);
+    main->addWidget(okButton, 0, Qt::AlignHCenter);
 
-    enableCheck->setChecked(false);
-    onEnableToggled(enableCheck->isChecked());
+    onEnableToggled(false);
 }
 
-// Applies a ScheduleConfig to the dialog
+// Apply config
 void ScheduleDialog::setConfig(const ScheduleConfig& cfg) {
-    const QSignalBlocker blockEnable(enableCheck);
-    const QSignalBlocker blockRecur(recurrenceBox);
-
-    enableCheck->setChecked(cfg.enabled);
-
     QDateTime dt = forceSecondsZero(cfg.when);
     dt = clampToNextMinute(dt);
 
@@ -132,32 +108,31 @@ void ScheduleDialog::setConfig(const ScheduleConfig& cfg) {
     onEnableToggled(cfg.enabled);
 }
 
-// Reads the current ScheduleConfig from the dialog
+// Read config
 ScheduleDialog::ScheduleConfig ScheduleDialog::config() const {
     ScheduleConfig out;
-    out.enabled = enableCheck->isChecked();
-    const QDateTime chosen = forceSecondsZero(dateTimeEdit->dateTime());
-    out.when = chosen;
-    out.recur = indexToRecurrence(recurrenceBox->currentIndex());
+    out.enabled = settingsGroup->isEnabled();
+    out.when    = forceSecondsZero(dateTimeEdit->dateTime());
+    out.recur   = indexToRecurrence(recurrenceBox->currentIndex());
     return out;
 }
 
-// Handles accept button click
+// Handle accept button
 void ScheduleDialog::onAcceptClicked() {
-    if (!enableCheck->isChecked()) {
+    if (!settingsGroup->isEnabled()) {
         emit scheduleSaved(config());
         return;
     }
 
     const QDateTime minAllowed = nextMinuteFromNow();
-    const QDateTime chosen = forceSecondsZero(dateTimeEdit->dateTime());
+    const QDateTime chosen     = forceSecondsZero(dateTimeEdit->dateTime());
 
     if (chosen < minAllowed) {
         PromptDialog::showDialog(
             this,
             PromptDialog::Warning,
-            tr("%1").arg(k_TIME_INVALID_TITLE),
-            tr("%1").arg(k_TIME_INVALID_BODY),
+            tr(k_TIME_INVALID_TITLE),
+            tr(k_TIME_INVALID_BODY),
             QString(),
             PromptDialog::Ok,
             PromptDialog::Ok);
@@ -170,40 +145,38 @@ void ScheduleDialog::onAcceptClicked() {
     emit scheduleSaved(config());
 }
 
-// Handles recurrence combo change
+// Handle recurrence change
 void ScheduleDialog::onRecurrenceChanged(int /*index*/) {
-    // Reserved for future behavior
 }
 
-// Handles enable checkbox toggle
+// Handle enable toggle
 void ScheduleDialog::onEnableToggled(bool checked) {
     settingsGroup->setEnabled(checked);
     updateStatusBadge(checked);
     updateHint(checked);
 }
 
-// Handles clickable hint link
+// Handle hint link
 void ScheduleDialog::onHintLinkActivated(const QString& link) {
     if (link == k_LINK_ENABLE) {
-        enableCheck->setChecked(true);
+        onEnableToggled(true);
     } else if (link == k_LINK_DISABLE) {
-        enableCheck->setChecked(false);
+        onEnableToggled(false);
     }
 }
 
-// Updates badge (currently placeholder)
+// Update badge
 void ScheduleDialog::updateStatusBadge(bool /*enabled*/) {
-    // Placeholder for future badge/indicator
 }
 
-// Updates hint label
+// Update hint
 void ScheduleDialog::updateHint(bool enabled) {
-    hintLabel->setText(enabled ? tr("%1").arg(k_HINT_ENABLED_HTML)
-                               : tr("%1").arg(k_HINT_DISABLED_HTML));
+    hintLabel->setText(enabled ? tr(k_HINT_ENABLED_HTML)
+                               : tr(k_HINT_DISABLED_HTML));
     hintLabel->setVisible(true);
 }
 
-// Normalizes a QDateTime to zero seconds
+// Normalize QDateTime
 QDateTime ScheduleDialog::forceSecondsZero(const QDateTime& dt) {
     QDateTime out = dt;
     const QTime t = dt.time();
@@ -211,24 +184,24 @@ QDateTime ScheduleDialog::forceSecondsZero(const QDateTime& dt) {
     return out;
 }
 
-// Maps index to Recurrence enum
+// Index → Recurrence
 ScheduleDialog::Recurrence ScheduleDialog::indexToRecurrence(int idx) {
-    static constexpr std::array<Recurrence, 4> map = {
-        Recurrence::Once, Recurrence::Daily, Recurrence::Weekly, Recurrence::Monthly
-    };
-    if (idx >= 0 && idx < static_cast<int>(map.size())) {
-        return map[static_cast<std::size_t>(idx)];
+    switch (idx) {
+    case k_IDX_DAILY:   return Recurrence::Daily;
+    case k_IDX_WEEKLY:  return Recurrence::Weekly;
+    case k_IDX_MONTHLY: return Recurrence::Monthly;
+    case k_IDX_ONCE:
+    default:            return Recurrence::Once;
     }
-    return Recurrence::Once;
 }
 
-// Maps Recurrence enum to combo index
+// Recurrence → Index
 int ScheduleDialog::recurrenceToIndex(Recurrence r) {
     switch (r) {
-    case Recurrence::Once:    return IDX_ONCE;
-    case Recurrence::Daily:   return IDX_DAILY;
-    case Recurrence::Weekly:  return IDX_WEEKLY;
-    case Recurrence::Monthly: return IDX_MONTHLY;
+    case Recurrence::Daily:   return k_IDX_DAILY;
+    case Recurrence::Weekly:  return k_IDX_WEEKLY;
+    case Recurrence::Monthly: return k_IDX_MONTHLY;
+    case Recurrence::Once:
+    default:                  return k_IDX_ONCE;
     }
-    return IDX_ONCE;
 }

@@ -1,5 +1,3 @@
-// filename: helpdialogstyling.h
-
 #ifndef HELPDIALOGSTYLING_H
 #define HELPDIALOGSTYLING_H
 
@@ -11,7 +9,6 @@ inline constexpr auto TAB_WIDGET_STYLE = R"(
         border: 1px solid #888;
         padding: 4px;
     }
-
     QTabBar::tab {
         background: #333;
         color: #DDD;
@@ -19,14 +16,29 @@ inline constexpr auto TAB_WIDGET_STYLE = R"(
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
     }
-
     QTabBar::tab:selected {
         background: #555;
         color: white;
     }
-
     QTabBar::tab:hover {
         background: #444;
+    }
+)";
+
+inline constexpr auto TEXT_BROWSER_STYLE = R"(
+    QTextBrowser {
+        font-size: 11pt;
+        color: #DDD;
+        background: #222;
+        border: none;
+        padding: 8px;
+    }
+    QTextBrowser a {
+        color: #6cf;
+        text-decoration: none;
+    }
+    QTextBrowser a:hover {
+        text-decoration: underline;
     }
 )";
 

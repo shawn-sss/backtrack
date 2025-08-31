@@ -20,6 +20,7 @@ class TemplateServiceManager;
 // Forward declaration (Qt class)
 class QToolButton;
 
+// Template dialog window
 class TemplateDialog : public QDialog {
     Q_OBJECT
 
@@ -27,36 +28,28 @@ public:
     explicit TemplateDialog(TemplateServiceManager* service, QWidget* parent = nullptr);
 
 signals:
-    // Template load/unload signals
     void templateLoaded(const QStringList& paths, const QString& name);
     void templateUnloaded(const QString& name);
-
-    // Requests to save or restore staging
     void requestSaveStaging();
     void requestRestoreStaging();
 
 private slots:
-    // Template actions
     void onActionLoadOrUnloadClicked(const QString& name);
     void onActionDeleteClicked(int row);
     void onActionSetDefaultClicked(int row);
-
-    // Selection and creation
     void onTemplateSelectionChanged();
     void onNewTemplateClicked();
 
 private:
-    // Table and preview management
     void populateTemplateTable();
     void updatePreviewForTemplate(const QString& templateName);
 
     TemplateServiceManager* templateService = nullptr;
 
-    QTableWidget* tableWidget = nullptr;
-    QListWidget* previewList = nullptr;
-
-    QPushButton* newTemplateBtn = nullptr;
-    QPushButton* closeBtn = nullptr;
+    QTableWidget* tableWidget   = nullptr;
+    QListWidget*  previewList   = nullptr;
+    QPushButton*  newTemplateBtn = nullptr;
+    QPushButton*  closeBtn       = nullptr;
 
     QString defaultTemplate;
     QString loadedTemplate;

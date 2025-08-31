@@ -1,5 +1,3 @@
-// filename: welcomedialogstyling.h
-
 #ifndef WELCOMEDIALOGSTYLING_H
 #define WELCOMEDIALOGSTYLING_H
 

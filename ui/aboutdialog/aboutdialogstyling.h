@@ -1,7 +1,6 @@
 #ifndef ABOUTDIALOGSTYLING_H
 #define ABOUTDIALOGSTYLING_H
 
-// Styling for About dialog
 namespace AboutDialogStyling {
 namespace Styles {
 

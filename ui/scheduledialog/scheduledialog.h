@@ -1,5 +1,3 @@
-// filename: scheduledialog.h
-
 #ifndef SCHEDULEDIALOG_H
 #define SCHEDULEDIALOG_H
 
@@ -8,7 +6,6 @@
 #include <QDialog>
 
 // Forward declaration (Qt class)
-class QCheckBox;
 class QComboBox;
 class QDateTimeEdit;
 class QGroupBox;
@@ -16,14 +13,13 @@ class QLabel;
 class QPushButton;
 class QString;
 
+// Schedule dialog window
 class ScheduleDialog : public QDialog {
     Q_OBJECT
 
 public:
-    // Recurrence options
     enum class Recurrence { Once, Daily, Weekly, Monthly };
 
-    // Data model for scheduling
     struct ScheduleConfig {
         bool       enabled = false;
         QDateTime  when;
@@ -32,12 +28,10 @@ public:
 
     explicit ScheduleDialog(QWidget* parent = nullptr);
 
-    // Apply and read config
     void setConfig(const ScheduleConfig& cfg);
     ScheduleConfig config() const;
 
 signals:
-    // Emitted when the schedule is saved
     void scheduleSaved(const ScheduleConfig& cfg);
 
 private slots:
@@ -47,8 +41,6 @@ private slots:
     void onHintLinkActivated(const QString& link);
 
 private:
-    // UI widgets
-    QCheckBox*     enableCheck     = nullptr;
     QLabel*        hintLabel       = nullptr;
     QGroupBox*     settingsGroup   = nullptr;
     QLabel*        dateTimeLabel   = nullptr;
@@ -57,14 +49,10 @@ private:
     QComboBox*     recurrenceBox   = nullptr;
     QPushButton*   okButton        = nullptr;
 
-    // Mapping helpers
     static Recurrence indexToRecurrence(int idx);
     static int        recurrenceToIndex(Recurrence r);
-
-    // Time utility
     static QDateTime  forceSecondsZero(const QDateTime& dt);
 
-    // UI update helpers
     void updateStatusBadge(bool enabled);
     void updateHint(bool enabled);
 

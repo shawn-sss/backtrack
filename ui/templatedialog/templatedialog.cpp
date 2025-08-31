@@ -15,7 +15,7 @@
 #include <QFont>
 #include <QInputDialog>
 
-// Constructor
+// Construct template dialog window
 TemplateDialog::TemplateDialog(TemplateServiceManager* service, QWidget* parent)
     : QDialog(parent), templateService(service) {
     using namespace TemplateDialogConstants;
@@ -71,7 +71,7 @@ TemplateDialog::TemplateDialog(TemplateServiceManager* service, QWidget* parent)
     populateTemplateTable();
 }
 
-// Populate the template table
+// Populate template table
 void TemplateDialog::populateTemplateTable() {
     using namespace TemplateDialogConstants;
     using namespace TemplateDialogStyling::Styles;
@@ -188,7 +188,7 @@ void TemplateDialog::populateTemplateTable() {
     tableWidget->sortItems(2, Qt::DescendingOrder);
 }
 
-// Handle load or unload action
+// Handle load/unload
 void TemplateDialog::onActionLoadOrUnloadClicked(const QString& name) {
     using namespace TemplateDialogConstants;
 
@@ -219,7 +219,7 @@ void TemplateDialog::onActionLoadOrUnloadClicked(const QString& name) {
     populateTemplateTable();
 }
 
-// Handle delete action
+// Handle delete
 void TemplateDialog::onActionDeleteClicked(int row) {
     using namespace TemplateDialogConstants;
 
@@ -245,10 +245,8 @@ void TemplateDialog::onActionDeleteClicked(int row) {
     }
 }
 
-// Handle set default action
+// Handle set default
 void TemplateDialog::onActionSetDefaultClicked(int row) {
-    using namespace TemplateDialogConstants;
-
     if (!templateService) return;
     if (row < 0 || row >= tableWidget->rowCount()) return;
 
@@ -263,7 +261,7 @@ void TemplateDialog::onActionSetDefaultClicked(int row) {
     populateTemplateTable();
 }
 
-// Handle selection change
+// Handle selection
 void TemplateDialog::onTemplateSelectionChanged() {
     int row = tableWidget->currentRow();
     if (row < 0) {
@@ -275,7 +273,7 @@ void TemplateDialog::onTemplateSelectionChanged() {
     updatePreviewForTemplate(rawName);
 }
 
-// Update preview for a template
+// Update preview
 void TemplateDialog::updatePreviewForTemplate(const QString& templateName) {
     using namespace TemplateDialogConstants;
 
@@ -290,7 +288,7 @@ void TemplateDialog::updatePreviewForTemplate(const QString& templateName) {
     }
 }
 
-// Handle new template creation
+// Handle new template
 void TemplateDialog::onNewTemplateClicked() {
     using namespace TemplateDialogConstants;
 

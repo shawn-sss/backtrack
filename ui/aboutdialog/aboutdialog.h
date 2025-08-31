@@ -6,7 +6,6 @@
 
 // Forward declaration (Qt class)
 class QLabel;
-class QDialogButtonBox;
 
 // About dialog window
 class AboutDialog : public QDialog {
@@ -16,9 +15,8 @@ public:
     explicit AboutDialog(QWidget* parent = nullptr);
 
 private:
-    QLabel*           logoLabel   = nullptr;
-    QLabel*           textLabel   = nullptr;
-    QDialogButtonBox* buttonBox   = nullptr;
+    QLabel* logoLabel = nullptr;
+    QLabel* textLabel = nullptr;
 };
 
 #endif // ABOUTDIALOG_H

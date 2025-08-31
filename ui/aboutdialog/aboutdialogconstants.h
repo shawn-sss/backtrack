@@ -5,22 +5,29 @@
 #include <Qt>
 #include <QString>
 
-// Constants used in About dialog
 namespace AboutDialogConstants {
 
-constexpr int kLogoSize     = 150;
-constexpr int kDialogWidth  = 500;
-constexpr int kDialogHeight = 400;
-constexpr int kTopMargin    = 15;
+// Dimensions
+constexpr int k_LOGO_SIZE     = 150;
+constexpr int k_DIALOG_WIDTH  = 500;
+constexpr int k_DIALOG_HEIGHT = 400;
+constexpr int k_TOP_MARGIN    = 15;
+constexpr int k_MAIN_MARGIN   = 10;
+constexpr int k_MAIN_SPACING  = 10;
 
-inline const QString kWindowTitle     = QStringLiteral("About");
-inline const QString kLogoPath        = QStringLiteral(":/resources/icons/app_icon.png");
-inline const QString kCloseButtonText = QStringLiteral("Close");
+// Titles & labels
+inline constexpr const char* k_WINDOW_TITLE      = "About";
+inline constexpr const char* k_LOGO_PATH         = ":/resources/icons/app_icon.png";
+inline constexpr const char* k_CLOSE_BUTTON_TEXT = "Close";
+inline constexpr const char* k_LABEL_VERSION     = "Version:";
+inline constexpr const char* k_LABEL_AUTHOR      = "Author:";
 
-constexpr auto kLogoAspectRatioMode = Qt::KeepAspectRatio;
-constexpr auto kLogoTransformMode   = Qt::SmoothTransformation;
+// Logo rendering modes
+constexpr auto k_LOGO_ASPECT_RATIO_MODE = Qt::KeepAspectRatio;
+constexpr auto k_LOGO_TRANSFORM_MODE    = Qt::SmoothTransformation;
 
-inline const QString kAboutHtmlTemplate = QStringLiteral(
+// HTML template
+inline const QString k_ABOUT_HTML_TEMPLATE = QStringLiteral(
     "<h2>%1</h2>"
     "<p>%2 <b>%3</b></p>"
     "<p>%4 <b>%5</b></p>"

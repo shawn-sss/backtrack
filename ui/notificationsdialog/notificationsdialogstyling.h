@@ -1,15 +1,12 @@
-// filename: notificationsdialogstyling.h
-
 #ifndef NOTIFICATIONSDIALOGSTYLING_H
 #define NOTIFICATIONSDIALOGSTYLING_H
 
 namespace NotificationsDialogStyling {
+namespace Styles {
 
-inline constexpr auto kListWidgetStyle = R"(
+inline constexpr auto k_LIST_WIDGET_STYLE = R"(
     QListWidget::item {
-        margin: 0px;
-        padding: 2px 6px;
-        border: none;
+        padding: 4px 6px;
         font-size: 13px;
         font-family: 'Segoe UI', 'Arial', sans-serif;
         color: #dddddd;
@@ -19,6 +16,14 @@ inline constexpr auto kListWidgetStyle = R"(
     }
 )";
 
+inline constexpr auto k_BUTTON_STYLE = R"(
+    QPushButton {
+        padding: 6px 18px;
+        font-weight: bold;
+    }
+)";
+
+} // namespace Styles
 } // namespace NotificationsDialogStyling
 
 #endif // NOTIFICATIONSDIALOGSTYLING_H
