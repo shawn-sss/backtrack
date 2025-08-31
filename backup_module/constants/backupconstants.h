@@ -6,43 +6,92 @@
 #include <QString>
 #include <QRegularExpression>
 
-// Drive label constants for backup item selection
-namespace Backup::Drive {
-inline constexpr auto k_DEFAULT_DRIVE_LABEL = "Local Disk";
-inline constexpr auto k_DRIVE_LABEL_SUFFIX  = "Drive";
+namespace Backup {
+
+// ------------------------------------------------------------
+// Drive label constants
+// ------------------------------------------------------------
+namespace Drive {
+inline const QString DefaultLabel = "Local Disk";
+inline const QString LabelSuffix  = "Drive";
 }
 
-// Timestamp formats for backup folders and display
-namespace Backup::Timestamps {
-inline constexpr auto k_BACKUP_FOLDER_TIMESTAMP_FORMAT        = "_yyyyMMdd_HHmmss";
-inline constexpr auto k_BACKUP_TIMESTAMP_DISPLAY_FORMAT       = "MM/dd/yyyy hh:mm AP";
-inline constexpr auto k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT = "yyyy-MM-dd HH:mm:ss";
-
-// Regex pattern for parsing backup folder timestamps
-inline const QRegularExpression k_BACKUP_FOLDER_TIMESTAMP_REGEX{
-                                                                R"((\d{8}_\d{6}))"};
+// ------------------------------------------------------------
+// Timestamp formats and regex
+// ------------------------------------------------------------
+namespace Timestamps {
+inline const QString FolderFormat       = "_yyyyMMdd_HHmmss";
+inline const QString DisplayFormat      = "MM/dd/yyyy hh:mm AP";
+inline const QString NotificationFormat = "yyyy-MM-dd HH:mm:ss";
+inline const QString IsoFormat          = "yyyy-MM-ddTHH:mm:ssZ"; // ISO format
+inline const QRegularExpression FolderRegex{R"((\d{8}_\d{6}))"};
 }
 
-// Keys for backup log metadata
-namespace BackupMetadata {
-inline constexpr auto k_NAME                     = "backup_name";
-inline constexpr auto k_TIMESTAMP                = "backup_timestamp";
-inline constexpr auto k_DURATION                 = "backup_duration";
-inline constexpr auto k_DURATION_READABLE        = "backup_duration_readable";
-inline constexpr auto k_SIZE_BYTES               = "total_size_bytes";
-inline constexpr auto k_SIZE_READABLE            = "total_size_readable";
-inline constexpr auto k_FILE_COUNT               = "file_count";
-inline constexpr auto k_FOLDER_COUNT             = "folder_count";
-inline constexpr auto k_USER_SELECTED_ITEMS      = "user_selected_items";
-inline constexpr auto k_USER_SELECTED_ITEM_COUNT = "user_selected_item_count";
-inline constexpr auto k_BACKUP_FILES             = "backup_files";
-inline constexpr auto k_BACKUP_FOLDERS           = "backup_folders";
+// ------------------------------------------------------------
+// Backup log metadata keys
+// ------------------------------------------------------------
+namespace Metadata {
+inline const QString Name                = "backup_name";
+inline const QString Timestamp           = "backup_timestamp";
+inline const QString Duration            = "backup_duration";
+inline const QString DurationReadable    = "backup_duration_readable";
+inline const QString SizeBytes           = "total_size_bytes";
+inline const QString SizeReadable        = "total_size_readable";
+inline const QString FileCount           = "file_count";
+inline const QString FolderCount         = "folder_count";
+inline const QString UserSelectedItems   = "user_selected_items";
+inline const QString UserSelectedItemCnt = "user_selected_item_count";
+inline const QString Files               = "backup_files";
+inline const QString Folders             = "backup_folders";
 }
 
-// Common QDir entry filters for backup operations
-namespace Backup::Dirs {
-inline constexpr auto k_BACKUP_ENTRY_FILTER =
-    QDir::NoDotAndDotDot | QDir::AllEntries;
+// ------------------------------------------------------------
+// Initial backup config keys
+// ------------------------------------------------------------
+namespace InitConfig {
+inline const QString Location   = "location";
+inline const QString Timestamp  = "timestamp";
+inline const QString AppName    = "app_name";
+inline const QString AppAuthor  = "app_author";
+inline const QString AppVersion = "app_version";
+inline const QString Backup     = "backup";
 }
+
+// ------------------------------------------------------------
+// Log constants
+// ------------------------------------------------------------
+namespace Logs {
+inline const QString FileSuffix = "_backup_logs.json";
+}
+
+// ------------------------------------------------------------
+// Directory entry filters
+// ------------------------------------------------------------
+namespace Filters {
+inline constexpr auto All   = QDir::NoDotAndDotDot | QDir::AllEntries;
+inline constexpr auto Files = QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs;
+inline constexpr auto Dirs  = QDir::NoDotAndDotDot | QDir::Dirs;
+inline constexpr auto Logs  = QDir::Files;
+inline constexpr auto LogsByTime = QDir::Time;
+}
+
+// ------------------------------------------------------------
+// Backup scanning
+// ------------------------------------------------------------
+namespace Scan {
+inline constexpr int MinFolderAgeSecs = 5; // ignore very recent folders
+}
+
+// ------------------------------------------------------------
+// Transfer worker constants
+// ------------------------------------------------------------
+namespace Transfer {
+inline const QString DriveRootSuffix   = ":/";
+inline const QString DriveFolderFormat = "%1 (%2 %3)";
+inline const QString MkpathCurrentDir  = ".";
+inline constexpr auto EntryFilter      = QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files;
+}
+
+} // namespace Backup
 
 #endif // BACKUPCONSTANTS_H

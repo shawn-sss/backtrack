@@ -9,7 +9,7 @@
 
 // Static timestamp regex definition
 const QRegularExpression DestinationProxyModel::timestampRegex(
-    Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_REGEX);
+    Backup::Timestamps::FolderRegex);
 
 // Constructor
 DestinationProxyModel::DestinationProxyModel(QObject* parent)

@@ -733,14 +733,14 @@ void MainWindow::updateLastBackupInfo() {
         return;
     }
 
-    const QString name = metadata.value(BackupMetadata::k_NAME).toString();
-    const QString timestampRaw = metadata.value(BackupMetadata::k_TIMESTAMP).toString();
-    const int durationSec = metadata.value(BackupMetadata::k_DURATION).toInt();
-    const QString sizeStr = metadata.value(BackupMetadata::k_SIZE_READABLE).toString();
+    const QString name = metadata.value(Backup::Metadata::Name).toString();
+    const QString timestampRaw = metadata.value(Backup::Metadata::Timestamp).toString();
+    const int durationSec = metadata.value(Backup::Metadata::Duration).toInt();
+    const QString sizeStr = metadata.value(Backup::Metadata::SizeReadable).toString();
 
     const QString formattedTimestamp = Shared::Formatting::formatTimestamp(
         QDateTime::fromString(timestampRaw, Qt::ISODate),
-        Backup::Timestamps::k_BACKUP_TIMESTAMP_DISPLAY_FORMAT);
+        Backup::Timestamps::DisplayFormat);
 
     const QString formattedDuration = Shared::Formatting::formatDuration(durationSec);
 
@@ -1345,7 +1345,7 @@ void MainWindow::showNextNotification() {
 // Notifications: display one popup
 void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
     QString message = Labels::Notification::k_TIMESTAMP_TEMPLATE.arg(
-        notif.timestamp.toLocalTime().toString(Backup::Timestamps::k_NOTIFICATION_TIMESTAMP_DISPLAY_FORMAT));
+        notif.timestamp.toLocalTime().toString(Backup::Timestamps::NotificationFormat));
 
     auto *dlg = new PromptDialog(this);
     dlg->setWindowTitle(InfoMessages::k_NOTIFICATION_POPUP_TITLE);

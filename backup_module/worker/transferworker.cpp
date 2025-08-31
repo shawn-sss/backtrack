@@ -12,12 +12,16 @@
 TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
 
+// ------------------------------------------------------------
 // Stop the transfer process externally
+// ------------------------------------------------------------
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
+// ------------------------------------------------------------
 // Check if a stop has been requested
+// ------------------------------------------------------------
 bool TransferWorker::shouldStop() {
     if (stopRequested.load()) {
         emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
@@ -26,7 +30,9 @@ bool TransferWorker::shouldStop() {
     return false;
 }
 
+// ------------------------------------------------------------
 // Start the file or folder transfer process
+// ------------------------------------------------------------
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -51,7 +57,7 @@ void TransferWorker::startTransfer() {
             return;
         }
 
-        const bool isDriveRoot = fileInfo.isDir() && filePath.endsWith(":/");
+        const bool isDriveRoot = fileInfo.isDir() && filePath.endsWith(Backup::Transfer::DriveRootSuffix);
         const bool success = isDriveRoot
                                  ? processDriveRoot(filePath)
                                  : processFileOrFolder(filePath);
@@ -68,7 +74,9 @@ void TransferWorker::startTransfer() {
     emit finished();
 }
 
+// ------------------------------------------------------------
 // Handle copying when the source is a drive root
+// ------------------------------------------------------------
 bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     if (shouldStop()) return false;
 
@@ -80,12 +88,11 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
 
     const QStorageInfo storageInfo(driveRoot);
     const QString driveName = storageInfo.displayName().isEmpty()
-                                  ? Backup::Drive::k_DEFAULT_DRIVE_LABEL
+                                  ? Backup::Drive::DefaultLabel
                                   : storageInfo.displayName();
 
     const QString driveBackupFolder = QDir(destination).filePath(
-        QStringLiteral("%1 (%2 %3)")
-            .arg(driveName, driveRoot.left(1), Backup::Drive::k_DRIVE_LABEL_SUFFIX));
+        Backup::Transfer::DriveFolderFormat.arg(driveName, driveRoot.left(1), Backup::Drive::LabelSuffix));
 
     QDir backupDir(driveBackupFolder);
     if (backupDir.exists() && !backupDir.removeRecursively()) {
@@ -93,12 +100,12 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
         return false;
     }
 
-    if (!backupDir.mkpath(".")) {
+    if (!backupDir.mkpath(Backup::Transfer::MkpathCurrentDir)) {
         emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
         return false;
     }
 
-    const QFileInfoList entries = QDir(driveRoot).entryInfoList(QDir::NoDotAndDotDot | QDir::AllDirs | QDir::Files);
+    const QFileInfoList entries = QDir(driveRoot).entryInfoList(Backup::Transfer::EntryFilter);
     for (const QFileInfo& entry : entries) {
         if (!copyItem(entry, backupDir.filePath(entry.fileName()))) {
             return false;
@@ -108,7 +115,9 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     return true;
 }
 
+// ------------------------------------------------------------
 // Handle copying a single file or directory
+// ------------------------------------------------------------
 bool TransferWorker::processFileOrFolder(const QString& filePath) {
     if (shouldStop()) return false;
 
@@ -118,7 +127,9 @@ bool TransferWorker::processFileOrFolder(const QString& filePath) {
     return copyItem(fileInfo, destPath);
 }
 
+// ------------------------------------------------------------
 // Copy a file or directory to a destination
+// ------------------------------------------------------------
 bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
     if (!fileInfo.isReadable()) {
         emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));

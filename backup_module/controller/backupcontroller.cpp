@@ -41,8 +41,8 @@ bool BackupController::createBackupFolder(const QString& path) {
 QString BackupController::generateBackupFolderPath(const QString& destinationPath) const {
     return QDir(destinationPath).filePath(
         ServiceDirector::getInstance().getBackupServiceManager()->getBackupPrefix() +
-        QDateTime::currentDateTime().toString(
-            Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_FORMAT));
+                                          QDateTime::currentDateTime().toString(
+                                              Backup::Timestamps::FolderFormat));
 }
 
 // Starts a new backup operation in a worker thread
@@ -146,7 +146,7 @@ void BackupController::cleanupAfterTransfer() {
 // Clears contents of the backup archive directory
 void BackupController::resetBackupArchive(const QString& directoryPath) {
     QDir dir(directoryPath);
-    const QFileInfoList entries = dir.entryInfoList(Backup::Dirs::k_BACKUP_ENTRY_FILTER);
+    const QFileInfoList entries = dir.entryInfoList(Backup::Filters::All);  // ✅ new
 
     for (const QFileInfo& entry : entries) {
         const QString path = entry.absoluteFilePath();

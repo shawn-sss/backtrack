@@ -61,7 +61,7 @@ QVariant StagingModel::data(const QModelIndex& index, int role) const {
         if (fileInfo.isRoot()) {
             const QStorageInfo storageInfo(path);
             const QString volumeLabel = storageInfo.displayName().isEmpty()
-                                            ? Backup::Drive::k_DEFAULT_DRIVE_LABEL
+                                            ? Backup::Drive::DefaultLabel
                                             : storageInfo.displayName();
             return QString("%1 (%2)").arg(volumeLabel, path.left(2));
         }
