@@ -310,9 +310,11 @@ void MainWindow::initializeUI() {
     connect(templateResetButton, &QPushButton::clicked, this, [this]() {
         stagingModel->clear();
         QStringList paths;
-        for (const auto& entry : savedStagingBeforeTemplate) {
-            paths << entry.path;
+
+        for (int i = 0; i < savedStagingBeforeTemplate.size(); ++i) {
+            paths << savedStagingBeforeTemplate.at(i).path;
         }
+
         if (!paths.isEmpty()) {
             stagingModel->addPaths(paths);
         }
@@ -1255,9 +1257,10 @@ void MainWindow::onTemplateButtonClicked() {
             stagingModel->clear();
 
             QStringList paths;
-            for (const auto& entry : savedStagingBeforeTemplate) {
-                paths << entry.path;
+            for (int i = 0; i < savedStagingBeforeTemplate.size(); ++i) {
+                paths << savedStagingBeforeTemplate.at(i).path;
             }
+
             if (!paths.isEmpty()) {
                 stagingModel->addPaths(paths);
             }
@@ -1270,21 +1273,24 @@ void MainWindow::onTemplateButtonClicked() {
         }
     });
 
-    connect(dialog, &TemplateDialog::templateLoaded, this, [this](const QStringList& paths, const QString& name) {
-        stagingModel->clear();
-        if (!paths.isEmpty()) {
-            stagingModel->addPaths(paths);
-        }
-        ui->BackupStagingTreeView->clearSelection();
-        ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+    connect(dialog, &TemplateDialog::templateLoaded, this,
+            [this](const QStringList& paths, const QString& name) {
+                stagingModel->clear();
+                if (!paths.isEmpty()) {
+                    stagingModel->addPaths(paths);
+                }
 
-        updateBackupStagingTitle(name);
-        templateServiceManager.setCurrentStagingEntries(paths);
-    });
+                ui->BackupStagingTreeView->clearSelection();
+                ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
 
-    connect(dialog, &TemplateDialog::templateUnloaded, this, [this](const QString& name) {
-        Q_UNUSED(name);
-    });
+                updateBackupStagingTitle(name);
+                templateServiceManager.setCurrentStagingEntries(paths);
+            });
+
+    connect(dialog, &TemplateDialog::templateUnloaded, this,
+            [this](const QString& name) {
+                Q_UNUSED(name);
+            });
 
     dialog->exec();
     dialog->deleteLater();
@@ -1296,9 +1302,11 @@ void MainWindow::restoreStagingFromService() {
 
     stagingModel->clear();
     QStringList paths;
-    for (const auto& entry : restored) {
-        paths << entry.path;
+
+    for (int i = 0; i < restored.size(); ++i) {
+        paths << restored.at(i).path;
     }
+
     if (!paths.isEmpty()) {
         stagingModel->addPaths(paths);
     }
