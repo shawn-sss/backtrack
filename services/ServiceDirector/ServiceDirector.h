@@ -1,4 +1,3 @@
-// ServiceDirector.h
 #ifndef SERVICEDIRECTOR_H
 #define SERVICEDIRECTOR_H
 
@@ -18,7 +17,6 @@ class ThemeServiceManager;
 class QObject;
 class QWidget;
 
-// Small constants
 namespace ServiceDirectorConstants {
 inline constexpr int kImmediateMs = 0;
 }
@@ -28,30 +26,27 @@ public:
     // Lifecycle
     static ServiceDirector& getInstance();
 
-    // Theme application & event filtering
+    // Theme
     void applyTheme();
     void installThemeEventFilter(QObject* target);
-
-    // Theme preference access
     ThemeServiceConstants::UserThemePreference getThemePreference() const;
     void setThemePreference(ThemeServiceConstants::UserThemePreference preference);
 
-    // Install metadata operations
+    // Install metadata
     void loadInstallMetadata();
     void saveInstallMetadata();
 
-    // Service manager accessors
+    // Accessors
     UserServiceManager* getUserServiceManager();
     BackupServiceManager* getBackupServiceManager();
     InstallServiceManager* getInstallServiceManager();
     ThemeServiceManager* getThemeServiceManager();
 
-    // First-run & onboarding
+    // First run
     bool isFirstRun() const;
     void maybeShowWelcomeDialog(QWidget* parent = nullptr);
 
 private:
-    // Construction & defaults
     ServiceDirector();
     void setupDefaults();
 
@@ -62,4 +57,4 @@ private:
     bool firstRun = false;
 };
 
-#endif // SERVICEDIRECTOR_H
+#endif

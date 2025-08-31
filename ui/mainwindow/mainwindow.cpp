@@ -278,7 +278,6 @@ void MainWindow::onScheduleButtonClicked() {
 
 // UI: controls and staging
 void MainWindow::initializeUI() {
-    // Progress bar
     Shared::UI::setupProgressBar(
         ui->TransferProgressBar,
         UI::Progress::k_PROGRESS_BAR_MIN_VALUE,
@@ -292,7 +291,6 @@ void MainWindow::initializeUI() {
         ui->TransferProgressText->setText(UI::Progress::k_PROGRESS_BAR_INITIAL_MESSAGE);
     }
 
-    // Staging title row (label + reset button)
     stagingTitleLayout = new QHBoxLayout(ui->StagingListTitleContainer);
     stagingTitleLayout->setContentsMargins(0, 0, 0, 0);
     stagingTitleLayout->setSpacing(6);
@@ -302,29 +300,31 @@ void MainWindow::initializeUI() {
     stagingTitleLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     stagingTitleLayout->addWidget(stagingTitleLabel);
 
-    // Tiny red reset button with an ✖
     templateResetButton = new QPushButton(QStringLiteral("✖"), ui->StagingListTitleContainer);
-
-    // Apply official styling: sets cursor, tooltip, objectName = "TemplateResetButton", and stylesheet
     Shared::UI::UIUtilsServiceManager::applyTemplateResetButtonStyling(templateResetButton);
-
-    // Keep it tiny regardless of layout/theme
     templateResetButton->setFixedSize(16, 16);
     templateResetButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    // Hidden until a template is selected
     templateResetButton->setVisible(false);
+    templateResetButton->setToolTip(tr("Reset to previous staging"));
 
     connect(templateResetButton, &QPushButton::clicked, this, [this]() {
         stagingModel->clear();
+        QStringList paths;
+        for (const auto& entry : savedStagingBeforeTemplate) {
+            paths << entry.path;
+        }
+        if (!paths.isEmpty()) {
+            stagingModel->addPaths(paths);
+        }
+
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
-        updateBackupStagingTitle(QString());  // clears title & hides the reset button
+
+        updateBackupStagingTitle(QString());
     });
 
     stagingTitleLayout->addWidget(templateResetButton);
 
-    // Rest of UI init
     initializeBackupSystem();
     setInitialButtonTexts();
 }
@@ -638,6 +638,27 @@ void MainWindow::initializeBackupSystem() {
     ensureBackupStatusUpdated();
     applyCustomPalettesToAllTreeViews();
     ui->BackupViewContainer->setStyleSheet(MainWindowStyling::Styles::BackupViewContainer::STYLE);
+
+    const QString defaultTemplate = templateServiceManager.getDefaultTemplate();
+    if (!defaultTemplate.isEmpty()) {
+        QVector<TemplateEntry> entries = templateServiceManager.loadTemplate(defaultTemplate);
+
+        if (!entries.isEmpty()) {
+            QStringList paths;
+            paths.reserve(entries.size());
+            for (const TemplateEntry &entry : std::as_const(entries)) {
+                paths.append(entry.path);
+            }
+
+            stagingModel->clear();
+            stagingModel->addPaths(paths);
+            ui->BackupStagingTreeView->clearSelection();
+            ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+            updateBackupStagingTitle(defaultTemplate);
+            templateServiceManager.setCurrentStagingEntries(paths);
+        }
+    }
 }
 
 // Backup status: serialized refresh
@@ -1223,27 +1244,80 @@ void MainWindow::triggerButtonFeedback(QPushButton *button,
 void MainWindow::onTemplateButtonClicked() {
     auto* dialog = new TemplateDialog(&templateServiceManager, this);
 
+    connect(dialog, &TemplateDialog::requestSaveStaging, this, [this]() {
+        if (savedStagingBeforeTemplate.isEmpty()) {
+            savedStagingBeforeTemplate = templateServiceManager.getCurrentStagingEntries();
+        }
+    });
+
+    connect(dialog, &TemplateDialog::requestRestoreStaging, this, [this]() {
+        if (!savedStagingBeforeTemplate.isEmpty()) {
+            stagingModel->clear();
+
+            QStringList paths;
+            for (const auto& entry : savedStagingBeforeTemplate) {
+                paths << entry.path;
+            }
+            if (!paths.isEmpty()) {
+                stagingModel->addPaths(paths);
+            }
+
+            ui->BackupStagingTreeView->clearSelection();
+            ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+            updateBackupStagingTitle(QString());
+            templateServiceManager.restoreStaging(savedStagingBeforeTemplate);
+        }
+    });
+
     connect(dialog, &TemplateDialog::templateLoaded, this, [this](const QStringList& paths, const QString& name) {
         stagingModel->clear();
-        stagingModel->addPaths(paths);
+        if (!paths.isEmpty()) {
+            stagingModel->addPaths(paths);
+        }
         ui->BackupStagingTreeView->clearSelection();
         ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
         updateBackupStagingTitle(name);
         templateServiceManager.setCurrentStagingEntries(paths);
+    });
+
+    connect(dialog, &TemplateDialog::templateUnloaded, this, [this](const QString& name) {
+        Q_UNUSED(name);
     });
 
     dialog->exec();
     dialog->deleteLater();
 }
 
+// Helper: restore staging state from TemplateServiceManager
+void MainWindow::restoreStagingFromService() {
+    QVector<TemplateEntry> restored = templateServiceManager.getCurrentStagingEntries();
+
+    stagingModel->clear();
+    QStringList paths;
+    for (const auto& entry : restored) {
+        paths << entry.path;
+    }
+    if (!paths.isEmpty()) {
+        stagingModel->addPaths(paths);
+    }
+
+    ui->BackupStagingTreeView->clearSelection();
+    ui->BackupStagingTreeView->setCurrentIndex(QModelIndex());
+
+    updateBackupStagingTitle(QString());
+}
+
 // Template: update title and reset button
 void MainWindow::updateBackupStagingTitle(const QString &templateName) {
     if (templateName.isEmpty()) {
         stagingTitleLabel->setText(Labels::Backup::k_STAGING_TITLE);
-        templateResetButton->setVisible(false);
+        templateResetButton->setVisible(false);   // 🔑 hides ✖
     } else {
-        stagingTitleLabel->setText(QString("%1 - %2").arg(Labels::Backup::k_STAGING_TITLE, templateName));
-        templateResetButton->setVisible(true);
+        stagingTitleLabel->setText(
+            QString("%1 - %2").arg(Labels::Backup::k_STAGING_TITLE, templateName));
+        templateResetButton->setVisible(true);    // 🔑 shows ✖
     }
 }
 

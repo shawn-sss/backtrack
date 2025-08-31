@@ -1,19 +1,24 @@
-// filename: templatedialog.h
-
 #ifndef TEMPLATEDIALOG_H
 #define TEMPLATEDIALOG_H
+
+// Project includes
+#include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 
 // Qt includes
 #include <QDialog>
 #include <QString>
 #include <QStringList>
+#include <QTableWidget>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVector>
 
 // Forward declaration (Custom class)
+struct TemplateEntry;
 class TemplateServiceManager;
 
-// Forward declarations (Qt classes)
-class QListWidget;
-class QPushButton;
+// Forward declaration (Qt class)
+class QToolButton;
 
 class TemplateDialog : public QDialog {
     Q_OBJECT
@@ -22,24 +27,39 @@ public:
     explicit TemplateDialog(TemplateServiceManager* service, QWidget* parent = nullptr);
 
 signals:
+    // Template load/unload signals
     void templateLoaded(const QStringList& paths, const QString& name);
+    void templateUnloaded(const QString& name);
+
+    // Requests to save or restore staging
+    void requestSaveStaging();
+    void requestRestoreStaging();
 
 private slots:
-    void onLoadClicked();
-    void onDeleteClicked();
-    void onSaveClicked();
+    // Template actions
+    void onActionLoadOrUnloadClicked(const QString& name);
+    void onActionDeleteClicked(int row);
+    void onActionSetDefaultClicked(int row);
+
+    // Selection and creation
+    void onTemplateSelectionChanged();
+    void onNewTemplateClicked();
 
 private:
-    void populateTemplateList();
+    // Table and preview management
+    void populateTemplateTable();
+    void updatePreviewForTemplate(const QString& templateName);
 
     TemplateServiceManager* templateService = nullptr;
 
-    QListWidget* listWidget   = nullptr;
-    QPushButton* loadButton   = nullptr;
-    QPushButton* deleteButton = nullptr;
-    QPushButton* saveButton   = nullptr;
+    QTableWidget* tableWidget = nullptr;
+    QListWidget* previewList = nullptr;
 
-    Q_DISABLE_COPY_MOVE(TemplateDialog)
+    QPushButton* newTemplateBtn = nullptr;
+    QPushButton* closeBtn = nullptr;
+
+    QString defaultTemplate;
+    QString loadedTemplate;
 };
 
 #endif // TEMPLATEDIALOG_H

@@ -103,6 +103,7 @@ set(UI_DIALOG_TEMPLATE
     ui/templatedialog/templatedialog.cpp
     ui/templatedialog/templatedialog.ui
     ui/templatedialog/templatedialogconstants.h
+    ui/templatedialog/templatedialogstyling.h
 )
 
 # UI: Schedule dialog

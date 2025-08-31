@@ -3,8 +3,9 @@
 
 namespace TemplateServiceConstants {
 namespace Keys {
-inline constexpr char Path[] = "path";
-inline constexpr char IsFolder[] = "isFolder";
+inline constexpr char Path[]       = "path";
+inline constexpr char IsFolder[]   = "isFolder";
+inline constexpr char DefaultKey[] = "_default";
 }
 }
 

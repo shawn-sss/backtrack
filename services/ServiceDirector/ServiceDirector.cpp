@@ -7,6 +7,7 @@
 #include "../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h"
 #include "../../services/ServiceManagers/ThemeServiceManager/ThemeServiceManager.h"
+#include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 #include "../../ui/welcomedialog/welcomedialog.h"
 
 // Qt includes
@@ -17,7 +18,7 @@
 // C++ includes
 #include <memory>
 
-// Lifecycle: singleton, construction, defaults, first-run
+// Lifecycle
 ServiceDirector& ServiceDirector::getInstance() {
     static ServiceDirector instance;
     return instance;
@@ -42,17 +43,19 @@ ServiceDirector::ServiceDirector() {
     userServiceManager->load();
 }
 
-void ServiceDirector::setupDefaults() {
-    InstallServiceManager::initializeDefaults();
-    userServiceManager->initializeDefaults();
-    NotificationServiceManager::initializeDefaults();
-}
-
 bool ServiceDirector::isFirstRun() const {
     return firstRun;
 }
 
-// User onboarding: welcome dialog on first run
+// Defaults
+void ServiceDirector::setupDefaults() {
+    InstallServiceManager::initializeDefaults();
+    userServiceManager->initializeDefaults();
+    NotificationServiceManager::initializeDefaults();
+    TemplateServiceManager::initializeDefaults();
+}
+
+// Welcome dialog
 void ServiceDirector::maybeShowWelcomeDialog(QWidget* parent) {
     if (!firstRun)
         return;
@@ -63,7 +66,7 @@ void ServiceDirector::maybeShowWelcomeDialog(QWidget* parent) {
     });
 }
 
-// Theme management: apply/install filter and get/set preference
+// Theme
 void ServiceDirector::applyTheme() {
     getThemeServiceManager()->applyTheme();
 }
@@ -88,7 +91,7 @@ void ServiceDirector::setThemePreference(ThemeServiceConstants::UserThemePrefere
     userServiceManager->save();
 }
 
-// Install metadata persistence: load/save
+// Install metadata
 void ServiceDirector::loadInstallMetadata() {
     installServiceManager->load();
 }
@@ -97,7 +100,7 @@ void ServiceDirector::saveInstallMetadata() {
     installServiceManager->save();
 }
 
-// Accessors: service managers
+// Accessors
 UserServiceManager* ServiceDirector::getUserServiceManager() {
     return userServiceManager.get();
 }

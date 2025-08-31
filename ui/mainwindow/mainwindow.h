@@ -71,7 +71,7 @@ private:
     void setupConnections();
     void setupTrayIcon();
 
-    // Toolbar and views setup
+    // Toolbar & views
     void initializeToolbar();
     void initializeBackupUi();
     void setupSourceTreeView();
@@ -82,14 +82,14 @@ private:
                            QAbstractItemView::SelectionMode selectionMode,
                            bool stretchLastColumn, bool showHeader = true);
 
-    // File watching
+    // File watcher
     void initializeFileWatcher();
     void refreshFileWatcher();
     QStringList getWatchedRoots() const;
     void handleWatchedPathChanged(const QString& path);
     void checkStagingForReadAccessLoss();
 
-    // Backup system and status
+    // Backup system & status
     void initializeBackupSystem();
     void connectBackupSignals();
     void updateBackupLabels();
@@ -156,6 +156,9 @@ private:
     Ui::MainWindow* ui = nullptr;
     QToolBar* toolBar = nullptr;
     QLabel* notificationBadge = nullptr;
+    void restoreStagingFromService();
+
+    QVector<TemplateEntry> savedStagingBeforeTemplate;
 
     // Models & Services
     QFileSystemModel* sourceModel = nullptr;
@@ -185,7 +188,7 @@ private:
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
-    // Template / Title bar controls
+    // Template / title bar
     QLabel* stagingTitleLabel = nullptr;
     QPushButton* templateResetButton = nullptr;
     QHBoxLayout* stagingTitleLayout = nullptr;
@@ -199,4 +202,4 @@ private:
     QPointer<ScheduleDialog> openScheduleDialog_;
 };
 
-#endif // MAINWINDOW_H
+#endif
