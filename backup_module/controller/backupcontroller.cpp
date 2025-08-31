@@ -146,7 +146,7 @@ void BackupController::cleanupAfterTransfer() {
 // Clears contents of the backup archive directory
 void BackupController::resetBackupArchive(const QString& directoryPath) {
     QDir dir(directoryPath);
-    const QFileInfoList entries = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::AllEntries);
+    const QFileInfoList entries = dir.entryInfoList(Backup::Dirs::k_BACKUP_ENTRY_FILTER);
 
     for (const QFileInfo& entry : entries) {
         const QString path = entry.absoluteFilePath();

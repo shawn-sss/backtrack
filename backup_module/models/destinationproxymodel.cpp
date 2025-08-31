@@ -1,5 +1,6 @@
 // Project includes
 #include "destinationproxymodel.h"
+#include "../constants/backupconstants.h"
 
 // Qt includes
 #include <QFileSystemModel>
@@ -7,7 +8,8 @@
 #include <QStringView>
 
 // Static timestamp regex definition
-const QRegularExpression DestinationProxyModel::timestampRegex(R"((\d{8}_\d{6}))");
+const QRegularExpression DestinationProxyModel::timestampRegex(
+    Backup::Timestamps::k_BACKUP_FOLDER_TIMESTAMP_REGEX);
 
 // Constructor
 DestinationProxyModel::DestinationProxyModel(QObject* parent)
@@ -37,17 +39,20 @@ bool DestinationProxyModel::lessThan(const QModelIndex& left, const QModelIndex&
     const bool leftIsDir = model->isDir(left);
     const bool rightIsDir = model->isDir(right);
 
+    // Always sort directories before files
     if (leftIsDir != rightIsDir)
         return leftIsDir;
 
-    const QRegularExpressionMatch leftMatch = timestampRegex.match(leftName);
+    // Compare based on timestamp regex if both match
+    const QRegularExpressionMatch leftMatch  = timestampRegex.match(leftName);
     const QRegularExpressionMatch rightMatch = timestampRegex.match(rightName);
 
     if (leftMatch.hasMatch() && rightMatch.hasMatch()) {
-        const QStringView leftTimestamp = leftMatch.capturedView(1);
+        const QStringView leftTimestamp  = leftMatch.capturedView(1);
         const QStringView rightTimestamp = rightMatch.capturedView(1);
-        return leftTimestamp > rightTimestamp;
+        return leftTimestamp > rightTimestamp; // descending order
     }
 
+    // Fallback to alphabetical
     return leftName < rightName;
 }
