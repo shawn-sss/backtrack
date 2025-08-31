@@ -378,57 +378,61 @@ void MainWindow::setupTrayIcon() {
     auto* systemTrayContextMenu = new SystemTrayContextMenu(this);
     trayMenu = systemTrayContextMenu;
 
-    QAction* actionOpen = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_OPEN);
-    QAction* actionSettings = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_SETTINGS);
+    systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_OPEN);
+    systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_SETTINGS);
     systemTrayContextMenu->addSeparator();
-    QAction* actionExit = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_EXIT);
+    systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_EXIT);
 
-    connect(systemTrayContextMenu, &SystemTrayContextMenu::safeTriggered, this, [this](QAction* action) {
-        const QString text = action->text().trimmed();
-        if (text == MainWindowConstants::k_TRAY_ACTION_OPEN) {
-            this->showNormal();
-            this->activateWindow();
-        } else if (text == MainWindowConstants::k_TRAY_ACTION_SETTINGS) {
-            if (settingsDialog && settingsDialog->isVisible()) {
-                settingsDialog->raise();
-                settingsDialog->activateWindow();
-                return;
-            }
+    connect(systemTrayContextMenu, &SystemTrayContextMenu::safeTriggered, this,
+            [this](QAction* action) {
+                const QString text = action->text().trimmed();
+                if (text == MainWindowConstants::k_TRAY_ACTION_OPEN) {
+                    this->showNormal();
+                    this->activateWindow();
+                } else if (text == MainWindowConstants::k_TRAY_ACTION_SETTINGS) {
+                    if (settingsDialog && settingsDialog->isVisible()) {
+                        settingsDialog->raise();
+                        settingsDialog->activateWindow();
+                        return;
+                    }
 
-            settingsDialog = new SettingsDialog(this);
-            connect(settingsDialog, &SettingsDialog::requestBackupReset, this, [this](const QString& path, const QString& type) {
-                this->handleBackupDeletion(path, type);
+                    settingsDialog = new SettingsDialog(this);
+                    connect(settingsDialog, &SettingsDialog::requestBackupReset, this,
+                            [this](const QString& path, const QString& type) {
+                                this->handleBackupDeletion(path, type);
+                            });
+                    connect(settingsDialog, &SettingsDialog::requestAppDataClear, this,
+                            [this]() {
+                                this->handleAppDataClear();
+                            });
+
+                    settingsDialog->exec();
+                    delete settingsDialog;
+                    settingsDialog = nullptr;
+                } else if (text == MainWindowConstants::k_TRAY_ACTION_EXIT) {
+                    QApplication::quit();
+                }
             });
-            connect(settingsDialog, &SettingsDialog::requestAppDataClear, this, [this]() {
-                this->handleAppDataClear();
-            });
-
-            settingsDialog->exec();
-            delete settingsDialog;
-            settingsDialog = nullptr;
-        } else if (text == MainWindowConstants::k_TRAY_ACTION_EXIT) {
-            QApplication::quit();
-        }
-    });
 
     trayIcon->setContextMenu(systemTrayContextMenu);
     trayIcon->show();
 
-    connect(trayIcon, &QSystemTrayIcon::activated, this, [this, systemTrayContextMenu](QSystemTrayIcon::ActivationReason reason) {
-        QPoint cursorPos = QCursor::pos();
-        switch (reason) {
-        case QSystemTrayIcon::Trigger:
-            this->showNormal();
-            this->activateWindow();
-            break;
-        case QSystemTrayIcon::Context:
-            systemTrayContextMenu->popup(cursorPos);
-            break;
-        case QSystemTrayIcon::DoubleClick:
-        default:
-            break;
-        }
-    });
+    connect(trayIcon, &QSystemTrayIcon::activated, this,
+            [this, systemTrayContextMenu](QSystemTrayIcon::ActivationReason reason) {
+                const QPoint cursorPos = QCursor::pos();
+                switch (reason) {
+                case QSystemTrayIcon::Trigger:
+                    this->showNormal();
+                    this->activateWindow();
+                    break;
+                case QSystemTrayIcon::Context:
+                    systemTrayContextMenu->popup(cursorPos);
+                    break;
+                case QSystemTrayIcon::DoubleClick:
+                default:
+                    break;
+                }
+            });
 }
 
 // File watcher: initialize
@@ -1258,8 +1262,8 @@ void MainWindow::onUnlockDriveClicked() {
         return;
     }
 
-    QString drivePath = driveLetter + ":/";
-    QDir driveDir(drivePath);
+    const QString drivePath = driveLetter + ":/";
+    const QDir driveDir(drivePath);
 
     if (driveDir.exists() && driveDir.isReadable()) {
         PromptDialog::showDialog(
@@ -1274,14 +1278,18 @@ void MainWindow::onUnlockDriveClicked() {
     }
 
     QProcess taskKill;
-    taskKill.start(MainWindowConstants::k_TASKKILL_CMD, QStringList() << "/IM" << MainWindowConstants::k_MANAGE_BDE_EXE << "/F");
+    taskKill.start(MainWindowConstants::k_TASKKILL_CMD,
+                   QStringList() << "/IM" << MainWindowConstants::k_MANAGE_BDE_EXE << "/F");
     taskKill.waitForFinished(2000);
 
-    QString script = QStringLiteral("Start-Process %1 -ArgumentList '%2' -Verb runAs")
-                         .arg(QString::fromUtf8(MainWindowConstants::k_MANAGE_BDE_EXE))
-                         .arg(QString(MainWindowConstants::k_UNLOCK_ARGS).arg(driveLetter.toUpper()));
+    const QString manageBde  = QString::fromUtf8(MainWindowConstants::k_MANAGE_BDE_EXE);
+    const QString unlockArgs = QString(MainWindowConstants::k_UNLOCK_ARGS)
+                                   .arg(driveLetter.toUpper());
 
-    if (!QProcess::startDetached(MainWindowConstants::k_POWERSHELL_CMD, QStringList() << "-Command" << script)) {
+    const QString script = QStringLiteral("Start-Process %1 -ArgumentList '%2' -Verb runAs").arg(manageBde, unlockArgs);
+
+    if (!QProcess::startDetached(MainWindowConstants::k_POWERSHELL_CMD,
+                                 QStringList() << "-Command" << script)) {
         PromptDialog::showDialog(
             this,
             PromptDialog::Critical,
