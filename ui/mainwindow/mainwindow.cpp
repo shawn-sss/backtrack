@@ -1404,8 +1404,7 @@ QString MainWindow::getSelectedDriveLetter() const {
 
 // Notifications: dialog
 void MainWindow::showNotificationDialog() {
-    QList<NotificationServiceStruct> notifications = NotificationServiceManager::instance().allNotifications();
-
+    QList<NotificationSettings::NotificationServiceStruct> notifications = NotificationServiceManager::instance().allNotifications();
     NotificationsDialog dialog(notifications, this);
     dialog.exec();
 
@@ -1432,7 +1431,7 @@ void MainWindow::showNextNotification() {
 }
 
 // Notifications: display one popup
-void MainWindow::displayNotificationPopup(const NotificationServiceStruct &notif) {
+void MainWindow::displayNotificationPopup(const NotificationSettings::NotificationServiceStruct &notif) {
     QString message = Labels::Notification::k_TIMESTAMP_TEMPLATE.arg(
         notif.timestamp.toLocalTime().toString(Backup::Timestamps::NotificationFormat));
 

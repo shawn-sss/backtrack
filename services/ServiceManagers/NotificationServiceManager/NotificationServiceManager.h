@@ -2,7 +2,7 @@
 #define NOTIFICATIONSERVICEMANAGER_H
 
 // Project includes
-#include "NotificationServiceStruct.h"
+#include "NotificationServiceConstants.h"
 
 // Qt includes
 #include <QObject>
@@ -14,9 +14,10 @@ class NotificationServiceManager : public QObject {
     Q_OBJECT
 
 public:
+    // Singleton access
     static NotificationServiceManager& instance();
 
-    // Defaults
+    // Initialize with defaults
     static void initializeDefaults();
 
     // Persistence
@@ -30,8 +31,8 @@ public:
     void suspendNotifications(bool suspend);
 
     // Query
-    QList<NotificationServiceStruct> unreadNotifications() const;
-    const QList<NotificationServiceStruct>& allNotifications() const;
+    QList<NotificationSettings::NotificationServiceStruct> unreadNotifications() const;
+    const QList<NotificationSettings::NotificationServiceStruct>& allNotifications() const;
 
 signals:
     void notificationsUpdated();
@@ -41,7 +42,7 @@ private:
     QString notificationFilePath() const;
 
     bool notificationsSuspended = false;
-    QList<NotificationServiceStruct> notifications;
+    QList<NotificationSettings::NotificationServiceStruct> notifications;
 };
 
-#endif
+#endif // NOTIFICATIONSERVICEMANAGER_H

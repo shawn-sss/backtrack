@@ -23,14 +23,14 @@
 
 namespace {
 
-QString formatNotificationText(const NotificationServiceStruct& notif) {
+QString formatNotificationText(const NotificationSettings::NotificationServiceStruct& notif) {
     const QString dateStr =
         QLocale().toString(notif.timestamp.toLocalTime(), QStringLiteral("MMM d, yyyy - h:mm AP"));
     const QString badge = notif.read ? QString() : QStringLiteral("🔴 ");
     return QStringLiteral("%1%2\n%3").arg(badge, dateStr, notif.message);
 }
 
-QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) {
+QListWidgetItem* createNotificationItem(const NotificationSettings::NotificationServiceStruct& notif) {
     auto* item = new QListWidgetItem(formatNotificationText(notif));
     if (notif.read) {
         item->setForeground(QBrush(Qt::gray));
@@ -44,8 +44,10 @@ QListWidgetItem* createNotificationItem(const NotificationServiceStruct& notif) 
 
 } // namespace
 
-// Constructs NotificationsDialog and initializes UI, list, and actions
-NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>& notifications, QWidget* parent)
+// Construct notifications dialog with UI setup
+NotificationsDialog::NotificationsDialog(
+    const QList<NotificationSettings::NotificationServiceStruct>& notifications,
+    QWidget* parent)
     : QDialog(parent) {
 
     setWindowTitle(NotificationsDialogConstants::kWindowTitle);
@@ -67,16 +69,17 @@ NotificationsDialog::NotificationsDialog(const QList<NotificationServiceStruct>&
     Shared::UI::applyButtonTooltipAndCursor(clearAllButton, NotificationsDialogConstants::kClearAllTooltip);
     Shared::UI::applyButtonTooltipAndCursor(closeButton,    NotificationsDialogConstants::kCloseTooltip);
 
-    QList<NotificationServiceStruct> sortedNotifications = notifications;
+    QList<NotificationSettings::NotificationServiceStruct> sortedNotifications = notifications;
     std::sort(sortedNotifications.begin(), sortedNotifications.end(),
-              [](const NotificationServiceStruct& a, const NotificationServiceStruct& b) {
+              [](const NotificationSettings::NotificationServiceStruct& a,
+                 const NotificationSettings::NotificationServiceStruct& b) {
                   return a.timestamp > b.timestamp;
               });
 
     if (sortedNotifications.isEmpty()) {
         listWidget->addItem(new QListWidgetItem(NotificationsDialogConstants::kNoNotificationsText));
     } else {
-        for (const NotificationServiceStruct& notif : sortedNotifications) {
+        for (const NotificationSettings::NotificationServiceStruct& notif : sortedNotifications) {
             listWidget->addItem(createNotificationItem(notif));
         }
         listWidget->setCurrentRow(0);

@@ -208,7 +208,6 @@ set(SRC_SERVICE_MANAGERS
     services/ServiceManagers/NotificationServiceManager/NotificationServiceConstants.h
     services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.cpp
     services/ServiceManagers/NotificationServiceManager/NotificationServiceManager.h
-    services/ServiceManagers/NotificationServiceManager/NotificationServiceStruct.h
 
     services/ServiceManagers/PathServiceManager/PathServiceConstants.h
     services/ServiceManagers/PathServiceManager/PathServiceManager.cpp

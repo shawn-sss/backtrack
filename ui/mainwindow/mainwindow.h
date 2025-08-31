@@ -6,6 +6,7 @@
 #include "../../services/ServiceManagers/TemplateServiceManager/TemplateServiceManager.h"
 #include "../../backup_module/service/backupservice.h"
 #include "../../../../constants/system_constants.h"
+#include "../../services/ServiceManagers/NotificationServiceManager/NotificationServiceConstants.h" // ✅ needed for NotificationSettings::NotificationServiceStruct
 
 // Qt includes
 #include <QMainWindow>
@@ -37,7 +38,6 @@ class FileWatcher;
 class NotificationServiceManager;
 class StagingModel;
 class ToolbarServiceManager;
-class NotificationServiceStruct;
 class SettingsDialog;
 class ScheduleServiceManager;
 
@@ -126,7 +126,7 @@ private:
     void updateNotificationButtonState();
     void showNotificationDialog();
     void feedbackNotificationButton();
-    void displayNotificationPopup(const NotificationServiceStruct& notif);
+    void displayNotificationPopup(const NotificationSettings::NotificationServiceStruct& notif); // ✅ fixed type
     void showNextNotification();
     void finishNotificationQueue();
 
@@ -184,7 +184,7 @@ private:
     SettingsDialog* settingsDialog = nullptr;
 
     // Notifications
-    QList<NotificationServiceStruct> notificationQueue;
+    QList<NotificationSettings::NotificationServiceStruct> notificationQueue; // ✅ fixed type
     bool isNotificationPopupVisible = false;
     bool orphanLogNotified = false;
 
@@ -202,4 +202,4 @@ private:
     QPointer<ScheduleDialog> openScheduleDialog_;
 };
 
-#endif
+#endif // MAINWINDOW_H

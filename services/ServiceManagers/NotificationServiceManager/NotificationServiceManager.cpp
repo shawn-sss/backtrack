@@ -10,25 +10,25 @@
 #include <QJsonDocument>
 #include <QStandardPaths>
 
-// Lifecycle: construct and load
+// Construct and load manager
 NotificationServiceManager::NotificationServiceManager() {
     load();
 }
 
-// Lifecycle: singleton instance
+// Return singleton instance
 NotificationServiceManager& NotificationServiceManager::instance() {
     static NotificationServiceManager instance;
     return instance;
 }
 
-// Persistence: file path
+// Return notification file path
 QString NotificationServiceManager::notificationFilePath() const {
     return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/" +
            NotificationSettings::kNotificationFolder + "/" +
            NotificationSettings::kNotificationFileName;
 }
 
-// Defaults: initialize with welcome message
+// Initialize with default welcome message
 void NotificationServiceManager::initializeDefaults() {
     const QString path = instance().notificationFilePath();
 
@@ -40,7 +40,7 @@ void NotificationServiceManager::initializeDefaults() {
     }
     if (!needsInit) return;
 
-    NotificationServiceStruct welcome{
+    NotificationSettings::NotificationServiceStruct welcome{
         NotificationSettings::kDefaultWelcomeMessage,
         QDateTime::currentDateTimeUtc(),
         false
@@ -52,7 +52,7 @@ void NotificationServiceManager::initializeDefaults() {
     }
 }
 
-// Persistence: load notifications
+// Load notifications from file
 void NotificationServiceManager::load() {
     notifications.clear();
 
@@ -63,12 +63,14 @@ void NotificationServiceManager::load() {
     const QJsonArray array = doc.array();
     for (const auto& val : array) {
         if (val.isObject()) {
-            notifications.append(NotificationServiceStruct::fromJson(val.toObject()));
+            notifications.append(
+                NotificationSettings::NotificationServiceStruct::fromJson(val.toObject())
+                );
         }
     }
 }
 
-// Persistence: save notifications
+// Save notifications to file
 void NotificationServiceManager::save() {
     if (notificationsSuspended) return;
 
@@ -79,16 +81,20 @@ void NotificationServiceManager::save() {
     JsonManager::saveJsonFile(notificationFilePath(), QJsonDocument(array));
 }
 
-// Mutation: add notification
+// Add a new notification
 void NotificationServiceManager::addNotification(const QString& message) {
     if (notificationsSuspended) return;
 
-    notifications.prepend({ message, QDateTime::currentDateTimeUtc(), false });
+    notifications.prepend({
+        message,
+        QDateTime::currentDateTimeUtc(),
+        false
+    });
     save();
     emit notificationsUpdated();
 }
 
-// Mutation: mark all as read
+// Mark all notifications as read
 void NotificationServiceManager::markAllAsRead() {
     if (notificationsSuspended) return;
 
@@ -99,21 +105,21 @@ void NotificationServiceManager::markAllAsRead() {
     emit notificationsUpdated();
 }
 
-// Query: unread notifications
-QList<NotificationServiceStruct> NotificationServiceManager::unreadNotifications() const {
-    QList<NotificationServiceStruct> unread;
+// Return unread notifications
+QList<NotificationSettings::NotificationServiceStruct> NotificationServiceManager::unreadNotifications() const {
+    QList<NotificationSettings::NotificationServiceStruct> unread;
     for (const auto& n : notifications) {
         if (!n.read) unread.append(n);
     }
     return unread;
 }
 
-// Query: all notifications
-const QList<NotificationServiceStruct>& NotificationServiceManager::allNotifications() const {
+// Return all notifications
+const QList<NotificationSettings::NotificationServiceStruct>& NotificationServiceManager::allNotifications() const {
     return notifications;
 }
 
-// Mutation: clear all notifications
+// Clear all notifications and reset with welcome
 void NotificationServiceManager::clearAllNotifications() {
     if (notificationsSuspended) return;
 
@@ -127,7 +133,7 @@ void NotificationServiceManager::clearAllNotifications() {
     emit notificationsUpdated();
 }
 
-// Control: suspend/resume notifications
+// Suspend or resume notifications
 void NotificationServiceManager::suspendNotifications(bool suspend) {
     notificationsSuspended = suspend;
 }
