@@ -1,95 +1,94 @@
 #ifndef MAINWINDOWLABELS_H
 #define MAINWINDOWLABELS_H
 
-// Qt includes
+// C++ includes
 #include <QString>
 
-// Backup-related labels and button texts
-namespace Labels::Backup {
-inline constexpr auto k_FOUND                            = "Backup Found: ";
-inline constexpr auto k_TOTAL_COUNT                      = "Backup Total Count: ";
-inline constexpr auto k_TOTAL_SIZE                       = "Backup Total Size: ";
-inline constexpr auto k_LOCATION_ACCESS                  = "Backup Location Access: ";
+namespace Labels {
 
+namespace Backup {
+// Button texts
 inline constexpr auto k_ADD_TO_BACKUP_ORIGINAL_TEXT      = "➕ Add to Backup";
 inline constexpr auto k_REMOVE_FROM_BACKUP_ORIGINAL_TEXT = "➖ Remove from Backup";
-inline constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT      = "🗑️ Delete Backup";
-inline constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "📁 Change Location";
 inline constexpr auto k_CREATE_BACKUP_ORIGINAL_TEXT      = "📦 Create Backup";
+inline constexpr auto k_CHANGE_DESTINATION_ORIGINAL_TEXT = "📂 Change Destination";
+inline constexpr auto k_DELETE_BACKUP_ORIGINAL_TEXT      = "🗑️ Delete Backup";
 inline constexpr auto k_NOTIFICATION_ORIGINAL_TEXT       = "🔔 Notifications";
 inline constexpr auto k_UNLOCK_DRIVE_ORIGINAL_TEXT       = "🔓 Unlock Drive";
-inline constexpr auto k_TEMPLATE_ORIGINAL_TEXT           = "📋 Template";
-inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT           = "📅 Schedule";
+inline constexpr auto k_TEMPLATE_ORIGINAL_TEXT           = "📑 Templates";
+inline constexpr auto k_SCHEDULE_ORIGINAL_TEXT           = "⏰ Schedule";
 
-inline constexpr auto k_ADD_TO_BACKUP_BUTTON_TEXT        = "✅ Added!";
-inline constexpr auto k_REMOVE_FROM_BACKUP_BUTTON_TEXT   = "✅ Removed!";
-inline constexpr auto k_DELETE_BACKUP_BUTTON_TEXT        = "✅ Deleted!";
-inline constexpr auto k_CHANGE_DESTINATION_BUTTON_TEXT   = "✅ Changed!";
-inline constexpr auto k_CREATE_BACKUP_BUTTON_TEXT        = "✅ Created!";
-inline constexpr auto k_NOTIFICATION_BUTTON_TEXT         = "✅ Opened!";
-inline constexpr auto k_UNLOCK_DRIVE_BUTTON_TEXT         = "✅ Unlocked!";
-inline constexpr auto k_TEMPLATE_BUTTON_TEXT             = "✅ Loaded!";
+// Status label
+inline const QString k_STATUS_LABEL =
+    QStringLiteral("<b>Backup Archive Status:</b> %1 %2");
 
-inline constexpr auto k_BACKING_UP_BUTTON_TEXT           = "📦 Backing Up...";
-inline constexpr auto k_UNLOCKING_FEEDBACK_TEXT          = "🔒 Unlocking...";
+// Status texts
+inline constexpr auto k_READY_LABEL     = "Healthy";
+inline constexpr auto k_WARNING_LABEL   = "Warning";
+inline constexpr auto k_NOT_INITIALIZED = "Uninitialized";
 
-inline constexpr auto k_READY_LABEL                      = "OK";
-inline constexpr auto k_WARNING_LABEL                    = "Warning";
-inline constexpr auto k_NOT_INITIALIZED                  = "Uninitialized";
+// Metadata
+inline constexpr auto k_TOTAL_COUNT     = "Total Backups: ";
+inline constexpr auto k_TOTAL_SIZE      = "Total Size: ";
+inline constexpr auto k_LOCATION_ACCESS = "Location Access: ";
 
-inline constexpr auto k_WARNING_SUMMARY_LABEL            = "WARNING!";
-inline constexpr auto k_APP_AND_BACKUP_ISSUE_LABEL       = "App and Backup issues detected.";
-inline constexpr auto k_BACKUP_ISSUE_LABEL               = "Backup issue detected.";
-inline constexpr auto k_APP_ISSUE_LABEL                  = "App issue detected.";
-inline constexpr auto k_NO_BACKUPS_COUNT_LABEL           = "Backup archive location uninitialized.";
-inline constexpr auto k_SEE_NOTIFICATIONS_LABEL          = "See Notifications for more details.";
+// Staging
+inline constexpr auto k_STAGING_TITLE = "Staging Area";
 
-inline constexpr auto k_STAGING_TITLE                    = "Backup Staging";
-inline constexpr auto k_TEMPLATE_RESET_BUTTON_TXT        = "✕";
+// Notification feedback
+inline constexpr auto k_NOTIFICATION_BUTTON_TEXT = "✅ Notified!";
 
-inline const QString k_STATUS_LABEL = QStringLiteral("<b>Backup Archive Status:</b> %1 %2");
+// Special states
+inline constexpr auto k_WARNING_SUMMARY_LABEL      = "⚠ Issues detected";
+inline constexpr auto k_APP_AND_BACKUP_ISSUE_LABEL = "App + Backup Issues";
+inline constexpr auto k_BACKUP_ISSUE_LABEL         = "Backup Issue";
+inline constexpr auto k_APP_ISSUE_LABEL            = "App Issue";
+inline constexpr auto k_NO_BACKUPS_COUNT_LABEL     = "No backups yet";
+inline constexpr auto k_SEE_NOTIFICATIONS_LABEL    = "See notifications for details";
 }
 
-// Last backup information labels
-namespace Labels::LastBackup {
-inline constexpr auto k_NAME      = "Last Backup Name: ";
-inline constexpr auto k_TIMESTAMP = "Last Backup Timestamp: ";
-inline constexpr auto k_DURATION  = "Last Backup Duration: ";
-inline constexpr auto k_SIZE      = "Last Backup Size: ";
+namespace LastBackup {
+// Labels
+inline constexpr auto k_NAME      = "Name: ";
+inline constexpr auto k_TIMESTAMP = "Timestamp: ";
+inline constexpr auto k_DURATION  = "Duration: ";
+inline constexpr auto k_SIZE      = "Size: ";
 
-inline const QString k_NO_BACKUPS_MESSAGE = QStringLiteral("No backups yet. Create one to see details here.");
+// Messages
+inline const QString k_NO_BACKUPS_MESSAGE =
+    QStringLiteral("No backups have been created yet.");
 }
 
-// Directory status labels
-namespace Labels::DirectoryStatus {
+namespace DirectoryStatus {
 inline constexpr auto k_WRITABLE  = "Writable";
-inline constexpr auto k_READ_ONLY = "Read-Only";
+inline constexpr auto k_READ_ONLY = "Read-only";
 inline constexpr auto k_UNKNOWN   = "Unknown";
 }
 
-// Application status labels
-namespace Labels::ApplicationStatus {
+namespace ApplicationStatus {
+// Labels
 inline constexpr auto k_HEALTHY = "Healthy";
 inline constexpr auto k_INVALID = "Invalid";
 
-inline const QString k_STATUS_LABEL = QStringLiteral("<b>App Config Status:</b> %1 %2");
+// Status label
+inline const QString k_STATUS_LABEL =
+    QStringLiteral("<b>App Config Status:</b> %1 %2");
 }
 
-// Emoji symbols for status visuals
-namespace Labels::Emoji {
+namespace Emoji {
 inline constexpr auto k_GREEN  = "🟢";
 inline constexpr auto k_YELLOW = "🟡";
 inline constexpr auto k_RED    = "🔴";
 }
 
-// General-purpose literals
-namespace Labels::General {
+namespace General {
 inline constexpr auto k_ELLIPSIS = "...";
 }
 
-// Notification-related
-namespace Labels::Notification {
-inline const QString k_TIMESTAMP_TEMPLATE = QStringLiteral("[%1]");
+namespace Notification {
+inline const QString k_TIMESTAMP_TEMPLATE = "[%1]";
 }
+
+} // namespace Labels
 
 #endif // MAINWINDOWLABELS_H

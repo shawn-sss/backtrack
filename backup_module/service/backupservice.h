@@ -2,67 +2,83 @@
 #define BACKUPSERVICE_H
 
 // Qt includes
-#include <QFileInfoList>
-#include <QJsonArray>
-#include <QJsonObject>
 #include <QObject>
-#include <QSet>
 #include <QString>
 #include <QStringList>
+#include <QFileInfoList>
+#include <QJsonObject>
 
-// Represents backup folder status
-enum class BackupStatus {
-    None,
-    Broken,
-    Valid
+// Forward declaration (Custom class)
+class UserServiceManager;
+
+// Severity level of backup archive state
+enum class BackupStatusLevel {
+    Ok,
+    Warning,
+    Error
 };
 
-// Describes results of a backup structure scan
+// Result of scanning backup root for integrity
 struct BackupScanResult {
-    bool validAppStructure = false;
+    bool validAppStructure    = false;
     bool validBackupStructure = false;
-    bool structureExists = false;
-    bool hasOrphanedLogs = false;
-    bool hasMissingLogs = false;
+    bool structureExists      = false;
+    bool hasOrphanedLogs      = false;
+    bool hasMissingLogs       = false;
 
     bool isBroken() const {
-        return !validBackupStructure || hasOrphanedLogs || hasMissingLogs;
+        return !validAppStructure || !validBackupStructure;
+    }
+
+    bool isValid() const {
+        return validAppStructure && validBackupStructure && !hasOrphanedLogs && !hasMissingLogs;
+    }
+
+    BackupStatusLevel getStatusLevel() const {
+        if (isBroken()) return BackupStatusLevel::Error;
+        if (hasOrphanedLogs || hasMissingLogs) return BackupStatusLevel::Warning;
+        return BackupStatusLevel::Ok;
     }
 };
 
-// Handles creation, scanning, and summary of backups
+// Handles scanning, metadata, and summaries for backups
 class BackupService : public QObject {
     Q_OBJECT
 
 public:
     explicit BackupService(const QString& backupRoot, QObject* parent = nullptr);
-    Q_DISABLE_COPY(BackupService)
 
-    // Backup configuration
+    // Backup root handling
     void setBackupRoot(const QString& path);
     QString getBackupRoot() const;
+
+    // Initialization
     void initializeBackupRootIfNeeded();
 
-    // Structure scanning
+    // Scanning
     BackupScanResult scanForBackupStatus() const;
 
-    // Backup metadata and summary
+    // Logs and metadata
+    QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;
     QJsonObject getLastBackupMetadata() const;
-    void createBackupSummary(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration);
-
-    // Backup statistics
     int getBackupCount() const;
     quint64 getTotalBackupSize() const;
+    qint64 calculateTotalBackupSize(const QStringList& items) const;
+
+    // Summaries
+    void createBackupSummary(const QString& backupFolderPath,
+                             const QStringList& selectedItems,
+                             qint64 backupDuration);
 
 signals:
     void backupSummaryWritten(const QString& logFilePath);
 
 private:
-    // Internal metadata and file helpers
-    QJsonObject createBackupMetadata(const QString& backupFolderPath, const QStringList& selectedItems, qint64 backupDuration) const;
-    qint64 calculateTotalBackupSize(const QStringList& selectedItems) const;
-    QFileInfoList getBackupLogFiles(bool sortedByTime = false) const;
+    QJsonObject createBackupMetadata(const QString& backupFolderPath,
+                                     const QStringList& selectedItems,
+                                     qint64 backupDuration) const;
 
+private:
     QString backupRootPath;
 };
 

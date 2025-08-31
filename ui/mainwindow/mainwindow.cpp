@@ -119,7 +119,7 @@ void MainWindow::initializeServices() {
     scheduleService_ = new ScheduleServiceManager(this);
 
     connect(scheduleService_, &ScheduleServiceManager::fired, this, [this]() {
-        QTimer::singleShot(k_SCHEDULE_FIRE_DELAY_MS, this, [this]() {
+        QTimer::singleShot(MainWindowConstants::k_SCHEDULE_FIRE_DELAY_MS, this, [this]() {
             onCreateBackupClicked();
             PromptDialog::showDialog(
                 this,
@@ -345,15 +345,15 @@ void MainWindow::setInitialButtonTexts() {
 // UI: cursors, tooltips, and styles
 void MainWindow::applyButtonCursors() {
     const QList<QPair<QPushButton *, QString>> buttons = {
-        {ui->AddToBackupButton,       k_ADD_TO_BACKUP},
-        {ui->RemoveFromBackupButton,  k_REMOVE_FROM_BACKUP},
-        {ui->CreateBackupButton,      k_CREATE_BACKUP},
-        {ui->ChangeBackupDestinationButton, k_CHANGE_DESTINATION},
-        {ui->DeleteBackupButton,      k_DELETE_BACKUP},
-        {ui->NotificationButton,      k_NOTIFICATIONS},
-        {ui->UnlockDriveButton,       k_UNLOCK_DRIVE},
-        {ui->TemplateButton,          k_TEMPLATE},
-        {ui->ScheduleButton,          k_SCHEDULE}
+        {ui->AddToBackupButton,       MainWindowConstants::k_ADD_TO_BACKUP},
+        {ui->RemoveFromBackupButton,  MainWindowConstants::k_REMOVE_FROM_BACKUP},
+        {ui->CreateBackupButton,      MainWindowConstants::k_CREATE_BACKUP},
+        {ui->ChangeBackupDestinationButton, MainWindowConstants::k_CHANGE_DESTINATION},
+        {ui->DeleteBackupButton,      MainWindowConstants::k_DELETE_BACKUP},
+        {ui->NotificationButton,      MainWindowConstants::k_NOTIFICATIONS},
+        {ui->UnlockDriveButton,       MainWindowConstants::k_UNLOCK_DRIVE},
+        {ui->TemplateButton,          MainWindowConstants::k_TEMPLATE},
+        {ui->ScheduleButton,          MainWindowConstants::k_SCHEDULE}
     };
 
     Shared::UI::applyButtonStyling(buttons);
@@ -378,17 +378,17 @@ void MainWindow::setupTrayIcon() {
     auto* systemTrayContextMenu = new SystemTrayContextMenu(this);
     trayMenu = systemTrayContextMenu;
 
-    QAction* actionOpen = systemTrayContextMenu->addAction(k_TRAY_ACTION_OPEN);
-    QAction* actionSettings = systemTrayContextMenu->addAction(k_TRAY_ACTION_SETTINGS);
+    QAction* actionOpen = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_OPEN);
+    QAction* actionSettings = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_SETTINGS);
     systemTrayContextMenu->addSeparator();
-    QAction* actionExit = systemTrayContextMenu->addAction(k_TRAY_ACTION_EXIT);
+    QAction* actionExit = systemTrayContextMenu->addAction(MainWindowConstants::k_TRAY_ACTION_EXIT);
 
     connect(systemTrayContextMenu, &SystemTrayContextMenu::safeTriggered, this, [this](QAction* action) {
         const QString text = action->text().trimmed();
-        if (text == k_TRAY_ACTION_OPEN) {
+        if (text == MainWindowConstants::k_TRAY_ACTION_OPEN) {
             this->showNormal();
             this->activateWindow();
-        } else if (text == k_TRAY_ACTION_SETTINGS) {
+        } else if (text == MainWindowConstants::k_TRAY_ACTION_SETTINGS) {
             if (settingsDialog && settingsDialog->isVisible()) {
                 settingsDialog->raise();
                 settingsDialog->activateWindow();
@@ -406,7 +406,7 @@ void MainWindow::setupTrayIcon() {
             settingsDialog->exec();
             delete settingsDialog;
             settingsDialog = nullptr;
-        } else if (text == k_TRAY_ACTION_EXIT) {
+        } else if (text == MainWindowConstants::k_TRAY_ACTION_EXIT) {
             QApplication::quit();
         }
     });
@@ -675,14 +675,13 @@ void MainWindow::updateBackupLabels() {
 // Backup status: status label styling
 void MainWindow::updateBackupStatusLabel(const QString &statusColor) {
     const auto [emoji, text] = statusVisualsForColor(statusColor);
-    QString style;
 
-    if (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING ||
-        statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND) {
-        style = MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE;
-    } else {
-        style = MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE;
-    }
+    QString style =
+        (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_WARNING)
+            ? MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE
+            : (statusColor == MainWindowStyling::Styles::Visuals::BACKUP_STATUS_COLOR_NOT_FOUND)
+                  ? MainWindowStyling::Styles::LabelStyles::k_ERROR_LABEL_STYLE
+                  : MainWindowStyling::Styles::GeneralText::k_DEFAULT_STYLE;
 
     setStatusLabel(ui->BackupStatusLabel, emoji, text, style);
 
@@ -754,8 +753,8 @@ void MainWindow::updateLastBackupInfo() {
 void MainWindow::updateBackupLocationLabel(const QString &location) {
     QString displayText = location;
 
-    if (location.length() > k_BACKUP_LOCATION_MAXCHARS) {
-        int half = k_BACKUP_LOCATION_MAXCHARS / 2;
+    if (location.length() > MainWindowConstants::k_BACKUP_LOCATION_MAXCHARS) {
+        int half = MainWindowConstants::k_BACKUP_LOCATION_MAXCHARS / 2;
         displayText = location.left(half) + Labels::General::k_ELLIPSIS + location.right(half);
     }
 
@@ -817,9 +816,9 @@ void MainWindow::handleSpecialBackupLabelStates(const BackupScanResult &scan) {
         ui->BackupLocationStatusLabel->setText(infoLine);
     } else if (isUninitialized || (backupCount == 0 && (backupDirEmpty || !locationInitialized))) {
         ui->BackupTotalCountLabel->setText(Labels::Backup::k_NO_BACKUPS_COUNT_LABEL);
-        ui->BackupTotalCountLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_WARNING_LABEL_STYLE);
-        ui->BackupTotalSizeLabel->setText("");
-        ui->BackupLocationStatusLabel->setText("");
+        ui->BackupTotalCountLabel->setStyleSheet(MainWindowStyling::Styles::LabelStyles::k_ERROR_LABEL_STYLE);
+        ui->BackupTotalSizeLabel->setText(QString());
+        ui->BackupLocationStatusLabel->setText(QString());
         ui->BackupTotalSizeLabel->hide();
         ui->BackupLocationStatusLabel->hide();
         return;
@@ -1275,14 +1274,14 @@ void MainWindow::onUnlockDriveClicked() {
     }
 
     QProcess taskKill;
-    taskKill.start(k_TASKKILL_CMD, QStringList() << "/IM" << k_MANAGE_BDE_EXE << "/F");
+    taskKill.start(MainWindowConstants::k_TASKKILL_CMD, QStringList() << "/IM" << MainWindowConstants::k_MANAGE_BDE_EXE << "/F");
     taskKill.waitForFinished(2000);
 
     QString script = QStringLiteral("Start-Process %1 -ArgumentList '%2' -Verb runAs")
-                         .arg(QString::fromUtf8(k_MANAGE_BDE_EXE))
-                         .arg(QString(k_UNLOCK_ARGS).arg(driveLetter.toUpper()));
+                         .arg(QString::fromUtf8(MainWindowConstants::k_MANAGE_BDE_EXE))
+                         .arg(QString(MainWindowConstants::k_UNLOCK_ARGS).arg(driveLetter.toUpper()));
 
-    if (!QProcess::startDetached(k_POWERSHELL_CMD, QStringList() << "-Command" << script)) {
+    if (!QProcess::startDetached(MainWindowConstants::k_POWERSHELL_CMD, QStringList() << "-Command" << script)) {
         PromptDialog::showDialog(
             this,
             PromptDialog::Critical,
@@ -1294,7 +1293,7 @@ void MainWindow::onUnlockDriveClicked() {
         return;
     }
 
-    QTimer::singleShot(k_DRIVE_UNLOCK_DELAY_MS, this, [this]() {
+    QTimer::singleShot(MainWindowConstants::k_DRIVE_UNLOCK_DELAY_MS, this, [this]() {
         ensureBackupStatusUpdated();
         refreshFileWatcher();
         ui->DriveTreeView->setModel(sourceModel);

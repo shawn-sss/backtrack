@@ -8,7 +8,6 @@ inline constexpr auto k_ICON_PATH = ":/resources/icons/app_icon.png";
 
 // TreeView column configuration
 namespace UI::TreeView {
-inline constexpr auto k_STAGING_COLUMN_NAME = "Name";
 inline constexpr int k_START_HIDDEN_COLUMN  = 1;
 inline constexpr int k_DEFAULT_COLUMN_COUNT = 4;
 }

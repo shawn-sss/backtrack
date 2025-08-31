@@ -17,15 +17,16 @@ inline constexpr auto k_APP_VERSION = "0.6";
 namespace App::Items {
 inline constexpr auto k_APPDATA_SETUP_FOLDER              = "app_config";
 inline constexpr auto k_APPDATA_SETUP_INFO_FILE           = "app_init.json";
+inline constexpr auto k_APPDATA_SETUP_NOTIFICATIONS_FILE  = "app_notifications.json";
 inline constexpr auto k_APPDATA_SETUP_USER_SETTINGS_FILE  = "user_settings.json";
 inline constexpr auto k_APPDATA_SETUP_USER_TEMPLATES_FILE = "user_templates.json";
-inline constexpr auto k_APPDATA_SETUP_NOTIFICATIONS_FILE  = "app_notifications.json";
 
 inline constexpr auto k_BACKUP_SETUP_FOLDER              = "app_backups";
 inline constexpr auto k_BACKUP_SETUP_CONFIG_FOLDER       = "_MyDataBackupApp";
-inline constexpr auto k_BACKUP_SETUP_CONFIG_LOGS_FOLDER  = "logs";
 inline constexpr auto k_BACKUP_SETUP_CONFIG_INFO_FILE    = "backup_init.json";
+inline constexpr auto k_BACKUP_SETUP_CONFIG_LOGS_FOLDER  = "logs";
 inline constexpr auto k_BACKUP_SETUP_CONFIG_LOGS_FILE    = "log.json";
+inline constexpr auto k_BACKUP_SETUP_CONFIG_LOGS_SUFFIX  = "_backup_logs.json";
 }
 
 #endif // APP_INFO_H

@@ -1,25 +1,24 @@
 // Project includes
 #include "stagingmodel.h"
 #include "../constants/backupconstants.h"
-#include "../../../../constants/interface_config.h"
 
 // Qt includes
-#include <QFileIconProvider>
 #include <QFileInfo>
 #include <QStorageInfo>
 
+// Constructor
 StagingModel::StagingModel(QObject* parent)
     : QAbstractItemModel(parent) {
     stagedPaths.reserve(10);
 }
 
+// File icon provider (singleton)
 QFileIconProvider& StagingModel::iconProvider() {
     static QFileIconProvider provider;
     return provider;
 }
 
-// Model structure methods
-
+// Model structure
 QModelIndex StagingModel::index(int row, int column, const QModelIndex& parent) const {
     if (!parent.isValid() && row >= 0 && row < stagedPaths.size() && column == 0) {
         return createIndex(row, column);
@@ -41,13 +40,12 @@ int StagingModel::rowCount(const QModelIndex& parent) const {
 
 QVariant StagingModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section == 0) {
-        return UI::TreeView::k_STAGING_COLUMN_NAME;
+        return Backup::Metadata::StagingColumnName;
     }
     return {};
 }
 
-// Data retrieval for display, tooltip, and decoration roles
-
+// Data retrieval
 QVariant StagingModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || index.row() >= stagedPaths.size()) {
         return {};
@@ -75,8 +73,7 @@ QVariant StagingModel::data(const QModelIndex& index, int role) const {
     }
 }
 
-// Path modification methods
-
+// Path modification
 void StagingModel::addPath(const QString& path) {
     if (!path.isEmpty() && !stagedPathsSet.contains(path)) {
         const int newRow = stagedPaths.size();
@@ -110,8 +107,7 @@ void StagingModel::clear() {
     endResetModel();
 }
 
-// Path query methods
-
+// Path queries
 QStringList StagingModel::getStagedPaths() const {
     return QStringList(stagedPaths.begin(), stagedPaths.end());
 }

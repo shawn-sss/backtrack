@@ -1,7 +1,7 @@
 #ifndef MAINWINDOWSTYLING_H
 #define MAINWINDOWSTYLING_H
 
-// Qt includes
+// C++ includes
 #include <QString>
 
 namespace MainWindowStyling {
@@ -9,111 +9,51 @@ namespace Styles {
 
 // Backup view container
 namespace BackupViewContainer {
-inline constexpr auto STYLE = R"(
-    #BackupViewContainer {
-        border-radius: 10px;
-        padding: 10px;
-        border: 1px solid #666;
-        background-color: #2b2b2b;
-    }
-
-    #DriveTreeView,
-    #BackupStagingTreeView,
-    #BackupDestinationView {
-        border: 1px solid #666;
-    }
-
-    #BackupLocationLabel,
-    #SourceListLabel,
-    #StagingListLabel {
-        font-size: 10pt;
-        font-style: italic;
-        color: #ccc;
-    }
-)";
+inline const QString STYLE =
+    "QWidget#BackupViewContainer {"
+    "   border: 1px solid #444444;"
+    "   border-radius: 6px;"
+    "   padding: 4px;"
+    "   background-color: #2d2d2d;"
+    "}";
 }
 
-// Staging title label
-namespace StagingTitleLabel {
-inline constexpr auto STYLE = R"(
-    QLabel#StagingListTitleLabel {
-        font-weight: bold;
-        background-color: #444;
-        color: white;
-        padding: 4px 10px;
-        border-radius: 8px;
-    }
-)";
-}
-
-// General reusable text styles
+// General text
 namespace GeneralText {
-inline constexpr auto k_RED_BOLD_STYLE = "color: red; font-weight: bold;";
-inline constexpr auto k_DEFAULT_STYLE  = "color: #ddd;";
-inline constexpr auto k_INFO_STYLE     = "color: blue;";
-inline constexpr auto k_SUCCESS_STYLE  = "color: green; font-weight: bold;";
+inline const QString k_DEFAULT_STYLE =
+    "QLabel {"
+    "   color: #e0e0e0;"
+    "   font-size: 13px;"
+    "}";
 }
 
-// Styles for labels with warning semantics
+// Label styles
 namespace LabelStyles {
-inline constexpr auto k_WARNING_LABEL_STYLE = "color: red; font-weight: bold;";
+inline const QString k_WARNING_LABEL_STYLE =
+    "QLabel {"
+    "   color: #ffcc00;"
+    "   font-weight: bold;"
+    "}";
+inline const QString k_ERROR_LABEL_STYLE =
+    "QLabel {"
+    "   color: #F44336;"
+    "   font-weight: bold;"
+    "}";
 }
 
-// Backup status colors
+// Visual indicators
 namespace Visuals {
-inline constexpr auto COLOR_GREEN  = "green";
-inline constexpr auto COLOR_RED    = "red";
-inline constexpr auto COLOR_YELLOW = "orange";
-
-inline constexpr auto BACKUP_STATUS_COLOR_FOUND     = COLOR_GREEN;
-inline constexpr auto BACKUP_STATUS_COLOR_NOT_FOUND = COLOR_RED;
-inline constexpr auto BACKUP_STATUS_COLOR_WARNING   = COLOR_YELLOW;
+inline const QString BACKUP_STATUS_COLOR_FOUND     = "#4CAF50";
+inline const QString BACKUP_STATUS_COLOR_WARNING   = "#FFC107";
+inline const QString BACKUP_STATUS_COLOR_NOT_FOUND = "#F44336";
 }
 
-// Button styles
-namespace ButtonStyles {
-inline constexpr auto PRIMARY = R"(
-    QPushButton {
-        background-color: #4CAF50;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
-    }
-    QPushButton:hover {
-        background-color: #45a049;
-    }
-)";
-
-inline constexpr auto DANGER = R"(
-    QPushButton {
-        background-color: #f44336;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
-    }
-    QPushButton:hover {
-        background-color: #da190b;
-    }
-)";
-
-inline constexpr auto RESET = R"(
-    QPushButton {
-        border: none;
-        background: transparent;
-    }
-    QPushButton:hover {
-        background: #666;
-        border-radius: 4px;
-    }
-)";
-}
-
-// Theme-dependent colors
+// Theme colors
 namespace ThemeColors {
-inline constexpr auto DARK_HIGHLIGHT   = "#5E3D74";
-inline constexpr auto LIGHT_HIGHLIGHT  = "#3399FF";
-inline constexpr auto DARK_TEXT        = "#D4AAFF";
-inline constexpr auto LIGHT_TEXT       = "#004A99";
+inline const QString DARK_HIGHLIGHT  = "#1E88E5";
+inline const QString LIGHT_HIGHLIGHT = "#64B5F6";
+inline const QString DARK_TEXT       = "#FFFFFF";
+inline const QString LIGHT_TEXT      = "#000000";
 }
 
 } // namespace Styles

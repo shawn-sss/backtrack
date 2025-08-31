@@ -1,25 +1,20 @@
 // Project includes
 #include "fileoperations.h"
+#include "../constants/backupconstants.h"
 #include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
-#include "../constants/backupconstants.h"   // ✅ include constants
 
 // Qt includes
 #include <QDir>
 #include <QFile>
 #include <QFileInfoList>
-#include <QJsonDocument>
-#include <QSaveFile>
 
-// ------------------------------------------------------------
-// Recursively copy a directory and its contents
-// ------------------------------------------------------------
+// Copy a directory and its contents recursively
 bool FileOperations::copyDirectoryRecursively(const QString& sourcePath, const QString& destinationPath) {
     const QDir sourceDir(sourcePath);
     if (!sourceDir.exists()) return false;
 
     QDir destinationDir(destinationPath);
-    if (!destinationDir.exists() && !destinationDir.mkpath(Backup::Transfer::MkpathCurrentDir))
-
+    if (!destinationDir.exists() && !destinationDir.mkpath("."))
         return false;
 
     const QFileInfoList entries = sourceDir.entryInfoList(Backup::Filters::All);
@@ -33,47 +28,35 @@ bool FileOperations::copyDirectoryRecursively(const QString& sourcePath, const Q
             if (!QFile::copy(srcFilePath, destFilePath)) return false;
         }
     }
-
     return true;
 }
 
-// ------------------------------------------------------------
-// Delete a directory and its contents
-// ------------------------------------------------------------
+// Delete a directory recursively
 bool FileOperations::deleteDirectory(const QString& path) {
     QDir dir(path);
     return dir.exists() && dir.removeRecursively();
 }
 
-// ------------------------------------------------------------
 // Create a directory if it does not exist
-// ------------------------------------------------------------
 bool FileOperations::createDirectory(const QString& path) {
     QDir dir(path);
-    return dir.exists() || dir.mkpath(Backup::Transfer::MkpathCurrentDir);
+    return dir.exists() || dir.mkpath(".");
 }
 
-// ------------------------------------------------------------
-// Calculate the total size of a directory
-// ------------------------------------------------------------
+// Calculate total size of a directory recursively
 quint64 FileOperations::calculateDirectorySize(const QDir& dir) {
     quint64 totalSize = 0;
     const QFileInfoList entries = dir.entryInfoList(Backup::Filters::All);
 
     for (const QFileInfo& entry : entries) {
-        if (entry.isDir()) {
-            totalSize += calculateDirectorySize(QDir(entry.absoluteFilePath()));
-        } else {
-            totalSize += entry.size();
-        }
+        totalSize += entry.isDir()
+        ? calculateDirectorySize(QDir(entry.absoluteFilePath()))
+        : entry.size();
     }
-
     return totalSize;
 }
 
-// ------------------------------------------------------------
-// Recursively collect file paths from a directory
-// ------------------------------------------------------------
+// Collect all files recursively into a JSON array and a unique set
 void FileOperations::collectFilesRecursively(const QString& dirPath,
                                              QSet<QString>& uniqueFiles,
                                              QJsonArray& filesArray) {
@@ -92,9 +75,7 @@ void FileOperations::collectFilesRecursively(const QString& dirPath,
     }
 }
 
-// ------------------------------------------------------------
-// Recursively collect directory paths
-// ------------------------------------------------------------
+// Collect all directories recursively into a JSON array and a unique set
 void FileOperations::collectDirectoriesRecursively(const QString& dirPath,
                                                    QSet<QString>& uniqueFolders,
                                                    QJsonArray& foldersArray) {
@@ -112,22 +93,18 @@ void FileOperations::collectDirectoriesRecursively(const QString& dirPath,
     }
 }
 
-// ------------------------------------------------------------
-// Create required backup folder infrastructure
-// ------------------------------------------------------------
-bool FileOperations::createBackupInfrastructure(const QString& /* backupDir */, QString& errorMessage) {
+// Create required backup infrastructure directories
+bool FileOperations::createBackupInfrastructure(const QString&, QString& errorMessage) {
     const QString appFolderPath  = PathServiceManager::backupConfigFolderPath();
     const QString logsFolderPath = PathServiceManager::backupLogsFolderPath();
 
     if (!QDir().mkpath(appFolderPath)) {
-        errorMessage = QString("Failed to create directory: %1").arg(appFolderPath);
+        errorMessage = Backup::Errors::Messages[Backup::ErrorCode::CreateAppFolder].arg(appFolderPath);
         return false;
     }
-
     if (!QDir().mkpath(logsFolderPath)) {
-        errorMessage = QString("Failed to create logs directory: %1").arg(logsFolderPath);
+        errorMessage = Backup::Errors::Messages[Backup::ErrorCode::CreateLogsFolder].arg(logsFolderPath);
         return false;
     }
-
     return true;
 }

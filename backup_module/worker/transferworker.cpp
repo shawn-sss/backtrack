@@ -1,38 +1,35 @@
 // Project includes
 #include "transferworker.h"
-#include "../service/fileoperations.h"
-#include "../../ui/mainwindow/mainwindowmessages.h"
 #include "../constants/backupconstants.h"
+#include "../service/fileoperations.h"
 
 // Qt includes
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QStorageInfo>
 
-TransferWorker::TransferWorker(const QStringList& files, const QString& destination, QObject* parent)
+// Constructor
+TransferWorker::TransferWorker(const QStringList& files,
+                               const QString& destination,
+                               QObject* parent)
     : QObject(parent), files(files), destination(destination) {}
 
-// ------------------------------------------------------------
-// Stop the transfer process externally
-// ------------------------------------------------------------
+// Stop transfer
 void TransferWorker::stopTransfer() {
     stopRequested.store(true);
 }
 
-// ------------------------------------------------------------
-// Check if a stop has been requested
-// ------------------------------------------------------------
+// Check if stop was requested
 bool TransferWorker::shouldStop() {
     if (stopRequested.load()) {
-        emit errorOccurred(WarningMessages::k_WARNING_OPERATION_STILL_RUNNING);
+        emit errorOccurred(Backup::Errors::Messages[Backup::ErrorCode::OperationStillRunning]);
         return true;
     }
     return false;
 }
 
-// ------------------------------------------------------------
-// Start the file or folder transfer process
-// ------------------------------------------------------------
+// Start transfer
 void TransferWorker::startTransfer() {
     if (files.isEmpty()) {
         emit transferComplete();
@@ -51,13 +48,16 @@ void TransferWorker::startTransfer() {
 
         const QFileInfo fileInfo(filePath);
         if (!fileInfo.exists() || !fileInfo.isReadable()) {
-            emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(filePath));
+            emit errorOccurred(
+                Backup::Errors::Messages[Backup::ErrorCode::FileAccessDenied].arg(filePath));
             emit removeFromStaging(filePath);
             emit finished();
             return;
         }
 
-        const bool isDriveRoot = fileInfo.isDir() && filePath.endsWith(Backup::Transfer::DriveRootSuffix);
+        const bool isDriveRoot = fileInfo.isDir() &&
+                                 filePath.endsWith(Backup::Drive::RootSuffix);
+
         const bool success = isDriveRoot
                                  ? processDriveRoot(filePath)
                                  : processFileOrFolder(filePath);
@@ -74,15 +74,14 @@ void TransferWorker::startTransfer() {
     emit finished();
 }
 
-// ------------------------------------------------------------
-// Handle copying when the source is a drive root
-// ------------------------------------------------------------
+// Process drive root
 bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     if (shouldStop()) return false;
 
     const QFileInfo fileInfo(driveRoot);
     if (!fileInfo.isDir() || !fileInfo.exists()) {
-        emit errorOccurred(QString(ErrorMessages::k_ERROR_NO_ITEMS_SELECTED_FOR_BACKUP).arg(driveRoot));
+        emit errorOccurred(
+            Backup::Errors::Messages[Backup::ErrorCode::NoItemsSelected].arg(driveRoot));
         return false;
     }
 
@@ -92,16 +91,18 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
                                   : storageInfo.displayName();
 
     const QString driveBackupFolder = QDir(destination).filePath(
-        Backup::Transfer::DriveFolderFormat.arg(driveName, driveRoot.left(1), Backup::Drive::LabelSuffix));
+        Backup::Drive::FolderFormat.arg(driveName,
+                                        driveRoot.left(1),
+                                        Backup::Drive::LabelSuffix));
 
     QDir backupDir(driveBackupFolder);
     if (backupDir.exists() && !backupDir.removeRecursively()) {
-        emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
+        emit errorOccurred(Backup::Errors::Messages[Backup::ErrorCode::CreateBackupFolder]);
         return false;
     }
 
-    if (!backupDir.mkpath(Backup::Transfer::MkpathCurrentDir)) {
-        emit errorOccurred(ErrorMessages::k_ERROR_CREATE_BACKUP_FOLDER);
+    if (!backupDir.mkpath(".")) {
+        emit errorOccurred(Backup::Errors::Messages[Backup::ErrorCode::CreateBackupFolder]);
         return false;
     }
 
@@ -115,9 +116,7 @@ bool TransferWorker::processDriveRoot(const QString& driveRoot) {
     return true;
 }
 
-// ------------------------------------------------------------
-// Handle copying a single file or directory
-// ------------------------------------------------------------
+// Process file or folder
 bool TransferWorker::processFileOrFolder(const QString& filePath) {
     if (shouldStop()) return false;
 
@@ -127,27 +126,29 @@ bool TransferWorker::processFileOrFolder(const QString& filePath) {
     return copyItem(fileInfo, destPath);
 }
 
-// ------------------------------------------------------------
-// Copy a file or directory to a destination
-// ------------------------------------------------------------
+// Copy item
 bool TransferWorker::copyItem(const QFileInfo& fileInfo, const QString& destinationPath) {
     if (!fileInfo.isReadable()) {
-        emit errorOccurred(QString(ErrorMessages::k_ERROR_FILE_ACCESS_DENIED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(
+            Backup::Errors::Messages[Backup::ErrorCode::FileAccessDenied].arg(fileInfo.absoluteFilePath()));
         return false;
     }
 
     QFile destFile(destinationPath);
     if (destFile.exists() && !destFile.remove()) {
-        emit errorOccurred(QString(ErrorMessages::k_ERROR_TRANSFER_FAILED).arg(destinationPath));
+        emit errorOccurred(
+            Backup::Errors::Messages[Backup::ErrorCode::TransferFailed].arg(destinationPath));
         return false;
     }
 
     const bool success = fileInfo.isDir()
-                             ? FileOperations::copyDirectoryRecursively(fileInfo.absoluteFilePath(), destinationPath)
+                             ? FileOperations::copyDirectoryRecursively(fileInfo.absoluteFilePath(),
+                                                                        destinationPath)
                              : QFile::copy(fileInfo.absoluteFilePath(), destinationPath);
 
     if (!success) {
-        emit errorOccurred(QString(ErrorMessages::k_ERROR_TRANSFER_FAILED).arg(fileInfo.absoluteFilePath()));
+        emit errorOccurred(
+            Backup::Errors::Messages[Backup::ErrorCode::TransferFailed].arg(fileInfo.absoluteFilePath()));
         return false;
     }
 

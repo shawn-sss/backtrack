@@ -1,13 +1,12 @@
-// Project includes
 #include "backupservice.h"
 #include "../constants/backupconstants.h"
 #include "../../backup_module/service/fileoperations.h"
 #include "../../../../constants/app_info.h"
 #include "../../../../services/ServiceDirector/ServiceDirector.h"
-#include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
-#include "../../../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
-#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 #include "../../../../services/ServiceManagers/BackupServiceManager/BackupServiceManager.h"
+#include "../../../../services/ServiceManagers/FormatUtilsServiceManager/FormatUtilsServiceManager.h"
+#include "../../../../services/ServiceManagers/JsonServiceManager/JsonServiceManager.h"
+#include "../../../../services/ServiceManagers/PathServiceManager/PathServiceManager.h"
 
 // Qt includes
 #include <QDateTime>
@@ -17,15 +16,11 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-// ------------------------------------------------------------
 // Constructor
-// ------------------------------------------------------------
 BackupService::BackupService(const QString& backupRoot, QObject* parent)
     : QObject(parent), backupRootPath(backupRoot) {}
 
-// ------------------------------------------------------------
-// Set / Get backup root path
-// ------------------------------------------------------------
+// Backup root set/get
 void BackupService::setBackupRoot(const QString& path) {
     backupRootPath = path;
 }
@@ -34,9 +29,7 @@ QString BackupService::getBackupRoot() const {
     return backupRootPath;
 }
 
-// ------------------------------------------------------------
-// Initialize the backup folder structure if it doesn't exist
-// ------------------------------------------------------------
+// Initialize backup folder structure if missing
 void BackupService::initializeBackupRootIfNeeded() {
     const QString configFilePath = PathServiceManager::backupInitMetadataFilePath();
     if (QFile::exists(configFilePath)) return;
@@ -47,7 +40,7 @@ void BackupService::initializeBackupRootIfNeeded() {
     const QJsonObject backupData{
         {Backup::InitConfig::Location, backupRootPath},
         {Backup::InitConfig::Timestamp,
-         QDateTime::currentDateTimeUtc().toString(Qt::ISODate)} // ISO standard
+         QDateTime::currentDateTimeUtc().toString(Qt::ISODate)}
     };
 
     const QJsonObject backupConfig{
@@ -60,9 +53,7 @@ void BackupService::initializeBackupRootIfNeeded() {
     JsonManager::saveJsonFile(configFilePath, backupConfig);
 }
 
-// ------------------------------------------------------------
 // Scan backup root and return status report
-// ------------------------------------------------------------
 BackupScanResult BackupService::scanForBackupStatus() const {
     BackupScanResult result;
     const QDir rootDir(backupRootPath);
@@ -120,9 +111,7 @@ BackupScanResult BackupService::scanForBackupStatus() const {
     return result;
 }
 
-// ------------------------------------------------------------
-// Return backup log files, optionally sorted by time
-// ------------------------------------------------------------
+// Return backup log files
 QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
     const QDir logsDir(PathServiceManager::backupLogsFolderPath());
     const QString pattern = "*_" + QString::fromUtf8(App::Items::k_BACKUP_SETUP_CONFIG_LOGS_FILE);
@@ -134,9 +123,7 @@ QFileInfoList BackupService::getBackupLogFiles(bool sortedByTime) const {
         );
 }
 
-// ------------------------------------------------------------
-// Return metadata from the latest backup log
-// ------------------------------------------------------------
+// Return metadata from latest backup log
 QJsonObject BackupService::getLastBackupMetadata() const {
     const QFileInfoList logFiles = getBackupLogFiles(true);
     if (logFiles.isEmpty()) return {};
@@ -149,32 +136,25 @@ QJsonObject BackupService::getLastBackupMetadata() const {
     return {};
 }
 
-// ------------------------------------------------------------
-// Return total number of backup logs
-// ------------------------------------------------------------
+// Return total number of backups
 int BackupService::getBackupCount() const {
     return getBackupLogFiles().size();
 }
 
-// ------------------------------------------------------------
-// Calculate total size of all backups recorded in logs
-// ------------------------------------------------------------
+// Return total size of all backups
 quint64 BackupService::getTotalBackupSize() const {
     quint64 totalSize = 0;
     const QFileInfoList& logFiles = getBackupLogFiles();
     for (const QFileInfo& logFile : logFiles) {
         QJsonObject metadata;
         if (JsonManager::loadJsonFile(logFile.absoluteFilePath(), metadata)) {
-            totalSize += metadata.value(Backup::Metadata::SizeBytes)
-            .toVariant().toULongLong();
+            totalSize += metadata.value(Backup::Metadata::SizeBytes).toVariant().toULongLong();
         }
     }
     return totalSize;
 }
 
-// ------------------------------------------------------------
-// Calculate total size of the given list of paths
-// ------------------------------------------------------------
+// Calculate total size of given paths
 qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     qint64 totalSize = 0;
     for (const QString& item : items) {
@@ -186,9 +166,7 @@ qint64 BackupService::calculateTotalBackupSize(const QStringList& items) const {
     return totalSize;
 }
 
-// ------------------------------------------------------------
-// Create backup summary log for a new backup
-// ------------------------------------------------------------
+// Create backup summary (metadata log)
 void BackupService::createBackupSummary(const QString& backupFolderPath,
                                         const QStringList& selectedItems,
                                         qint64 backupDuration) {
@@ -207,9 +185,7 @@ void BackupService::createBackupSummary(const QString& backupFolderPath,
     emit backupSummaryWritten(logFilePath);
 }
 
-// ------------------------------------------------------------
-// Build JSON summary metadata for a backup operation
-// ------------------------------------------------------------
+// Build backup metadata JSON
 QJsonObject BackupService::createBackupMetadata(const QString& backupFolderPath,
                                                 const QStringList& selectedItems,
                                                 qint64 backupDuration) const {

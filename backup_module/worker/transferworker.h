@@ -5,62 +5,40 @@
 #include <QObject>
 #include <QStringList>
 #include <QFileInfo>
-
-// C++ includes
 #include <atomic>
 
-// Executes file transfers to backup destination
+// Forward declaration (Qt class)
+class QStorageInfo;
+
+// Worker for transferring files and folders into a backup destination
 class TransferWorker : public QObject {
     Q_OBJECT
 
 public:
-    // Constructor
-    explicit TransferWorker(const QStringList& files, const QString& destination, QObject* parent = nullptr);
-    Q_DISABLE_COPY(TransferWorker)
+    explicit TransferWorker(const QStringList& files,
+                            const QString& destination,
+                            QObject* parent = nullptr);
 
 public slots:
-    // Begin the transfer operation
     void startTransfer();
-
-    // Request to stop the operation
     void stopTransfer();
 
 signals:
-    // Emitted to indicate updated progress percentage
-    void progressUpdated(int progress);
-
-    // Emitted when all transfers are completed
+    void progressUpdated(int percent);
     void transferComplete();
-
-    // Emitted when an error occurs
-    void errorOccurred(const QString& error);
-
-    // Emitted when processing has finished
+    void errorOccurred(const QString& errorMessage);
+    void removeFromStaging(const QString& filePath);
     void finished();
 
-    // Emitted to remove unreadable file from staging
-    void removeFromStaging(const QString& path);
-
 private:
-    // Check whether stop was requested
     bool shouldStop();
-
-    // Handle root-level drive copy
     bool processDriveRoot(const QString& driveRoot);
-
-    // Handle single file or directory copy
     bool processFileOrFolder(const QString& filePath);
-
-    // Core logic for copying an item
     bool copyItem(const QFileInfo& fileInfo, const QString& destinationPath);
 
-    // List of files to transfer
+private:
     QStringList files;
-
-    // Backup destination path
     QString destination;
-
-    // Atomic flag to track stop request
     std::atomic<bool> stopRequested{false};
 };
 

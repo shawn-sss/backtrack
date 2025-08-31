@@ -1,6 +1,5 @@
 // Project includes
 #include "TemplateServiceManager.h"
-#include "TemplateServiceConstants.h"
 
 // Qt includes
 #include <QFile>
