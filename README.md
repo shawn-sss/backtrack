@@ -2,7 +2,7 @@
 ![Version](https://img.shields.io/badge/version-v0.7-orange)
 
 <p align="center">
-  <img src="screenshot.jpg" alt="Screenshot">
+  <img src="screenshot.png" alt="Screenshot">
 </p>
 
 **Backtrack** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. Built for both everyday users and advanced power users, it delivers a **fast, dependable, and transparent** backup experience that puts you in full control.
