@@ -1,78 +1,82 @@
-# Backtrack *(Beta Release v0.7)*
-![Version](https://img.shields.io/badge/version-v0.6-orange)
+# Backtrack *(Beta Release v0.7)*  
+![Version](https://img.shields.io/badge/version-v0.7-orange)
 
 <p align="center">
   <img src="screenshot.jpg" alt="Screenshot">
 </p>
 
-**Backtrack** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. This tool has grown beyond basic backup functionality, now offering encrypted drive support, backup health monitoring, reusable SnapList templates, in-app help, and a revamped settings experience.
+**Backtrack** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. Built for both everyday users and advanced power users, it delivers a **fast, dependable, and transparent** backup experience that puts you in full control.
 
-Whether you're a casual user or a power user who wants full control over backups, **Backtrack** provides a fast, reliable, and transparent way to protect your data.
+---
 
 ## 🚀 Overview
 
-Easily select what to back up—from files and folders to entire drives—and store them safely in your chosen location. The app generates metadata, supports customizable backup templates, and keeps users informed if anything goes wrong with their backups or install files. It's designed for simplicity, but loaded with thoughtful features.
+Choose what to back up—from files and folders to entire drives—and store them safely in your chosen location. The app automatically creates metadata, supports reusable templates, includes a scheduler for automation, and keeps you informed with health checks, notifications, and real-time status indicators.  
+
+Designed for simplicity, but loaded with advanced features.
+
+---
 
 ## 🧰 Features
 
-### Core Features
-- **Flexible Selection Options**  
-  Back up individual files, folders, or entire drives via a simple UI.
+### 🔑 Essentials
+- Back up **files, folders, or full drives** through an easy-to-use interface  
+- **Detailed backup summaries** with size, timestamps, and logs  
+- **Metadata JSON logs** for traceability and auditing  
+- **Back up unlocked encrypted drives**  
 
-- **Visual Progress & Backup Overview**  
-  See how many backups exist, total storage used, and when the last backup was created.
+### 📊 Dashboard & Printouts
+The main window shows backup information grouped into three areas:
+1. **Realtime App Config & Backup Archive Status**  
+2. **Archive Summary** — total backups, total size, and location access  
+3. **Last Backup Info** — name, timestamp, duration, and size  
 
-- **Detailed Backup Summaries**  
-  Each backup shows sizes, timestamps, and status indicators.
+### ⚙️ Advanced Controls
+- **Templates** to save and reuse backup selections  
+- **Scheduler** for automated, recurring backups  
+- **Notifications panel** for alerts and issues  
+- **Settings Panel** with options for:  
+  - Light & dark themes  
+  - Custom filename prefixes  
+  - Minimize to tray  
+  - Reset archive or clear app data  
+  - Import/export user preferences  
 
-- **Metadata Log Files**  
-  A JSON log accompanies every backup for traceability and auditing.
-
-### Advanced Features
-- 🔐 **Encrypted Drive Support**  
-  Unlock encrypted drives before backing them up using the built-in unlock tool.
-
-- 📋 **Backup Templates**  
-  Save and load reusable sets of selected items to simplify repeated backup jobs.
-
-- 🛡️ **Backup Health Monitoring & Notifications**  
-  Detects and alerts you to missing logs, backup mismatches, or broken paths in the archive or app install.
-
-- ⚙️ **Revamped Settings Panel**  
-  Now split into *User* and *System* settings:
-  - Choose between light and dark themes
-  - Set custom backup filename prefixes
-  - Enable or disable minimize-to-tray
-  - Reset the archive or clear app data in one click
-
-- 🆘 **Built-In Help Window**  
-  Includes tabs for “Getting Started”, “Features”, and “FAQ” to help you navigate the app and troubleshoot common questions.
+---
 
 ## 🖥️ Installation & Usage
 
 ### Installation
-1. **Clone or Download** this repository.
-2. Build the code using your preferred **C++** compiler or IDE.
+1. **Clone or Download** this repository  
+2. Build the code using your preferred **C++** compiler or IDE  
+3. *(Coming soon)* Prebuilt `.exe` installers will be available with the full release  
 
 ### Usage
-1. Launch the program.
-2. Choose a destination for your backups.
-3. Select files, folders, or drives to include.
-4. (Optional) Save selections as a SnapList for reuse.
-5. Click **“Create Backup”** to begin.
+1. Launch the program  
+2. Choose a destination for your backups  
+3. Select files, folders, or drives to include  
+4. (Optional) Save selections as a **Template** for reuse  
+5. (Optional) Configure automatic backups in the **Scheduler**  
+6. Click **“Create Backup”** to begin  
 
 > **Note**: While stable and feature-rich, the app is still in beta. Test with non-critical data before relying on it for essential backups.
+
+---
 
 ## 🤝 Contributing
 
 Contributions and feedback are always welcome!  
-- Submit issues for bugs, suggestions, or feature requests.  
-- Open a Pull Request if you'd like to propose a code improvement or UI tweak.  
-- Contribution may be limited until things stabilize—more to come as the roadmap develops.
+- Submit issues for bugs, suggestions, or feature requests  
+- Open a Pull Request for code improvements or UI tweaks  
+- Contributions may be limited until things stabilize—more to come as the roadmap develops  
+
+---
 
 ## 📬 Contact & Feedback
 
-- **Report Issues**: Use the GitHub Issues tab to report bugs or request features.  
-- **Need Help?**: Browse the in-app Help window or start a discussion on GitHub.
+- **Report Issues**: Use the GitHub Issues tab to report bugs or request features  
+- **Need Help?**: Browse the in-app Help window or start a discussion on GitHub  
 
-**Thanks for checking out Backtrack — your data deserves better backups.**
+---
+
+**Thanks for checking out Backtrack — because your data deserves backups you can trust.**
