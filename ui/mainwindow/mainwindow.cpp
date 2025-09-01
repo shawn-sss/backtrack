@@ -1361,17 +1361,19 @@ void MainWindow::onUnlockDriveClicked() {
 
     QProcess taskKill;
     taskKill.start(MainWindowConstants::k_TASKKILL_CMD,
-                   QStringList() << "/IM" << MainWindowConstants::k_MANAGE_BDE_EXE << "/F");
+                   { MainWindowConstants::k_TASKKILL_ARG_IM,
+                    MainWindowConstants::k_MANAGE_BDE_EXE,
+                    MainWindowConstants::k_TASKKILL_ARG_FORCE });
     taskKill.waitForFinished(2000);
 
-    const QString manageBde  = QString::fromUtf8(MainWindowConstants::k_MANAGE_BDE_EXE);
-    const QString unlockArgs = QString(MainWindowConstants::k_UNLOCK_ARGS)
-                                   .arg(driveLetter.toUpper());
-
-    const QString script = QStringLiteral("Start-Process %1 -ArgumentList '%2' -Verb runAs").arg(manageBde, unlockArgs);
+    QString script = QString(MainWindowConstants::k_UNLOCK_SCRIPT_TEMPLATE)
+                         .arg(MainWindowConstants::k_MANAGE_BDE_EXE,
+                              driveLetter.toUpper(),
+                              QString(MainWindowConstants::k_UNLOCK_ARGS_PASSWORD)
+                                  .arg(driveLetter.toUpper()));
 
     if (!QProcess::startDetached(MainWindowConstants::k_POWERSHELL_CMD,
-                                 QStringList() << "-Command" << script)) {
+                                 { "-Command", script })) {
         PromptDialog::showDialog(
             this,
             PromptDialog::Critical,
