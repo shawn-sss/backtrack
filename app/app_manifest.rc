@@ -17,12 +17,12 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "MyDataBackupApp\0"
-            VALUE "FileDescription", "MyDataBackupApp\0"
+            VALUE "CompanyName", "Backtrack\0"
+            VALUE "FileDescription", "Backtrack\0"
             VALUE "FileVersion", "1.0.0.0\0"
-            VALUE "InternalName", "MyDataBackupApp\0"
-            VALUE "OriginalFilename", "MyDataBackupApp.exe\0"
-            VALUE "ProductName", "MyDataBackupApp\0"
+            VALUE "InternalName", "Backtrack\0"
+            VALUE "OriginalFilename", "Backtrack.exe\0"
+            VALUE "ProductName", "Backtrack\0"
             VALUE "ProductVersion", "1.0.0.0\0"
         END
     END

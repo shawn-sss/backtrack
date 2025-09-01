@@ -4,7 +4,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
-set(PROJECT_NAME MyDataBackupApp)
+set(PROJECT_NAME Backtrack)
 set(PROJECT_VERSION 0.5)
 set(PROJECT_LANGUAGES CXX)
 

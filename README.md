@@ -1,13 +1,13 @@
-# MyDataBackupApp *(Beta Release v0.6)*
+# Backtrack *(Beta Release v0.7)*
 ![Version](https://img.shields.io/badge/version-v0.6-orange)
 
 <p align="center">
   <img src="screenshot.jpg" alt="Screenshot">
 </p>
 
-**MyDataBackupApp** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. This tool has grown beyond basic backup functionality, now offering encrypted drive support, backup health monitoring, reusable SnapList templates, in-app help, and a revamped settings experience.
+**Backtrack** is a lightweight yet powerful **C++** utility for selecting, backing up, and managing important data—including individual files, folders, and full drives. This tool has grown beyond basic backup functionality, now offering encrypted drive support, backup health monitoring, reusable SnapList templates, in-app help, and a revamped settings experience.
 
-Whether you're a casual user or a power user who wants full control over backups, **MyDataBackupApp** provides a fast, reliable, and transparent way to protect your data.
+Whether you're a casual user or a power user who wants full control over backups, **Backtrack** provides a fast, reliable, and transparent way to protect your data.
 
 ## 🚀 Overview
 
@@ -32,7 +32,7 @@ Easily select what to back up—from files and folders to entire drives—and st
 - 🔐 **Encrypted Drive Support**  
   Unlock encrypted drives before backing them up using the built-in unlock tool.
 
-- 📋 **SnapLists (Backup Templates)**  
+- 📋 **Backup Templates**  
   Save and load reusable sets of selected items to simplify repeated backup jobs.
 
 - 🛡️ **Backup Health Monitoring & Notifications**  
@@ -75,4 +75,4 @@ Contributions and feedback are always welcome!
 - **Report Issues**: Use the GitHub Issues tab to report bugs or request features.  
 - **Need Help?**: Browse the in-app Help window or start a discussion on GitHub.
 
-**Thanks for checking out MyDataBackupApp — your data deserves better backups.**
+**Thanks for checking out Backtrack — your data deserves better backups.**
